@@ -1,0 +1,21 @@
+# OS / 编辑器
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.sublime-*
+
+# 日志 / 临时
+*.log
+tmp/
+.cache/
+
+# 本地实验 / 草稿（不进 repo）
+.scratch/
+drafts/
+
+# atomcode 本地状态（如果有人把 plugin 装到自己机器测试）
+.atomcode/local/

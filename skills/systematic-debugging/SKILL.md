@@ -1,0 +1,67 @@
+---
+name: systematic-debugging
+description: 4-phase root cause。bug 修复前必须找根因。服务主基调第 3 条"综合集成"——debug 是从症状到根因的迭代认识。
+user-invocable: true
+---
+
+# Systematic Debugging
+
+## 服务的主基调原则
+
+**主基调第 3 条：从定性到定量的综合集成。** debug 是这个原则的最纯粹体现——从"现象"（定性）到"根因"（定量）的反复迭代。
+
+**主基调第 1 条：系统工程。** bug 不是"代码错了"，是"系统行为偏离契约"。修 bug 之前必须理解系统在哪一层偏离了。
+
+## 触发时机
+
+- 测试失败，且失败原因不明确
+- 用户报告 bug
+- agent 自己的修复尝试失败 2 次以上
+- `executing-plans` 里任务执行失败
+
+## 4-Phase 流程
+
+### Phase 1：Reproduce（复现）
+
+- 找到能稳定复现 bug 的最小步骤
+- 如果不能稳定复现，先解决"如何复现"——这是前置条件
+- 记录复现步骤，后续每个 phase 都要用
+
+**失败模式：** "我跑了一次没出错，应该好了"——这不是 debug，是祈祷。
+
+### Phase 2：Isolate（隔离）
+
+- 用二分法缩小问题范围
+- 注释掉代码块、跳过路径、隔离输入
+- 找到"最小变更集"——能让 bug 消失的最小代码改动
+
+**失败模式：** "我觉得是 X 的问题" 没验证就直接改。先验证假设，再动手。
+
+### Phase 3：Root Cause（根因）
+
+- 最小变更集找到后，问"为什么这个改动能修 bug？"
+- 答案应该是系统层面的解释，不是"因为改了这行所以好了"
+- 如果解释不了，回到 Phase 2
+
+**失败模式：** "能跑就行"——没找到根因的修复，bug 会以另一种形式回来。
+
+### Phase 4：Fix & Verify（修复并验证）
+
+- 修复 root cause，不是修复症状
+- 跑复现步骤，确认 bug 没了
+- 跑全量测试，确认没引入新 bug
+- 加一个回归测试，专门测这个 bug——防止它回来
+
+**失败模式：** 修完不跑全量测试。一个 bug 的修复破坏了别的地方，比 bug 本身更糟。
+
+## 与其他 skill 的关系
+
+- 与 `test-driven-development` 配合：Phase 4 的回归测试就是 TDD 的 RED
+- 与 `verification-before-completion` 配合：Phase 4 的 verify 就是这个 skill 的应用
+- 与 `human-in-loop` 配合：如果 Phase 3 找不到 root cause，停下来问用户
+
+## 不做的事
+
+- 不"先试试改这里看会不会好"——这是 vibe debugging，不是 systematic
+- 不在找到根因前修复——症状修复会掩盖根因
+- 不跳过 Phase 4 的回归测试——"这个 bug 应该不会再出现了"不是验证
