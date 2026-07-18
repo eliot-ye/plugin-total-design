@@ -3,9 +3,25 @@ name: td-explore
 description: 不带 stakes 的思考伙伴，写代码前先探索。OpenSpec 契约层入口。触发场景：用户说"想探索"、"explore"、"先想想"、"不确定要建什么"、"帮我想清楚 X"。
 user-invocable: true
 argument-hint: <topic or question>
+aliases:
+  atomcode: total-design:td-explore
+  claude-code: total-design:td-explore
+  cursor: td-explore
 ---
 
 # td-explore
+
+## 平台命名
+
+本 skill 在不同平台下的调用名：
+
+| 平台 | 调用名 |
+|---|---|
+| atomcode | `total-design:td-explore` |
+| Claude Code | `total-design:td-explore` |
+| Cursor / 其他 | `td-explore` |
+
+本文 body 里引用其他 skill 时一律用**逻辑名**（如 `brainstorming`），由当前平台的加载器负责拼前缀。
 
 不创建 change、不写 artifact，只是**探索**。在用户还不确定要建什么的时候，agent 帮用户想清楚。
 

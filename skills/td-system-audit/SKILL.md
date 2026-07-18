@@ -3,9 +3,25 @@ name: td-system-audit
 description: 周期性对照系统工程主基调自检。total-design 新增，体现钱学森"总体设计部"视角。触发场景：用户说"audit"、"自检"、"复盘"、"对照主基调"、"最近推进不顺"。
 user-invocable: true
 argument-hint: optional: <scope = current-change | project>
+aliases:
+  atomcode: total-design:td-system-audit
+  claude-code: total-design:td-system-audit
+  cursor: td-system-audit
 ---
 
 # td-system-audit
+
+## 平台命名
+
+本 skill 在不同平台下的调用名：
+
+| 平台 | 调用名 |
+|---|---|
+| atomcode | `total-design:td-system-audit` |
+| Claude Code | `total-design:td-system-audit` |
+| Cursor / 其他 | `td-system-audit` |
+
+本文 body 里引用其他 skill 时一律用**逻辑名**（如 `human-in-loop`、`delay-decision`、`critical-buffer`），由当前平台的加载器负责拼前缀。
 
 **total-design 新增。** OpenSpec 原版没这个。
 
@@ -49,13 +65,13 @@ audit 的对照标准是主基调四条，不是"代码质量"或"进度"——�
 
 #### 主基调 2：总体设计部
 
-- [ ] agent 是否在"自己拍板应该由用户拍的事"？（违反 → 蛔发 `human-in-loop`）
+- [ ] agent 是否在"自己拍板应该由用户拍的事"？（违反 → 触发 `human-in-loop`）
 - [ ] 是否有"分系统工程师视角"压过"总体设计部视角"的地方？
 
 #### 主基调 3：从定性到定量的综合集成
 
 - [ ] design.md 里的决策是从定性到定量迭代出来的，还是凭感觉拍的？
-- [ ] 可逆决策是否被过早闭合？（违反 → 蛔发 `delay-decision`）
+- [ ] 可逆决策是否被过早闭合？（违反 → 触发 `delay-decision`）
 - [ ] archive 时是否做了"实际 vs 预期"复盘？
 
 #### 主基调 4：开放的复杂巨系统
@@ -95,15 +111,15 @@ audit 的对照标准是主基调四条，不是"代码质量"或"进度"——�
 2. <动作 2>
 ```
 
-### 4. 蛔发修复
+### 4. 触发修复
 
-对每个严重问题，蛔发对应的 constraint skill 修复：
+对每个严重问题，触发对应的 constraint skill 修复：
 
-- 关键链缓冲被压缩 → 蛔发 `critical-buffer`，重新规划 tasks
-- agent 自己拍板了 → 蛔发 `human-in-loop`，回去问用户
-- 可逆决策被过早闭合 → 蛔发 `delay-decision`，重新打开决策
+- 关键链缓冲被压缩 → 触发 `critical-buffer`，重新规划 tasks
+- agent 自己拍板了 → 触发 `human-in-loop`，回去问用户
+- 可逆决策被过早闭合 → 触发 `delay-decision`，重新打开决策
 
-## 蛔发时机
+## 触发时机
 
 system-audit 不是只在用户显式调用时才跑。agent 在以下时机应主动建议 audit：
 

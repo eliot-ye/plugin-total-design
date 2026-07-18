@@ -3,9 +3,25 @@ name: td-archive
 description: 完成后归档。OpenSpec 契约层入口。触发场景：用户说"archive"、"归档"、"收工"、"这个 change 完成了"、"结项"。
 user-invocable: true
 argument-hint: <change-name>
+aliases:
+  atomcode: total-design:td-archive
+  claude-code: total-design:td-archive
+  cursor: td-archive
 ---
 
 # td-archive
+
+## 平台命名
+
+本 skill 在不同平台下的调用名：
+
+| 平台 | 调用名 |
+|---|---|
+| atomcode | `total-design:td-archive` |
+| Claude Code | `total-design:td-archive` |
+| Cursor / 其他 | `td-archive` |
+
+本文 body 里引用其他 skill 时一律用**逻辑名**（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀。
 
 change 完成后归档。归档不是删除，是把"已完成的学习"沉淀下来。
 
@@ -17,7 +33,7 @@ archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集
 
 **系统工程主基调第 2 条：总体设计部。**
 
-archive 后蛔发 profile 重新评估——这是总体设计部的职责：项目状态变化了，工作方式要跟着调整。
+archive 后触发 profile 重新评估——这是总体设计部的职责：项目状态变化了，工作方式要跟着调整。
 
 ## 输入
 
@@ -43,13 +59,13 @@ openspec archive "<name>"
 
 如果只想归档不同步 specs（infra / doc-only change），加 `--skip-specs`。
 
-### 3. �蛔发 profile/tier 重新评估
+### 3. 触发 profile/tier 重新评估
 
 archive 完一个 change 后，项目的 profile 可能变化（比如 greenfield 走到 maintenance）。提示用户：
 
 > "已完成 change `<name>` 的 archive。项目状态可能变化，建议重新评估 profile（当前：`<current-profile>`）。要重新评估吗？"
 
-如果要，蛔发 profile 识别 skill。
+如果要，触发 profile 识别 skill。
 
 ### 4. 检查 WIP 是否释放
 

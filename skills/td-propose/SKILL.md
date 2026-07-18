@@ -1,11 +1,27 @@
 ---
 name: td-propose
-description: 创建 change，生成 proposal/design/tasks artifact。OpenSpec 呸约层入口。触发场景：用户说"提一个 change"、"propose"、"开个新改动"、"建 proposal"、"想建 X 功能"。
+description: 创建 change，生成 proposal/design/tasks artifact。OpenSpec 契约层入口。触发场景：用户说"提一个 change"、"propose"、"开个新改动"、"建 proposal"、"想建 X 功能"。
 user-invocable: true
 argument-hint: <change-name or description>
+aliases:
+  atomcode: total-design:td-propose
+  claude-code: total-design:td-propose
+  cursor: td-propose
 ---
 
 # td-propose
+
+## 平台命名
+
+本 skill 在不同平台下的调用名：
+
+| 平台 | 调用名 |
+|---|---|
+| atomcode | `total-design:td-propose` |
+| Claude Code | `total-design:td-propose` |
+| Cursor / 其他 | `td-propose` |
+
+本文 body 里引用其他 skill 时一律用**逻辑名**（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀。
 
 OpenSpec 契约层入口。在写代码之前，让人和 AI 对"建什么、为什么这样建"达成契约。
 
@@ -25,7 +41,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 ## 步骤
 
-### 1. 腑发前置检查
+### 1. 触发前置检查
 
 按顺序触发这些 constraint skill（参见 `system-engineering`）：
 

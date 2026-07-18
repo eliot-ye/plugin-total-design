@@ -3,9 +3,25 @@ name: td-reverse-spec
 description: 中途接手项目专用：先 reverse-spec 已有代码，再 propose 改动。触发场景：用户说"接手项目"、"reverse spec"、"反推 spec"、"看现有代码"、"刚接手这个库"。
 user-invocable: true
 argument-hint: <existing-codebase-path or empty for cwd>
+aliases:
+  atomcode: total-design:td-reverse-spec
+  claude-code: total-design:td-reverse-spec
+  cursor: td-reverse-spec
 ---
 
 # td-reverse-spec
+
+## 平台命名
+
+本 skill 在不同平台下的调用名：
+
+| 平台 | 调用名 |
+|---|---|
+| atomcode | `total-design:td-reverse-spec` |
+| Claude Code | `total-design:td-reverse-spec` |
+| Cursor / 其他 | `td-reverse-spec` |
+
+本文 body 里引用其他 skill 时一律用**逻辑名**（如 `profile-brownfield`），由当前平台的加载器负责拼前缀。
 
 **中途接手项目专用。** OpenSpec 原版没这个，是 total-design 新增的。
 
@@ -36,7 +52,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 - 有无 `tests/`、CI 配置、`package.json` 等
 - 最近 git 提交频率
 
-判断属于哪种 profile（`profile-greenfield` / `profile-brownfield` / `profile-maintenance`）。中途接手通常蛔发 `profile-brownfield`。
+判断属于哪种 profile（`profile-greenfield` / `profile-brownfield` / `profile-maintenance`）。中途接手通常触发 `profile-brownfield`。
 
 ### 2. 分系统切分
 

@@ -97,6 +97,23 @@ git clone <this-repo-url> ~/.atomcode/plugins/total-design
 - `/td-reverse-spec`：OpenSpec 假设你是 greenfield，但中途接手项目时直接 propose 大改动很危险。先 reverse-spec 已有代码，建立 baseline spec。
 - `/td-system-audit`：钱学森"总体设计部"视角的工程化。周期性把 agent 当前的工作对照系统工程四条主基调过一遍，识别"局部优化制造全局失调"的风险。
 
+### skill 在 atomcode 下的实际调用名
+
+atomcode 加载 plugin 时，会自动给 plugin 内的 skill 加 `<plugin-name>:` 前缀。本 plugin 的 `name` 是 `total-design`，所以 6 个 td-* skill 在 atomcode 下：
+
+| skill 逻辑名 | atomcode 调用名 |
+|---|---|
+| `td-propose` | `total-design:td-propose` |
+| `td-explore` | `total-design:td-explore` |
+| `td-apply` | `total-design:td-apply` |
+| `td-reverse-spec` | `total-design:td-reverse-spec` |
+| `td-archive` | `total-design:td-archive` |
+| `td-system-audit` | `total-design:td-system-audit` |
+
+`/` 菜单里看到的是 `/total-design:td-apply` 这种带前缀的形式；`use_skill` 工具调用也要传带前缀的全名。skill 文件 frontmatter 的 `name` 字段保持纯 `[a-z0-9_-]`（atomcode 校验规则，不允许 `:`），前缀由 atomcode 加载时拼接。
+
+本 plugin 的 skill body 和 command body 都按"逻辑名 + 平台命名小节"的方式写：body 内引用其他 skill 用逻辑名（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀；每个文件顶部有 `## 平台命名` 小节列出各平台下的实际调用名。这是为了预留本 plugin 未来扩展到非 atomcode 平台（Claude Code / Cursor / Codex）的能力——同一份 SKILL.md，不同平台用不同前缀。
+
 ### frontmatter 字段格式
 
 atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 plugin 所有 SKILL.md 和命令文件遵循这一规则：

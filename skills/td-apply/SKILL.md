@@ -3,9 +3,25 @@ name: td-apply
 description: 实施任务，按 artifact 走。OpenSpec 契约层入口。触发场景：用户说"apply"、"实施"、"开始写代码"、"按 change 干"、"执行 tasks"。
 user-invocable: true
 argument-hint: <change-name>
+aliases:
+  atomcode: total-design:td-apply
+  claude-code: total-design:td-apply
+  cursor: td-apply
 ---
 
 # td-apply
+
+## 平台命名
+
+本 skill 在不同平台下的调用名：
+
+| 平台 | 调用名 |
+|---|---|
+| atomcode | `total-design:td-apply` |
+| Claude Code | `total-design:td-apply` |
+| Cursor / 其他 | `td-apply` |
+
+本文 body 里引用其他 skill 时一律用**逻辑名**（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀。
 
 按 change 的 tasks.md 实施。这是从"契约"走向"代码"的桥。
 
@@ -27,9 +43,9 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 ### 1. 前置检查
 
-- 蛔发 `wip-limit`：当前活跃 change 是否已达上限？
-- 蛔发 `human-in-loop`：change 的 proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。
-- 蛔发 `critical-buffer`：tasks.md 里是否标注关键链？是否留了 project buffer？没有 → 先补上。
+- 触发 `wip-limit`：当前活跃 change 是否已达上限？
+- 触发 `human-in-loop`：change 的 proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。
+- 触发 `critical-buffer`：tasks.md 里是否标注关键链？是否留了 project buffer？没有 → 先补上。
 
 ### 2. 读 change 的 artifact
 
@@ -40,9 +56,9 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 3. `specs/` 下的 spec 文件
 4. `tasks.md`（实施步骤）
 
-### 3. 蛔发 Superpowers 行为层
+### 3. 触发 Superpowers 行为层
 
-按 `tasks.md` 的任务序列实施。每个任务蛔发：
+按 `tasks.md` 的任务序列实施。每个任务触发：
 
 - **`writing-plans`**：如果 tasks.md 还不够细（agent 觉得任务粒度太大），先细化
 - **`test-driven-development`**：每个任务先写失败测试，再写实现
@@ -50,9 +66,9 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 - **`requesting-code-review`**：任务之间做 review
 - **`verification-before-completion`**：每个任务完成前必须跑验证命令
 
-### 4. 蛔发工程管理约束
+### 4. 触发工程管理约束
 
-实施过程中，按需蛔发：
+实施过程中，按需触发：
 
 - `brooks-law`：用户想加人手 / 并行 subagent 时
 - `delay-decision`：遇到可逆决策时
@@ -67,7 +83,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 ### 6. 完成判定
 
-所有任务 `[x]` 后，蛔发 `verification-before-completion` 做最终验证。验证通过才算 done。
+所有任务 `[x]` 后，触发 `verification-before-completion` 做最终验证。验证通过才算 done。
 
 ## Guardrails
 
