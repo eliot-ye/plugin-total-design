@@ -19,3 +19,5 @@ drafts/
 
 # atomcode 本地状态（如果有人把 plugin 装到自己机器测试）
 .atomcode/local/
+.atomcode/memory.md
+.atomcode/

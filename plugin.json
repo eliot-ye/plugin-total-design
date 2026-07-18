@@ -1,8 +1,7 @@
 {
   "name": "total-design",
   "version": "0.1.0",
-  "description": "装上它，你的 agent 就有了一个总体设计部。OpenSpec 契约层 + Superpowers 行为层 + 钱学森系统工程主基调，封装成一个 atomcode plugin。",
+  "description": "A system-engineering design department for your agent: OpenSpec contract layer + Superpowers behavior layer + Qian Xuesen systems-engineering keynote, packed as an atomcode plugin.",
   "skills": "./skills",
-  "commands": "./commands",
-  "hooks": "./hooks.json"
+  "commands": "./commands"
 }

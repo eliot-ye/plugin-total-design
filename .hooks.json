@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "td-remind-system-engineering": {
+      "event": "pre_tool_use",
+      "matcher": "Write|Edit",
+      "command": "echo '[total-design] pre_tool_use Write|Edit: remember system-engineering 主基调——这个写入是局部优化还是全局协调？'",
+      "timeout_ms": 5000
+    },
+    "td-remind-wip-human-delay": {
+      "event": "user_prompt_submit",
+      "command": "echo '[total-design] user_prompt_submit: 检查是否需要触发 wip-limit / human-in-loop / delay-decision'",
+      "timeout_ms": 5000
+    }
+  }
+}

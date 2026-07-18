@@ -6,7 +6,7 @@
 
 这是一个 **atomcode plugin**，不是一个应用项目，也不是一个代码项目。
 
-- **产出形态**：一组 Markdown 文件（`SKILL.md` / 命令文件）+ 一个 `plugin.json` manifest + 一个 `hooks.json`
+- **产出形态**：一组 Markdown 文件（`SKILL.md` / 命令文件）+ 一个 `plugin.json` manifest + 一个 `.hooks.json`（项目级 hooks，atomcode 标准文件名）
 - **运行方式**：用户通过 atomcode marketplace 安装本 plugin，装上后 agent 自动加载 skills 和 commands
 - **没有可执行代码**：所有"逻辑"都是 Markdown 指令，由 agent 读取并执行
 
@@ -39,7 +39,7 @@ total-design/
 ├── AGENTS.md                ← 本文件
 ├── CONTRIBUTING.md
 ├── LICENSE
-├── hooks.json
+├── .hooks.json             ← 项目级 hooks（atomcode 读 <project>/.hooks.json）
 │
 ├── skills/
 │   ├── system-engineering/ ← 钱学森主基调（约束层入口）
@@ -113,7 +113,9 @@ argument_hint: <参数提示>
 ### plugin.json 编辑
 
 - 只接受 JSON（不接受 YAML）
-- 合法字段：`name` / `version` / `description` / `skills` / `commands` / `hooks`
+- 合法字段：`name` / `version` / `description` / `skills` / `commands`
+- **`description` 字段必须纯 ASCII**——atomcode TUI plugin manager（`crates/atomcode-tuix/src/modals/plugin_manager.rs:1148`）按字节下标 57 切 description 做 UI 一行截断，没用 `is_char_boundary` 保护；若含中日韩多字节字符且下标 57 落在字符内部，Rust 切片直接 panic 让 atomcode 崩。中文描述放 README.md / AGENTS.md，不进 plugin.json。
+- **不要写 `hooks` 字段指向外部 JSON 文件路径**——atomcode 把 `hooks` 字段反序列化成 `HooksField` enum，只接受内联对象/对象列表，写字符串路径（如 `"./hooks.json"`）会让 atomcode 反序列化失败直接崩。hooks 装载走另一条路：atomcode 直接读 `~/.atomcode/hooks.json`（全局）和 `<project>/.hooks.json`（项目级），不经 manifest 引。
 - **没有 `constraints` / `profiles` / `tiers` 字段**——这些必须以 skill 形态存在
 
 ## 设计原则
@@ -133,7 +135,7 @@ argument_hint: <参数提示>
 
 Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读触发，不靠 hook 强制。
 
-`hooks.json` 第一版只是提醒，不阻塞。是否升级为强制要实测。
+`.hooks.json` 第一版只是提醒，不阻塞。是否升级为强制要实测。atomcode hooks schema：外层 `{"hooks": {<name>: {...}}}`，事件名蛇形（`pre_tool_use` / `post_tool_use` / `session_start` / `session_end` / `user_prompt_submit`），字段 `command` / `matcher` / `timeout_ms` / `event`。不是 Claude Code 的 `PreToolUse` 大驼峰 + 嵌套 `hooks` 数组 + `timeout`。
 
 ### 4. 不原样照搬 Superpowers
 
