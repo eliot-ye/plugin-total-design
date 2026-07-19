@@ -79,6 +79,30 @@ git clone <this-repo-url> ~/.atomcode/plugins/total-design
 
 ---
 
+## 仓库结构
+
+```
+total-design/
+├── .claude-plugin/         ← manifest 目录（atomcode + Claude Code 共用）
+│   ├── marketplace.json
+│   └── plugin.json
+├── README.md
+├── AGENTS.md
+├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
+├── LICENSE
+│
+├── skills/                 ← 25 个 skill，全部目录式 SKILL.md
+│   ├── 约束层（6 个）
+│   ├── 行为层（7 个，Superpowers 转译）
+│   ├── 配置层（6 个，3 profile + 3 tier）
+│   └── 契约层（6 个 td-*，与下方 command 一一对应）
+│
+└── commands/               ← 6 个 slash 命令入口（极薄，逻辑全在同名 skill）
+```
+
+---
+
 ## 命令清单（契约层入口）
 
 所有命令扁平 kebab-case，无冒号（atomcode 命名规则）。
@@ -110,7 +134,7 @@ atomcode 加载 plugin 时，会自动给 plugin 内的 skill 加 `<plugin-name>
 | `td-archive` | `total-design:td-archive` |
 | `td-system-audit` | `total-design:td-system-audit` |
 
-`/` 菜单里看到的是 `/total-design:td-apply` 这种带前缀的形式；`use_skill` 工具调用也要传带前缀的全名。skill 文件 frontmatter 的 `name` 字段保持纯 `[a-z0-9_-]`（atomcode 校验规则，不允许 `:`），前缀由 atomcode 加载时拼接。
+`/` 菜单里看到的是 `/total-design:td-apply` 这种带前缀的形式；`use_skill` 工具调用也要传带前缀的全名。skill 文件 frontmatter 的 `name` 字段保持纯合法字符（`a-zA-Z0-9-_/`，禁 `:`，禁首尾斜杠和 `//`，1–64 字符），前缀由 atomcode 加载时拼接。
 
 本 plugin 的 skill body 和 command body 都按"逻辑名 + 平台命名小节"的方式写：body 内引用其他 skill 用逻辑名（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀；每个文件顶部有 `## 平台命名` 小节列出各平台下的实际调用名。这是为了预留本 plugin 未来扩展到非 atomcode 平台（Claude Code / Cursor / Codex）的能力——同一份 SKILL.md，不同平台用不同前缀。
 
@@ -133,10 +157,14 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 ## Skill 清单
 
-19 个 skill，按调用方式分两组：
+25 个 skill，按调用方式分两组：
 
-- **`user-invocable: true`**（7 个，行为层）：用户可在 `/` 菜单主动调，也可被 agent 自动触发
-- **`user-invocable: false`**（12 个，约束层 + 配置层）：agent 自动触发，不暴露在 `/` 菜单
+- **`user-invocable: true`**（13 个）：用户可在 `/` 菜单主动调，也可被 agent 自动触发
+  - 行为层 7 个（Superpowers 转译）
+  - 契约层 6 个 td-*（与 6 个 command 一一对应）
+- **`user-invocable: false`**（12 个）：agent 自动触发，不暴露在 `/` 菜单
+  - 约束层 6 个（钱学森主基调 + 5 条局部规律）
+  - 配置层 6 个（3 profile + 3 tier）
 
 ### 约束层（钱学森系统工程主基调 + 局部规律）
 
@@ -178,6 +206,19 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 - `tier-large` — 100+ 文件 / 多团队 / 多仓库，constraints 强制，要求总体设计文档
 
 两个维度都以 skill 形态存在，agent 根据现场判读激活哪一组。
+
+### 契约层（6 个 td-* skill，与 6 个 command 一一对应）
+
+每个 td-* skill 既是 skill（可被 `use_skill` 调用）又对应一个 slash command（`/td-*`）。frontmatter 里写了 `aliases` 映射三平台调用名。
+
+| Skill | 对应 command | 对应 OpenSpec | user-invocable |
+|---|---|---|---|
+| `td-propose` | `/td-propose` | `/opsx:propose` | true |
+| `td-explore` | `/td-explore` | `/opsx:explore` | true |
+| `td-apply` | `/td-apply` | `/opsx:apply` | true |
+| `td-reverse-spec` | `/td-reverse-spec` | 本 plugin 新增 | true |
+| `td-archive` | `/td-archive` | `/opsx:archive` | true |
+| `td-system-audit` | `/td-system-audit` | 本 plugin 新增 | true |
 
 ---
 

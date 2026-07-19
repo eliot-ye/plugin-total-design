@@ -44,6 +44,15 @@ audit 的对照标准是主基调四条，不是"代码质量"或"进度"——�
 - `current-change`：审计当前活跃的 change
 - `project`：审计整个项目的工作方式
 
+## 触发时机
+
+system-audit 不是只在用户显式调用时才跑。agent 在以下时机应主动建议 audit：
+
+- 每完成 3 个 change（project scope）
+- 每完成 1 个 large tier 的 change（current-change scope）
+- 用户表达"感觉最近推进不顺利"时
+- 关键链缓冲被多次压缩后
+
 ## 步骤
 
 ### 1. 收集审计对象
@@ -119,14 +128,14 @@ audit 的对照标准是主基调四条，不是"代码质量"或"进度"——�
 - agent 自己拍板了 → 触发 `human-in-loop`，回去问用户
 - 可逆决策被过早闭合 → 触发 `delay-decision`，重新打开决策
 
-## 触发时机
+### 5. 修复后重跑 audit 闭环
 
-system-audit 不是只在用户显式调用时才跑。agent 在以下时机应主动建议 audit：
+严重问题修复完成后，**重跑同一 scope 的 audit**，确认：
 
-- 每完成 3 个 change（project scope）
-- 每完成 1 个 large tier 的 change（current-change scope）
-- 用户表达"感觉最近推进不顺利"时
-- 关键链缓冲被多次压缩后
+- 之前的严重问题已消除
+- 修复动作没引入新的"局部优化制造全局失调"
+
+直到重跑结果无严重问题，本轮 audit 才算闭合。不重跑 = 闭环没合，问题可能换形式回来。
 
 ## Guardrails
 

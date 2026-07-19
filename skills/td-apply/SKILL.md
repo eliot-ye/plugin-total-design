@@ -62,7 +62,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 - **`writing-plans`**：如果 tasks.md 还不够细（agent 觉得任务粒度太大），先细化
 - **`test-driven-development`**：每个任务先写失败测试，再写实现
-- **`executing-plans`** 或 `subagent-driven-development`：按任务序列执行
+- **`executing-plans`**：按任务序列执行
 - **`requesting-code-review`**：任务之间做 review
 - **`verification-before-completion`**：每个任务完成前必须跑验证命令
 

@@ -47,6 +47,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 - `wip-limit`：当前活跃 change 是否已达上限？
 - `human-in-loop`：用户描述是否清晰到可以 propose？不清楚就问。
+- **brownfield reverse-spec 检查**：若当前 profile 是 `profile-brownfield`，检查 `openspec/specs/` 下是否已有相关分系统的 baseline spec。没有 → 触发 `human-in-loop`，提示用户"你对现有系统还没建立认识，propose 大改动风险高。先 `/td-reverse-spec` 吗？"
 
 ### 2. 创建 change 目录
 

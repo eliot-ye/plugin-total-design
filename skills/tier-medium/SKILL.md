@@ -15,13 +15,13 @@ user-invocable: false
 
 ## constraint 强度
 
-| constraint | 强度 |
-|---|---|
-| wip-limit | 上限 2（中系统并行开始有协调成本） |
-| critical-buffer | 35% project buffer（不确定性中等） |
-| brooks-law | 提醒（中团队加人手要考虑 onboarding） |
-| delay-decision | 强 |
-| human-in-loop | + 公共契约变更 |
+强度本身见 `constraint-matrix` skill 的表 1。本 tier 的特殊说明：
+
+- `wip-limit` 上限 2：中系统并行开始有协调成本
+- `critical-buffer` 35% project buffer：不确定性中等
+- `brooks-law` 提醒：中团队加人手要考虑 onboarding
+- `delay-decision` 强
+- `human-in-loop` + 公共契约变更
 
 ## system-audit 频率
 

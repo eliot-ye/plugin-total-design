@@ -45,9 +45,18 @@ archive 后触发 profile 重新评估——这是总体设计部的职责：项
 
 - 所有 tasks.md 里的任务都 `[x]` 了吗？
 - `verification-before-completion` 跑过了吗？
-- proposal 的"系统工程影响评估"节里说的预期变化，实际发生了吗？如果没发生，archive 前要在 change 里补一节"实际系统工程影响 vs 预期"。
 
-### 2. archive（含 sync）
+### 2. 强制"实际 vs 预期"复盘（硬步骤）
+
+archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预期"——对照 proposal 的"系统工程影响评估"节，记录：
+
+- 预期影响的分系统 vs 实际影响的分系统
+- 预期整体性能变化 vs 实际变化
+- 预期之外的副作用（这是后续 `/td-system-audit` 的输入）
+
+没这一节，archive 拒绝继续。这是 `/td-system-audit` "实际 vs 预期"审计的数据来源——闭环必须闭合。
+
+### 3. archive（含 sync）
 
 ```bash
 openspec archive "<name>"
@@ -59,7 +68,7 @@ openspec archive "<name>"
 
 如果只想归档不同步 specs（infra / doc-only change），加 `--skip-specs`。
 
-### 3. 触发 profile/tier 重新评估
+### 4. 触发 profile/tier 重新评估
 
 archive 完一个 change 后，项目的 profile 可能变化（比如 greenfield 走到 maintenance）。提示用户：
 

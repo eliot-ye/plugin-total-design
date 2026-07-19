@@ -16,7 +16,7 @@ user-invocable: true
 
 - 用户要 build 一个 feature / fix 一个 bug / 重构一个模块
 - 在 `/td-propose` 之前
-- 在 `/td-explore` 流程中
+- 在 `/td-explore` 流程中被激活（`td-explore` 调用本 skill 的方法论，不是反向依赖）
 
 ## 工作方式
 

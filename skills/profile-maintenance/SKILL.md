@@ -22,13 +22,10 @@ user-invocable: false
 
 ## 在各 tier 下的 constraint 强度
 
-| constraint | tier-small | tier-medium | tier-large |
-|---|---|---|---|
-| wip-limit | 上限 3 | 上限 2 | 上限 1 |
-| critical-buffer | 20% buffer | 35% buffer | 50% buffer |
-| brooks-law | 不强制 | 提醒 | 强制 |
-| delay-decision | 强 | 强 | 强 |
-| human-in-loop | 仅不可逆决策 | + 生产环境改动前 | + 所有 constraint 强制 + system-audit 周期性 |
+强度本身见 `constraint-matrix` skill 的表 1 与表 2。本 profile 的特殊加成：
+
+- `human-in-loop` 在 tier-medium 加"+ 生产环境改动前"，在 tier-large 加"+ 所有 constraint 强制 + system-audit 周期性"
+- 其余 4 个 constraint 的强度由 tier 决定，profile-maintenance 不再加成
 
 ## 特殊规则
 

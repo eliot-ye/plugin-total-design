@@ -228,7 +228,7 @@ Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读�
 
 ## 社区行为准则
 
-参见 `CODE_OF_CONDUCT.md`（如果有的话）。简单说：
+参见 `CODE_OF_CONDUCT.md`。简单说：
 
 - 尊重所有人——不论背景、经验、立场
 - 聚焦技术讨论——不攻击人

@@ -43,6 +43,16 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 ## 步骤
 
+### 0. 确保 OpenSpec 已 init
+
+reverse-spec 要把反推结果写到 `openspec/specs/` 下，前提是目标仓库已 `openspec init`。检查 `openspec/` 目录是否存在；不存在则先跑：
+
+```bash
+openspec init
+```
+
+接手项目时 OpenSpec 通常还没装，这步不能跳。
+
 ### 1. 识别代码库状态
 
 扫描目标代码库：

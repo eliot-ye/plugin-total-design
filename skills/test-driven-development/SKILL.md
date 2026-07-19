@@ -51,6 +51,8 @@ user-invocable: true
 
 这个规则看起来激进，但它防止了"测试只是为了配合已写代码"的腐烂。
 
+**例外（brownfield 老代码）：** 本规则只适用于**当前 change 新写的代码**。接手项目时已存在的老代码本来就没测试，强制删除会摧毁系统——老代码走 `profile-brownfield` 的路径：先加 characterization test 锁定现有行为，再重构。
+
 ### 不接受"这个没法测"
 
 如果 agent 说"这个没法测"：
