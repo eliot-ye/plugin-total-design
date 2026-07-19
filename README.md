@@ -279,8 +279,8 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 本 plugin 站在三个巨人的肩膀上：
 
-- **OpenSpec**（Fission-AI）—— 契约层方法论来源
-- **Superpowers**（Jesse Vincent / obra）—— 行为层方法论来源
-- **钱学森** —— 系统工程思想来源
+- [**OpenSpec**（Fission-AI）](https://github.com/Fission-AI/OpenSpec)—— 契约层方法论来源
+- [**Superpowers**（Jesse Vincent / obra）](https://github.com/obra/superpowers)—— 行为层方法论来源
+- **钱学森的工程理论** —— 系统工程思想来源
 
 没有他们的工作，这个 plugin 不会存在。

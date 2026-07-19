@@ -163,7 +163,7 @@ Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读�
 
 ## 不做的事
 
-- **不做 multi-platform 同步**：plugin 只针对 atomcode，不同步到 `.claude/` / `.codex/` 等其他平台
+- **当前阶段只针对 atomcode**：skill body 内引用其他 skill 用逻辑名（如 `wip-limit`），由各平台加载器负责拼前缀，预留未来同步到 `.claude/` / `.codex/` 的能力
 - **不做 plugin 内的 spec 系统**：OpenSpec 本身是独立 CLI，本 plugin 转译方法论不重新实现 CLI
 - **不做静态配置文件**：profile × tier 不用 yaml 配置，全做成 skill
 - **不原样照搬 Superpowers 的 SKILL.md**：转译时去掉 Superpowers 自己的 plugin 引用、marketplace 引用
@@ -180,4 +180,4 @@ Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读�
 - **设计文档**：`thoughts/total-design.md`（在源 thinking 仓库里）
 - **OpenSpec**：https://github.com/Fission-AI/OpenSpec
 - **Superpowers**：https://github.com/obra/superpowers
-- **钱学森系统工程**：《系统工程论》《创建系统学》
+- **钱学森系统工程**：系统工程论《创建系统学》《工程控制论》
