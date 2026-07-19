@@ -7,7 +7,7 @@
   },
   "plugins": [
     {
-      "name": "superpowers",
+      "name": "total-design",
       "description": "A system-engineering design department for your agent: OpenSpec contract layer + Superpowers behavior layer + Qian Xuesen systems-engineering keynote, packed as an atomcode plugin.",
       "version": "0.1.0",
       "source": "./",
