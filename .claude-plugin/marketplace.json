@@ -1,0 +1,20 @@
+{
+  "name": "total-design-marketplace",
+  "description": "Development marketplace for Total Design skills library",
+  "owner": {
+    "name": "Eliot Ye",
+    "email": "eliot_ye@163.com"
+  },
+  "plugins": [
+    {
+      "name": "superpowers",
+      "description": "A system-engineering design department for your agent: OpenSpec contract layer + Superpowers behavior layer + Qian Xuesen systems-engineering keynote, packed as an atomcode plugin.",
+      "version": "0.1.0",
+      "source": "./",
+      "author": {
+        "name": "Eliot Ye",
+        "email": "eliot_ye@163.com"
+      }
+    }
+  ]
+}
