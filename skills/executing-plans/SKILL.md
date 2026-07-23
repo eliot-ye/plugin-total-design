@@ -71,8 +71,3 @@ checkpoint 格式：
 - 与 `test-driven-development` 配合：每个任务都走 TDD
 - 与 `requesting-code-review` 配合：checkpoint 时做 review
 - 与 `human-in-loop` 配合：checkpoint 时机由这个 skill 定
-
-## 不做的事
-
-- 不"一次性把所有任务做完再汇报"——checkpoint 是纪律
-- 不在 checkpoint 时问"你满意吗"——问具体的"拍板 X 决策"

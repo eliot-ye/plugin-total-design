@@ -3,25 +3,9 @@ name: td-explore
 description: 不带 stakes 的思考伙伴，写代码前先探索。OpenSpec 契约层入口。触发场景：用户说"想探索"、"explore"、"先想想"、"不确定要建什么"、"帮我想清楚 X"。
 user-invocable: true
 argument-hint: <topic or question>
-aliases:
-  atomcode: total-design:td-explore
-  claude-code: total-design:td-explore
-  cursor: td-explore
 ---
 
 # td-explore
-
-## 平台命名
-
-本 skill 在不同平台下的调用名：
-
-| 平台 | 调用名 |
-|---|---|
-| atomcode | `total-design:td-explore` |
-| Claude Code | `total-design:td-explore` |
-| Cursor / 其他 | `td-explore` |
-
-本文 body 里引用其他 skill 时一律用**逻辑名**（如 `brainstorming`），由当前平台的加载器负责拼前缀。
 
 不创建 change、不写 artifact，只是**探索**。在用户还不确定要建什么的时候，agent 帮用户想清楚。
 
@@ -41,6 +25,14 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 ## 步骤
 
+### 0. 激活主基调与配置层
+
+每个 td-* skill 的步骤 0 执行同一序列，只注入强度不做判断：
+
+1. **`system-engineering`** — 主基调四条进入上下文。explore 不写 artifact、不动代码，constraint 强度对其直接影响较小。
+2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）读入上下文。会话内缓存，后续步骤直接引用。profile 决定 explore 的侧重点（greenfield 重候选方向，brownfield 重"动老代码的影响"，maintenance 重"生产稳定性"），所以 profile/tier 仍需在步骤 0 判读完成。
+3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 0 判断是否触发**。"是否触发"是步骤 1 的事。
+
 ### 1. 读现有 context
 
 - 读项目当前状态（git log、package.json、目录结构）
@@ -49,12 +41,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 ### 2. 苏格拉底式对话
 
-升级为"总体设计部"工作方式（见 `brainstorming` skill）：
-
-- 不直接给方案，先问用户想达到什么
-- 探索 2–3 个候选方向
-- 对每个方向，问"如果选这个，系统整体会怎么变？"
-- 不急着收敛，允许矛盾并存
+调用 `brainstorming` skill 的 1–4 步工作方式（不直接给方案 / 探索 2–3 个候选 / 对每个方向问"系统整体会怎么变" / 允许矛盾并存），不在此重述。explore 与 brainstorming 的差别只在产物：brainstorming 收敛成 spec 文档，explore 不写文档只输出探索结论（步骤 4）。
 
 ### 3. 系统工程视角评估
 

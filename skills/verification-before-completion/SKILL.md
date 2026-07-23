@@ -75,9 +75,3 @@ UI 改动也要验证：snapshot test、E2E test、至少手动截图对比。"�
 - 与 `test-driven-development` 配合：TDD 的 GREEN 是 task-level，本 skill 是 change-level
 - 与 `systematic-debugging` 配合：verification 失败时，触发 systematic-debugging
 - 与 `executing-plans` 配合：task 标 `[x]` 前必须 verification
-
-## 不做的事
-
-- 不接受任何形式的"我觉得"——只要"我验证了"
-- 不跳过验证"为了节省时间"——省下的时间会双倍花在 debug 上
-- 不在验证失败时声称"基本完成"

@@ -22,15 +22,17 @@ user-invocable: false
 | `delay-decision` | 强 | 强 | 强 |
 | `human-in-loop` | 仅不可逆决策 | + 公共契约变更 | + 总体设计文档审阅 |
 
-## 表 2：3 个 profile 在 human-in-loop 上的额外触发条件
+## 表 2：3 个 profile 在 human-in-loop 上的场景加成
 
 | profile | tier-small | tier-medium | tier-large |
 |---|---|---|---|
-| `profile-greenfield` | 仅不可逆决策 | + 公共契约变更 | + 总体设计文档审阅 |
-| `profile-brownfield` | 仅不可逆决策 | + 改老代码前 | + 总体设计文档必填 |
-| `profile-maintenance` | 仅不可逆决策 | + 生产环境改动前 | + 所有 constraint 强制 + system-audit 周期性 |
+| `profile-greenfield` | — | + 公共契约变更 | + 总体设计文档审阅 |
+| `profile-brownfield` | — | + 改老代码前 | + 总体设计文档必填 |
+| `profile-maintenance` | — | + 生产环境改动前 | + 所有 constraint 强制 + system-audit 周期性 |
 
-profile 决定 human-in-loop 的"场景加成"，tier 决定其余 4 个 constraint 的强度。两者正交叠加。
+"—" 表示该格无 profile 场景加成，仅用表 1 第 5 行的 tier 基线。3 个 profile 在 tier-small 下都没有超出 tier 基线的加成。
+
+最终 human-in-loop 强度 = `human-in-loop` skill 的 5 类通用基线 ∪ 表 1 第 5 行 tier 加成 ∪ 表 2 profile 场景加成。三者叠加，不替换。
 
 ## 表 3：system-audit 频率
 
@@ -45,3 +47,39 @@ profile 决定 human-in-loop 的"场景加成"，tier 决定其余 4 个 constra
 3 个 profile skill（`profile-greenfield` / `profile-brownfield` / `profile-maintenance`）和 3 个 tier skill（`tier-small` / `tier-medium` / `tier-large`）在"## 在各 tier 下的 constraint 强度"或"## constraint 强度"小节引用本 skill 的表 1 与表 2，并补充本 profile / tier 的特殊加成。
 
 agent 在激活任意 constraint skill 时，应同时查本 skill 确认当前 profile × tier 下的强度。
+
+## 识别流程（profile × tier 单一入口）
+
+每个 td-* skill 的"步骤 0"调用本节。agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `$_TD_PROFILE` / `$_TD_TIER`），后续步骤据此查表 1 / 表 2 / 表 3 的强度。
+
+### 1. 判读 profile（三选一，按优先级）
+
+| 优先级 | profile | 判据（全部成立） |
+|---|---|---|
+| 1 | `profile-maintenance` | 仓库已上线 **且** 有真实用户流量 **且** 有 CI/CD 配置 |
+| 2 | `profile-brownfield` | 仓库已有可运行代码（非脚手架）**且** 不满足 maintenance 判据 |
+| 3 | `profile-greenfield` | 仓库刚 init / 只有脚手架 / 文件数 < 10 且无业务逻辑 |
+
+判据冲突时按优先级取高的。判据不明确 → 触发 `human-in-loop`，问用户"这是新项目、接手项目、还是上线维护？"。
+
+### 2. 判读 tier（三选一）
+
+| tier | 判据（任一成立即取该 tier，取最高） |
+|---|---|
+| `tier-large` | 文件数 100+ **或** 多团队 **或** 多仓库 **或** 多部署单元 |
+| `tier-medium` | 文件数 10–100 **或** 单团队多人 **或** 1–3 个部署单元 |
+| `tier-small` | 文件数 3–10 **或** 单人/单团队 **或** 1 个部署单元 |
+
+系统有"明显分系统边界"即使文件少，也升级到 `tier-medium`。系统拆成多个独立子系统 → 每个子系统独立定 tier。
+
+### 3. 缓存判读结果
+
+判读结果在工作会话内缓存，不每次步骤 0 都重判。触发重新判读的时机：
+
+- `/td-archive` 完成后（项目状态可能变化）
+- `/td-system-audit` 发现 profile/tier 与实际不符
+- 用户显式说"项目阶段变了"
+
+### 4. 注入强度
+
+判读完成后，agent 把表 1（5 个 constraint 在当前 tier 下的强度）+ 表 2（当前 profile 的 human-in-loop 加成）+ 表 3（system-audit 频率）读入上下文。后续步骤引用这些强度值，不再回查本 skill。

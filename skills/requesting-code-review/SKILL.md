@@ -88,9 +88,3 @@ warning 不阻塞，但要记录在 tasks.md 的"已知问题"里。
 - 与 `executing-plans` 配合：checkpoint 时触发 review
 - 与 `human-in-loop` 配合：critical issue 是 agent 自己能修就修，修不了触发 human-in-loop
 - 与 `verification-before-completion` 配合：review 是 verification 的一部分
-
-## 不做的事
-
-- 不做"鼓励式 review"——"看起来不错！"不是 review
-- 不把所有问题都标 critical——分级是纪律
-- 不在 review 里改代码——review 是判断，改是执行

@@ -15,13 +15,13 @@ user-invocable: false
 
 ## constraint 强度
 
-强度本身见 `constraint-matrix` skill 的表 1。本 tier 的特殊说明：
+强度本身见 `constraint-matrix` skill 的表 1。本 tier 的注解：
 
-- `wip-limit` 上限 1：大系统并行硬解 = 失控
-- `critical-buffer` 50% project buffer：不确定性最高
-- `brooks-law` 强制：大系统加人手几乎必然拖慢
-- `delay-decision` 强
-- `human-in-loop` + 总体设计文档审阅
+- `wip-limit`：大系统并行硬解 = 失控
+- `critical-buffer`：不确定性最高
+- `brooks-law`：大系统加人手几乎必然拖慢，强制
+- `delay-decision`：强
+- `human-in-loop`：+ 总体设计文档审阅
 
 ## system-audit 频率
 

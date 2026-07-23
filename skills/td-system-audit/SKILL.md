@@ -2,26 +2,10 @@
 name: td-system-audit
 description: 周期性对照系统工程主基调自检。total-design 新增，体现钱学森"总体设计部"视角。触发场景：用户说"audit"、"自检"、"复盘"、"对照主基调"、"最近推进不顺"。
 user-invocable: true
-argument-hint: optional: <scope = current-change | project>
-aliases:
-  atomcode: total-design:td-system-audit
-  claude-code: total-design:td-system-audit
-  cursor: td-system-audit
+argument-hint: "<scope: current-change | project>  (可选, 默认 current-change)"
 ---
 
 # td-system-audit
-
-## 平台命名
-
-本 skill 在不同平台下的调用名：
-
-| 平台 | 调用名 |
-|---|---|
-| atomcode | `total-design:td-system-audit` |
-| Claude Code | `total-design:td-system-audit` |
-| Cursor / 其他 | `td-system-audit` |
-
-本文 body 里引用其他 skill 时一律用**逻辑名**（如 `human-in-loop`、`delay-decision`、`critical-buffer`），由当前平台的加载器负责拼前缀。
 
 **total-design 新增。** OpenSpec 原版没这个。
 
@@ -46,14 +30,22 @@ audit 的对照标准是主基调四条，不是"代码质量"或"进度"——�
 
 ## 触发时机
 
-system-audit 不是只在用户显式调用时才跑。agent 在以下时机应主动建议 audit：
+system-audit 不是只在用户显式调用时才跑。agent 应在以下时机主动建议 audit：
 
-- 每完成 3 个 change（project scope）
-- 每完成 1 个 large tier 的 change（current-change scope）
-- 用户表达"感觉最近推进不顺利"时
-- 关键链缓冲被多次压缩后
+- **频率触发**：对照 `constraint-matrix` 表 3 的 system-audit 频率（按当前 tier 的 project scope / current-change scope 阈值）。频率事实源在表 3，本 skill 不重写——`td-archive` 步骤 4.2 已维护"累计 archive 计数器"，达阈值即建议。
+- **信号触发**：
+  - 用户表达"感觉最近推进不顺利"时
+  - 关键链缓冲被多次压缩后
 
 ## 步骤
+
+### 0. 激活主基调与配置层
+
+每个 td-* skill 的步骤 0 执行同一序列，只注入强度不做判断：
+
+1. **`system-engineering`** — 主基调四条进入上下文。本 skill 的审计对照标准就是主基调四条，没有主基调框架，audit 会退化成"代码质量审查"。
+2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 3（system-audit 频率，读入上下文。会话内缓存，后续步骤直接引用。audit 频率是否达标，查表 3。
+3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 0 判断是否触发**。"是否触发"是步骤 1 的事。
 
 ### 1. 收集审计对象
 
@@ -135,7 +127,9 @@ system-audit 不是只在用户显式调用时才跑。agent 在以下时机应�
 - 之前的严重问题已消除
 - 修复动作没引入新的"局部优化制造全局失调"
 
-直到重跑结果无严重问题，本轮 audit 才算闭合。不重跑 = 闭环没合，问题可能换形式回来。
+重跑最多 3 次。3 次后仍有严重问题 → 触发 `human-in-loop`，让用户介入决定如何处理（继续修复、调整 scope、或接受残留风险）。
+
+不重跑 = 闭环没合，问题可能换形式回来。
 
 ## Guardrails
 

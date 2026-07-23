@@ -3,25 +3,9 @@ name: td-propose
 description: 创建 change，生成 proposal/design/tasks artifact。OpenSpec 契约层入口。触发场景：用户说"提一个 change"、"propose"、"开个新改动"、"建 proposal"、"想建 X 功能"。
 user-invocable: true
 argument-hint: <change-name or description>
-aliases:
-  atomcode: total-design:td-propose
-  claude-code: total-design:td-propose
-  cursor: td-propose
 ---
 
 # td-propose
-
-## 平台命名
-
-本 skill 在不同平台下的调用名：
-
-| 平台 | 调用名 |
-|---|---|
-| atomcode | `total-design:td-propose` |
-| Claude Code | `total-design:td-propose` |
-| Cursor / 其他 | `td-propose` |
-
-本文 body 里引用其他 skill 时一律用**逻辑名**（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀。
 
 OpenSpec 契约层入口。在写代码之前，让人和 AI 对"建什么、为什么这样建"达成契约。
 
@@ -41,13 +25,21 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 ## 步骤
 
+### 0. 激活主基调与配置层
+
+每个 td-* skill 的步骤 0 执行同一序列，只注入强度不做判断：
+
+1. **`system-engineering`** — 主基调四条进入上下文。propose 的每个判断都在主基调四条框架下做。
+2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）读入上下文。会话内缓存，后续步骤直接引用。
+3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 0 判断是否触发**。"是否触发"是步骤 1 的事，表 1 + 表 2 注入后判断 wip-limit / human-in-loop 是否触发。
+
 ### 1. 触发前置检查
 
-按顺序触发这些 constraint skill（参见 `system-engineering`）：
+对照步骤 0 注入的强度与当前 change 状态，判断是否触发：
 
-- `wip-limit`：当前活跃 change 是否已达上限？
-- `human-in-loop`：用户描述是否清晰到可以 propose？不清楚就问。
-- **brownfield reverse-spec 检查**：若当前 profile 是 `profile-brownfield`，检查 `openspec/specs/` 下是否已有相关分系统的 baseline spec。没有 → 触发 `human-in-loop`，提示用户"你对现有系统还没建立认识，propose 大改动风险高。先 `/td-reverse-spec` 吗？"
+- `wip-limit`：当前活跃 change 数已达上限？已达 → 报告列表 + 提示"先 archive 或 finish 现有 change 再起新的"，但不强制阻塞。
+- `human-in-loop`：用户描述是否清晰到可以 propose？不清楚 → 用 `AskUserQuestion` 问"想做什么 change"。
+- **brownfield reverse-spec 检查**：若 `$_TD_PROFILE == profile-brownfield`，检查 `openspec/specs/` 下是否已有相关分系统的 baseline spec。没有 → 触发 `human-in-loop`，提示用户"你对现有系统还没建立认识，propose 大改动风险高。先 `/td-reverse-spec` 吗？"——用户同意后执行 `/td-reverse-spec` 建立 baseline，完成后回到本步骤继续 propose。
 
 ### 2. 创建 change 目录
 
@@ -75,6 +67,10 @@ openspec instructions <artifact-id> --change "<name>" --json
 - 应用 `context` 和 `rules` 作为约束——**不要把它们复制进 artifact 文件**
 - 读已完成的依赖 artifact 作为 context
 - 写到 `resolvedOutputPath`
+
+#### greenfield 初始 spec 建立
+
+若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空，第一个 change 的 proposal 还要建立初始 spec baseline——这是后续所有改动的影响评估依据。
 
 #### proposal.md 必填节：系统工程影响评估
 

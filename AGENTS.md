@@ -44,7 +44,7 @@ total-design/
 ├── LICENSE
 ├── .gitignore
 │
-├── skills/                  ← 25 个 skill，全部目录式（每个目录下是 SKILL.md）
+├── skills/                  ← 26 个 skill，全部目录式（每个目录下是 SKILL.md）
 │   │
 │   ├── 约束层（6 个）
 │   │   ├── system-engineering/ ← 钱学森主基调；user-invocable: false
@@ -63,7 +63,8 @@ total-design/
 │   │   ├── systematic-debugging/
 │   │   └── verification-before-completion/
 │   │
-│   ├── 配置层（6 个）
+│   ├── 配置层（7 个）
+│   │   ├── constraint-matrix/  ← profile × tier × constraint 强度矩阵的单一事实源；user-invocable: false
 │   │   ├── profile-greenfield/ ← 3 个现场 profile，user-invocable: false
 │   │   ├── profile-brownfield/
 │   │   ├── profile-maintenance/
@@ -100,10 +101,6 @@ name: <skill-name>
 description: <一句话描述，会进 system prompt>
 user-invocable: true | false
 argument-hint: <参数提示>          ← 仅 user-invocable: true 的命令式 skill 需要
-aliases:                            ← 仅契约层 td-* skill 需要
-  atomcode: total-design:<name>
-  claude-code: total-design:<name>
-  cursor: <name>
 ---
 
 # <Skill Title>
@@ -113,14 +110,28 @@ aliases:                            ← 仅契约层 td-* skill 需要
 <正文>
 ```
 
-**frontmatter 字段用连字符不用下划线**：`user-invocable` / `argument-hint`。下划线版本（`user_invocable` / `argument_hint`）会被 atomcode 静默忽略。
-
 **必须有 `## 服务的主基调原则` 一节的 skill：**
 
 - 约束层 5 个局部规律（`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop`）—— 显式 link 到 `system-engineering` 主基调的某一条
 - 契约层 6 个 td-* skill —— 同上
 
 `system-engineering` 自己是主基调本身，不需要这一节。行为层 / 配置层 skill 可选这一节，但写了更清晰。
+
+### SKILL 不可引用 AGENTS 文件
+
+**任何 `SKILL.md` 的正文或 frontmatter 都不得引用 `AGENTS.md`、`CLAUDE.md`、`.atomcode.md` 等 agent 指令文件——无论是路径、文件名还是"见 AGENTS.md"之类的指向。**
+
+理由：
+
+- AGENTS.md 是给**本仓库的开发 agent** 看的元指令，不是 plugin 的运行时资产。装上 plugin 的用户 agent 不会读这个仓库的 AGENTS.md。
+- SKILL.md 一旦出现 `AGENTS.md` 字样，等于把一份只对仓库内部生效的约定泄漏给下游 agent，造成歧义。
+- 多平台扩展时（同步到 `.claude/` / `.codex/` 等），AGENTS.md 路径不保证存在，引用会变成死链。
+
+执行细则：
+
+1. SKILL.md 正文需要说明编辑规则时，改用一句话自包含描述，不写"见 AGENTS.md"。
+2. 约束层 / 契约层 skill 的 `## 服务的主基调原则` 一节，直接陈述它服务钱学森系统工程主基调的哪一条，不指向 AGENTS.md。
+3. 若发现现有 SKILL.md 里有对 AGENTS.md 的引用，视为 bug，转译时删掉。
 
 ### 命令文件编辑
 
@@ -137,17 +148,7 @@ argument-hint: <参数提示>
 
 # <command-name>
 
-## 平台命名
-
-| 平台 | skill 调用名 |
-|---|---|
-| atomcode | `total-design:<name>` |
-| Claude Code | `total-design:<name>` |
-| Cursor / 其他 | `<name>` |
-
-本命令是 `<name>` skill 的 slash 入口，逻辑全部维护在 skill 里。
-
-**立刻调用 `use_skill` 工具，传入 skill 名 `total-design:<name>`，参数 `$ARGUMENTS`。**
+**立刻调用 `<command-name>` skill，参数 `$ARGUMENTS`。**
 ```
 
 6 个命令文件 (`td-propose` / `td-explore` / `td-apply` / `td-reverse-spec` / `td-archive` / `td-system-audit`) 都遵循这个极薄模板——命令只是 slash 入口，真正的逻辑在同名 skill (`skills/<td-*>/SKILL.md`) 里。这样同一份逻辑既能被 slash command 触发，也能被 agent 自动触发。
@@ -199,6 +200,18 @@ atomcode hooks schema（备用参考）：外层 `{"hooks": {<name>: {...}}}`，
   - `claude-code: total-design:<name>`
   - `cursor: <name>`（无前缀）
 - **skill body 内引用其他 skill 用逻辑名**（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀——这是预留多平台扩展的关键设计
+
+### td-* skill 共享片段
+
+6 个 td-* skill 的 body 里曾经各自重复"平台命名表""逻辑名说明""步骤 0 激活主基调与配置层"。这三段已抽为共享片段，td-* skill 的 body 不再重写，改为一句指向本节：
+
+**平台命名**：6 个 td-* skill 在不同平台下的调用名见各自 frontmatter 的 `aliases` 字段（atomcode / claude-code / cursor 三套）。body 不再放平台命名表，引用其他 skill 一律用逻辑名，由当前平台加载器负责拼前缀。
+
+**td-* 标准步骤 0**（每个 td-* skill 的"### 0. 激活主基调与配置层"都执行同一序列，只注入强度不做判断）：
+
+1. **`system-engineering`** — 主基调四条进入上下文。各 td-* skill 在这一条后补自己的注解（如"reverse-spec 是总体设计部在接手阶段的工作"）。
+2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）+ 表 3（system-audit 频率，仅 archive/apply 需要）读入上下文。会话内缓存，后续步骤直接引用。
+3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 0 判断是否触发**。"是否触发"是步骤 1 的事。
 
 ## commit 风格
 

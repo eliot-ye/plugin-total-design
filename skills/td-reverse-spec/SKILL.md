@@ -3,25 +3,9 @@ name: td-reverse-spec
 description: 中途接手项目专用：先 reverse-spec 已有代码，再 propose 改动。触发场景：用户说"接手项目"、"reverse spec"、"反推 spec"、"看现有代码"、"刚接手这个库"。
 user-invocable: true
 argument-hint: <existing-codebase-path or empty for cwd>
-aliases:
-  atomcode: total-design:td-reverse-spec
-  claude-code: total-design:td-reverse-spec
-  cursor: td-reverse-spec
 ---
 
 # td-reverse-spec
-
-## 平台命名
-
-本 skill 在不同平台下的调用名：
-
-| 平台 | 调用名 |
-|---|---|
-| atomcode | `total-design:td-reverse-spec` |
-| Claude Code | `total-design:td-reverse-spec` |
-| Cursor / 其他 | `td-reverse-spec` |
-
-本文 body 里引用其他 skill 时一律用**逻辑名**（如 `profile-brownfield`），由当前平台的加载器负责拼前缀。
 
 **中途接手项目专用。** OpenSpec 原版没这个，是 total-design 新增的。
 
@@ -43,15 +27,13 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 ## 步骤
 
-### 0. 确保 OpenSpec 已 init
+### 0. 激活主基调与配置层
 
-reverse-spec 要把反推结果写到 `openspec/specs/` 下，前提是目标仓库已 `openspec init`。检查 `openspec/` 目录是否存在；不存在则先跑：
+每个 td-* skill 的步骤 0 执行同一序列，只注入强度不做判断：
 
-```bash
-openspec init
-```
-
-接手项目时 OpenSpec 通常还没装，这步不能跳。
+1. **`system-engineering`** — 主基调四条进入上下文。reverse-spec 是总体设计部在"接手"阶段的工作。
+2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）读入上下文。会话内缓存，后续步骤直接引用。reverse-spec 本身是 profile-brownfield 的入口动作，但 tier 决定 reverse-spec 的粒度（small 粗粒度即可，large 要画分系统接口图）。
+3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 0 判断是否触发**。"是否触发"是步骤 1 的事。
 
 ### 1. 识别代码库状态
 

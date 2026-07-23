@@ -59,9 +59,3 @@ user-invocable: true
 - 与 `test-driven-development` 配合：Phase 4 的回归测试就是 TDD 的 RED
 - 与 `verification-before-completion` 配合：Phase 4 的 verify 就是这个 skill 的应用
 - 与 `human-in-loop` 配合：如果 Phase 3 找不到 root cause，停下来问用户
-
-## 不做的事
-
-- 不"先试试改这里看会不会好"——这是 vibe debugging，不是 systematic
-- 不在找到根因前修复——症状修复会掩盖根因
-- 不跳过 Phase 4 的回归测试——"这个 bug 应该不会再出现了"不是验证

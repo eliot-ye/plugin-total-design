@@ -15,13 +15,13 @@ user-invocable: false
 
 ## constraint 强度
 
-强度本身见 `constraint-matrix` skill 的表 1。本 tier 的特殊说明：
+强度本身见 `constraint-matrix` skill 的表 1。本 tier 的注解：
 
-- `wip-limit` 上限 3：小系统允许稍微并行
-- `critical-buffer` 20% project buffer：不确定性较低
-- `brooks-law` 不强制：小团队加人手影响有限
-- `delay-decision` 强：小系统可逆决策容易回滚，更该延迟
-- `human-in-loop` 仅不可逆决策
+- `wip-limit`：小系统允许稍微并行
+- `critical-buffer`：不确定性较低
+- `brooks-law`：小团队加人手影响有限，不强制
+- `delay-decision`：表 1 说"强"（三个 tier 都强）。小系统回滚成本低，更该延迟——这是"强"在小系统的具体含义
+- `human-in-loop`：仅不可逆决策
 
 ## system-audit 频率
 

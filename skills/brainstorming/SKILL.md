@@ -50,15 +50,3 @@ user-invocable: true
 ### 6. 保存 spec 文档
 
 brainstorming 收敛到一定程度，把成果写成 spec 文档（给 `/td-propose` 用）。
-
-## 与其他 skill 的关系
-
-- 与 `writing-plans` 配合：brainstorming 产出 spec，writing-plans 把 spec 拆成任务
-- 与 `human-in-loop` 配合：brainstorming 里遇到不可逆决策，触发 human-in-loop
-- 与 `delay-decision` 配合：可逆决策在 brainstorming 阶段不强行闭合
-
-## 不做的事
-
-- 不在 brainstorming 阶段写代码
-- 不替用户决定方向——agent 给候选 + 推荐，用户拍板
-- 不假装"用户说的就是对的"——agent 看到系统层面的风险，要说出来

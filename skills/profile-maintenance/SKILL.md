@@ -22,10 +22,7 @@ user-invocable: false
 
 ## 在各 tier 下的 constraint 强度
 
-强度本身见 `constraint-matrix` skill 的表 1 与表 2。本 profile 的特殊加成：
-
-- `human-in-loop` 在 tier-medium 加"+ 生产环境改动前"，在 tier-large 加"+ 所有 constraint 强制 + system-audit 周期性"
-- 其余 4 个 constraint 的强度由 tier 决定，profile-maintenance 不再加成
+强度本身见 `constraint-matrix` skill 的表 1 与表 2。profile-maintenance 不再加成其余 4 个 constraint——强度由 tier 决定。
 
 ## 特殊规则
 
