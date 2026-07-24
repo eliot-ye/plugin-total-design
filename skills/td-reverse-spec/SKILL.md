@@ -7,9 +7,12 @@ argument-hint: <existing-codebase-path or empty for cwd>
 
 # td-reverse-spec
 
-**中途接手项目专用。** OpenSpec 原版没这个，是 total-design 新增的。
-
 中途接手已有代码库时，直接 `/td-propose` 改动很危险——你不知道现有代码在 spec 层是什么样子。reverse-spec 先从代码反推 spec，建立 baseline，再在 baseline 上 propose 改动。
+
+## 依赖技能
+
+- `system-engineering`
+- `constraint-matrix`
 
 ## 服务的主基调原则
 
@@ -29,11 +32,11 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 ### 0. 激活主基调与配置层
 
-每个 td-* skill 的步骤 0 执行同一序列，只注入强度不做判断：
+**加载技能 `system-engineering` `constraint-matrix`**
 
-1. **`system-engineering`** — 主基调四条进入上下文。reverse-spec 是总体设计部在"接手"阶段的工作。
-2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）读入上下文。会话内缓存，后续步骤直接引用。reverse-spec 本身是 profile-brownfield 的入口动作，但 tier 决定 reverse-spec 的粒度（small 粗粒度即可，large 要画分系统接口图）。
-3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 0 判断是否触发**。"是否触发"是步骤 1 的事。
+- 执行 `constraint-matrix` 的 `## 识别流程`
+- `system-engineering`：reverse-spec 是总体设计部在"接手"阶段的工作。
+- reverse-spec 本身是 profile-brownfield 的入口动作，但 tier 决定 reverse-spec 的粒度（small 粗粒度即可，large 要画分系统接口图）。
 
 ### 1. 识别代码库状态
 

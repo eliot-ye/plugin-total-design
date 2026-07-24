@@ -7,9 +7,12 @@ argument-hint: "<scope: current-change | project>  (可选, 默认 current-chang
 
 # td-system-audit
 
-**total-design 新增。** OpenSpec 原版没这个。
-
 钱学森"总体设计部"视角的工程化体现。周期性把 agent 当前的工作对照系统工程四条主基调过一遍，识别"局部优化制造全局失调"的风险。
+
+## 依赖技能
+
+- `system-engineering`
+- `constraint-matrix`
 
 ## 服务的主基调原则
 
@@ -41,11 +44,11 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 ### 0. 激活主基调与配置层
 
-每个 td-* skill 的步骤 0 执行同一序列，只注入强度不做判断：
+**加载技能 `system-engineering` `constraint-matrix`**
 
-1. **`system-engineering`** — 主基调四条进入上下文。本 skill 的审计对照标准就是主基调四条，没有主基调框架，audit 会退化成"代码质量审查"。
-2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 3（system-audit 频率，读入上下文。会话内缓存，后续步骤直接引用。audit 频率是否达标，查表 3。
-3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 0 判断是否触发**。"是否触发"是步骤 1 的事。
+- `system-engineering`：主基调四条进入上下文。audit 的对照标准就是主基调四条，没有主基调框架，audit 会退化成"代码质量审查"。
+- 执行 `constraint-matrix` 的 `## 识别流程`
+- 表 3（system-audit 频率）必须读入——audit 频率是否达标，查表 3。
 
 ### 1. 收集审计对象
 
@@ -81,6 +84,14 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 - [ ] 有没有把"复杂巨系统"当"简单系统"硬解？（比如同时开太多 change、压缩关键链缓冲）
 
 ### 3. 输出审计报告
+
+报告同时输出到对话和落盘。落盘路径：`openspec/.td-state/audits/<YYYYMMDD-HHMMSS>-<scope>.md`。目录由本步骤首次运行时按需创建。
+
+落盘后，同步更新 `openspec/.td-state/audit-history.yaml`：追加一条本次 audit 的记录。文件格式见 `constraint-matrix` 的「持久化层」节，文件由本步骤首次运行时按需创建。
+
+**null 语义**：`audit-history.yaml` 不存在 → 本步骤创建文件并写入首条记录；`audits/` 目录不存在 → 同步创建。
+
+报告模板：
 
 ```markdown
 ## System Audit 报告

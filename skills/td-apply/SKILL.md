@@ -9,6 +9,11 @@ argument-hint: <change-name>
 
 按 change 的 tasks.md 实施。这是从"契约"走向"代码"的桥。
 
+## 依赖技能
+
+- `system-engineering`
+- `constraint-matrix`
+
 ## 服务的主基调原则
 
 **系统工程主基调第 1 条：系统工程。**
@@ -21,17 +26,16 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 ## 输入
 
-`$ARGUMENTS`：change 名。空则用 `AskUserQuestion` 问用户"想 apply 哪个 change"。
+`$ARGUMENTS`：change 名。空则问用户"想 apply 哪个 change"。
 
 ## 步骤
 
 ### 0. 激活主基调与配置层
 
-每个 td-* skill 的步骤 0 执行同一序列，只注入强度不做判断：
+**加载技能 `system-engineering` `constraint-matrix`**
 
-1. **`system-engineering`** — 主基调四条进入上下文。apply 是"在系统全局立场上推进实施"，没有主基调框架就会退化为"按任务清单打勾"。
-2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）+ 表 3（system-audit 频率）读入上下文。会话内缓存，后续步骤直接引用。
-3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 0 判断是否触发**。"是否触发"是步骤 1 的事，是否触发 / tasks 是否合规的判断在步骤 1 进行。
+- 执行 `constraint-matrix` 的 `## 识别流程`
+- 表 1 + 表 2 读入——步骤 1 据此判断是否触发 / tasks 是否合规。apply 不触发 system-audit。
 
 ### 1. 前置检查
 

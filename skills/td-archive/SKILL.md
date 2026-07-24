@@ -9,6 +9,11 @@ argument-hint: <change-name>
 
 change 完成后归档。归档不是删除，是把"已完成的学习"沉淀下来。
 
+## 依赖技能
+
+- `system-engineering`
+- `constraint-matrix`
+
 ## 服务的主基调原则
 
 **系统工程主基调第 3 条：从定性到定量的综合集成。**
@@ -27,11 +32,10 @@ archive 后触发 profile 重新评估——这是总体设计部的职责：项
 
 ### 0. 激活主基调与配置层
 
-每个 td-* skill 的步骤 0 执行同一序列，只注入强度不做判断：
+**加载技能 `system-engineering` `constraint-matrix`**
 
-1. **`system-engineering`** — 主基调四条进入上下文。archive 是"完成一次从预期到实际的综合集成循环"，没有主基调框架就会退化为"打完勾收工"。
-2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）+ 表 3（system-audit 频率）读入上下文。会话内缓存，后续步骤直接引用。
-3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 0 判断是否触发**。"是否触发"是步骤 1 的事。archive 后会触发重新判读（见步骤 4）。
+- 执行 `constraint-matrix` 的 `## 识别流程`
+- 表 1 + 表 2 + 表 3 全部读入——步骤 1 据此判断是否触发 / tasks 是否合规。
 
 ### 1. 前置检查
 
@@ -79,17 +83,13 @@ archive 完一个 change 后，项目的 profile 可能变化（比如 greenfiel
 
 archive 是"完成一个 change"的事件，正好对照 `constraint-matrix` 表 3 的 system-audit 频率。
 
-计数器持久化优先读 `openspec/changes/archive/`，会话内缓存仅作加速。
+**持久化计数器**：每次 archive 完成后，读 `openspec/.td-state/archive-counter.yaml`，把 `count` +1，写回文件。文件格式见 `constraint-matrix` 的「持久化层」节，文件由本步骤首次运行时按需创建。
 
-不同 tier 的触发模型不同：
+计数达到当前 tier 的阈值（tier-small 5 个 / tier-medium 3 个，查 `archive-counter.yaml` 的 `count`），或距上次 project-scope audit 已满一周（tier-large，查 `openspec/.td-state/audit-history.yaml` 最近一条 `scope: project` 记录的 `timestamp`）→ **主动建议**用户跑 `/td-system-audit project`，不是强制，是"按主基调第 2 条总体设计部职责，该周期性自检了"。
 
-| tier | project scope 触发 | current-change scope 触发 |
-|---|---|---|
-| `tier-small` | 累计 5 个 change | 不要求 |
-| `tier-medium` | 累计 3 个 change | 每个关键链任务完成时 |
-| `tier-large` | 每周一次（时间驱动） | 每完成 1 个 change |
+判定优先级：tier-large 走时间驱动（audit-history.yaml），不查 archive-counter 的 count；tier-small / tier-medium 走 count 驱动（archive-counter.yaml），不查时间。单一事实源——count 在 archive-counter，project-audit 时间戳在 audit-history，不交叉。
 
-计数达到当前 tier 的阈值（tier-small/medium）或距上次 project-scope audit 已满一周（tier-large）→ **主动建议**用户跑 `/td-system-audit project`，不是强制，是"按主基调第 2 条总体设计部职责，该周期性自检了"。
+**null 语义**：`audit-history.yaml` 不存在，或存在但无 `scope: project` 记录 → 视为"从未跑过 project audit"，tier-large 直接建议跑 `/td-system-audit project`。`archive-counter.yaml` 不存在 → 视为 `count: 0`，按当前 archive 事件 +1 后再判阈值（tier-small/medium）。两个文件均由本步骤首次运行时按需创建。
 
 #### 4.3 WIP 释放检查
 

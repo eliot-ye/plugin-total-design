@@ -9,6 +9,11 @@ argument-hint: <topic or question>
 
 不创建 change、不写 artifact，只是**探索**。在用户还不确定要建什么的时候，agent 帮用户想清楚。
 
+## 依赖技能
+
+- `system-engineering`
+- `constraint-matrix`
+
 ## 服务的主基调原则
 
 **系统工程主基调第 2 条：总体设计部。**
@@ -27,11 +32,15 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 ### 0. 激活主基调与配置层
 
-每个 td-* skill 的步骤 0 执行同一序列，只注入强度不做判断：
+**加载技能 `system-engineering` `constraint-matrix`**
 
-1. **`system-engineering`** — 主基调四条进入上下文。explore 不写 artifact、不动代码，constraint 强度对其直接影响较小。
-2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）读入上下文。会话内缓存，后续步骤直接引用。profile 决定 explore 的侧重点（greenfield 重候选方向，brownfield 重"动老代码的影响"，maintenance 重"生产稳定性"），所以 profile/tier 仍需在步骤 0 判读完成。
-3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 0 判断是否触发**。"是否触发"是步骤 1 的事。
+- 执行 `constraint-matrix` 的 `## 识别流程`
+- explore 不写 artifact、不动代码，constraint 强度对其直接影响较小。
+- profile 决定 explore 的侧重点（greenfield 重候选方向，brownfield 重"动老代码的影响"，maintenance 重"生产稳定性"），所以 profile/tier 仍需在步骤 0 判读完成。
+
+### 0.5 读现场背景（config.yaml context）
+
+与 `td-propose` 步骤 0.5 同一引导流程：读 `openspec/config.yaml` 的 `context` 字段作为探索现场背景；若为空或模板默认值，一次问完 tech stack / conventions / domain 三个问题，答案写入 `context` 字段。一次性投入，后续 td-propose / td-explore 都能读到。用户跳过 → 保持空，继续步骤 1（不阻塞）。
 
 ### 1. 读现有 context
 

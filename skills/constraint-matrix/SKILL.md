@@ -1,12 +1,12 @@
 ---
 name: constraint-matrix
-description: profile × tier × constraint 强度矩阵的单一事实源。3 个 profile 和 3 个 tier skill 引用本 skill，强度只在这里改。
+description: 激活任意 constraint skill 时，应同时查本 skill 确认当前 profile × tier 下的强度
 user-invocable: false
 ---
 
 # Constraint 强度矩阵（单一事实源）
 
-本 skill 是所有 profile / tier skill 引用的**唯一事实源**。改强度只改本 skill，不要在 3 个 profile 文件和 3 个 tier 文件里各自重写——那些文件只描述"判断依据"和"特殊规则"，强度本身查本 skill。
+本 skill 是所有 profile / tier skill 引用的**唯一事实源**。
 
 ## 服务的主基调原则
 
@@ -44,13 +44,61 @@ user-invocable: false
 
 ## 如何被引用
 
-3 个 profile skill（`profile-greenfield` / `profile-brownfield` / `profile-maintenance`）和 3 个 tier skill（`tier-small` / `tier-medium` / `tier-large`）在"## 在各 tier 下的 constraint 强度"或"## constraint 强度"小节引用本 skill 的表 1 与表 2，并补充本 profile / tier 的特殊加成。
-
 agent 在激活任意 constraint skill 时，应同时查本 skill 确认当前 profile × tier 下的强度。
 
-## 识别流程（profile × tier 单一入口）
+## 持久化层（.td-state/）
+
+profile/tier 判读结果持久化到 `openspec/.td-state/profile-tier.yaml`。文件由 agent 首次运行识别流程时按需创建，不预置。
+
+### 约定路径
+
+```
+openspec/.td-state/
+├── profile-tier.yaml        ← 本 skill 维护：profile/tier 判读缓存 + 触发重判的时间戳
+├── archive-counter.yaml     ← td-archive 维护：累计归档计数（system-audit 频率触发用）
+├── audit-history.yaml       ← td-system-audit 维护：audit 时间戳序列
+├── critical-buffer.yaml     ← critical-buffer 维护：关键链缓冲消耗
+└── audits/                  ← td-system-audit 维护：每次完整 audit 报告
+```
+
+### 文件模板
+
+**`profile-tier.yaml`**：
+
+```yaml
+profile: <profile-greenfield | profile-brownfield | profile-maintenance>
+tier: <tier-small | tier-medium | tier-large>
+judged_at: <ISO8601 时间戳>
+judge_reason: <一句话判据，如"已上线 + 有 CI/CD → maintenance；文件 120 个 → large">
+```
+
+**`archive-counter.yaml`**（td-archive 维护，只管累计 count + 最近一次 archive 标识，时间戳判定统一走 `audit-history.yaml`）：
+
+```yaml
+count: <累计已 archive 的 change 数>
+last_archive_name: <最近 archive 的 change 名>
+```
+
+**`audit-history.yaml`**（td-system-audit 维护）：
+
+```yaml
+audits:
+  - timestamp: <ISO8601>
+    scope: <current-change | project>
+    report: <audits/ 下的报告文件名>
+    severe_count: <严重问题数>
+    next_due: <下次 project-scope audit 的 ISO8601 截止时间，仅 tier-large project scope 需要算"一周后">
+```
+
+**文件不存在时的行为**：agent 调用识别流程时，若 `openspec/.td-state/profile-tier.yaml` 不存在，按下方"### 1. 判读 profile"+"### 2. 判读 tier"现判，判完后创建文件并写入结果。若文件已存在，优先读文件，不重判——除非命中"触发重新判读"的时机。
+
+## 识别流程
 
 每个 td-* skill 的"步骤 0"调用本节。agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `$_TD_PROFILE` / `$_TD_TIER`），后续步骤据此查表 1 / 表 2 / 表 3 的强度。
+
+### 0. 读持久化缓存
+
+读 `openspec/.td-state/profile-tier.yaml`。若文件存在且无重判触发（见"### 3. 缓存判读结果"），直接用缓存值，跳到"### 4. 注入强度"。若文件不存在，按"### 1"+"### 2"现判——**本步骤只读不写**，写入职责在"### 3. 缓存判读结果"。文件格式见上方"持久化层"节。
 
 ### 1. 判读 profile（三选一，按优先级）
 
@@ -74,9 +122,9 @@ agent 在激活任意 constraint skill 时，应同时查本 skill 确认当前 
 
 ### 3. 缓存判读结果
 
-判读结果在工作会话内缓存，不每次步骤 0 都重判。触发重新判读的时机：
+判读结果写入 `openspec/.td-state/profile-tier.yaml` 持久化，跨会话保留。触发重新判读的时机（命中即删除 profile-tier.yaml 的缓存值、重跑"### 1"+"### 2"）：
 
-- `/td-archive` 完成后（项目状态可能变化）
+- `/td-archive` 完成后（项目状态可能变化）—— archive 步骤 4.1 已负责触发重判
 - `/td-system-audit` 发现 profile/tier 与实际不符
 - 用户显式说"项目阶段变了"
 

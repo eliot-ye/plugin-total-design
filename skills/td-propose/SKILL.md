@@ -9,6 +9,11 @@ argument-hint: <change-name or description>
 
 OpenSpec 契约层入口。在写代码之前，让人和 AI 对"建什么、为什么这样建"达成契约。
 
+## 依赖技能
+
+- `system-engineering`
+- `constraint-matrix`
+
 ## 服务的主基调原则
 
 **系统工程主基调第 3 条：从定性到定量的综合集成。**
@@ -27,11 +32,25 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 ### 0. 激活主基调与配置层
 
-每个 td-* skill 的步骤 0 执行同一序列，只注入强度不做判断：
+**加载技能 `system-engineering` `constraint-matrix`**
 
-1. **`system-engineering`** — 主基调四条进入上下文。propose 的每个判断都在主基调四条框架下做。
-2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）读入上下文。会话内缓存，后续步骤直接引用。
-3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 0 判断是否触发**。"是否触发"是步骤 1 的事，表 1 + 表 2 注入后判断 wip-limit / human-in-loop 是否触发。
+- 执行 `constraint-matrix` 的 `## 识别流程`
+- propose 的每个判断都在主基调四条框架下做。
+- 表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）必须读入——步骤 1 据此判断 wip-limit / human-in-loop 是否触发。
+
+### 0.5 读现场背景（config.yaml context）
+
+读 `openspec/config.yaml` 的 `context` 字段（tech stack、conventions、domain knowledge 等），作为后续 proposal/design 的现场背景。这部分背景信息会直接进入 proposal 的"系统工程影响评估"节的判断依据。
+
+**首次运行引导填**：若 `context` 字段为空、被注释、或仍是模板默认值，问用户两到三个关键问题（tech stack / conventions / domain），拿到答案后写入 `openspec/config.yaml` 的 `context` 字段。这是一次性投入——后续所有 td-propose / td-explore 都能读到。
+
+引导问题示例：
+
+- "项目的主要 tech stack 是？"（如 TypeScript / Rust / Python / 混合）
+- "团队遵守的 conventions 有？"（如 conventional commits / 代码风格指南 / PR 模板）
+- "项目所在的 domain 是？"（如 e-commerce / infra / 内部工具）
+
+用户答完 → 写入 config.yaml → 继续步骤 1。用户跳过 → 保持空，继续步骤 1（不阻塞）。
 
 ### 1. 触发前置检查
 
@@ -68,13 +87,13 @@ openspec instructions <artifact-id> --change "<name>" --json
 - 读已完成的依赖 artifact 作为 context
 - 写到 `resolvedOutputPath`
 
-#### greenfield 初始 spec 建立
+greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空，第一个 change 的 proposal 还要建立初始 spec baseline——这是后续所有改动的影响评估依据。
 
-若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空，第一个 change 的 proposal 还要建立初始 spec baseline——这是后续所有改动的影响评估依据。
+### 5. artifact 必填项检查
+
+每个 artifact 写完后，对照 total-design 对 OpenSpec 模板的**新增要求**做必填项检查。缺项 → 回步骤 4 补写,不能跳到步骤 6。
 
 #### proposal.md 必填节：系统工程影响评估
-
-这是 total-design 对 OpenSpec proposal 模板的**新增要求**。proposal 里必须有一节：
 
 ```markdown
 ## 系统工程影响评估
@@ -89,7 +108,16 @@ openspec instructions <artifact-id> --change "<name>" --json
 
 没填这一节的 proposal 不算 apply-ready。
 
-### 5. 循环直到所有 applyRequires artifact 完成
+#### tasks.md 必填：关键链标注与 project buffer
+
+tasks.md 必须：
+
+- 标注关键链（critical chain）：哪条任务序列是项目的关键路径
+- 留 project buffer：按步骤 0 注入的当前 tier 比例（tier-small 20% / tier-medium 35% / tier-large 50%）
+
+粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `critical-buffer` skill 的标注规范。
+
+### 6. 循环直到所有 applyRequires artifact 完成
 
 每创建完一个 artifact：
 

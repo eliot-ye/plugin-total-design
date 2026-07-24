@@ -144,6 +144,7 @@ argument-hint: <参数提示>          ← 仅 user-invocable: true 的命令式
 name: <command-name>
 description: <一句话描述>
 argument-hint: <参数提示>
+args: none|option|required
 ---
 
 # <command-name>
@@ -224,7 +225,6 @@ atomcode hooks schema（备用参考）：外层 `{"hooks": {<name>: {...}}}`，
 
 ## 不做的事
 
-- **当前 plugin 已预留多平台扩展能力**：6 个 td-* skill 的 frontmatter 写了 `aliases`（atomcode / claude-code / cursor 三套调用名），skill body 内引用其他 skill 用逻辑名。各平台加载器负责拼前缀，实现"同一份 SKILL.md，不同平台用不同前缀"
 - **不做 plugin 内的 spec 系统**：OpenSpec 本身是独立 CLI，本 plugin 转译方法论不重新实现 CLI
 - **不做静态配置文件**：profile × tier 不用 yaml 配置，全做成 skill
 - **不原样照搬 Superpowers 的 SKILL.md**：转译时去掉 Superpowers 自己的 plugin 引用、marketplace 引用

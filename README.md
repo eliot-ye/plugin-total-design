@@ -276,20 +276,6 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 ---
 
-## 设计文档
-
-完整设计沉淀见 `thoughts/total-design.md`（在源 thinking 仓库里），覆盖：
-
-- 定位（客户 + 三种进场现场 + 价值主张）
-- 三层结构详解
-- 钱学森系统工程主基调四条
-- profile × tier × constraint 强度矩阵
-- atomcode plugin 规范事实清单（来自源码）
-- 4 阶段实现路径
-- 开放问题
-
----
-
 ## 贡献
 
 见 [CONTRIBUTING.md](CONTRIBUTING.md)。

@@ -40,16 +40,3 @@ user-invocable: false
 
 当 agent 调用 `/td-system-audit` 时，本 skill 是审计的对照标准。
 
-## 被谁显式 link
-
-5 个局部规律 skill 在 frontmatter / 正文开头显式 link 到本 skill 的某一条主基调：
-
-| 局部规律 skill | link 到的主基调 |
-|---|---|
-| `wip-limit` | 第 4 条：开放的复杂巨系统 |
-| `critical-buffer` | 第 1 条：系统工程 + 第 2 条：总体设计部 |
-| `brooks-law` | 第 1 条：系统工程 |
-| `delay-decision` | 第 3 条：从定性到定量的综合集成 |
-| `human-in-loop` | 第 2 条：总体设计部 + 第 3 条：综合集成 |
-
-反向追溯用这张表；改主基调时也要检查这 5 个 skill 的 link 是否仍然成立。
