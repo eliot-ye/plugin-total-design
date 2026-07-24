@@ -92,10 +92,10 @@ total-design/
 ├── CODE_OF_CONDUCT.md
 ├── LICENSE
 │
-├── skills/                 ← 25 个 skill，全部目录式 SKILL.md
+├── skills/                 ← 26 个 skill，全部目录式 SKILL.md
 │   ├── 约束层（6 个）
 │   ├── 行为层（7 个，Superpowers 转译）
-│   ├── 配置层（6 个，3 profile + 3 tier）
+│   ├── 配置层（7 个，constraint-matrix + 3 profile + 3 tier）
 │   └── 契约层（6 个 td-*，与下方 command 一一对应）
 │
 └── commands/               ← 6 个 slash 命令入口（极薄，逻辑全在同名 skill）
@@ -157,14 +157,14 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 ## Skill 清单
 
-25 个 skill，按调用方式分两组：
+26 个 skill，按调用方式分两组：
 
 - **`user-invocable: true`**（13 个）：用户可在 `/` 菜单主动调，也可被 agent 自动触发
   - 行为层 7 个（Superpowers 转译）
   - 契约层 6 个 td-*（与 6 个 command 一一对应）
-- **`user-invocable: false`**（12 个）：agent 自动触发，不暴露在 `/` 菜单
+- **`user-invocable: false`**（13 个）：agent 自动触发，不暴露在 `/` 菜单
   - 约束层 6 个（钱学森主基调 + 5 条局部规律）
-  - 配置层 6 个（3 profile + 3 tier）
+  - 配置层 7 个（constraint-matrix + 3 profile + 3 tier）
 
 ### 约束层（钱学森系统工程主基调 + 局部规律）
 
@@ -192,6 +192,10 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 | `verification-before-completion` | 声明"完成"之前；evidence before assertions | true |
 
 ### 配置层（profile × tier 二维）
+
+**矩阵单一事实源（`user-invocable: false`）：**
+
+- `constraint-matrix` — profile × tier × constraint 强度矩阵的单一事实源；3 个 profile 和 3 个 tier skill 都引用本 skill，强度只在这里改
 
 **profile 维度（仓库状态，全部 `user-invocable: false`）：**
 

@@ -194,7 +194,7 @@ atomcode hooks schema（备用参考）：外层 `{"hooks": {<name>: {...}}}`，
 
 - **skill 名**：kebab-case，无冒号（atomcode `validate_skill_name` 规则）
 - **命令名**：`td-<verb>` 或 `td-<noun>`，扁平 kebab-case
-- **文件名**：`SKILL.md`（目录式；本 plugin 25 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
+- **文件名**：`SKILL.md`（目录式；本 plugin 26 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
 - **主基调 skill**：`system-engineering`，是所有局部约束的前提，不单独触发（`user-invocable: false`）
 - **多平台调用名**：6 个契约层 td-* skill 在 frontmatter 里写 `aliases` 映射：
   - `atomcode: total-design:<name>`
