@@ -24,9 +24,9 @@ archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集
 
 archive 后触发 profile 重新评估——这是总体设计部的职责：项目状态变化了，工作方式要跟着调整。
 
-## 输入
+## 输入 - 要 archive 的 change 名。空则推导或问用户。
 
-`$ARGUMENTS`：要 archive 的 change 名。空则用 `AskUserQuestion` 问用户。
+`$ARGUMENTS`
 
 ## 步骤
 

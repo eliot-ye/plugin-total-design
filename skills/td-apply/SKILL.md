@@ -24,9 +24,9 @@ apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"�
 
 apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-loop` 让用户（总体设计部）拍。
 
-## 输入
+## 输入 - change 名。空则推导或问用户"想 apply 哪个 change"
 
-`$ARGUMENTS`：change 名。空则问用户"想 apply 哪个 change"。
+`$ARGUMENTS`
 
 ## 步骤
 

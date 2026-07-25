@@ -22,11 +22,15 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 ## 输入
 
-`$ARGUMENTS` 可以是：
+#### 可以是：
 
 - **kebab-case change 名**：如 `add-user-auth`
 - **自然语言描述**：agent 从中推导 kebab-case 名
 - **空**：用 `AskUserQuestion` 问用户"想做什么 change"
+
+#### 内容
+
+`$ARGUMENTS`
 
 ## 步骤
 

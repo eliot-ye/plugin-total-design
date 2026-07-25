@@ -24,12 +24,14 @@ argument-hint: "<scope: current-change | project>  (可选, 默认 current-chang
 
 audit 的对照标准是主基调四条，不是"代码质量"或"进度"——这是系统工程视角的审计，不是项目管理视角的审计。
 
-## 输入
-
-`$ARGUMENTS`：audit 的范围。空则默认 `current-change`。
+## 输入 - audit 的范围。空则默认 `current-change`
 
 - `current-change`：审计当前活跃的 change
 - `project`：审计整个项目的工作方式
+
+#### 内容
+
+`$ARGUMENTS`
 
 ## 触发时机
 
