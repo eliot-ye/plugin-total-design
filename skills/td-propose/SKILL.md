@@ -34,15 +34,15 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 ## 步骤
 
-### 0. 激活主基调与配置层
+### 1. 激活主基调与配置层
 
 **加载技能 `system-engineering` `constraint-matrix`**
 
 - 执行 `constraint-matrix` 的 `## 识别流程`
 - propose 的每个判断都在主基调四条框架下做。
-- 表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）必须读入——步骤 1 据此判断 wip-limit / human-in-loop 是否触发。
+- 表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）必须读入——步骤 3 据此判断 wip-limit / human-in-loop 是否触发。
 
-### 0.5 读现场背景（config.yaml context）
+### 2. 读现场背景（config.yaml context）
 
 读 `openspec/config.yaml` 的 `context` 字段（tech stack、conventions、domain knowledge 等），作为后续 proposal/design 的现场背景。这部分背景信息会直接进入 proposal 的"系统工程影响评估"节的判断依据。
 
@@ -54,23 +54,23 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 - "团队遵守的 conventions 有？"（如 conventional commits / 代码风格指南 / PR 模板）
 - "项目所在的 domain 是？"（如 e-commerce / infra / 内部工具）
 
-用户答完 → 写入 config.yaml → 继续步骤 1。用户跳过 → 保持空，继续步骤 1（不阻塞）。
+用户答完 → 写入 config.yaml → 继续步骤 3。用户跳过 → 保持空，继续步骤 3（不阻塞）。
 
-### 1. 触发前置检查
+### 3. 触发前置检查
 
-对照步骤 0 注入的强度与当前 change 状态，判断是否触发：
+对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
 
 - `wip-limit`：当前活跃 change 数已达上限？已达 → 报告列表 + 提示"先 archive 或 finish 现有 change 再起新的"，但不强制阻塞。
 - `human-in-loop`：用户描述是否清晰到可以 propose？不清楚 → 用 `AskUserQuestion` 问"想做什么 change"。
 - **brownfield reverse-spec 检查**：若 `$_TD_PROFILE == profile-brownfield`，检查 `openspec/specs/` 下是否已有相关分系统的 baseline spec。没有 → 触发 `human-in-loop`，提示用户"你对现有系统还没建立认识，propose 大改动风险高。先 `/td-reverse-spec` 吗？"——用户同意后执行 `/td-reverse-spec` 建立 baseline，完成后回到本步骤继续 propose。
 
-### 2. 创建 change 目录
+### 4. 创建 change 目录
 
 ```bash
 openspec new change "<name>"
 ```
 
-### 3. 获取 artifact 构建顺序
+### 5. 获取 artifact 构建顺序
 
 ```bash
 openspec status --change "<name>" --json
@@ -78,7 +78,7 @@ openspec status --change "<name>" --json
 
 解析 JSON 拿到 `applyRequires`、`artifacts`、`planningHome`、`changeRoot`、`artifactPaths`、`actionContext`。
 
-### 4. 按依赖顺序创建 artifact
+### 6. 按依赖顺序创建 artifact
 
 用 `TodoWrite` 工具跟踪进度。每个 artifact：
 
@@ -93,9 +93,9 @@ openspec instructions <artifact-id> --change "<name>" --json
 
 greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空，第一个 change 的 proposal 还要建立初始 spec baseline——这是后续所有改动的影响评估依据。
 
-### 5. artifact 必填项检查
+### 7. artifact 必填项检查
 
-每个 artifact 写完后，对照 total-design 对 OpenSpec 模板的**新增要求**做必填项检查。缺项 → 回步骤 4 补写,不能跳到步骤 6。
+每个 artifact 写完后，对照 total-design 对 OpenSpec 模板的**新增要求**做必填项检查。缺项 → 回步骤 6 补写,不能跳到步骤 8。
 
 #### proposal.md 必填节：系统工程影响评估
 
@@ -121,7 +121,7 @@ tasks.md 必须：
 
 粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `critical-buffer` skill 的标注规范。
 
-### 6. 循环直到所有 applyRequires artifact 完成
+### 8. 循环直到所有 applyRequires artifact 完成
 
 每创建完一个 artifact：
 
@@ -131,7 +131,7 @@ openspec status --change "<name>" --json
 
 检查每个 `applyRequires` 里的 artifact ID 是否 `status: "done"`。
 
-### 6. 显示最终状态
+### 9. 显示最终状态
 
 ```bash
 openspec status --change "<name>"

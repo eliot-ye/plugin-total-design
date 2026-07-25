@@ -30,7 +30,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 ## 步骤
 
-### 0. 激活主基调与配置层
+### 1. 激活主基调与配置层
 
 **加载技能 `system-engineering` `constraint-matrix`**
 
@@ -38,7 +38,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 - `system-engineering`：reverse-spec 是总体设计部在"接手"阶段的工作。
 - reverse-spec 本身是 profile-brownfield 的入口动作，但 tier 决定 reverse-spec 的粒度（small 粗粒度即可，large 要画分系统接口图）。
 
-### 1. 识别代码库状态
+### 2. 识别代码库状态
 
 扫描目标代码库：
 
@@ -49,7 +49,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 判断属于哪种 profile（`profile-greenfield` / `profile-brownfield` / `profile-maintenance`）。中途接手通常触发 `profile-brownfield`。
 
-### 2. 分系统切分
+### 3. 分系统切分
 
 站在总体设计部视角，把代码库切成几个分系统（subsystem）。切分依据：
 
@@ -60,7 +60,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 不要过细——目标是识别"分系统"级别，不是"文件"级别。通常 3–8 个分系统。
 
-### 3. 对每个分系统 reverse-spec
+### 4. 对每个分系统 reverse-spec
 
 读分系统的代码，反推 spec：
 
@@ -71,7 +71,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 输出到 `openspec/specs/<subsystem-name>/spec.md`。
 
-### 4. 识别分系统间接口
+### 5. 识别分系统间接口
 
 把分系统之间的依赖关系画成图。识别：
 
@@ -79,7 +79,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 - 循环依赖
 - 隐式依赖（共享数据库、共享配置）
 
-### 5. 输出 reverse-spec 报告
+### 6. 输出 reverse-spec 报告
 
 ```markdown
 ## Reverse-Spec 报告：<codebase>

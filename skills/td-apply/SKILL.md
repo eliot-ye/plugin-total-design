@@ -30,23 +30,23 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 ## 步骤
 
-### 0. 激活主基调与配置层
+### 1. 激活主基调与配置层
 
 **加载技能 `system-engineering` `constraint-matrix`**
 
 - 执行 `constraint-matrix` 的 `## 识别流程`
-- 表 1 + 表 2 读入——步骤 1 据此判断是否触发 / tasks 是否合规。apply 不触发 system-audit。
+- 表 1 + 表 2 读入——步骤 2 据此判断是否触发 / tasks 是否合规。apply 不触发 system-audit。
 
-### 1. 前置检查
+### 2. 前置检查
 
-对照步骤 0 注入的强度与当前 change 状态，判断是否触发：
+对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
 
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。
 - **`wip-limit`**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段没拦，这里补拦）
-- **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按步骤 0 注入的当前 tier 比例）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
+- **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按步骤 1 注入的当前 tier 比例）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - 其余 constraint（brooks-law / delay-decision / human-in-loop）在实施过程中按需触发，不在本步预判。
 
-### 2. 读 change 的 artifact
+### 3. 读 change 的 artifact
 
 按依赖顺序读：
 
@@ -55,7 +55,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 3. `specs/` 下的 spec 文件
 4. `tasks.md`（实施步骤）
 
-### 3. 触发 Superpowers 行为层
+### 4. 触发 Superpowers 行为层
 
 按 `tasks.md` 的任务序列实施。行为层 skill 嵌套触发，不是平铺：
 
@@ -67,7 +67,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 `executing-plans` 是行为层执行的核心入口，TDD / review / verify 在 `executing-plans` 内部按任务粒度嵌套触发。
 
-### 4. 触发工程管理约束
+### 5. 触发工程管理约束
 
 实施过程中，按需触发：
 
@@ -75,14 +75,14 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 - `delay-decision`：遇到可逆决策时
 - `human-in-loop`：遇到 5 类必停场景时（见该 skill）
 
-### 5. 更新 tasks.md
+### 6. 更新 tasks.md
 
 每完成一个任务：
 
 - 把 `- [ ]` 改成 `- [x]`
 - 在任务后面加验证证据链接（测试输出、命令结果）
 
-### 6. 完成判定
+### 7. 完成判定
 
 所有任务 `[x]` 后，触发 `verification-before-completion` 做最终验证。验证通过才算 done。
 

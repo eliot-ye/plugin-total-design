@@ -204,15 +204,15 @@ atomcode hooks schema（备用参考）：外层 `{"hooks": {<name>: {...}}}`，
 
 ### td-* skill 共享片段
 
-6 个 td-* skill 的 body 里曾经各自重复"平台命名表""逻辑名说明""步骤 0 激活主基调与配置层"。这三段已抽为共享片段，td-* skill 的 body 不再重写，改为一句指向本节：
+6 个 td-* skill 的 body 里曾经各自重复"平台命名表""逻辑名说明""步骤 1 激活主基调与配置层"。这三段已抽为共享片段，td-* skill 的 body 不再重写，改为一句指向本节：
 
 **平台命名**：6 个 td-* skill 在不同平台下的调用名见各自 frontmatter 的 `aliases` 字段（atomcode / claude-code / cursor 三套）。body 不再放平台命名表，引用其他 skill 一律用逻辑名，由当前平台加载器负责拼前缀。
 
-**td-* 标准步骤 0**（每个 td-* skill 的"### 0. 激活主基调与配置层"都执行同一序列，只注入强度不做判断）：
+**td-* 标准步骤 1**（每个 td-* skill 的"### 1. 激活主基调与配置层"都执行同一序列，只注入强度不做判断）：
 
 1. **`system-engineering`** — 主基调四条进入上下文。各 td-* skill 在这一条后补自己的注解（如"reverse-spec 是总体设计部在接手阶段的工作"）。
 2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）+ 表 3（system-audit 频率，仅 archive/apply 需要）读入上下文。会话内缓存，后续步骤直接引用。
-3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 0 判断是否触发**。"是否触发"是步骤 1 的事。
+3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 1 判断是否触发**。"是否触发"是步骤 2 的事。
 
 ## commit 风格
 

@@ -44,7 +44,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 ## 步骤
 
-### 0. 激活主基调与配置层
+### 1. 激活主基调与配置层
 
 **加载技能 `system-engineering` `constraint-matrix`**
 
@@ -52,14 +52,14 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 - 执行 `constraint-matrix` 的 `## 识别流程`
 - 表 3（system-audit 频率）必须读入——audit 频率是否达标，查表 3。
 
-### 1. 收集审计对象
+### 2. 收集审计对象
 
 按 scope 收集：
 
 - **current-change**：当前活跃 change 的 proposal/design/tasks/specs
 - **project**：所有活跃 change + 最近 archive 的 3 个 change 的"实际 vs 预期"复盘
 
-### 2. 对照主基调四条审计
+### 3. 对照主基调四条审计
 
 对审计对象，逐条审计：
 
@@ -85,7 +85,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 - [ ] 当前 profile/tier 配置是否符合项目实际？
 - [ ] 有没有把"复杂巨系统"当"简单系统"硬解？（比如同时开太多 change、压缩关键链缓冲）
 
-### 3. 输出审计报告
+### 4. 输出审计报告
 
 报告同时输出到对话和落盘。落盘路径：`openspec/.td-state/audits/<YYYYMMDD-HHMMSS>-<scope>.md`。目录由本步骤首次运行时按需创建。
 
@@ -125,7 +125,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 2. <动作 2>
 ```
 
-### 4. 触发修复
+### 5. 触发修复
 
 对每个严重问题，触发对应的 constraint skill 修复：
 
@@ -133,7 +133,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 - agent 自己拍板了 → 触发 `human-in-loop`，回去问用户
 - 可逆决策被过早闭合 → 触发 `delay-decision`，重新打开决策
 
-### 5. 修复后重跑 audit 闭环
+### 6. 修复后重跑 audit 闭环
 
 严重问题修复完成后，**重跑同一 scope 的 audit**，确认：
 
