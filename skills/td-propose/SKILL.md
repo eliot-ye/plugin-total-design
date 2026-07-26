@@ -46,7 +46,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 读 `openspec/config.yaml` 的 `context` 字段（tech stack、conventions、domain knowledge 等），作为后续 proposal/design 的现场背景。这部分背景信息会直接进入 proposal 的"系统工程影响评估"节的判断依据。
 
-**首次运行引导填**：若 `context` 字段为空、被注释、或仍是模板默认值，问用户两到三个关键问题（tech stack / conventions / domain），拿到答案后写入 `openspec/config.yaml` 的 `context` 字段。这是一次性投入——后续所有 td-propose / td-explore 都能读到。
+**首次运行引导填**：若 `context` 字段为空、被注释、或仍是模板默认值，自动探索需要的信息，必要时询问用户关键问题，拿到答案后写入 `openspec/config.yaml` 的 `context` 字段。这是一次性投入——后续所有 td-propose / td-explore 都能读到。
 
 引导问题示例：
 
