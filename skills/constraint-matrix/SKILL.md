@@ -16,7 +16,7 @@ user-invocable: false
 
 | constraint | tier-small | tier-medium | tier-large |
 |---|---|---|---|
-| `wip-limit` | 上限 3 | 上限 2 | 上限 1 |
+| `wip-limit` | 上限 5 | 上限 4 | 上限 3 |
 | `critical-buffer` | 20% project buffer | 35% project buffer | 50% project buffer |
 | `brooks-law` | 不强制 | 提醒 | 强制 |
 | `delay-decision` | 强 | 强 | 强 |

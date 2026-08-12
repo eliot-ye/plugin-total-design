@@ -16,9 +16,9 @@ user-invocable: false
 
 | tier | WIP 上限 |
 |---|---|
-| `tier-small` | 3 |
-| `tier-medium` | 2 |
-| `tier-large` | 1 |
+| `tier-small` | 5 |
+| `tier-medium` | 4 |
+| `tier-large` | 3 |
 
 "活跃"定义：已经 `/td-propose` 但还没 `/td-archive` 的 change。
 
