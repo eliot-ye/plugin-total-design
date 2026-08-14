@@ -40,7 +40,7 @@ archive 后触发 profile 重新评估——这是总体设计部的职责：项
 ### 2. 前置检查
 
 - 所有 tasks.md 里的任务都 `[x]` 了吗？
-- `verification-before-completion` 跑过了吗？
+- `verification-before-completion` 跑过了吗？——含 change-level + 系统级（跨分系统边界，proposal 标注了受影响分系统时）两层验证，缺一层不算完成。
 
 ### 3. 强制"实际 vs 预期"复盘（硬步骤）
 

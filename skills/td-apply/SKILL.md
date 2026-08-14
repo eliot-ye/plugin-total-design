@@ -55,9 +55,11 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 3. `specs/` 下的 spec 文件
 4. `tasks.md`（实施步骤）
 
-### 4. 触发 Superpowers 行为层
+### 4. 架构 review + 触发行为层
 
-按 `tasks.md` 的任务序列实施。行为层 skill 嵌套触发，不是平铺：
+**进入任务实施前，先触发 `requesting-code-review` 的架构 review**——对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合（检查清单见该 skill 第 5 节）。**架构级 critical 未修复 → 不进入任务实施**，回步骤 3 重新读并让用户决策：改 proposal 还是继续。
+
+架构 review 通过后，按 `tasks.md` 的任务序列实施。行为层 skill 嵌套触发，不是平铺：
 
 1. **`writing-plans`**（若 tasks.md 粒度不够细）：细化任务序列
 2. **`executing-plans`**（按任务序列执行，内部嵌套触发以下 skill）：
@@ -84,7 +86,29 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 ### 7. 完成判定
 
-所有任务 `[x]` 后，触发 `verification-before-completion` 做最终验证。验证通过才算 done。
+所有任务 `[x]` 后，做**两层最终验证**，两层都通过才算 done：
+
+#### 7.1 change-level 验证
+
+触发 `verification-before-completion` 做 change-level 最终验证（全量测试 / lint / build / type check）。
+
+#### 7.2 系统级验证（跨分系统边界，硬步骤）
+
+change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估"节列出的**受影响分系统**，逐条跑**跨分系统边界验证**——验证各分系统整合后的整体行为符合契约，而不只是每个任务局部绿。
+
+"总体性能不等于各部分性能之和"（主基调第 1 条）——所有任务测试全绿不等于分系统整合正确。边界验证覆盖：
+
+- 受影响分系统之间的**接口/契约测试**（集成边界，不是单测）
+- 数据流跨分系统传递的正确性
+- 边界 mock：一个分系统的行为变更是否破坏相邻分系统的契约
+
+tier 分层强度（按步骤 1 注入的当前 tier）：
+
+- `tier-small`：对受影响分系统边界跑冒烟级集成验证
+- `tier-medium`：跑受影响边界的集成/契约测试
+- `tier-large`：强制完整集成测试 + 契约测试，逐条对照"影响哪些分系统"清单
+
+边界验证发现跨分系统问题 → 触发 `systematic-debugging` 找根因；若 root cause 在 plan 之外（proposal 的影响评估漏了分系统）→ 停下来问用户：是补 proposal 的评估还是改代码？
 
 ## Guardrails
 

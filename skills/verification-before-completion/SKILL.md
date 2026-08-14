@@ -56,6 +56,18 @@ user-invocable: true
 - 触发 `systematic-debugging` 走 4-phase 流程
 - 如果修不了，触发 `human-in-loop` 停下来问用户
 
+### 6. 系统级验证（跨分系统边界）
+
+change-level 验证通过 ≠ 系统整合正确。**"总体性能不等于各部分性能之和"（主基调第 1 条）**：所有任务测试全绿只证明每个分系统局部正确，不能证明分系统整合后整体行为符合契约。
+
+当 change 的 proposal 标注了"影响哪些分系统"时，change-level 验证之后必须追加**跨分系统边界验证**：
+
+- 受影响分系统之间的接口/契约测试（集成边界，不是单测）
+- 数据流跨分系统传递的正确性
+- 边界 mock：一个分系统的行为变更是否破坏相邻分系统的契约
+
+边界验证的触发与 tier 分层强度由 `td-apply` 步骤 7.2 定义，本 skill 负责执行层语义：边界验证也走本 skill 的 1–5 节流程——列出验证命令、实跑、检查输出、evidence-based 声明、失败触发 `systematic-debugging`。
+
 ## 硬约束
 
 ### 不接受"目测通过"
@@ -73,5 +85,6 @@ UI 改动也要验证：snapshot test、E2E test、至少手动截图对比。"�
 ## 与其他 skill 的关系
 
 - 与 `test-driven-development` 配合：TDD 的 GREEN 是 task-level，本 skill 是 change-level
+- 与 `td-apply` 配合：td-apply 步骤 7 做两层最终验证——7.1 调用本 skill 做 change-level 验证，7.2 触发本 skill 第 6 节的系统级（跨分系统边界）验证
 - 与 `systematic-debugging` 配合：verification 失败时，触发 systematic-debugging
 - 与 `executing-plans` 配合：task 标 `[x]` 前必须 verification

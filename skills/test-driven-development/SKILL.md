@@ -20,10 +20,14 @@ user-invocable: true
 
 ### RED：先写失败测试
 
-1. 看任务的"验证"字段
-2. 写一个测试，这个测试**当前会失败**（因为功能还没实现）
-3. 跑测试，确认它**真的失败**了（不是 build 错误、不是别的失败）
-4. 如果测试没失败，说明功能已经存在或测试写错了——停下来
+1. 看任务的"验证"字段与**风险等级**（high / medium / low，由 `writing-plans` 标注）
+2. 按风险等级决定测试强度：
+   - **high**（核心路径 / 跨多个分系统 / 数据一致性 / 安全 / 不可逆）：完整边界用例集（正常路径 + 边界 + 异常）
+   - **medium**（常规功能）：正常路径 + 关键边界
+   - **low**（机械改动）：冒烟级验证即可
+3. 写一个测试，这个测试**当前会失败**（因为功能还没实现）
+4. 跑测试，确认它**真的失败**了（不是 build 错误、不是别的失败）
+5. 如果测试没失败，说明功能已经存在或测试写错了——停下来
 
 ### GREEN：写最小实现
 
@@ -61,6 +65,7 @@ user-invocable: true
 
 ## 与其他 skill 的关系
 
+- 与 `writing-plans` 配合：任务的"风险"等级（high/medium/low）由 writing-plans 标注，RED 阶段据此决定测试强度
 - 与 `executing-plans` 配合：每个任务都走 TDD
 - 与 `verification-before-completion` 配合：TDD 的 GREEN 是 task-level verification，verification-before-completion 是 change-level verification
 - 与 `systematic-debugging` 配合：RED 失败时，如果失败原因不明确，触发 systematic-debugging
