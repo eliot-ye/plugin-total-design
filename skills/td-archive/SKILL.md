@@ -65,6 +65,8 @@ openspec archive "<name>"
 
 如果只想归档不同步 specs（infra / doc-only change），加 `--skip-specs`。
 
+**归档成功后 TODO 子项勾选**：读 `openspec/todo.md`，查找含 `  - [ ] change: <name>` 子项的主条目——把该 change 对应的子项勾选为 `  - [x] change: <name>`。然后检查该主条目：**全部子项都已勾选** → 主条目勾选 `[x]`；**仍有子项未勾选** → 主条目保持 `- [ ]`。找不到对应子项或文件不存在 → 跳过，不主动创建文件。
+
 ### 5. archive 后接力动作
 
 archive 是契约层的"闭合点"，必须触发三个后续接力（顺序执行）：
