@@ -13,6 +13,10 @@ Thumbs.db
 tmp/
 .cache/
 
+# Python（hooks/td_state_sync.py 的字节码产物）
+__pycache__/
+*.pyc
+
 # 本地实验 / 草稿（不进 repo）
 .scratch/
 drafts/

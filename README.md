@@ -83,7 +83,7 @@ git clone <this-repo-url> ~/.atomcode/plugins/total-design
 
 ```
 total-design/
-├── .claude-plugin/         ← manifest 目录（atomcode + Claude Code 共用）
+├── .atomcode-plugin/       ← manifest 目录（atomcode + Claude Code 共用）
 │   ├── marketplace.json
 │   └── plugin.json
 ├── README.md
@@ -98,8 +98,29 @@ total-design/
 │   ├── 配置层（7 个，constraint-matrix + 3 profile + 3 tier）
 │   └── 契约层（6 个 td-*，与下方 command 一一对应）
 │
-└── commands/               ← 7 个 slash 命令入口（6 个极薄，逻辑在同名 skill；td-list 只读无 skill）
+├── commands/               ← 7 个 slash 命令入口（6 个极薄，逻辑在同名 skill；td-list 只读无 skill）
+│
+└── hooks/                  ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
+    ├── hooks.json          ← hook 声明
+    └── td_state_sync.py    ← 会话结束时从文件系统事实校正 .td-state/ 状态文件
 ```
+
+### Hook（状态持久化兜底）
+
+plugin 带一个 `SessionEnd` hook，会话结束时自动校正 `openspec/.td-state/` 的状态文件：
+
+- `archive-counter.yaml` — 按 `openspec/changes/archive/` 目录事实重算 `count`（防 agent 漏写归档计数）
+- `audit-history.yaml` — 为 `openspec/.td-state/audits/*.md` 补缺失的报告记录（已有记录不动）
+
+它只做"防漏"的兜底，不做任何流程门禁——skill 的正常写入路径不受影响。
+
+**Hook 需信任后才激活**：安装后第一次运行会提示有 hook 待授权，执行
+
+```bash
+atomcode plugin trust total-design
+```
+
+下次 session 生效。插件更新后若 hook 命令有变动，需重新 trust。
 
 ---
 
