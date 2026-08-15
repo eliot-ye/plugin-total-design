@@ -100,7 +100,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 
 ### 7. artifact 必填项检查
 
-每个 artifact 写完后，对照本 plugin 对 OpenSpec 模板的**新增要求**做必填项检查。缺项 → 回步骤 6 补写,不能跳到步骤 8。
+每个 artifact 写完后，对照本 plugin 对 OpenSpec 模板的**新增要求**做必填项检查。缺项 → 回步骤 6 补写，不能跳到步骤 8。
 
 #### proposal.md 必填节：系统工程影响评估
 

@@ -1,6 +1,6 @@
 ---
 name: writing-plans
-description: 把工作拆成 bite-sized 任务，每个任务标注对分系统的影响。服务主基调第 1 条"系统工程"。
+description: 把工作拆成 bite-sized 任务，每个任务标注对分系统的影响。服务主基调第 1 条。触发场景：用户说"列个计划"、"拆任务"、"规划一下"，或 propose 建 tasks.md 骨架、apply 细化任务时。
 user-invocable: true
 ---
 

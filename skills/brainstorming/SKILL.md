@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: 升级为"总体设计部"工作方式。苏格拉底式提问提炼 spec，但每一步都站在系统全局立场。服务主基调第 2 条"总体设计部"和第 3 条"综合集成"。
+description: "总体设计部"工作方式，苏格拉底式提问提炼 spec，站在系统全局立场。服务主基调第 2、3 条。触发场景：用户要 build 功能 / fix bug / 重构模块但需求不清时——先问"想达到什么"，别急着给方案。
 user-invocable: true
 ---
 

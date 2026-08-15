@@ -1,6 +1,6 @@
 ---
 name: executing-plans
-description: 批量执行任务，带 human checkpoint。服务主基调第 2 条"总体设计部"。
+description: 批量执行任务，带 human checkpoint。服务主基调第 2 条。触发场景：tasks.md 已写好，用户说"开始执行" / "go" / "按 plan 干"时——关键链任务后停下来 checkpoint。
 user-invocable: true
 ---
 

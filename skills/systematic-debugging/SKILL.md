@@ -1,6 +1,6 @@
 ---
 name: systematic-debugging
-description: 4-phase root cause。bug 修复前必须找根因。服务主基调第 3 条"综合集成"——debug 是从症状到根因的迭代认识。
+description: 4-phase root cause，bug 修复前必须找根因。服务主基调第 3 条。触发场景：测试失败且原因不明；用户报告 bug；修复尝试失败 2 次以上时——先复现再隔离，别猜。
 user-invocable: true
 ---
 
