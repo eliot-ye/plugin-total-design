@@ -62,6 +62,11 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 - `wip-limit`：当前活跃 change 数已达上限？已达 → 报告列表 + 提示"先 archive 或 finish 现有 change 再起新的"，但不强制阻塞。
 - `human-in-loop`：用户描述是否清晰到可以 propose？不清楚 → 用 `AskUserQuestion` 问"想做什么 change"。
+- **TODO 池检查**：读 `openspec/todo.md`（不存在 → 跳过本子项，视为空池，不主动创建文件）。todo.md 的主条目/change 子项/优先级/分节规则见本 skill 的 `references/todo-format.md`。
+  - 列出全部**未勾选**（`- [ ]`）主条目作为候选池，**按优先级排序呈现**（P0 → P1 → P2，未标注视为 P2）。
+  - 若输入内容为空或用户没有明确 change 描述 → 询问用户让用户从候选池挑一个条目（或"不挑了，直接描述新 change"）。用户挑中某条目 → change 名从条目语义推导。
+  - 用户已给明确描述 → 检查候选池里是否有语义重合的主条目，有则提示用户"TODO 池里已有近似条目，要不要基于它 propose？"——同一条主条目可以承接多个 change（每个 change 一个子项追加），不算重复建 change。
+  - 候选池是 backlog（可以无限多），活跃 change 才是 WIP——池里有候选不构成阻塞，只有活跃 change 数触发 `wip-limit`。
 - **brownfield reverse-spec 检查**：若 `$_TD_PROFILE == profile-brownfield`，检查 `openspec/specs/` 下是否已有相关分系统的 baseline spec。没有 → 触发 `human-in-loop`，提示用户"你对现有系统还没建立认识，propose 大改动风险高。先 `/td-reverse-spec` 吗？"——用户同意后执行 `/td-reverse-spec` 建立 baseline，完成后回到本步骤继续 propose。
 - **greenfield explore 检查**：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空（还没建立初始 spec），检查会话内是否已做过探索（`td-explore` 或 `brainstorming` 产物，至少 2 个候选方向）。没有 → 触发 `human-in-loop`，提示用户"greenfield 最容易犯的错是'想到了就建'。先 `/td-explore` 至少探索 2 个候选方向再 propose 吗？"——用户同意后执行 `/td-explore`，完成后回到本步骤继续 propose。
 
@@ -70,6 +75,8 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 ```bash
 openspec new change "<name>"
 ```
+
+**若本 change 来自 TODO 池条目**（步骤 3 挑中的）：创建后回写 `openspec/todo.md`，在该主条目下**新增一个 change 子项** `  - [ ] change: <name>`（缩进两空格；同一条主条目承接多个 change 时追加多个子项，一个 change 一个子项）。**不勾选主条目**——勾选是 `td-archive` 的职责，且要等主条目下全部 change 子项归档后才勾。change 子项是 archive 时定位对应条目的锚点。
 
 ### 5. 获取 artifact 构建顺序
 
@@ -156,3 +163,4 @@ openspec status --change "<name>"
 - `context` 和 `rules` 是给你的约束，不是文件内容
 - 写完每个 artifact 后验证文件存在
 - 如果 change name 已存在，问用户是 continue 还是 new
+- **提案不引用 TODO 池**：proposal/design/tasks 等 change 资产**不得出现**对 `openspec/todo.md` 的引用（路径、条目描述、优先级、子项标注）——TODO 池信息只存在于 todo.md，backlog 是候选层，change 资产是契约层，两层分层隔离。TODO 池条目只通过主条目下的 change 子项建立关联，不进入 artifact 正文。

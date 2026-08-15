@@ -61,7 +61,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 ### 3. 对照主基调四条审计
 
-对审计对象，逐条审计。逐条检查清单见本 skill 的 `references/audit-report-template.md` 的「主基调对照清单」节——按四条主基调逐条打勾，违反项标注并触发对应 constraint skill（见步骤 5）。
+对审计对象，逐条审计。逐条检查清单见本 skill 的 `references/audit-report-template.md` 的「主基调对照清单」节——按四条主基调逐条打勾，违反项标注并触发对应 constraint skill（见步骤 6）。
 
 ### 4. 输出审计报告
 
@@ -73,7 +73,14 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 **null 语义**：`audit-history.yaml` 不存在 → 本步骤创建文件并写入首条记录；`audits/` 目录不存在 → 同步创建。
 
-### 5. 触发修复
+### 5. 问题落池（可选）
+
+审计报告输出后，对报告里"建议的下一步动作"（尤其是非严重问题、暂不立即修复的后续事项），询问用户："要不要把这些记进 `openspec/todo.md` 待办池？"——落池 = 记为 backlog 候选，等 `/td-propose` 时从池里挑，不占 WIP。
+
+- 用户同意 → 按 `td-propose` 的 `references/todo-format.md` 格式，把条目写入 `openspec/todo.md` 待办节（`- [ ] 一句话描述`；文件不存在 → 创建）。
+- 用户拒绝 → 跳过，不强制。
+
+### 6. 触发修复
 
 对每个严重问题，触发对应的 constraint skill 修复：
 
@@ -81,7 +88,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 - agent 自己拍板了 → 触发 `human-in-loop`，回去问用户
 - 可逆决策被过早闭合 → 触发 `delay-decision`，重新打开决策
 
-### 6. 修复后重跑 audit 闭环
+### 7. 修复后重跑 audit 闭环
 
 严重问题修复完成后，**重跑同一 scope 的 audit**，确认：
 

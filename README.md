@@ -253,6 +253,21 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 ---
 
+## TODO 待办池机制
+
+`openspec/todo.md` 是项目级待办池（backlog）：每条 `- [ ]` 主条目是一个潜在 change 的候选（可带 `[P0]/[P1]/[P2]` 优先级），活跃 change 才是 WIP——候选池可以无限多，`wip-limit` 只管活跃 change 数。主条目被 change 承接时，下面挂 `  - [ ] change: <name>` 子项（一个 change 一个子项）。机制贯穿四个 td-* skill：
+
+| skill | 与 TODO 池的关系 |
+|---|---|
+| `td-propose` | 优先从池里挑未勾选主条目建 change（按优先级排序呈现），在主条目下新增 `  - [ ] change: <name>` 子项，可多 change 承接同一条主条目 |
+| `td-archive` | 归档成功后把该 change 对应的子项勾选 `[x]`；主条目下全部子项都勾选后主条目才勾选 `[x]`——子项永久保留，作为追溯档案 |
+| `td-explore` | 读未勾选主条目作候选输入；探索出用户认可的新方向可落池（写主条目） |
+| `td-system-audit` | 审计发现问题时询问用户是否把"建议的下一步动作"落池（写主条目） |
+
+条目格式约定见 `td-propose` 的 `references/todo-format.md`（单一事实源）。
+
+---
+
 ## 典型工作流
 
 ### 零起步项目
@@ -317,6 +332,7 @@ openspec/.td-state/
 - **一个 change 一个 owner**：不同 change 是独立目录，天然隔离；同一个人/分支上串行推进，不要两个人同时编辑同一个 change。
 - **一个 change 对应一个分支 + PR**：官方推荐模式——`git switch -c <change-name>` → propose → apply → commit + PR → merge → archive（PR merge 后再 archive，主 spec 只跟着已合入的工作前进）。
 - `openspec/config.yaml` / `openspec/specs/` / `openspec/changes/` 是共享事实源，**必须提交**，不要 ignore。
+- **`openspec/todo.md` 是共享事实源，必须提交**——它是单文件，多人协作按**条目粒度人工协调**：同一时间只由一个人 propose / 勾选同一条目（不同条目互不冲突）；同一分支上 propose 挑候选、archive 勾选各自串行推进。
 
 ---
 
