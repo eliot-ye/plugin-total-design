@@ -27,8 +27,6 @@ user-invocable: false
 
 见 `constraint-matrix` 表 3（tier-large：current-change 每完成 1 个 change，project 每周一次）。本文件不重复定义频率数字。
 
-大系统的"局部优化制造全局失调"风险最高。每周一次 `project` scope audit 是底线。
-
 ## 特殊规则
 
 ### 1. 总体设计文档必填
