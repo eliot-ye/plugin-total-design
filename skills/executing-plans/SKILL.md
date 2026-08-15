@@ -69,7 +69,4 @@ checkpoint 格式：
 
 ## 与其他 skill 的关系
 
-- 与 `writing-plans` 配合：plan 是 input
-- 与 `test-driven-development` 配合：每个任务都走 TDD
 - 与 `requesting-code-review` 配合：checkpoint 时做 review
-- 与 `human-in-loop` 配合：checkpoint 时机由这个 skill 定

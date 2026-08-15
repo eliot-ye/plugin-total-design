@@ -81,10 +81,3 @@ UI 改动也要验证：snapshot test、E2E test、至少手动截图对比。"�
 ### 不接受"之前测过"
 
 "这个测试我之前跑过"——代码变了，之前的测试结果就失效。重跑。
-
-## 与其他 skill 的关系
-
-- 与 `test-driven-development` 配合：TDD 的 GREEN 是 task-level，本 skill 是 change-level
-- 与 `td-apply` 配合：td-apply 步骤 7 做两层最终验证——7.1 调用本 skill 做 change-level 验证，7.2 触发本 skill 第 6 节的系统级（跨分系统边界）验证
-- 与 `systematic-debugging` 配合：verification 失败时，触发 systematic-debugging
-- 与 `executing-plans` 配合：task 标 `[x]` 前必须 verification

@@ -46,8 +46,6 @@ tasks.md 分两个阶段完成:
 
 ## 与其他 skill 的关系
 
-- 与 `executing-plans` 配合：plan 是 input
-- 与 `critical-buffer` 配合：plan 里要标注关键链 + buffer
 - 与 `delay-decision` 配合：plan 里如果遇到可逆决策，标 `[延迟决策]` 而不是强行拍
 
 ## 不做的事

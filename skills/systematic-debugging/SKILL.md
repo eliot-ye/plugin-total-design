@@ -56,6 +56,4 @@ user-invocable: true
 
 ## 与其他 skill 的关系
 
-- 与 `test-driven-development` 配合：Phase 4 的回归测试就是 TDD 的 RED
-- 与 `verification-before-completion` 配合：Phase 4 的 verify 就是这个 skill 的应用
 - 与 `human-in-loop` 配合：如果 Phase 3 找不到 root cause，停下来问用户

@@ -65,9 +65,6 @@ user-invocable: true
 
 ## 与其他 skill 的关系
 
-- 与 `writing-plans` 配合：任务的"风险"等级（high/medium/low）由 writing-plans 标注，RED 阶段据此决定测试强度
-- 与 `executing-plans` 配合：每个任务都走 TDD
-- 与 `verification-before-completion` 配合：TDD 的 GREEN 是 task-level verification，verification-before-completion 是 change-level verification
 - 与 `systematic-debugging` 配合：RED 失败时，如果失败原因不明确，触发 systematic-debugging
 
 ## 不做的事

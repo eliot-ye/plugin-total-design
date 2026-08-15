@@ -98,7 +98,4 @@ review 对象不是代码，是 proposal 的分系统切分与设计决策。此
 
 ## 与其他 skill 的关系
 
-- 与 `td-apply` 配合：td-apply 步骤 4 在进入任务实施前触发本 skill 的架构 review（第 5 节，清单见本 skill 的 `references/architecture-review-checklist.md`）
-- 与 `executing-plans` 配合：checkpoint 时触发 review
 - 与 `human-in-loop` 配合：critical issue 是 agent 自己能修就修，修不了触发 human-in-loop
-- 与 `verification-before-completion` 配合：review 是 verification 的一部分

@@ -56,4 +56,3 @@ user-invocable: false
 
 - 与 `delay-decision` 配合：可逆决策延迟，但延迟期内触及不可逆点时，本 skill 触发
 - 与 `brooks-law` 配合：用户考虑"加人手"时，brooks-law 提醒，本 skill 要求用户显式确认
-- 与 `verification-before-completion` 配合：声明完成前必须验证，验证失败且 agent 不知如何修复时，本 skill 触发
