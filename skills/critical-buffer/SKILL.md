@@ -44,10 +44,6 @@ user-invocable: false
 
 ## 按 tier 调整
 
-| tier | project buffer 比例 |
-|---|---|
-| `tier-small` | 20% |
-| `tier-medium` | 35% |
-| `tier-large` | 50% |
+project buffer 比例按当前 tier 查 `constraint-matrix` 表 1（critical-buffer 行），本 skill 不重复定义数字。
 
 tier 越大，系统越复杂，不确定性越高，缓冲越厚。

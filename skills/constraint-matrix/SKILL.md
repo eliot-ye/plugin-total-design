@@ -63,32 +63,7 @@ openspec/.td-state/
 
 ### 文件模板
 
-**`profile-tier.yaml`**：
-
-```yaml
-profile: <profile-greenfield | profile-brownfield | profile-maintenance>
-tier: <tier-small | tier-medium | tier-large>
-judged_at: <ISO8601 时间戳>
-judge_reason: <一句话判据，如"已上线 + 有 CI/CD → maintenance；文件 120 个 → large">
-```
-
-**`archive-counter.yaml`**（td-archive 维护，只管累计 count + 最近一次 archive 标识，时间戳判定统一走 `audit-history.yaml`）：
-
-```yaml
-count: <累计已 archive 的 change 数>
-last_archive_name: <最近 archive 的 change 名>
-```
-
-**`audit-history.yaml`**（td-system-audit 维护）：
-
-```yaml
-audits:
-  - timestamp: <ISO8601>
-    scope: <current-change | project>
-    report: <audits/ 下的报告文件名>
-    severe_count: <严重问题数>
-    next_due: <下次 project-scope audit 的 ISO8601 截止时间，仅 tier-large project scope 需要算"一周后">
-```
+各文件的 YAML 模板见本 skill 的 `references/file-templates.md`（profile-tier / archive-counter / audit-history 三份）。本文件不重复模板内容，引用该文件即可。
 
 **文件不存在时的行为**：agent 调用识别流程时，若 `openspec/.td-state/profile-tier.yaml` 不存在，按下方"### 2. 判读 profile"+"### 3. 判读 tier"现判，判完后创建文件并写入结果。若文件已存在，优先读文件，不重判——除非命中"触发重新判读"的时机。
 

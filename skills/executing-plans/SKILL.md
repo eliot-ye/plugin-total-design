@@ -37,6 +37,8 @@ user-invocable: true
 - 遇到 `human-in-loop` skill 的 5 类必停场景
 - 任务实际耗时显著超过估时（>2x）
 
+**current-change audit 触发**：对照 `constraint-matrix` 表 3 的 current-change scope 频率——tier-medium 每个关键链任务完成时，随本 checkpoint 触发 `/td-system-audit current-change`（tier-small 不要求，tier-large 由 td-apply 步骤 7.3 负责，本处不重复）。
+
 checkpoint 格式：
 
 ```

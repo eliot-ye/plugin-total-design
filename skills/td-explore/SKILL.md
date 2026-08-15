@@ -36,11 +36,11 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 ### 1. 激活主基调与配置层
 
-**加载技能 `system-engineering` `constraint-matrix`**
+激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-- 执行 `constraint-matrix` 的 `## 识别流程`
-- explore 不写 artifact、不动代码，constraint 强度对其直接影响较小。
-- profile 决定 explore 的侧重点（greenfield 重候选方向，brownfield 重"动老代码的影响"，maintenance 重"生产稳定性"），所以 profile/tier 仍需在步骤 1 判读完成。
+1. **`system-engineering`** — 主基调四条进入上下文。
+2. **profile × tier 识别** — 执行 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2。会话内缓存，后续步骤直接引用。explore 不写 artifact、不动代码，constraint 强度对其直接影响较小，但 profile 决定 explore 的侧重点（greenfield 重候选方向，brownfield 重"动老代码的影响"，maintenance 重"生产稳定性"），所以 profile/tier 仍需判读完成。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
 ### 2. 读现场背景（config.yaml context）
 
@@ -54,7 +54,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 ### 4. 头脑风暴
 
-调用 `brainstorming` skill 的 1–4 步工作方式
+调用 `brainstorming` skill 的 1–4 步工作方式——**不执行** brainstorming 的第 5–6 步（分段确认、保存 spec 文档）：explore 阶段不落盘 spec，成果以对话形式交付（见步骤 6）。若用户要求把探索结果落盘为 spec 草稿，提示走 `/td-propose`（brainstorming 的保存步骤在那里执行）。
 
 ### 5. 系统工程视角评估
 
@@ -64,6 +64,12 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 - 整体性能预期变化
 - 是局部优化还是全局协调
 - 局部优化对全局失调的风险
+
+评估侧重按步骤 1 判读的 `$_TD_PROFILE` 调整：
+
+- `profile-greenfield`：重候选方向的**取舍与可逆性**——没有存量约束，方向选错成本低，但要用 `delay-decision` 避免"想到了就建"和"先把架构设计完美"两个陷阱
+- `profile-brownfield`：重**动老代码的影响**——候选方向会触碰哪些存量分系统、改动范围能否最小化、是否触发公共契约变更（对照 `human-in-loop` 5 类场景）
+- `profile-maintenance`：重**生产稳定性**——候选方向对线上契约、部署 pipeline、回归测试的影响，是否需要在生产环境改动前停下问用户
 
 ### 6. 总结给用户看
 

@@ -32,10 +32,11 @@ archive 后触发 profile 重新评估——这是总体设计部的职责：项
 
 ### 1. 激活主基调与配置层
 
-**加载技能 `system-engineering` `constraint-matrix`**
+激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-- 执行 `constraint-matrix` 的 `## 识别流程`
-- 表 1 + 表 2 + 表 3 全部读入——步骤 2 据此判断是否触发 / tasks 是否合规。
+1. **`system-engineering`** — 主基调四条进入上下文。archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集成循环"。
+2. **profile × tier 识别** — 执行 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（archive 需要表 3 判定 system-audit 频率触发）。会话内缓存，后续步骤直接引用。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——步骤 2 据此判断是否触发 / tasks 是否合规。
 
 ### 2. 前置检查
 
@@ -83,13 +84,16 @@ archive 完一个 change 后，项目的 profile 可能变化（比如 greenfiel
 
 archive 是"完成一个 change"的事件，正好对照 `constraint-matrix` 表 3 的 system-audit 频率。
 
-**持久化计数器**：每次 archive 完成后，读 `openspec/.td-state/archive-counter.yaml`，把 `count` +1，写回文件。文件格式见 `constraint-matrix` 的「持久化层」节，文件由本步骤首次运行时按需创建。
+**持久化计数器**：每次 archive 完成后，读 `openspec/.td-state/archive-counter.yaml`，把 `count` +1，写回文件。文件格式见 `constraint-matrix` 的 `references/file-templates.md`，文件由本步骤首次运行时按需创建。
 
-计数达到当前 tier 的阈值（tier-small 5 个 / tier-medium 3 个，查 `archive-counter.yaml` 的 `count`），或距上次 project-scope audit 已满一周（tier-large，查 `openspec/.td-state/audit-history.yaml` 最近一条 `scope: project` 记录的 `timestamp`）→ **主动建议**用户跑 `/td-system-audit project`，不是强制，是"按主基调第 2 条总体设计部职责，该周期性自检了"。
+**达阈值判定**（频率数字一律查 `constraint-matrix` 表 3 的 project scope 列，本文件不重复定义）：
 
-判定优先级：tier-large 走时间驱动（audit-history.yaml），不查 archive-counter 的 count；tier-small / tier-medium 走 count 驱动（archive-counter.yaml），不查时间。单一事实源——count 在 archive-counter，project-audit 时间戳在 audit-history，不交叉。
+| tier | 驱动源 | 判定方式 | 文件不存在时 |
+|---|---|---|---|
+| `tier-small` / `tier-medium` | count 驱动 | `archive-counter.yaml` 的 `count` ≥ 表 3 阈值 | 视为 `count: 0`，本事件 +1 后再判 |
+| `tier-large` | 时间驱动 | `audit-history.yaml` 最近一条 `scope: project` 的 `timestamp` 距今 ≥ 表 3 阈值（一周） | 视为从未跑过 project audit，直接判达阈值 |
 
-**null 语义**：`audit-history.yaml` 不存在，或存在但无 `scope: project` 记录 → 视为"从未跑过 project audit"，tier-large 直接建议跑 `/td-system-audit project`。`archive-counter.yaml` 不存在 → 视为 `count: 0`，按当前 archive 事件 +1 后再判阈值（tier-small/medium）。两个文件均由本步骤首次运行时按需创建。
+达阈值 → **主动建议**用户跑 `/td-system-audit project`，不是强制，是"按主基调第 2 条总体设计部职责，该周期性自检了"。两个文件均由本步骤首次运行时按需创建。
 
 #### 5.3 WIP 释放检查
 

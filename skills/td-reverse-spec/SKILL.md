@@ -32,11 +32,11 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 ### 1. 激活主基调与配置层
 
-**加载技能 `system-engineering` `constraint-matrix`**
+激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-- 执行 `constraint-matrix` 的 `## 识别流程`
-- `system-engineering`：reverse-spec 是总体设计部在"接手"阶段的工作。
-- reverse-spec 本身是 profile-brownfield 的入口动作，但 tier 决定 reverse-spec 的粒度（small 粗粒度即可，large 要画分系统接口图）。
+1. **`system-engineering`** — 主基调四条进入上下文。reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统全局视图，再决定动哪里。
+2. **profile × tier 识别** — 执行 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2。会话内缓存，后续步骤直接引用。reverse-spec 本身是 profile-brownfield 的入口动作，但 tier 决定 reverse-spec 的粒度（small 粗粒度即可，large 要画分系统接口图）。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
 ### 2. 识别代码库状态
 
@@ -47,7 +47,14 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 - 有无 `tests/`、CI 配置、`package.json` 等
 - 最近 git 提交频率
 
-判断属于哪种 profile（`profile-greenfield` / `profile-brownfield` / `profile-maintenance`）。中途接手通常触发 `profile-brownfield`。
+判断依据如下，但**不重新判读 profile**——步骤 1 已通过 `constraint-matrix` 判读并缓存 `$_TD_PROFILE` / `$_TD_TIER`，本步骤直接消费，不与缓存打架：
+
+- 文件数、代码行数
+- 主要目录结构
+- 有无 `tests/`、CI 配置、`package.json` 等
+- 最近 git 提交频率
+
+中途接手通常判读为 `profile-brownfield`。若步骤 1 判出其他 profile：`profile-greenfield`（代码库其实是脚手架）→ reverse-spec 可以粗粒度甚至跳过，见 `profile-greenfield` 的切换规则；`profile-maintenance`（已上线项目）→ reverse-spec 粒度按 tier 走，见该 profile 的切换规则。
 
 ### 3. 分系统切分
 
@@ -81,30 +88,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 ### 6. 输出 reverse-spec 报告
 
-```markdown
-## Reverse-Spec 报告：<codebase>
-
-### 识别的分系统
-1. <subsystem A> - <职责>
-2. <subsystem B> - <职责>
-...
-
-### 分系统间接口图
-<ASCII 图或 mermaid>
-
-### 各分系统 spec
-- <subsystem A>: openspec/specs/<A>/spec.md
-- <subsystem B>: openspec/specs/<B>/spec.md
-...
-
-### 已知风险 / 技术债
-- <风险 1>
-- <风险 2>
-
-### 建议的下一步
-- 如果想改某个分系统：`/td-propose <change-name>`
-- 如果某个分系统 spec 太复杂：先 `/td-explore` 那个分系统
-```
+按本 skill 的 `references/reverse-spec-report.md` 的报告模板输出（识别的分系统 + 接口图 + 各分系统 spec 位置 + 已知风险 + 建议的下一步）。
 
 ## Guardrails
 

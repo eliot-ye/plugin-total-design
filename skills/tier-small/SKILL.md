@@ -25,8 +25,7 @@ user-invocable: false
 
 ## system-audit 频率
 
-- 每完成 5 个 change 跑一次 `project` scope
-- 不要求每 change 跑 audit（开销不值）
+见 `constraint-matrix` 表 3（tier-small：project scope 每完成 5 个 change，current-change 不要求）。本文件不重复定义频率数字。
 
 ## 特殊规则
 

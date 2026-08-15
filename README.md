@@ -98,7 +98,7 @@ total-design/
 │   ├── 配置层（7 个，constraint-matrix + 3 profile + 3 tier）
 │   └── 契约层（6 个 td-*，与下方 command 一一对应）
 │
-└── commands/               ← 6 个 slash 命令入口（极薄，逻辑全在同名 skill）
+└── commands/               ← 7 个 slash 命令入口（6 个极薄，逻辑在同名 skill；td-list 只读无 skill）
 ```
 
 ---
@@ -115,11 +115,13 @@ total-design/
 | `/td-reverse-spec` | 中途接手项目专用：先 reverse-spec 已有代码 | 本 plugin 新增 |
 | `/td-archive` | 完成后归档 | `/opsx:archive` |
 | `/td-system-audit` | 周期性对照系统工程主基调自检 | 本 plugin 新增 |
+| `/td-list` | 列出所有未归档（活跃）的 change 态势 | 本 plugin 新增（只读） |
 
-**新增的两个命令意义：**
+**新增命令的意义：**
 
 - `/td-reverse-spec`：OpenSpec 假设你是 greenfield，但中途接手项目时直接 propose 大改动很危险。先 reverse-spec 已有代码，建立 baseline spec。
 - `/td-system-audit`：钱学森"总体设计部"视角的工程化。周期性把 agent 当前的工作对照系统工程四条主基调过一遍，识别"局部优化制造全局失调"的风险。
+- `/td-list`：只读查询入口，列活跃 change 态势（逻辑直接写在命令文件里，无同名 skill，故不遵循极薄模板）。
 
 ### skill 在 atomcode 下的实际调用名
 
@@ -136,7 +138,7 @@ atomcode 加载 plugin 时，会自动给 plugin 内的 skill 加 `<plugin-name>
 
 `/` 菜单里看到的是 `/total-design:td-apply` 这种带前缀的形式；`use_skill` 工具调用也要传带前缀的全名。skill 文件 frontmatter 的 `name` 字段保持纯合法字符（`a-zA-Z0-9-_/`，禁 `:`，禁首尾斜杠和 `//`，1–64 字符），前缀由 atomcode 加载时拼接。
 
-本 plugin 的 skill body 和 command body 都按"逻辑名 + 平台命名小节"的方式写：body 内引用其他 skill 用逻辑名（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀；每个文件顶部有 `## 平台命名` 小节列出各平台下的实际调用名。这是为了预留本 plugin 未来扩展到非 atomcode 平台（Claude Code / Cursor / Codex）的能力——同一份 SKILL.md，不同平台用不同前缀。
+本 plugin 的 skill body 和 command body 都按"逻辑名"的方式写：body 内引用其他 skill 用逻辑名（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀（atomcode 下为 `total-design:<name>`）。这是为了预留本 plugin 未来扩展到非 atomcode 平台（Claude Code / Cursor / Codex）的能力——同一份 SKILL.md，不同平台用不同前缀。
 
 ### frontmatter 字段格式
 
@@ -161,7 +163,7 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 - **`user-invocable: true`**（13 个）：用户可在 `/` 菜单主动调，也可被 agent 自动触发
   - 行为层 7 个（Superpowers 转译）
-  - 契约层 6 个 td-*（与 6 个 command 一一对应）
+  - 契约层 6 个 td-*（与 6 个 td-* command 一一对应；`td-list` 只读命令无同名 skill）
 - **`user-invocable: false`**（13 个）：agent 自动触发，不暴露在 `/` 菜单
   - 约束层 6 个（钱学森主基调 + 5 条局部规律）
   - 配置层 7 个（constraint-matrix + 3 profile + 3 tier）
@@ -211,9 +213,9 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 两个维度都以 skill 形态存在，agent 根据现场判读激活哪一组。
 
-### 契约层（6 个 td-* skill，与 6 个 command 一一对应）
+### 契约层（6 个 td-* skill，与 6 个 td-* command 一一对应；`td-list` 是只读查询命令，无同名 skill）
 
-每个 td-* skill 既是 skill（可被 `use_skill` 调用）又对应一个 slash command（`/td-*`）。frontmatter 里写了 `aliases` 映射三平台调用名。
+每个 td-* skill 既是 skill（可被 `use_skill` 调用）又对应一个 slash command（`/td-*`），调用名由平台加载器按 plugin 名拼前缀（见上方"skill 在 atomcode 下的实际调用名"一节）。
 
 | Skill | 对应 command | 对应 OpenSpec | user-invocable |
 |---|---|---|---|

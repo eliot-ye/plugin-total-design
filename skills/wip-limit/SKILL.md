@@ -12,13 +12,7 @@ user-invocable: false
 
 ## 规则
 
-同时活跃的 change 数量上限：
-
-| tier | WIP 上限 |
-|---|---|
-| `tier-small` | 5 |
-| `tier-medium` | 4 |
-| `tier-large` | 3 |
+同时活跃的 change 数量上限按当前 tier 查 `constraint-matrix` 表 1（wip-limit 行），本 skill 不重复定义数字。
 
 "活跃"定义：已经 `/td-propose` 但还没 `/td-archive` 的 change。
 

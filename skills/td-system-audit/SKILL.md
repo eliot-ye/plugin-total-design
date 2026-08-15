@@ -37,7 +37,7 @@ audit 的对照标准是主基调四条，不是"代码质量"或"进度"——�
 
 system-audit 不是只在用户显式调用时才跑。agent 应在以下时机主动建议 audit：
 
-- **频率触发**：对照 `constraint-matrix` 表 3 的 system-audit 频率（按当前 tier 的 project scope / current-change scope 阈值）。频率事实源在表 3，本 skill 不重写——`td-archive` 步骤 4.2 已维护"累计 archive 计数器"，达阈值即建议。
+- **频率触发**：对照 `constraint-matrix` 表 3 的 system-audit 频率（按当前 tier 的 project scope / current-change scope 阈值）。频率事实源在表 3，本 skill 不重写——`td-archive` 步骤 5.2 已维护"累计 archive 计数器"，达阈值即建议。
 - **信号触发**：
   - 用户表达"感觉最近推进不顺利"时
   - 关键链缓冲被多次压缩后
@@ -46,11 +46,11 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 ### 1. 激活主基调与配置层
 
-**加载技能 `system-engineering` `constraint-matrix`**
+激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-- `system-engineering`：主基调四条进入上下文。audit 的对照标准就是主基调四条，没有主基调框架，audit 会退化成"代码质量审查"。
-- 执行 `constraint-matrix` 的 `## 识别流程`
-- 表 3（system-audit 频率）必须读入——audit 频率是否达标，查表 3。
+1. **`system-engineering`** — 主基调四条进入上下文。audit 的对照标准就是主基调四条，没有主基调框架，audit 会退化成"代码质量审查"。
+2. **profile × tier 识别** — 执行 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（audit 频率是否达标，查表 3）。会话内缓存，后续步骤直接引用。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
 ### 2. 收集审计对象
 
@@ -61,69 +61,17 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 ### 3. 对照主基调四条审计
 
-对审计对象，逐条审计：
-
-#### 主基调 1：系统工程
-
-- [ ] 当前工作的每个局部动作，是否考虑了对系统整体的影响？
-- [ ] proposal 的"系统工程影响评估"节是否填得认真？
-- [ ] 有没有"局部最优但全局失调"的迹象？
-
-#### 主基调 2：总体设计部
-
-- [ ] agent 是否在"自己拍板应该由用户拍的事"？（违反 → 触发 `human-in-loop`）
-- [ ] 是否有"分系统工程师视角"压过"总体设计部视角"的地方？
-
-#### 主基调 3：从定性到定量的综合集成
-
-- [ ] design.md 里的决策是从定性到定量迭代出来的，还是凭感觉拍的？
-- [ ] 可逆决策是否被过早闭合？（违反 → 触发 `delay-decision`）
-- [ ] archive 时是否做了"实际 vs 预期"复盘？
-
-#### 主基调 4：开放的复杂巨系统
-
-- [ ] 当前 profile/tier 配置是否符合项目实际？
-- [ ] 有没有把"复杂巨系统"当"简单系统"硬解？（比如同时开太多 change、压缩关键链缓冲）
+对审计对象，逐条审计。逐条检查清单见本 skill 的 `references/audit-report-template.md` 的「主基调对照清单」节——按四条主基调逐条打勾，违反项标注并触发对应 constraint skill（见步骤 5）。
 
 ### 4. 输出审计报告
 
 报告同时输出到对话和落盘。落盘路径：`openspec/.td-state/audits/<YYYYMMDD-HHMMSS>-<scope>.md`。目录由本步骤首次运行时按需创建。
 
-落盘后，同步更新 `openspec/.td-state/audit-history.yaml`：追加一条本次 audit 的记录。文件格式见 `constraint-matrix` 的「持久化层」节，文件由本步骤首次运行时按需创建。
+报告按本 skill 的 `references/audit-report-template.md` 的「报告模板」节输出（Scope + 主基调对照表 + 发现的问题 + 建议的下一步动作）。
+
+落盘后，同步更新 `openspec/.td-state/audit-history.yaml`：追加一条本次 audit 的记录。文件格式见 `constraint-matrix` 的 `references/file-templates.md`，文件由本步骤首次运行时按需创建。
 
 **null 语义**：`audit-history.yaml` 不存在 → 本步骤创建文件并写入首条记录；`audits/` 目录不存在 → 同步创建。
-
-报告模板：
-
-```markdown
-## System Audit 报告
-
-### Scope
-<current-change | project>
-
-### 主基调对照
-
-| 主基调 | 通过 | 违反 |
-|---|---|---|
-| 1. 系统工程 | ✓ | — |
-| 2. 总体设计部 | — | ⚠ agent 在 X 决策上自己拍板了 |
-| 3. 综合集成 | ✓ | — |
-| 4. 复杂巨系统 | — | ⚠ 关键链缓冲被压缩到 15% |
-
-### 发现的问题
-
-1. **[严重]** <问题描述>
-   - 违反的主基调：<...>
-   - 建议修复：<...>
-
-2. **[提醒]** <问题描述>
-   - ...
-
-### 建议的下一步动作
-
-1. <动作 1>
-2. <动作 2>
-```
 
 ### 5. 触发修复
 

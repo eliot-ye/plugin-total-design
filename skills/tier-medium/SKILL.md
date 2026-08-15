@@ -25,8 +25,7 @@ user-invocable: false
 
 ## system-audit 频率
 
-- 每完成 3 个 change 跑一次 `project` scope
-- 每个关键链任务完成时跑 `current-change` scope
+见 `constraint-matrix` 表 3（tier-medium：project scope 每完成 3 个 change，current-change 每个关键链任务完成时）。本文件不重复定义频率数字。
 
 ## 特殊规则
 

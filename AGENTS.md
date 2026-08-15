@@ -80,13 +80,14 @@ total-design/
 │       ├── td-archive/
 │       └── td-system-audit/
 │
-└── commands/                ← 6 个 slash 命令入口（极薄，逻辑全在同名 skill 里）
+└── commands/                ← 7 个 slash 命令入口（6 个极薄，逻辑在同名 skill 里；td-list 例外，见下）
     ├── td-propose.md
     ├── td-explore.md
     ├── td-apply.md
     ├── td-reverse-spec.md
     ├── td-archive.md
-    └── td-system-audit.md
+    ├── td-system-audit.md
+    └── td-list.md            ← 只读命令，无同名 skill，逻辑直接写在命令文件里
 ```
 
 ## 编辑规则
@@ -154,6 +155,8 @@ args: none|option|required
 
 6 个命令文件 (`td-propose` / `td-explore` / `td-apply` / `td-reverse-spec` / `td-archive` / `td-system-audit`) 都遵循这个极薄模板——命令只是 slash 入口，真正的逻辑在同名 skill (`skills/<td-*>/SKILL.md`) 里。这样同一份逻辑既能被 slash command 触发，也能被 agent 自动触发。
 
+**例外：`td-list`**——只读命令（`openspec list` 列活跃 change），无同名 skill，逻辑直接写在命令文件里，不遵循极薄模板。它不需要被 agent 自动触发（只是查询入口），故不为其建 skill。
+
 ### plugin.json 编辑
 
 manifest 文件位于 `.claude-plugin/plugin.json`，被 atomcode 和 Claude Code marketplace 共用。
@@ -176,6 +179,8 @@ manifest 文件位于 `.claude-plugin/plugin.json`，被 atomcode 和 Claude Cod
 
 两个维度都以 skill 形态存在，agent 根据现场判读激活哪一组。
 
+**冲突优先级**：profile 与 tier 强度冲突时，**以 tier 为准**——tier 决定约束强度与流程重量（"不强求重流程"这类松绑优先），profile 只决定流程侧重（入口动作、TDD 边界、special rules），不改变强度。profile 的"默认激活的层"强度描述是默认值，最终强度以 `constraint-matrix` 表 1/表 2/表 3 为单一事实源。
+
 ### 3. 触发式而非 hook 强制
 
 Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读触发，不靠 hook 强制。
@@ -196,19 +201,15 @@ atomcode hooks schema（备用参考）：外层 `{"hooks": {<name>: {...}}}`，
 - **命令名**：`td-<verb>` 或 `td-<noun>`，扁平 kebab-case
 - **文件名**：`SKILL.md`（目录式；本 plugin 26 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
 - **主基调 skill**：`system-engineering`，是所有局部约束的前提，不单独触发（`user-invocable: false`）
-- **多平台调用名**：6 个契约层 td-* skill 在 frontmatter 里写 `aliases` 映射：
-  - `atomcode: total-design:<name>`
-  - `claude-code: total-design:<name>`
-  - `cursor: <name>`（无前缀）
-- **skill body 内引用其他 skill 用逻辑名**（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀——这是预留多平台扩展的关键设计
+- **skill body 内引用其他 skill 用逻辑名**（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀（atomcode 下为 `total-design:<name>`）——这是预留多平台扩展的关键设计。skill frontmatter 不写 `aliases`，调用名一律由平台加载器按 plugin 名拼接
 
 ### td-* skill 共享片段
 
-6 个 td-* skill 的 body 里曾经各自重复"平台命名表""逻辑名说明""步骤 1 激活主基调与配置层"。这三段已抽为共享片段，td-* skill 的 body 不再重写，改为一句指向本节：
+6 个 td-* skill 的 body 里曾经各自重复"平台命名表""逻辑名说明""步骤 1 激活主基调与配置层"。这三段按本节规范**自包含书写**——因为 SKILL.md 禁止引用 AGENTS.md（见上方"SKILL 不可引用 AGENTS 文件"），td-* skill 的 body 不能"指向本节"，必须把规范内容写进各自文件。本节是给本仓库开发 agent 的统一规范，不是运行时资产：
 
-**平台命名**：6 个 td-* skill 在不同平台下的调用名见各自 frontmatter 的 `aliases` 字段（atomcode / claude-code / cursor 三套）。body 不再放平台命名表，引用其他 skill 一律用逻辑名，由当前平台加载器负责拼前缀。
+**平台命名**：6 个 td-* skill 在不同平台下的调用名由当前平台的加载器按 plugin 名拼前缀（atomcode 下为 `total-design:<name>`），不写入 frontmatter。body 不再放平台命名表，引用其他 skill 一律用逻辑名，由当前平台加载器负责拼前缀。
 
-**td-* 标准步骤 1**（每个 td-* skill 的"### 1. 激活主基调与配置层"都执行同一序列，只注入强度不做判断）：
+**td-* 标准步骤 1**（每个 td-* skill 的"### 1. 激活主基调与配置层"都按此序列自包含书写，只注入强度不做判断）：
 
 1. **`system-engineering`** — 主基调四条进入上下文。各 td-* skill 在这一条后补自己的注解（如"reverse-spec 是总体设计部在接手阶段的工作"）。
 2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）+ 表 3（system-audit 频率，仅 archive/apply 需要）读入上下文。会话内缓存，后续步骤直接引用。

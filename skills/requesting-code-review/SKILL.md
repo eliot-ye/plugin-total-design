@@ -88,20 +88,7 @@ warning 不阻塞，但要记录在 tasks.md 的"已知问题"里。
 
 review 对象不是代码，是 proposal 的分系统切分与设计决策。此时改架构成本最低。
 
-#### 检查清单：高内聚
-
-- 每个分系统职责是否单一（一个分系统只做一件事）
-- 分系统内部是否自包含（数据所有权清晰）
-- 职责是否重复（两个分系统做同一件事 → 合并信号）
-
-#### 检查清单：低耦合
-
-- 分系统间接口是否最小化（只暴露必要契约，内部实现不外泄）
-- 有无循环依赖（A ↔ B）
-- 有无隐式依赖（共享数据库、共享配置、时序耦合）
-- 一个改动是否牵动过多分系统（过度耦合信号）
-
-#### 与 Code review 共用分级
+检查清单（高内聚 / 低耦合）见本 skill 的 `references/architecture-review-checklist.md`。分级与阻塞语义如下（与 code review 共用）：
 
 - **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖——**阻塞 apply**，先回 propose 改 proposal 再继续
 - **warning**：接口偏大、职责偏散——记录到 proposal，可延后
@@ -111,7 +98,7 @@ review 对象不是代码，是 proposal 的分系统切分与设计决策。此
 
 ## 与其他 skill 的关系
 
-- 与 `td-apply` 配合：td-apply 步骤 4 在进入任务实施前触发本 skill 的架构 review（第 5 节）
+- 与 `td-apply` 配合：td-apply 步骤 4 在进入任务实施前触发本 skill 的架构 review（第 5 节，清单见本 skill 的 `references/architecture-review-checklist.md`）
 - 与 `executing-plans` 配合：checkpoint 时触发 review
 - 与 `human-in-loop` 配合：critical issue 是 agent 自己能修就修，修不了触发 human-in-loop
 - 与 `verification-before-completion` 配合：review 是 verification 的一部分

@@ -32,10 +32,11 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 ### 1. 激活主基调与配置层
 
-**加载技能 `system-engineering` `constraint-matrix`**
+激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-- 执行 `constraint-matrix` 的 `## 识别流程`
-- 表 1 + 表 2 读入——步骤 2 据此判断是否触发 / tasks 是否合规。apply 不触发 system-audit。
+1. **`system-engineering`** — 主基调四条进入上下文。apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。
+2. **profile × tier 识别** — 执行 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 7.3）。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——步骤 2 据此判断是否触发 / tasks 是否合规。
 
 ### 2. 前置检查
 
@@ -57,7 +58,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 ### 4. 架构 review + 触发行为层
 
-**进入任务实施前，先触发 `requesting-code-review` 的架构 review**——对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合（检查清单见该 skill 第 5 节）。**架构级 critical 未修复 → 不进入任务实施**，回步骤 3 重新读并让用户决策：改 proposal 还是继续。
+**进入任务实施前，先触发 `requesting-code-review` 的架构 review**——对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合（检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 不进入任务实施**，回步骤 3 重新读并让用户决策：改 proposal 还是继续。
 
 架构 review 通过后，按 `tasks.md` 的任务序列实施。行为层 skill 嵌套触发，不是平铺：
 
@@ -96,19 +97,23 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估"节列出的**受影响分系统**，逐条跑**跨分系统边界验证**——验证各分系统整合后的整体行为符合契约，而不只是每个任务局部绿。
 
-"总体性能不等于各部分性能之和"（主基调第 1 条）——所有任务测试全绿不等于分系统整合正确。边界验证覆盖：
-
-- 受影响分系统之间的**接口/契约测试**（集成边界，不是单测）
-- 数据流跨分系统传递的正确性
-- 边界 mock：一个分系统的行为变更是否破坏相邻分系统的契约
-
-tier 分层强度（按步骤 1 注入的当前 tier）：
+"总体性能不等于各部分性能之和"（主基调第 1 条）——所有任务测试全绿不等于分系统整合正确。**执行语义由 `verification-before-completion` 第 6 节承载**（接口/契约测试、数据流传递、边界 mock 的具体做法在那里），本步骤只定义触发条件与 tier 分层强度（按步骤 1 注入的当前 tier）：
 
 - `tier-small`：对受影响分系统边界跑冒烟级集成验证
 - `tier-medium`：跑受影响边界的集成/契约测试
 - `tier-large`：强制完整集成测试 + 契约测试，逐条对照"影响哪些分系统"清单
 
 边界验证发现跨分系统问题 → 触发 `systematic-debugging` 找根因；若 root cause 在 plan 之外（proposal 的影响评估漏了分系统）→ 停下来问用户：是补 proposal 的评估还是改代码？
+
+#### 7.3 current-change audit（按表 3 频率）
+
+两层验证通过后，对照 `constraint-matrix` 表 3 的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`：
+
+- `tier-small`：不要求
+- `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 3），此处不再重复
+- `tier-large`：每完成 1 个 change 触发——本步骤即触发点
+
+触发即调用 `/td-system-audit current-change`，把本次 change 的"实际 vs 预期"对照主基调过一遍。audit 报告落盘 `openspec/.td-state/audits/`，更新 `audit-history.yaml`。
 
 ## Guardrails
 

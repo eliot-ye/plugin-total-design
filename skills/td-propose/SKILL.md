@@ -36,11 +36,11 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 ### 1. 激活主基调与配置层
 
-**加载技能 `system-engineering` `constraint-matrix`**
+激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-- 执行 `constraint-matrix` 的 `## 识别流程`
-- propose 的每个判断都在主基调四条框架下做。
-- 表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）必须读入——步骤 3 据此判断 wip-limit / human-in-loop 是否触发。
+1. **`system-engineering`** — 主基调四条进入上下文。propose 的每个判断都在主基调四条框架下做。
+2. **profile × tier 识别** — 执行 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）。会话内缓存，后续步骤直接引用。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——步骤 3 据此判断 wip-limit / human-in-loop 是否触发。
 
 ### 2. 读现场背景（config.yaml context）
 
@@ -63,6 +63,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 - `wip-limit`：当前活跃 change 数已达上限？已达 → 报告列表 + 提示"先 archive 或 finish 现有 change 再起新的"，但不强制阻塞。
 - `human-in-loop`：用户描述是否清晰到可以 propose？不清楚 → 用 `AskUserQuestion` 问"想做什么 change"。
 - **brownfield reverse-spec 检查**：若 `$_TD_PROFILE == profile-brownfield`，检查 `openspec/specs/` 下是否已有相关分系统的 baseline spec。没有 → 触发 `human-in-loop`，提示用户"你对现有系统还没建立认识，propose 大改动风险高。先 `/td-reverse-spec` 吗？"——用户同意后执行 `/td-reverse-spec` 建立 baseline，完成后回到本步骤继续 propose。
+- **greenfield explore 检查**：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空（还没建立初始 spec），检查会话内是否已做过探索（`td-explore` 或 `brainstorming` 产物，至少 2 个候选方向）。没有 → 触发 `human-in-loop`，提示用户"greenfield 最容易犯的错是'想到了就建'。先 `/td-explore` 至少探索 2 个候选方向再 propose 吗？"——用户同意后执行 `/td-explore`，完成后回到本步骤继续 propose。
 
 ### 4. 创建 change 目录
 
@@ -81,6 +82,10 @@ openspec status --change "<name>" --json
 ### 6. 按依赖顺序创建 artifact
 
 用 `TodoWrite` 工具跟踪进度。每个 artifact：
+
+**先消费行为层产物**：若本次会话已产出 `brainstorming` 的 spec 草稿或 `td-explore` 的候选方向评估（对话形式或落盘草稿），把其中的候选方向取舍与"系统工程影响"评估合并进 proposal 骨架，作为步骤 7 必填项的输入。没有产物则跳过，直接从 template 构建。
+
+每个 artifact：
 
 ```bash
 openspec instructions <artifact-id> --change "<name>" --json
@@ -117,7 +122,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 tasks.md 必须：
 
 - 标注关键链（critical chain）：哪条任务序列是项目的关键路径
-- 留 project buffer：按步骤 0 注入的当前 tier 比例（tier-small 20% / tier-medium 35% / tier-large 50%）
+- 留 project buffer：按 `constraint-matrix` 表 1 注入的当前 tier 比例（critical-buffer 行，会话内已缓存）
 
 粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `critical-buffer` skill 的标注规范。
 

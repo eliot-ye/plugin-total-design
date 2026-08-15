@@ -38,6 +38,10 @@ greenfield 最容易犯的错是"我想到了就建"。explore 至少探索 2 �
 
 greenfield 容易陷入"先把架构设计完美"。用 delay-decision skill——可逆决策先往简单走，等信息足够再回头。
 
+### 4. tier 松绑优先
+
+本 profile 的"行为层强：full SDD"与 `tier-small` 的"不强求重流程"冲突时，**以 tier 为准**——tier 决定约束强度与流程重量，profile 只决定流程侧重（greenfield 侧重 explore→propose 的完整路径，不改变各 tier 的强度）。greenfield × small 时流程从简，greenfield × medium/large 时再走全套 SDD。
+
 ## 与其他 profile 的切换
 
 - 项目有了可运行代码 + 真实用户 → 切 `profile-maintenance`
