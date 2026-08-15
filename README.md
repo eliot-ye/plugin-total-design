@@ -92,13 +92,13 @@ total-design/
 ├── CODE_OF_CONDUCT.md
 ├── LICENSE
 │
-├── skills/                 ← 26 个 skill，全部目录式 SKILL.md
+├── skills/                 ← 27 个 skill，全部目录式 SKILL.md
 │   ├── 约束层（6 个）
 │   ├── 行为层（7 个，Superpowers 转译）
 │   ├── 配置层（7 个，constraint-matrix + 3 profile + 3 tier）
-│   └── 契约层（6 个 td-*，与下方 command 一一对应）
+│   └── 契约层（7 个 td-*，与下方 command 一一对应）
 │
-├── commands/               ← 7 个 slash 命令入口（6 个极薄，逻辑在同名 skill；td-list 只读无 skill）
+├── commands/               ← 8 个 slash 命令入口（7 个极薄，逻辑在同名 skill；td-list 只读无 skill）
 │
 └── hooks/                  ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
     ├── hooks.json          ← hook 声明
@@ -130,6 +130,7 @@ atomcode plugin trust total-design
 
 | 命令 | 用途 | 对应 OpenSpec |
 |---|---|---|
+| `/td-init` | 初始化 td 工作流：检查 OpenSpec 结构 + 配置 .gitignore | 本 plugin 新增（仅用户触发） |
 | `/td-propose` | 创建 change，生成 proposal/design/tasks artifact | `/opsx:propose` |
 | `/td-explore` | 不带 stakes 的思考伙伴，写代码前先探索 | `/opsx:explore` |
 | `/td-apply` | 实施任务，按 artifact 走 | `/opsx:apply` |
@@ -140,16 +141,18 @@ atomcode plugin trust total-design
 
 **新增命令的意义：**
 
+- `/td-init`：初始化入口——检查 `openspec/` 结构是否就绪（没有则初始化：CLI 可用时跑 `openspec init`，不可用时代劳创建目录结构），配置 `.gitignore` 忽略可推导的 `.td-state/` 本地状态（根 `.gitignore` 已有条目则不动；否则在 `openspec/.gitignore` 创建/追加 `.td-state/`），从源头消灭多人协作的假冲突。**仅用户可触发**（`disable-model-invocation: true`），agent 不会自动调用。
 - `/td-reverse-spec`：OpenSpec 假设你是 greenfield，但中途接手项目时直接 propose 大改动很危险。先 reverse-spec 已有代码，建立 baseline spec。
 - `/td-system-audit`：钱学森"总体设计部"视角的工程化。周期性把 agent 当前的工作对照系统工程四条主基调过一遍，识别"局部优化制造全局失调"的风险。
 - `/td-list`：只读查询入口，列活跃 change 态势（逻辑直接写在命令文件里，无同名 skill，故不遵循极薄模板）。
 
 ### skill 在 atomcode 下的实际调用名
 
-atomcode 加载 plugin 时，会自动给 plugin 内的 skill 加 `<plugin-name>:` 前缀。本 plugin 的 `name` 是 `total-design`，所以 6 个 td-* skill 在 atomcode 下：
+atomcode 加载 plugin 时，会自动给 plugin 内的 skill 加 `<plugin-name>:` 前缀。本 plugin 的 `name` 是 `total-design`，所以 7 个 td-* skill 在 atomcode 下：
 
 | skill 逻辑名 | atomcode 调用名 |
 |---|---|
+| `td-init` | `total-design:td-init` |
 | `td-propose` | `total-design:td-propose` |
 | `td-explore` | `total-design:td-explore` |
 | `td-apply` | `total-design:td-apply` |
@@ -180,11 +183,11 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 ## Skill 清单
 
-26 个 skill，按调用方式分两组：
+27 个 skill，按调用方式分两组：
 
-- **`user-invocable: true`**（13 个）：用户可在 `/` 菜单主动调，也可被 agent 自动触发
+- **`user-invocable: true`**（14 个）：用户可在 `/` 菜单主动调；其中 `td-init` 还带 `disable-model-invocation: true`（仅用户可触发，agent 不能自动调用），其余 13 个也可被 agent 自动触发
   - 行为层 7 个（Superpowers 转译）
-  - 契约层 6 个 td-*（与 6 个 td-* command 一一对应；`td-list` 只读命令无同名 skill）
+  - 契约层 7 个 td-*（与 7 个 td-* command 一一对应；`td-list` 只读命令无同名 skill）
 - **`user-invocable: false`**（13 个）：agent 自动触发，不暴露在 `/` 菜单
   - 约束层 6 个（钱学森主基调 + 5 条局部规律）
   - 配置层 7 个（constraint-matrix + 3 profile + 3 tier）
@@ -234,12 +237,13 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 两个维度都以 skill 形态存在，agent 根据现场判读激活哪一组。
 
-### 契约层（6 个 td-* skill，与 6 个 td-* command 一一对应；`td-list` 是只读查询命令，无同名 skill）
+### 契约层（7 个 td-* skill，与 7 个 td-* command 一一对应；`td-list` 是只读查询命令，无同名 skill）
 
-每个 td-* skill 既是 skill（可被 `use_skill` 调用）又对应一个 slash command（`/td-*`），调用名由平台加载器按 plugin 名拼前缀（见上方"skill 在 atomcode 下的实际调用名"一节）。
+每个 td-* skill 既是 skill（可被 `use_skill` 调用）又对应一个 slash command（`/td-*`），调用名由平台加载器按 plugin 名拼前缀（见上方"skill 在 atomcode 下的实际调用名"一节）。`td-init` 是唯一带 `disable-model-invocation: true` 的 td-* skill——只可用户触发，agent 不自动调用。
 
 | Skill | 对应 command | 对应 OpenSpec | user-invocable |
 |---|---|---|---|
+| `td-init` | `/td-init` | 本 plugin 新增（初始化入口） | true（仅用户触发） |
 | `td-propose` | `/td-propose` | `/opsx:propose` | true |
 | `td-explore` | `/td-explore` | `/opsx:explore` | true |
 | `td-apply` | `/td-apply` | `/opsx:apply` | true |
@@ -280,6 +284,39 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 4. /td-apply fix-bug-<name>         ← 修复 root cause，加回归测试
 5. /td-archive fix-bug-<name>       ← 归档
 ```
+
+---
+
+## 多人协作与初始化建议
+
+多人同时使用 td 工作流时，git 冲突只有两类，处理方式完全不同：
+
+**假冲突（.td-state/ 状态文件）——用 .gitignore 从源头消灭。**
+
+`openspec/.td-state/` 下所有状态文件（`profile-tier.yaml` / `archive-counter.yaml` / `audit-history.yaml` / `audits/`）都可以从文件系统事实推导（`archive/` 目录、`audits/*.md` 等），提交进 git 只会制造冲突——两人同时 archive / audit 时对同一份 YAML 读改写，git 要么报冲突、要么静默丢失数据。**初始化时运行 `/td-init` 一键配置**（检查 OpenSpec 结构 + 配置 .gitignore + 老项目迁移检查），或手动配置，冲突面直接归零（两种放置方式）：
+
+```gitignore
+# 方式 A：项目根 .gitignore
+openspec/.td-state/
+```
+
+```gitignore
+# 方式 B：openspec/.gitignore（嵌套规则，路径相对 openspec/ 目录，不误伤其他内容）
+.td-state/
+```
+
+- 加 .gitignore 之后这些文件仍留在本地，plugin（含 `SessionEnd` hook）照常读写，只是不再进版本库。
+- 若是在加 .gitignore 之前就已经提交过 `.td-state/` 的老项目，需要先执行一次 `git rm -r --cached openspec/.td-state/`，否则 git 会继续跟踪已入库的文件。
+
+**真冲突（specs/ 主 spec 合并）——保留，交给总体设计部裁决。**
+
+两个 change 同时改同一分系统的契约，归档时 `openspec/specs/` 合并会冲突。**这是 feature 不是 bug**——git 在告诉你两个 change 对系统行为有分歧，不能由 agent 自动挑选版本，`/td-archive` 检测到 `UU` 冲突时应触发 `human-in-loop` 让用户裁决。
+
+**协作约定：**
+
+- **一个 change 一个 owner**：不同 change 是独立目录，天然隔离；同一个人/分支上串行推进，不要两个人同时编辑同一个 change。
+- **一个 change 对应一个分支 + PR**：官方推荐模式——`git switch -c <change-name>` → propose → apply → commit + PR → merge → archive（PR merge 后再 archive，主 spec 只跟着已合入的工作前进）。
+- `openspec/config.yaml` / `openspec/specs/` / `openspec/changes/` 是共享事实源，**必须提交**，不要 ignore。
 
 ---
 
