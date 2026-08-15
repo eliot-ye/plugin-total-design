@@ -38,7 +38,7 @@ user-invocable: false
 ## 触发时 agent 应做的事
 
 1. 在 tasks.md 里显式标注关键链路径
-2. 在关键链末端留 project buffer（默认总估时的 20–50%，按 tier 调整）
+2. 在关键链末端留 project buffer（比例按 `constraint-matrix` 表 1 的 critical-buffer 行查当前 tier）
 3. 拒绝把缓冲当"可压缩的余量"——它是系统吸收不确定性的容量
 4. 当用户要求压缩时，先问："这是真瓶颈还是非瓶颈？非瓶颈压缩不影响整体性能。"
 
