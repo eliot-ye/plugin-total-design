@@ -15,7 +15,7 @@ user-invocable: false
 
 ## constraint 强度
 
-强度本身见 `constraint-matrix` skill 的表 1。本 tier 的注解：
+强度本身见步骤 1 注入的表 1（若未注入,调 `constraint-matrix` 注入后再读）。本 tier 的注解：
 
 - `wip-limit`：大系统并行硬解 = 失控
 - `critical-buffer`：不确定性最高
@@ -25,7 +25,7 @@ user-invocable: false
 
 ## system-audit 频率
 
-见 `constraint-matrix` 表 3（tier-large：current-change 每完成 1 个 change，project 每周一次）。本文件不重复定义频率数字。
+见步骤 1 注入的表 3（tier-large：current-change 每完成 1 个 change，project 每周一次）。本文件不重复定义频率数字。
 
 ## 特殊规则
 
@@ -42,13 +42,13 @@ large 系统的每个 change，proposal 里必须附"总体设计文档"：
 
 ### 2. WIP 限制
 
-大系统并行硬解几乎必然制造失调。同一时刻至多允许的活跃 change 数见 `constraint-matrix` 表 1（wip-limit 行），本文件不重复数字。
+大系统并行硬解几乎必然制造失调。同一时刻至多允许的活跃 change 数按步骤 1 注入的表 1 的 wip-limit 行取值，本文件不重复数字。
 
 如果用户坚持要并行，触发 `brooks-law` 强制提醒，并要求用户显式确认风险。
 
 ### 3. 关键链 buffer
 
-大系统的不确定性最高——集成问题、跨团队协调、生产环境意外。buffer 比例见 `constraint-matrix` 表 1（critical-buffer 行），本文件不重复数字。buffer 不是"浪费"，是"必然需要的容量"。
+大系统的不确定性最高——集成问题、跨团队协调、生产环境意外。buffer 比例按步骤 1 注入的表 1 的 critical-buffer 行取值，本文件不重复数字。buffer 不是"浪费"，是"必然需要的容量"。
 
 ### 4. 周期性 system-audit
 

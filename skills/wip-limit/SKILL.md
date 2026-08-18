@@ -12,7 +12,7 @@ user-invocable: false
 
 ## 规则
 
-同时活跃的 change 数量上限按当前 tier 查 `constraint-matrix` 表 1（wip-limit 行），本 skill 不重复定义数字。
+同时活跃的 change 数量上限按当前 tier 查表 1 的 wip-limit 行取值(表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `constraint-matrix` 注入后再读)。本 skill 不重复定义数字。
 
 "活跃"定义：已经 `/td-propose` 但还没 `/td-archive` 的 change。
 

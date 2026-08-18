@@ -15,7 +15,7 @@ user-invocable: false
 
 ## constraint 强度
 
-强度本身见 `constraint-matrix` skill 的表 1。本 tier 的注解：
+强度本身见步骤 1 注入的表 1（若未注入,调 `constraint-matrix` 注入后再读）。本 tier 的注解：
 
 - `wip-limit`：小系统允许稍微并行
 - `critical-buffer`：不确定性较低
@@ -25,7 +25,7 @@ user-invocable: false
 
 ## system-audit 频率
 
-见 `constraint-matrix` 表 3（tier-small：project scope 每完成 5 个 change，current-change 不要求）。本文件不重复定义频率数字。
+见步骤 1 注入的表 3（tier-small：project scope 每完成 5 个 change，current-change 不要求）。本文件不重复定义频率数字。
 
 ## 特殊规则
 

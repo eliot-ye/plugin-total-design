@@ -39,7 +39,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。propose 的每个判断都在主基调四条框架下做。
-2. **profile × tier 识别** — 执行 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）。会话内缓存，后续步骤直接引用。
+2. **profile × tier 识别** — 调 `constraint-matrix`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）。会话内缓存，后续步骤直接引用。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——步骤 3 据此判断 wip-limit / human-in-loop 是否触发。
 
 ### 2. 读现场背景（config.yaml context）
@@ -129,7 +129,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 tasks.md 必须：
 
 - 标注关键链（critical chain）：哪条任务序列是项目的关键路径
-- 留 project buffer：按 `constraint-matrix` 表 1 注入的当前 tier 比例（critical-buffer 行，会话内已缓存）
+- 留 project buffer:按当前 tier 比例(查表 1 的 critical-buffer 行,会话内已缓存。表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `constraint-matrix` 注入后再读)
 
 粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `critical-buffer` skill 的标注规范。
 
@@ -143,7 +143,21 @@ openspec status --change "<name>" --json
 
 检查每个 `applyRequires` 里的 artifact ID 是否 `status: "done"`。
 
-### 9. 显示最终状态
+### 9. 架构 review（proposal 定型后）
+
+所有 artifact 创建完成后，**进入实施前先做架构 review**。
+
+调 `requesting-code-review` 的架构 review（见该 skill 第 5 节），review 对象是 proposal 的分系统切分与设计决策，检查清单见该 skill 的 `references/architecture-review-checklist.md`。
+
+分级与阻塞语义：
+
+- **critical**（坏的分系统切分 / 循环依赖 / 隐式依赖）→ **阻塞**，回步骤 6 改 proposal 再重新 review
+- **warning**（接口偏大、职责偏散）→ 记录到 proposal，可延后
+- **nit**（命名等）→ 可忽略
+
+架构 review 通过（无 critical）才进入步骤 10。
+
+### 10. 显示最终状态
 
 ```bash
 openspec status --change "<name>"
@@ -153,6 +167,7 @@ openspec status --change "<name>"
 
 - Change 名 + 位置
 - 创建的 artifact 列表 + 简述
+- 架构 review 结果：通过 / 有 warning（已记录）
 - "All artifacts created! Ready for implementation."
 - "Run `/td-apply` to start implementing."
 

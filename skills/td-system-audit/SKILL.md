@@ -37,7 +37,7 @@ audit 的对照标准是主基调四条，不是"代码质量"或"进度"——�
 
 system-audit 不是只在用户显式调用时才跑。agent 应在以下时机主动建议 audit：
 
-- **频率触发**：对照 `constraint-matrix` 表 3 的 system-audit 频率（按当前 tier 的 project scope / current-change scope 阈值）。频率事实源在表 3，本 skill 不重写——`td-archive` 步骤 5.2 已维护"累计 archive 计数器"，达阈值即建议。
+- **频率触发**：对照表 3(system-audit 频率,按当前 tier 的 project scope / current-change scope 阈值)。表 3 由 td-* 步骤 1 注入会话上下文;若未注入,调 `constraint-matrix` 注入后再读。频率事实源在 `constraint-matrix` 表 3,本 skill 不重写——`td-archive` 步骤 5.2 已维护"累计 archive 计数器",达阈值即建议。
 - **信号触发**：
   - 用户表达"感觉最近推进不顺利"时
   - 关键链缓冲被多次压缩后
@@ -49,7 +49,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。audit 的对照标准就是主基调四条，没有主基调框架，audit 会退化成"代码质量审查"。
-2. **profile × tier 识别** — 执行 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（audit 频率是否达标，查表 3）。会话内缓存，后续步骤直接引用。
+2. **profile × tier 识别** — 调 `constraint-matrix`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（audit 频率是否达标，查表 3）。会话内缓存，后续步骤直接引用。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
 ### 2. 收集审计对象

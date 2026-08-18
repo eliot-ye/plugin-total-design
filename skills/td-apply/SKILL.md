@@ -35,7 +35,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。
-2. **profile × tier 识别** — 执行 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 7.3）。
+2. **profile × tier 识别** — 调 `constraint-matrix`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 7.3）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——步骤 2 据此判断是否触发 / tasks 是否合规。
 
 ### 2. 前置检查
@@ -44,7 +44,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。
 - **`wip-limit`**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段没拦，这里补拦）
-- **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按步骤 1 注入的当前 tier 比例）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
+- **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按当前 tier 比例,查表 1 的 critical-buffer 行。表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `constraint-matrix` 注入后再读）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - 其余 constraint（brooks-law / delay-decision / human-in-loop）在实施过程中按需触发，不在本步预判。
 
 ### 3. 读 change 的 artifact
@@ -107,7 +107,7 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 
 #### 7.3 current-change audit（按表 3 频率）
 
-两层验证通过后，对照 `constraint-matrix` 表 3 的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`：
+两层验证通过后,对照表 3的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`。表 3 由 td-* 步骤 1 注入会话上下文;若未注入,调 `constraint-matrix` 注入后再读:
 
 - `tier-small`：不要求
 - `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 3），此处不再重复
