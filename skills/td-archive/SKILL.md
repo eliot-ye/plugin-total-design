@@ -67,6 +67,17 @@ openspec archive "<name>"
 
 **归档成功后 TODO 子项勾选**：读 `openspec/todo.md`，查找含 `  - [ ] change: <name>` 子项的主条目——把该 change 对应的子项勾选为 `  - [x] change: <name>`。然后检查该主条目：**全部子项都已勾选** → 主条目勾选 `[x]`；**仍有子项未勾选** → 主条目保持 `- [ ]`。找不到对应子项或文件不存在 → 跳过，不主动创建文件。
 
+**Purpose TBD housekeeping 检查**：`openspec archive` sync 主 spec 时，新生成的主 spec `## Purpose` 节会保留 td-archive 模板默认值 `TBD - created by archiving change <name>. Update Purpose after archive.`——这是已知的 sync 副作用，不能让 TBD 残留到下一次 audit。
+
+sync 完成后**立即执行**：
+
+1. 读本次 archive 涉及的所有主 spec（即 change 的 `specs/` delta 覆盖的那些 `openspec/specs/<capability>/spec.md`）
+2. 对每个主 spec，检查 `## Purpose` 节是否仍为 `TBD` 模板默认值（grep `^TBD - created by archiving` 即可命中）
+3. 命中 → **本步骤内补写**（不要推迟到下一次 audit）：基于已归档 change 的 proposal「What Changes」节，为每个 TBD 主 spec 写一句话 Purpose（描述该 capability 是什么、解决什么问题）。补写后再次 grep 确认无 TBD 残留。
+4. 全部主 spec 的 Purpose 都已非 TBD → 跳过，不打扰用户
+
+这是 housekeeping，不是核心归档动作——但放任 TBD 残留会让后续 `/td-system-audit` 反复报告同一问题。本检查确保"归档即闭环"。
+
 ### 5. archive 后接力动作
 
 archive 是契约层的"闭合点"，必须触发三个后续接力（顺序执行）：
