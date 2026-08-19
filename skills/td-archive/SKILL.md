@@ -51,6 +51,11 @@ archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预�
 - 预期整体性能变化 vs 实际变化
 - 预期之外的副作用（这是后续 `/td-system-audit` 的输入）
 
+复盘的对照源有两个，按"有则用、缺则降级"原则叠加：
+
+1. **proposal 的"系统工程影响评估"节** —— 永远存在（propose 必填项），是"预期"侧的主锚点。
+2. **`openspec/specs/` 下的主 spec baseline** —— 若该 change 改动的分系统在 `openspec/specs/<subsystem>/spec.md` 有 reverse-spec 或前序 archive sync 沉淀的 baseline，把 baseline 作为"改之前真实状态"的对照源之一，复盘要回答"change 的 spec delta 是否破坏了 baseline 声明的契约 / 不变量"。**baseline 不存在**（greenfield 首个 change、或该分系统从未被 reverse-spec）→ 跳过本对照源，仅用 proposal 自述做复盘，不阻塞 archive。
+
 没这一节，archive 拒绝继续。这是 `/td-system-audit` "实际 vs 预期"审计的数据来源——闭环必须闭合。
 
 ### 4. archive（含 sync）
