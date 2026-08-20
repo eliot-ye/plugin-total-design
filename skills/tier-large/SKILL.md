@@ -13,10 +13,6 @@ user-invocable: false
 - 部署单元：多个
 - 系统层次：多层嵌套的分系统，可能有跨仓库依赖
 
-## constraint 强度
-
-强度本身见步骤 1 注入的表 1（若未注入,调 `field-assessment` 注入后再读）。本 tier 的注解已合并进 `field-assessment/references/strength-matrix.md` 的「表 1 注解」节,本文件不重复。
-
 ## system-audit 频率
 
 见步骤 1 注入的表 3（tier-large：current-change 每完成 1 个 change，project 每周一次）。本文件不重复定义频率数字。
@@ -43,17 +39,17 @@ large 系统的每个 change，proposal 里必须附"总体设计文档"：
 
 ### 2. WIP 限制
 
-大系统并行硬解几乎必然制造失调。同一时刻至多允许的活跃 change 数按步骤 1 注入的表 1 的 wip-limit 行取值，本文件不重复数字。
+大系统并行硬解几乎必然制造失调。同一时刻至多允许的活跃 change 数按表 1 的 wip-limit 行取值（表 1 见 `field-assessment/references/strength-matrix.md`），本文件不重复数字。
 
 如果用户坚持要并行，触发 `brooks-law` 强制提醒，并要求用户显式确认风险。
 
 ### 3. 关键链 buffer
 
-大系统的不确定性最高——集成问题、跨团队协调、生产环境意外。buffer 比例按步骤 1 注入的表 1 的 critical-buffer 行取值，本文件不重复数字。buffer 不是"浪费"，是"必然需要的容量"。
+大系统的不确定性最高——集成问题、跨团队协调、生产环境意外。buffer 比例按表 1 的 critical-buffer 行取值，本文件不重复数字。buffer 不是"浪费"，是"必然需要的容量"。
 
 ### 4. 周期性 system-audit
 
-大系统的"局部优化制造全局失调"风险最高。`project` scope audit 频率见表 3 的 tier-large project scope 行（表 3 由 td-* 步骤 1 注入会话上下文；若未注入，调 `field-assessment` 注入后再读）。本文件不重复定义频率数字。
+大系统的"局部优化制造全局失调"风险最高。`project` scope audit 频率见表 3 的 tier-large project scope 行（表 3 见 `field-assessment/references/audit-frequency.md`）。本文件不重复定义频率数字。
 
 audit 报告里特别关注：
 
@@ -61,7 +57,7 @@ audit 报告里特别关注：
 - 关键链 buffer 是否被压缩
 - 是否有"应该触发 human-in-loop 但没触发"的决策
 
-**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**——每个子系统有自己的"局部优化制造全局失调"风险，跨子系统的依赖链是跨子系统的关键链。audit 报告里应区分"子系统内部失调"和"跨子系统边界失调"，后者按"最高 tier 子系统"的强度处理（保守原则）。
+**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**，audit 报告里区分"子系统内部失调"和"跨子系统边界失调"——后者按"最高 tier 子系统"的强度处理（保守原则）。子系统独立定 tier 的执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
 
 ## 与其他 tier 的切换
 

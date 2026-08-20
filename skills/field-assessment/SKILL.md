@@ -14,14 +14,7 @@ user-invocable: false
 
 ## 内容编排
 
-本 skill 的正文是编排层，实际内容在 `references/` 下四个文件：
-
-| 文件 | 内容 | 被谁读 |
-|---|---|---|
-| `references/strength-matrix.md` | 表 1（5 constraint × 3 tier 强度）+ 表 2（profile × human-in-loop 加成） | 读 constraint 强度的 skill |
-| `references/audit-frequency.md` | 表 3（system-audit 频率） | 读 audit 频率的 skill（td-system-audit / executing-plans / 3 tier） |
-| `references/identification-flow.md` | 识别流程（读缓存→判 profile→判 tier→缓存→注入强度）+ 持久化层路径 + profile-tier.yaml 模板 | 每个 td-* skill 的步骤 1 |
-| `references/subsystem-tiering.md` | 子系统独立定 tier 机制（层次观归位） | 处理子系统分层强度的 skill |
+本 skill 的正文是编排层，实际内容在 `references/` 下四个文件（强度矩阵 / audit 频率 / 识别流程 / 子系统独立定 tier）。下游 skill 通过 `field-assessment` 的识别流程读这四个文件。
 
 ## 如何被引用
 

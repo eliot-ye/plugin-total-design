@@ -70,7 +70,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
   - 用户已给明确描述 → 检查候选池里是否有语义重合的主条目，有则提示用户"TODO 池里已有近似条目，要不要基于它 propose？"——同一条主条目可以承接多个 change（每个 change 一个子项追加），不算重复建 change。
   - 候选池是 backlog（可以无限多），活跃 change 才是 WIP——池里有候选不构成阻塞，只有活跃 change 数触发 `wip-limit`。
 - **brownfield reverse-spec 检查**：若 `$_TD_PROFILE == profile-brownfield`，检查 `openspec/specs/` 下是否已有相关分系统的 baseline spec。没有 → 触发 `human-in-loop`，提示用户"你对现有系统还没建立认识，propose 大改动风险高。先 `/td-reverse-spec` 吗？"——用户同意后执行 `/td-reverse-spec` 建立 baseline，完成后回到本步骤继续 propose。
-- **greenfield explore 检查**：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空（还没建立初始 spec），检查会话内是否已做过探索（`td-explore` 或 `brainstorming` 产物，至少 2 个候选方向）。没有 → 触发 `human-in-loop`，提示用户"greenfield 最容易犯的错是'想到了就建'。先 `/td-explore` 至少探索 2 个候选方向再 propose 吗？"——用户同意后执行 `/td-explore`，完成后回到本步骤继续 propose。
+- **greenfield explore 检查**：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空（还没建立初始 spec），检查会话内是否已做过探索。判据：会话历史里是否出现过 `/td-explore` 调用或 `brainstorming` 触发，且产物里含**至少 2 个候选方向**（每个候选方向标注系统工程影响，见 `td-explore` 步骤 4 的产物要求）。没有 → 触发 `human-in-loop`，提示用户"greenfield 最容易犯的错是'想到了就建'。先 `/td-explore` 至少探索 2 个候选方向再 propose 吗？"——用户同意后执行 `/td-explore`，完成后回到本步骤继续 propose。
 
 ### 4. 创建 change 目录
 
@@ -150,7 +150,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 tasks.md 必须：
 
 - 标注关键链（critical chain）：哪条任务序列是项目的关键路径
-- 留 project buffer:按当前 tier 比例(查表 1 的 critical-buffer 行,会话内已缓存。表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读)
+- 留 project buffer:按当前 tier 比例(查表 1 的 critical-buffer 行,会话内已缓存;表 1 见 `field-assessment/references/strength-matrix.md`)
 
 粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `critical-buffer` skill 的标注规范。
 

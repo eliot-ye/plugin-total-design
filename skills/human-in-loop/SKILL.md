@@ -21,8 +21,8 @@ user-invocable: false
 3. **生产环境影响**：部署、迁移、权限变更、数据修改
 4. **超出当前 change scope 的影响**：改动会波及 change 之外的代码或系统
 5. **agent 自己的置信度低**：agent 不确定方案是否对齐用户意图时
-6. **WIP 硬约束 override**（见 `wip-limit` 的「硬约束 + override 机制」节）：用户想并行硬解超过 wip-limit 上限的 change 时，必须显式确认风险——这与 `brooks-law` 的"加人手前显式确认"是对称设计。
-7. **被 `/td-system-audit` 触发修复时**：audit 发现"局部最优但全局失调"问题时，触发本 skill 让用户（总体设计部）判断这是真全局失调还是可接受的局部优化。本 skill 是 audit 修复目标之一。
+6. **WIP 硬约束 override**：本类由 `wip-limit` 的 override 流程触发（见 `wip-limit` 的「硬约束 + override 机制」节）。用户想并行硬解超过 wip-limit 上限的 change 时，本 skill 负责执行"显式确认风险"的回路。第 6 类不参与 profile × tier 强度叠加——它是 WIP 硬约束的 override 通道，与 profile/tier 强度无关。
+7. **被 `/td-system-audit` 触发修复时**：audit 发现"局部最优但全局失调"问题时，触发本 skill 让用户（总体设计部）判断这是真全局失调还是可接受的局部优化。
 
 ### 强度叠加规则
 
@@ -60,4 +60,4 @@ user-invocable: false
 
 - 与 `delay-decision` 配合：可逆决策延迟，但延迟期内触及不可逆点时，本 skill 触发
 - 与 `brooks-law` 配合：用户考虑"加人手"时，brooks-law 提醒，本 skill 要求用户显式确认
-- 与 `wip-limit` 配合：用户想并行硬解超过 wip-limit 上限的 change 时，wip-limit 硬阻塞，本 skill 在 override 流程里要求用户显式确认风险——与 brooks-law 的"加人手前显式确认"是对称设计。
+- 与 `wip-limit` 配合：用户想并行硬解超过 wip-limit 上限的 change 时，wip-limit 硬阻塞，本 skill 在 override 流程里要求用户显式确认风险（第 6 类）。

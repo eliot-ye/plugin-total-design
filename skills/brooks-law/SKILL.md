@@ -25,7 +25,7 @@ Brooks 在《人月神话》里说："向一个进度落后的项目加人手，
 - 用户说"再招一个"/"加个 agent"/"并行多开几个 subagent"
 - `/td-apply` 时用户要求"dispatching-parallel-agents" 加速
 - change 的 tasks.md 里出现"多人协作"或"并行"字样
-- **WIP override 时被 `wip-limit` 触发**：用户对 WIP 超限显式 override 时，`wip-limit` 的 override 流程会触发本 skill 做强制提醒（见 `wip-limit` 的「硬约束 + override 机制」节）。本 skill 与 `wip-limit` 的"加人手前显式确认"是对称设计——两个 skill 都服务主基调第 4 条"不能并行硬解"，执行强度也应该对称。
+- **WIP override 时被 `wip-limit` 触发**：用户对 WIP 超限显式 override 时，`wip-limit` 的 override 流程会触发本 skill 做强制提醒（见 `wip-limit` 的「硬约束 + override 机制」节）。
 
 ## 触发时 agent 应做的事
 

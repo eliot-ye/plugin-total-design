@@ -13,13 +13,9 @@ user-invocable: false
 - 部署单元：1 个
 - 系统层次：扁平，无明显分系统边界
 
-## constraint 强度
-
-强度本身见步骤 1 注入的表 1（若未注入,调 `field-assessment` 注入后再读）。本 tier 的注解已合并进 `field-assessment/references/strength-matrix.md` 的「表 1 注解」节,本文件不重复。
-
 ## system-audit 频率
 
-见步骤 1 注入的表 3（tier-small：project scope 每完成 5 个 change，current-change 不要求）。本文件不重复定义频率数字。
+见表 3 的 tier-small 行（project scope 每完成 5 个 change，current-change 不要求；表 3 见 `field-assessment/references/audit-frequency.md`）。本文件不重复定义频率数字。
 
 ## 特殊规则
 

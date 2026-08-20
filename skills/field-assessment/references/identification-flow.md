@@ -48,6 +48,16 @@ agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `
 
 **子系统独立定 tier 时的强度注入**：当 `profile-tier.yaml` 含 `subsystems` 条目时，注入强度应**按子系统分别注入**——每个子系统有自己的表 1 / 表 2 强度。跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则）。后续步骤引用强度时，需区分"当前操作作用于哪个子系统"。
 
+### 下游引用强度的约定
+
+下游 skill 引用表 1 / 表 2 / 表 3 的强度值时，遵循同一约定：
+
+- **强度值由 td-* skill 的"步骤 1"注入会话上下文**——通过 `field-assessment` 的识别流程完成注入。
+- **若强度未注入**（如 td-* skill 跳过步骤 1、或会话上下文被清理），下游 skill 调 `field-assessment` 注入后再读，不重复定义数值。
+- **单一事实源**：强度数值只在 `strength-matrix.md`（表 1 + 表 2）和 `audit-frequency.md`（表 3）定义，下游 skill 引用时不复制数值，只引用"按当前 tier 查表 X 的 Y 行"。
+
+这条约定对所有 constraint skill、tier skill、td-* skill 生效。下游 skill 不必在正文重复这条约定——本节是约定的单一锚点。
+
 ## 持久化层（.td-state/）
 
 profile/tier 判读结果持久化到 `openspec/.td-state/profile-tier.yaml`。文件由 agent 首次运行识别流程时按需创建，不预置。

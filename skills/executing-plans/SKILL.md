@@ -16,7 +16,7 @@ user-invocable: true
 
 - plan 已经写好（`writing-plans` 完成）
 - 用户说"开始执行" / "go"
-- **current-change audit 触发**（随本 skill 的 Human checkpoint 触发）：对照表 3 current-change scope 频率（表 3 由 td-* 步骤 1 注入会话上下文；若未注入，调 `field-assessment` 注入后再读）——`tier-medium` 每个关键链任务完成时触发 `/td-system-audit current-change`；`tier-small` 不要求；`tier-large` 由 `td-apply` 步骤 7.3 负责，本处不重复。
+- **current-change audit 触发**（随本 skill 的 Human checkpoint 触发）：对照表 3 current-change scope 频率（表 3 见 `field-assessment/references/audit-frequency.md`）——`tier-medium` 每个关键链任务完成时触发 `/td-system-audit current-change`；`tier-small` 不要求；`tier-large` 由 `td-apply` 步骤 7.3 负责，本处不重复。
 
 ## 工作方式
 

@@ -39,7 +39,7 @@ audit 的对照标准是主基调四条，不是"代码质量"或"进度"——�
 
 system-audit 不是只在用户显式调用时才跑。agent 应在以下时机主动建议 audit：
 
-- **频率触发**：对照表 3(system-audit 频率,按当前 tier 的 project scope / current-change scope 阈值)。表 3 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读。频率事实源在 `field-assessment` 表 3,本 skill 不重写——`td-archive` 步骤 5.2 已维护"累计 archive 计数器",达阈值即建议。
+- **频率触发**：对照表 3(system-audit 频率,按当前 tier 的 project scope / current-change scope 阈值;表 3 见 `field-assessment/references/audit-frequency.md`)。频率事实源在表 3,本 skill 不重写——`td-archive` 步骤 5.2 已维护"累计 archive 计数器",达阈值即建议。
 - **信号触发**：
   - 用户表达"感觉最近推进不顺利"时
   - 关键链缓冲被多次压缩后
@@ -61,7 +61,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 - **current-change**：当前活跃 change 的 proposal/design/tasks/specs
 - **project**：所有活跃 change + 最近 archive 的 3 个 change 的"实际 vs 预期"复盘，**并纳入 `openspec/specs/` 下的主 spec baseline**——这是 reverse-spec / archive sync 沉淀下来的分系统契约与不变量，作为 audit 对照"局部改动是否破坏既有分系统契约"的锚点。`openspec/specs/` 为空（项目从未 reverse-spec、也未 archive 过任何 change）→ 跳过 baseline 锚点，仅审计活跃 change 与最近 archive 复盘。
 
-**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**——每个子系统有自己的"局部优化制造全局失调"风险，跨子系统的依赖链是跨子系统的关键链。audit 报告里应区分"子系统内部失调"和"跨子系统边界失调"，后者按"最高 tier 子系统"的强度处理（保守原则）。
+**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**，audit 报告里区分"子系统内部失调"和"跨子系统边界失调"——后者按"最高 tier 子系统"的强度处理（保守原则）。执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
 
 ### 3. 对照主基调四条审计
 

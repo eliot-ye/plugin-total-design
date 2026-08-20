@@ -47,23 +47,21 @@ user-invocable: false
 - 用户在 `/td-propose` 或 `/td-apply` 时要求"加快进度"或"压缩估时"
 - agent 自己生成 tasks.md 时
 - 多个 change 在排队，用户想插队
-- **被 `/td-system-audit` 触发修复时**：audit 发现"关键链缓冲被压缩"问题时，触发本 skill 重新规划 tasks。本 skill 是 audit 修复目标之一。
+- **被 `/td-system-audit` 触发修复时**：audit 发现"关键链缓冲被压缩"问题时，触发本 skill 重新规划 tasks。
 
 ## 触发时 agent 应做的事
 
 1. 在 tasks.md 里显式标注关键链路径
-2. 在关键链末端留 project buffer(比例按表 1 的 critical-buffer 行取值,按当前 tier。表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读)
+2. 在关键链末端留 project buffer(比例按表 1 的 critical-buffer 行取值,按当前 tier;表 1 见 `field-assessment/references/strength-matrix.md`)
 3. 拒绝把缓冲当"可压缩的余量"——它是系统吸收不确定性的容量
 4. 当用户要求压缩时，先问："这是真瓶颈还是非瓶颈？非瓶颈压缩不影响整体性能。"
 
 ## 按 tier 调整
 
-project buffer 比例按表 1 的 critical-buffer 行取值(按当前 tier)。表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读。本 skill 不重复定义数字。
+project buffer 比例按表 1 的 critical-buffer 行取值(按当前 tier)。本 skill 不重复定义数字。
 
 tier 越大，系统越复杂，不确定性越高，缓冲越厚。
 
 ### 层次观归位
 
-当系统内部有明显的子系统边界时（`field-assessment` 识别流程允许子系统独立定 tier），本 skill 的关键链标注应**按子系统层次分别标注**——每个子系统有自己的关键链和 project buffer，子系统之间的依赖链是跨子系统的关键链。
-
-这不是把"一个 tier-large 的关键链"拆成"多个 tier-small 的关键链"——而是承认复杂巨系统是多层级嵌套结构（主基调第 4 条「层次观」），不同层次的关键链需要分层标注，才能在 `td-apply` 步骤 7.2 的系统级验证里被逐条验证。
+当系统内部有明显的子系统边界时（`field-assessment` 识别流程允许子系统独立定 tier），本 skill 的关键链标注应**按子系统层次分别标注**——每个子系统有自己的关键链和 project buffer，子系统之间的依赖链是跨子系统的关键链。子系统独立定 tier 的执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。

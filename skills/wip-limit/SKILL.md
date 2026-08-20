@@ -10,11 +10,11 @@ user-invocable: false
 
 **系统工程主基调第 4 条：开放的复杂巨系统。** 复杂巨系统不能并行硬解。同时开太多 change，彼此的相互作用无法被 agent 同时持有——每个 change 都半途而废，整体性能下降。
 
-"不能并行硬解"是硬约束，不是建议——违反即系统失调。但钱学森系统工程也尊重"触发式而非强制"哲学：硬约束默认阻塞，用户显式 override 时松绑，override 时触发额外强制提醒。这与 `brooks-law` 的"强制提醒 + 显式确认"是对称设计——两个 skill 都服务主基调第 4 条"不能并行硬解"，执行强度也应该对称。
+"不能并行硬解"是硬约束，不是建议——违反即系统失调。但钱学森系统工程也尊重"触发式而非强制"哲学：硬约束默认阻塞，用户显式 override 时松绑，override 时触发额外强制提醒。
 
 ## 规则
 
-同时活跃的 change 数量上限按当前 tier 查表 1 的 wip-limit 行取值(表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读)。本 skill 不重复定义数字。
+同时活跃的 change 数量上限按当前 tier 查表 1 的 wip-limit 行取值（表 1 见 `field-assessment/references/strength-matrix.md`）。本 skill 不重复定义数字。
 
 "活跃"定义：已经 `/td-propose` 但还没 `/td-archive` 的 change。
 
@@ -30,9 +30,9 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
    - 给出两个选项：(a) 先 `/td-archive` 一个再 propose/apply；(b) 显式 override。
    - 等待用户决策。
 4. **override 流程（用户选 override 时）**：
-   - 触发 `brooks-law` 强制提醒（与 brooks-law 的"显式确认"对称）。
+   - 触发 `brooks-law` 强制提醒（加人手前的协调成本反思）。
    - 触发 `critical-buffer` 评估（并行 change 对关键链 buffer 的影响，见 `critical-buffer` 的「隐性 buffer 压缩」节）。
-   - 要求用户显式确认："我理解并行硬解 N+1 个 change 的风险，包括注意力分散导致的隐性 buffer 压缩、跨 change 全局失调可能不被 project scope audit 及时检测到。"
+   - 触发 `human-in-loop` 第 6 类（WIP 硬约束 override）——本 skill 是第 6 类的唯一触发源，由 `human-in-loop` 负责执行"显式确认风险"的回路。
    - 用户确认后，在 change 的 `proposal.md` 里记录"override WIP 上限，用户已确认风险"——作为后续 `/td-system-audit` 的输入。
    - 才继续执行后续步骤。
 
@@ -46,7 +46,7 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
 - 用户想 `/td-propose` 一个新 change，但活跃 change 数已达上限
 - 用户想同时推进多个 change
 - **override 后的二次检测**：用户对某次 WIP 超限显式 override 后，下一次 `/td-propose` 或 `/td-apply` 再次检测到 WIP 超限时，本 skill 应在 override 流程里额外提示"上次已 override 一次，连续 override 会让 WIP 硬约束彻底失效"——防止 override 滥用。
-- **被 `/td-system-audit` 触发修复时**：audit 发现"同时开太多 change（WIP 超限）"问题时，触发本 skill 的「硬约束 + override 机制」节，阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override。本 skill 是 audit 修复目标之一。
+- **被 `/td-system-audit` 触发修复时**：audit 发现"同时开太多 change（WIP 超限）"问题时，触发本 skill 的「硬约束 + override 机制」节，阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override。
 
 ## 触发时 agent 应做的事
 

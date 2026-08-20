@@ -47,9 +47,9 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
 
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节（含"预期行为模型"字段）？没有 → 不算 apply-ready，停下来问用户。
-- **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `tier-large` 的「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。这与 `td-propose` 步骤 7 的"tier-large 总体设计文档必填"检查对称——两处都校验，避免漏检。
-- **`wip-limit`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。**阻塞本步骤，不执行步骤 3**，执行 `wip-limit` 的「硬约束 + override 机制」节（权威描述在该 skill，本文件不重复；override 通过后继续步骤 3）。apply 阶段的 WIP 补拦与 propose 阶段的 WIP 硬阻塞是对称设计，两处都必须执行硬阻塞 + override 机制。
-- **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按当前 tier 比例,查表 1 的 critical-buffer 行。表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
+- **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `tier-large` 的「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。与 `td-propose` 步骤 7 的检查在两处分别校验，避免漏检。
+- **`wip-limit`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。**阻塞本步骤，不执行步骤 3**，执行 `wip-limit` 的「硬约束 + override 机制」节（权威描述在该 skill，本文件不重复；override 通过后继续步骤 3）。propose 与 apply 两处都必须执行硬阻塞 + override 机制。
+- **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按当前 tier 比例,查表 1 的 critical-buffer 行;表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - 其余 constraint（brooks-law / delay-decision / human-in-loop）在实施过程中按需触发，不在本步预判。
 
 ### 3. 读 change 的 artifact
@@ -63,7 +63,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 ### 4. 架构 review + 触发行为层
 
-**进入任务实施前，先触发 `requesting-code-review` 的架构 review**——对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合（检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 不进入任务实施**，回步骤 3 重新读并让用户决策：改 proposal 还是继续。
+**进入任务实施前，先触发 `requesting-code-review` 的架构 review**——对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合（检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review（与 `td-propose` 步骤 9 的架构 critical 闭环对称）。
 
 架构 review 通过后，按 `tasks.md` 的任务序列实施。行为层 skill 嵌套触发，不是平铺：
 
@@ -110,11 +110,11 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 
 边界验证发现跨分系统问题 → 触发 `systematic-debugging` 找根因；若 root cause 在 plan 之外（proposal 的影响评估漏了分系统）→ 停下来问用户：是补 proposal 的评估还是改代码？
 
-**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，本步骤的跨分系统边界验证应**按子系统层次分别验证**——每个子系统有自己的边界验证强度（按该子系统的 tier），跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则）。这不是把"一个 tier-large 的边界验证"拆成"多个 tier-small 的边界验证"——而是承认复杂巨系统是多层级嵌套结构（主基调第 4 条「层次观」），不同层次的子系统需要分层对待。
+**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，本步骤的跨分系统边界验证应**按子系统层次分别验证**——每个子系统按自己的 tier 强度验证，跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则）。子系统独立定 tier 的执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
 
 #### 7.3 current-change audit（按表 3 频率）
 
-两层验证通过后,对照表 3的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`。表 3 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读:
+两层验证通过后,对照表 3的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`(表 3 见 `field-assessment/references/audit-frequency.md`):
 
 - `tier-small`：不要求
 - `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 3），此处不再重复
