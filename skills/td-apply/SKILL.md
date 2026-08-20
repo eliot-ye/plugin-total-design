@@ -48,14 +48,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节（含"预期行为模型"字段）？没有 → 不算 apply-ready，停下来问用户。
 - **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `tier-large` 的「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。这与 `td-propose` 步骤 7 的"tier-large 总体设计文档必填"检查对称——两处都校验，避免漏检。
-- **`wip-limit`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。**阻塞本步骤，不执行步骤 3**。执行 `wip-limit` 的「硬约束 + override 机制」：
-  1. 报告当前活跃 change 列表 + WIP 上限 + 当前 tier
-  2. 给用户两个选项：(a) 先 `/td-archive` 一个再 apply；(b) 显式 override
-  3. 用户选 (a) → 引导走 `/td-archive`，本 change 的 apply 暂停
-  4. 用户选 (b) → 进入 override 流程（触发 `brooks-law` 强制提醒 + `critical-buffer` 隐性 buffer 压缩评估 + 要求用户显式确认风险 + 在 change 的 proposal.md 记录"apply 阶段 override WIP 上限，用户已确认风险"）
-  5. override 确认完成 → 才继续执行步骤 3
-
-  **不允许"提示一下就放行"**——apply 阶段的 WIP 补拦与 propose 阶段的 WIP 硬阻塞是对称设计，两处都必须执行硬阻塞 + override 机制。
+- **`wip-limit`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。**阻塞本步骤，不执行步骤 3**，执行 `wip-limit` 的「硬约束 + override 机制」节（权威描述在该 skill，本文件不重复；override 通过后继续步骤 3）。apply 阶段的 WIP 补拦与 propose 阶段的 WIP 硬阻塞是对称设计，两处都必须执行硬阻塞 + override 机制。
 - **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按当前 tier 比例,查表 1 的 critical-buffer 行。表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - 其余 constraint（brooks-law / delay-decision / human-in-loop）在实施过程中按需触发，不在本步预判。
 

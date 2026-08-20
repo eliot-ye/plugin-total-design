@@ -55,7 +55,7 @@ archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预�
 - **模型验证**：proposal 的"预期行为模型"是否被实际行为验证？
   - 如果验证通过 → 模型成立，记录"预期行为模型已验证"。
   - 如果验证失败 → 模型需要修正，记录"预期行为模型与实际偏差：<偏差描述>，模型修正建议：<...>"。这是综合集成循环的闭合动作——把"这次发现的偏差"转化为"下一个 propose 的预测模型修正"（见 `system-engineering` 的「反馈控制回路」节）。
-  - 如果 proposal 没填"预期行为模型"字段（旧 change 兼容）→ 跳过本字段，仅用前三个字段做复盘。
+  - 如果 proposal 没填"预期行为模型"字段（旧 change 兼容）→ 跳过本字段，仅用前三个字段做复盘。本兜底仅兼容本 plugin 之前版本的旧 change；新 change 的 proposal 必填此字段（`td-propose` 步骤 7），理论上不应走到本分支。
 
 复盘的对照源有两个，按"有则用、缺则降级"原则叠加：
 
@@ -78,16 +78,7 @@ openspec archive "<name>"
 
 **归档成功后 TODO 子项勾选**：读 `openspec/todo.md`，查找含 `  - [ ] change: <name>` 子项的主条目——把该 change 对应的子项勾选为 `  - [x] change: <name>`。然后检查该主条目：**全部子项都已勾选** → 主条目勾选 `[x]`；**仍有子项未勾选** → 主条目保持 `- [ ]`。找不到对应子项或文件不存在 → 跳过，不主动创建文件。
 
-**Purpose TBD housekeeping 检查**：`openspec archive` sync 主 spec 时，新生成的主 spec `## Purpose` 节会保留 td-archive 模板默认值 `TBD - created by archiving change <name>. Update Purpose after archive.`——这是已知的 sync 副作用，不能让 TBD 残留到下一次 audit。
-
-sync 完成后**立即执行**：
-
-1. 读本次 archive 涉及的所有主 spec（即 change 的 `specs/` delta 覆盖的那些 `openspec/specs/<capability>/spec.md`）
-2. 对每个主 spec，检查 `## Purpose` 节是否仍为 `TBD` 模板默认值（grep `^TBD - created by archiving` 即可命中）
-3. 命中 → **本步骤内补写**（不要推迟到下一次 audit）：基于已归档 change 的 proposal「What Changes」节，为每个 TBD 主 spec 写一句话 Purpose（描述该 capability 是什么、解决什么问题）。补写后再次 grep 确认无 TBD 残留。
-4. 全部主 spec 的 Purpose 都已非 TBD → 跳过，不打扰用户
-
-这是 housekeeping，不是核心归档动作——但放任 TBD 残留会让后续 `/td-system-audit` 反复报告同一问题。本检查确保"归档即闭环"。
+**Purpose TBD housekeeping 检查**：`openspec archive` sync 主 spec 时，新生成的主 spec `## Purpose` 节会保留 td-archive 模板默认值 `TBD - created by archiving change <name>. Update Purpose after archive.`——这是已知的 sync 副作用，不能让 TBD 残留到下一次 audit。sync 完成后立即按 `references/purpose-tbd-housekeeping.md` 执行子流程（读涉及主 spec → grep `^TBD - created by archiving` → 命中则本步骤内补写一句话 Purpose → 再次 grep 确认无残留）。
 
 ### 5. archive 后接力动作
 

@@ -22,6 +22,7 @@ user-invocable: false
 4. **超出当前 change scope 的影响**：改动会波及 change 之外的代码或系统
 5. **agent 自己的置信度低**：agent 不确定方案是否对齐用户意图时
 6. **WIP 硬约束 override**（见 `wip-limit` 的「硬约束 + override 机制」节）：用户想并行硬解超过 wip-limit 上限的 change 时，必须显式确认风险——这与 `brooks-law` 的"加人手前显式确认"是对称设计。
+7. **被 `/td-system-audit` 触发修复时**：audit 发现"局部最优但全局失调"问题时，触发本 skill 让用户（总体设计部）判断这是真全局失调还是可接受的局部优化。本 skill 是 audit 修复目标之一。
 
 ### 强度叠加规则
 

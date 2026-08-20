@@ -12,6 +12,18 @@
 | `delay-decision` | 强 | 强 | 强 |
 | `human-in-loop` | 仅不可逆决策 | + 公共契约变更 | + 总体设计文档审阅 |
 
+### 表 1 注解（3 tier × 5 constraint）
+
+本表是三个 tier skill 的「constraint 强度」注解合并而来，避免三处重复。
+
+| constraint | tier-small 注解 | tier-medium 注解 | tier-large 注解 |
+|---|---|---|---|
+| `wip-limit` | 小系统允许稍微并行 | 中系统并行开始有协调成本 | 大系统并行硬解 = 失控 |
+| `critical-buffer` | 不确定性较低 | 不确定性中等 | 不确定性最高 |
+| `brooks-law` | 小团队加人手影响有限，不强制 | 中团队加人手要考虑 onboarding，提醒 | 大系统加人手几乎必然拖慢，强制 |
+| `delay-decision` | 表 1 说"强"（三个 tier 都强）。小系统回滚成本低，更该延迟——这是"强"在小系统的具体含义 | 强 | 强 |
+| `human-in-loop` | 仅不可逆决策 | + 公共契约变更 | + 总体设计文档审阅 |
+
 ## 表 2：3 个 profile 在 human-in-loop 上的场景加成
 
 | profile | tier-small | tier-medium | tier-large |

@@ -15,13 +15,7 @@ user-invocable: false
 
 ## constraint 强度
 
-强度本身见步骤 1 注入的表 1（若未注入,调 `field-assessment` 注入后再读）。本 tier 的注解：
-
-- `wip-limit`：小系统允许稍微并行
-- `critical-buffer`：不确定性较低
-- `brooks-law`：小团队加人手影响有限，不强制
-- `delay-decision`：表 1 说"强"（三个 tier 都强）。小系统回滚成本低，更该延迟——这是"强"在小系统的具体含义
-- `human-in-loop`：仅不可逆决策
+强度本身见步骤 1 注入的表 1（若未注入,调 `field-assessment` 注入后再读）。本 tier 的注解已合并进 `field-assessment/references/strength-matrix.md` 的「表 1 注解」节,本文件不重复。
 
 ## system-audit 频率
 

@@ -88,11 +88,15 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 对每个严重问题，触发对应的 constraint skill 修复：
 
-- 关键链缓冲被压缩 → 触发 `critical-buffer`，重新规划 tasks
-- agent 自己拍板了 → 触发 `human-in-loop`，回去问用户
-- 可逆决策被过早闭合 → 触发 `delay-decision`，重新打开决策
-- **同时开太多 change（WIP 超限）** → 触发 `wip-limit` 的「硬约束 + override 机制」，阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override
-- **"局部最优但全局失调"** → 触发 `human-in-loop`，让用户（总体设计部）判断这是真全局失调还是可接受的局部优化。本 plugin 没有专门的"全局失调"constraint skill——这个判断必须由总体设计部做，不能由 agent 自己拍板（主基调第 2 条）。
+| 严重问题类型 | 触发的 constraint skill |
+|---|---|
+| 关键链缓冲被压缩 | `critical-buffer`（重新规划 tasks） |
+| agent 自己拍板了 | `human-in-loop`（回去问用户） |
+| 可逆决策被过早闭合 | `delay-decision`（重新打开决策） |
+| 同时开太多 change（WIP 超限） | `wip-limit` 的「硬约束 + override 机制」（阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override） |
+| 局部最优但全局失调 | `human-in-loop`（让总体设计部判断）。本 plugin 没有专门的"全局失调"constraint skill——这个判断必须由总体设计部做，不能由 agent 自己拍板（主基调第 2 条） |
+
+注：本表为问题→修复映射，各 constraint skill 的「触发时机」节已反向声明"被 `/td-system-audit` 触发修复时"。
 
 ### 7. 修复后重跑 audit 闭环
 

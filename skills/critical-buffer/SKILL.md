@@ -47,6 +47,7 @@ user-invocable: false
 - 用户在 `/td-propose` 或 `/td-apply` 时要求"加快进度"或"压缩估时"
 - agent 自己生成 tasks.md 时
 - 多个 change 在排队，用户想插队
+- **被 `/td-system-audit` 触发修复时**：audit 发现"关键链缓冲被压缩"问题时，触发本 skill 重新规划 tasks。本 skill 是 audit 修复目标之一。
 
 ## 触发时 agent 应做的事
 

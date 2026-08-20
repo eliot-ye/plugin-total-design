@@ -59,6 +59,8 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 调用 `brainstorming` skill 的 1–4 步工作方式——**不执行** brainstorming 的第 5–6 步（分段确认、保存 spec 文档）：explore 阶段不落盘 spec，成果以对话形式交付（见步骤 6）。若用户要求把探索结果落盘为 spec 草稿，提示走 `/td-propose`（brainstorming 的保存步骤在那里执行）。
 
+**产物要求**：explore 阶段必须产出**至少 2 个候选方向**，每个标注系统工程影响（影响哪些分系统 / 整体性能预期变化 / 可逆性）。这是 `/td-propose` 步骤 3 的"greenfield explore 检查"的判据——少于 2 个候选方向时，propose 阶段会拦下来要求先 explore。
+
 **与 `delay-decision` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策——不闭合 spec，等更多信息再 propose。当用户想"赶紧 propose 闭合 spec"时，触发 `delay-decision` 提醒："explore 不落盘 spec 是延迟决策的体现，信息不足时强行闭合会损失信息（主基调第 3 条综合集成）。"这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
 
 ### 5. 系统工程视角评估

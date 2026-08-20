@@ -62,14 +62,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
 
-- `wip-limit`（硬阻塞 + override）：当前活跃 change 数已达上限？已达 → **阻塞本步骤，不执行步骤 4**。执行 `wip-limit` 的「硬约束 + override 机制」：
-  1. 报告当前活跃 change 列表 + WIP 上限 + 当前 tier
-  2. 给用户两个选项：(a) 先 `/td-archive` 一个再 propose；(b) 显式 override
-  3. 用户选 (a) → 引导走 `/td-archive`，本 change 暂停
-  4. 用户选 (b) → 进入 override 流程（触发 `brooks-law` 强制提醒 + `critical-buffer` 隐性 buffer 压缩评估 + 要求用户显式确认风险 + 在 proposal.md 记录"override WIP 上限，用户已确认风险"）
-  5. override 确认完成 → 才继续执行步骤 4
-
-  **不允许"提示一下就放行"**——这是把硬约束降级为软约束，违反主基调第 4 条"不能并行硬解"的硬约束语义。
+- `wip-limit`（硬阻塞 + override）：当前活跃 change 数已达上限？已达 → **阻塞本步骤，不执行步骤 4**，执行 `wip-limit` 的「硬约束 + override 机制」节（权威描述在该 skill，本文件不重复；override 通过后继续步骤 4）。
 - `human-in-loop`：用户描述是否清晰到可以 propose？不清楚 → 用 `AskUserQuestion` 问"想做什么 change"。
 - **TODO 池检查**：读 `openspec/todo.md`（不存在 → 跳过本子项，视为空池，不主动创建文件）。todo.md 的主条目/change 子项/优先级/分节规则见 `references/todo-format.md`。
   - 列出全部**未勾选**（`- [ ]`）主条目作为候选池，**按优先级排序呈现**（P0 → P1 → P2，未标注视为 P2）。
@@ -86,6 +79,8 @@ openspec new change "<name>"
 ```
 
 **若本 change 来自 TODO 池条目**（步骤 3 挑中的）：创建后回写 `openspec/todo.md`，在该主条目下**新增一个 change 子项** `  - [ ] change: <name>`（缩进两空格；同一条主条目承接多个 change 时追加多个子项，一个 change 一个子项）。**不勾选主条目**——勾选是 `td-archive` 的职责，且要等主条目下全部 change 子项归档后才勾。change 子项是 archive 时定位对应条目的锚点。
+
+**本回写是对 todo.md 的单向关联标记，不是 change 资产引用 todo.md**——change 资产（proposal/design/tasks）仍然不得出现对 `openspec/todo.md` 的任何引用（见 Guardrails「提案不引用 TODO 池」）。关联方向是 todo.md → change 子项（todo.md 侧标记"这个 change 来自我"），不是 change → todo.md。两层分层隔离不被本回写破坏。
 
 ### 5. 获取 artifact 构建顺序
 

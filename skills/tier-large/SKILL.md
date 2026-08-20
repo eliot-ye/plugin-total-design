@@ -15,13 +15,7 @@ user-invocable: false
 
 ## constraint 强度
 
-强度本身见步骤 1 注入的表 1（若未注入,调 `field-assessment` 注入后再读）。本 tier 的注解：
-
-- `wip-limit`：大系统并行硬解 = 失控
-- `critical-buffer`：不确定性最高
-- `brooks-law`：大系统加人手几乎必然拖慢，强制
-- `delay-decision`：强
-- `human-in-loop`：+ 总体设计文档审阅
+强度本身见步骤 1 注入的表 1（若未注入,调 `field-assessment` 注入后再读）。本 tier 的注解已合并进 `field-assessment/references/strength-matrix.md` 的「表 1 注解」节,本文件不重复。
 
 ## system-audit 频率
 
@@ -59,7 +53,7 @@ large 系统的每个 change，proposal 里必须附"总体设计文档"：
 
 ### 4. 周期性 system-audit
 
-大系统的"局部优化制造全局失调"风险最高。每周一次 `project` scope audit 是底线。
+大系统的"局部优化制造全局失调"风险最高。`project` scope audit 频率见表 3 的 tier-large project scope 行（表 3 由 td-* 步骤 1 注入会话上下文；若未注入，调 `field-assessment` 注入后再读）。本文件不重复定义频率数字。
 
 audit 报告里特别关注：
 

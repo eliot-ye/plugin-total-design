@@ -15,13 +15,7 @@ user-invocable: false
 
 ## constraint 强度
 
-强度本身见步骤 1 注入的表 1（若未注入,调 `field-assessment` 注入后再读）。本 tier 的注解：
-
-- `wip-limit`：中系统并行开始有协调成本
-- `critical-buffer`：不确定性中等
-- `brooks-law`：中团队加人手要考虑 onboarding，提醒
-- `delay-decision`：强
-- `human-in-loop`：+ 公共契约变更
+强度本身见步骤 1 注入的表 1（若未注入,调 `field-assessment` 注入后再读）。本 tier 的注解已合并进 `field-assessment/references/strength-matrix.md` 的「表 1 注解」节,本文件不重复。
 
 ## system-audit 频率
 
