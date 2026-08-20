@@ -43,7 +43,7 @@ tasks.md 分两个阶段完成:
 
 ### 2. 每个任务必填字段
 
-字段模板与风险等级判定见本 skill 的 `references/task-template.md`（文件 / 风险 / 验证 / 分系统影响 / 依赖 五个字段 + high/medium/low 判定标准）。
+字段模板与风险等级判定见 `references/task-template.md`（文件 / 风险 / 验证 / 分系统影响 / 依赖 五个字段 + high/medium/low 判定标准）。
 
 每个任务必须带 `风险` 字段（high / medium / low）——`test-driven-development` 据此决定测试强度，`requesting-code-review` 据此决定 review 深度。
 
@@ -58,7 +58,7 @@ tasks.md 分两个阶段完成:
 ## 与其他 skill 的关系
 
 - 与 `delay-decision` 配合：plan 里如果遇到可逆决策，标 `[延迟决策]` 而不是强行拍
-- 与 `constraint-matrix` 配合：当 `constraint-matrix` 识别流程允许子系统独立定 tier 时，本 skill 的任务切分应**按子系统层次分别拆任务**——每个子系统有自己的任务序列，子系统之间的依赖任务是跨子系统的关键链。
+- 与 `field-assessment` 配合：当 `field-assessment` 识别流程允许子系统独立定 tier 时，本 skill 的任务切分应**按子系统层次分别拆任务**——每个子系统有自己的任务序列，子系统之间的依赖任务是跨子系统的关键链。
 
 ## 不做的事
 

@@ -12,7 +12,7 @@ argument-hint: <change-name>
 ## 依赖技能
 
 - `system-engineering`
-- `constraint-matrix`
+- `field-assessment`
 
 ## 服务的主基调原则
 
@@ -39,7 +39,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。
-2. **profile × tier 识别** — 调 `constraint-matrix`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 7.3）。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 7.3）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——步骤 2 据此判断是否触发 / tasks 是否合规。
 
 ### 2. 前置检查
@@ -56,7 +56,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
   5. override 确认完成 → 才继续执行步骤 3
 
   **不允许"提示一下就放行"**——apply 阶段的 WIP 补拦与 propose 阶段的 WIP 硬阻塞是对称设计，两处都必须执行硬阻塞 + override 机制。
-- **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按当前 tier 比例,查表 1 的 critical-buffer 行。表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `constraint-matrix` 注入后再读）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
+- **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按当前 tier 比例,查表 1 的 critical-buffer 行。表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - 其余 constraint（brooks-law / delay-decision / human-in-loop）在实施过程中按需触发，不在本步预判。
 
 ### 3. 读 change 的 artifact
@@ -117,11 +117,11 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 
 边界验证发现跨分系统问题 → 触发 `systematic-debugging` 找根因；若 root cause 在 plan 之外（proposal 的影响评估漏了分系统）→ 停下来问用户：是补 proposal 的评估还是改代码？
 
-**层次观归位**：当 `constraint-matrix` 识别流程允许子系统独立定 tier 时，本步骤的跨分系统边界验证应**按子系统层次分别验证**——每个子系统有自己的边界验证强度（按该子系统的 tier），跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则）。这不是把"一个 tier-large 的边界验证"拆成"多个 tier-small 的边界验证"——而是承认复杂巨系统是多层级嵌套结构（主基调第 4 条「层次观」），不同层次的子系统需要分层对待。
+**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，本步骤的跨分系统边界验证应**按子系统层次分别验证**——每个子系统有自己的边界验证强度（按该子系统的 tier），跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则）。这不是把"一个 tier-large 的边界验证"拆成"多个 tier-small 的边界验证"——而是承认复杂巨系统是多层级嵌套结构（主基调第 4 条「层次观」），不同层次的子系统需要分层对待。
 
 #### 7.3 current-change audit（按表 3 频率）
 
-两层验证通过后,对照表 3的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`。表 3 由 td-* 步骤 1 注入会话上下文;若未注入,调 `constraint-matrix` 注入后再读:
+两层验证通过后,对照表 3的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`。表 3 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读:
 
 - `tier-small`：不要求
 - `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 3），此处不再重复

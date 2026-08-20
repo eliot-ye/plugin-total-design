@@ -15,7 +15,7 @@ user-invocable: false
 
 ## constraint 强度
 
-强度本身见步骤 1 注入的表 1（若未注入,调 `constraint-matrix` 注入后再读）。本 tier 的注解：
+强度本身见步骤 1 注入的表 1（若未注入,调 `field-assessment` 注入后再读）。本 tier 的注解：
 
 - `wip-limit`：大系统并行硬解 = 失控
 - `critical-buffer`：不确定性最高
@@ -67,7 +67,7 @@ audit 报告里特别关注：
 - 关键链 buffer 是否被压缩
 - 是否有"应该触发 human-in-loop 但没触发"的决策
 
-**层次观归位**：当 `constraint-matrix` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**——每个子系统有自己的"局部优化制造全局失调"风险，跨子系统的依赖链是跨子系统的关键链。audit 报告里应区分"子系统内部失调"和"跨子系统边界失调"，后者按"最高 tier 子系统"的强度处理（保守原则）。
+**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**——每个子系统有自己的"局部优化制造全局失调"风险，跨子系统的依赖链是跨子系统的关键链。audit 报告里应区分"子系统内部失调"和"跨子系统边界失调"，后者按"最高 tier 子系统"的强度处理（保守原则）。
 
 ## 与其他 tier 的切换
 

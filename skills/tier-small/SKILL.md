@@ -15,7 +15,7 @@ user-invocable: false
 
 ## constraint 强度
 
-强度本身见步骤 1 注入的表 1（若未注入,调 `constraint-matrix` 注入后再读）。本 tier 的注解：
+强度本身见步骤 1 注入的表 1（若未注入,调 `field-assessment` 注入后再读）。本 tier 的注解：
 
 - `wip-limit`：小系统允许稍微并行
 - `critical-buffer`：不确定性较低

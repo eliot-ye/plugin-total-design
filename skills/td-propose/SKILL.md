@@ -12,7 +12,7 @@ OpenSpec 契约层入口。在写代码之前，让人和 AI 对"建什么、为
 ## 依赖技能
 
 - `system-engineering`
-- `constraint-matrix`
+- `field-assessment`
 
 ## 服务的主基调原则
 
@@ -41,7 +41,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。propose 的每个判断都在主基调四条框架下做。
-2. **profile × tier 识别** — 调 `constraint-matrix`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）。会话内缓存，后续步骤直接引用。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）。会话内缓存，后续步骤直接引用。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——步骤 3 据此判断 wip-limit / human-in-loop 是否触发。
 
 ### 2. 读现场背景（config.yaml context）
@@ -71,7 +71,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
   **不允许"提示一下就放行"**——这是把硬约束降级为软约束，违反主基调第 4 条"不能并行硬解"的硬约束语义。
 - `human-in-loop`：用户描述是否清晰到可以 propose？不清楚 → 用 `AskUserQuestion` 问"想做什么 change"。
-- **TODO 池检查**：读 `openspec/todo.md`（不存在 → 跳过本子项，视为空池，不主动创建文件）。todo.md 的主条目/change 子项/优先级/分节规则见本 skill 的 `references/todo-format.md`。
+- **TODO 池检查**：读 `openspec/todo.md`（不存在 → 跳过本子项，视为空池，不主动创建文件）。todo.md 的主条目/change 子项/优先级/分节规则见 `references/todo-format.md`。
   - 列出全部**未勾选**（`- [ ]`）主条目作为候选池，**按优先级排序呈现**（P0 → P1 → P2，未标注视为 P2）。
   - 若输入内容为空或用户没有明确 change 描述 → 询问用户让用户从候选池挑一个条目（或"不挑了，直接描述新 change"）。用户挑中某条目 → change 名从条目语义推导。
   - 用户已给明确描述 → 检查候选池里是否有语义重合的主条目，有则提示用户"TODO 池里已有近似条目，要不要基于它 propose？"——同一条主条目可以承接多个 change（每个 change 一个子项追加），不算重复建 change。
@@ -155,7 +155,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 tasks.md 必须：
 
 - 标注关键链（critical chain）：哪条任务序列是项目的关键路径
-- 留 project buffer:按当前 tier 比例(查表 1 的 critical-buffer 行,会话内已缓存。表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `constraint-matrix` 注入后再读)
+- 留 project buffer:按当前 tier 比例(查表 1 的 critical-buffer 行,会话内已缓存。表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读)
 
 粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `critical-buffer` skill 的标注规范。
 

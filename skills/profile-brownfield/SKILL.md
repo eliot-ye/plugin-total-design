@@ -22,7 +22,7 @@ user-invocable: false
 
 ## 在各 tier 下的 constraint 强度
 
-强度本身见 `constraint-matrix` skill 的表 1（5 个 constraint 在 3 个 tier 下的强度）与表 2（3 个 profile 在 human-in-loop 上的场景加成）。
+强度本身见 `field-assessment` skill 的表 1（5 个 constraint 在 3 个 tier 下的强度）与表 2（3 个 profile 在 human-in-loop 上的场景加成）。
 
 **profile-brownfield 在表 2 的加成**：
 

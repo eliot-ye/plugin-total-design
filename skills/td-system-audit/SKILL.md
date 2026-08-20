@@ -12,7 +12,7 @@ argument-hint: "<scope: current-change | project>  (可选, 默认 current-chang
 ## 依赖技能
 
 - `system-engineering`
-- `constraint-matrix`
+- `field-assessment`
 
 ## 服务的主基调原则
 
@@ -39,7 +39,7 @@ audit 的对照标准是主基调四条，不是"代码质量"或"进度"——�
 
 system-audit 不是只在用户显式调用时才跑。agent 应在以下时机主动建议 audit：
 
-- **频率触发**：对照表 3(system-audit 频率,按当前 tier 的 project scope / current-change scope 阈值)。表 3 由 td-* 步骤 1 注入会话上下文;若未注入,调 `constraint-matrix` 注入后再读。频率事实源在 `constraint-matrix` 表 3,本 skill 不重写——`td-archive` 步骤 5.2 已维护"累计 archive 计数器",达阈值即建议。
+- **频率触发**：对照表 3(system-audit 频率,按当前 tier 的 project scope / current-change scope 阈值)。表 3 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读。频率事实源在 `field-assessment` 表 3,本 skill 不重写——`td-archive` 步骤 5.2 已维护"累计 archive 计数器",达阈值即建议。
 - **信号触发**：
   - 用户表达"感觉最近推进不顺利"时
   - 关键链缓冲被多次压缩后
@@ -51,7 +51,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。audit 的对照标准就是主基调四条，没有主基调框架，audit 会退化成"代码质量审查"。
-2. **profile × tier 识别** — 调 `constraint-matrix`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（audit 频率是否达标，查表 3）。会话内缓存，后续步骤直接引用。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（audit 频率是否达标，查表 3）。会话内缓存，后续步骤直接引用。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
 ### 2. 收集审计对象
@@ -61,19 +61,19 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 - **current-change**：当前活跃 change 的 proposal/design/tasks/specs
 - **project**：所有活跃 change + 最近 archive 的 3 个 change 的"实际 vs 预期"复盘，**并纳入 `openspec/specs/` 下的主 spec baseline**——这是 reverse-spec / archive sync 沉淀下来的分系统契约与不变量，作为 audit 对照"局部改动是否破坏既有分系统契约"的锚点。`openspec/specs/` 为空（项目从未 reverse-spec、也未 archive 过任何 change）→ 跳过 baseline 锚点，仅审计活跃 change 与最近 archive 复盘。
 
-**层次观归位**：当 `constraint-matrix` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**——每个子系统有自己的"局部优化制造全局失调"风险，跨子系统的依赖链是跨子系统的关键链。audit 报告里应区分"子系统内部失调"和"跨子系统边界失调"，后者按"最高 tier 子系统"的强度处理（保守原则）。
+**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**——每个子系统有自己的"局部优化制造全局失调"风险，跨子系统的依赖链是跨子系统的关键链。audit 报告里应区分"子系统内部失调"和"跨子系统边界失调"，后者按"最高 tier 子系统"的强度处理（保守原则）。
 
 ### 3. 对照主基调四条审计
 
-对审计对象，逐条审计。逐条检查清单见本 skill 的 `references/audit-report-template.md` 的「主基调对照清单」节——按四条主基调逐条打勾，违反项标注并触发对应 constraint skill（见步骤 6）。
+对审计对象，逐条审计。逐条检查清单见 `references/audit-report-template.md` 的「主基调对照清单」节——按四条主基调逐条打勾，违反项标注并触发对应 constraint skill（见步骤 6）。
 
 ### 4. 输出审计报告
 
 报告同时输出到对话和落盘。落盘路径：`openspec/.td-state/audits/<YYYYMMDD-HHMMSS>-<scope>.md`。目录由本步骤首次运行时按需创建。
 
-报告按本 skill 的 `references/audit-report-template.md` 的「报告模板」节输出（Scope + 主基调对照表 + 发现的问题 + 建议的下一步动作）。
+报告按 `references/audit-report-template.md` 的「报告模板」节输出（Scope + 主基调对照表 + 发现的问题 + 建议的下一步动作）。
 
-落盘后，同步更新 `openspec/.td-state/audit-history.yaml`：追加一条本次 audit 的记录。文件格式见 `constraint-matrix` 的 `references/file-templates.md`，文件由本步骤首次运行时按需创建。
+落盘后，同步更新 `openspec/.td-state/audit-history.yaml`：追加一条本次 audit 的记录。文件格式见 `references/audit-history-template.md`，文件由本步骤首次运行时按需创建。
 
 **null 语义**：`audit-history.yaml` 不存在 → 本步骤创建文件并写入首条记录；`audits/` 目录不存在 → 同步创建。
 

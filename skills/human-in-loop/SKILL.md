@@ -27,7 +27,7 @@ user-invocable: false
 
 以上 5 类是**通用基线**，所有 profile × tier 下都生效——这是"必须停"的下限。
 
-`constraint-matrix` 表 1 第 5 行定义各 tier 的 human-in-loop **额外触发条件**（如 tier-medium 的"+ 公共契约变更"、tier-large 的"+ 总体设计文档审阅"）。表 2 定义各 profile 的**场景加成**（如 brownfield 的"+ 改老代码前"、maintenance 的"+ 生产环境改动前"）。
+`field-assessment` 表 1 第 5 行定义各 tier 的 human-in-loop **额外触发条件**（如 tier-medium 的"+ 公共契约变更"、tier-large 的"+ 总体设计文档审阅"）。表 2 定义各 profile 的**场景加成**（如 brownfield 的"+ 改老代码前"、maintenance 的"+ 生产环境改动前"）。
 
 最终生效强度 = 通用基线 5 类 ∪ 表 1 tier 加成 ∪ 表 2 profile 加成。三者叠加，不替换。改老代码既算基线第 4 类"超 scope 影响"也被 brownfield 加成点名，叠加只是强调，不矛盾。
 

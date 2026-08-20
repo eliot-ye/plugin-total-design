@@ -12,7 +12,7 @@ argument-hint: <existing-codebase-path or empty for cwd>
 ## 依赖技能
 
 - `system-engineering`
-- `constraint-matrix`
+- `field-assessment`
 
 ## 服务的主基调原则
 
@@ -35,7 +35,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统全局视图，再决定动哪里。
-2. **profile × tier 识别** — 调 `constraint-matrix`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2。会话内缓存，后续步骤直接引用。reverse-spec 本身是 profile-brownfield 的入口动作，但 tier 决定 reverse-spec 的粒度（small 粗粒度即可，large 要画分系统接口图）。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2。会话内缓存，后续步骤直接引用。reverse-spec 本身是 profile-brownfield 的入口动作，但 tier 决定 reverse-spec 的粒度（small 粗粒度即可，large 要画分系统接口图）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
 ### 2. 识别代码库状态
@@ -47,7 +47,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 - 有无 `tests/`、CI 配置、`package.json` 等
 - 最近 git 提交频率
 
-判断依据如下，但**不重新判读 profile**——步骤 1 已通过 `constraint-matrix` 判读并缓存 `$_TD_PROFILE` / `$_TD_TIER`，本步骤直接消费，不与缓存打架：
+判断依据如下，但**不重新判读 profile**——步骤 1 已通过 `field-assessment` 判读并缓存 `$_TD_PROFILE` / `$_TD_TIER`，本步骤直接消费，不与缓存打架：
 
 - 文件数、代码行数
 - 主要目录结构
@@ -67,7 +67,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 不要过细——目标是识别"分系统"级别，不是"文件"级别。通常 3–8 个分系统。
 
-**层次观归位**：分系统切分是主基调第 4 条「层次观」在 reverse-spec 阶段的工程化——承认复杂巨系统是多层级嵌套结构，先识别"分系统"层次的边界，再在每个分系统内部识别更细的层次。当分系统之间的边界明显（例如独立部署的微服务、独立仓库的子项目）时，本步骤的切分结果是 `constraint-matrix` 识别流程"子系统独立定 tier"机制的触发输入。
+**层次观归位**：分系统切分是主基调第 4 条「层次观」在 reverse-spec 阶段的工程化——承认复杂巨系统是多层级嵌套结构，先识别"分系统"层次的边界，再在每个分系统内部识别更细的层次。当分系统之间的边界明显（例如独立部署的微服务、独立仓库的子项目）时，本步骤的切分结果是 `field-assessment` 识别流程"子系统独立定 tier"机制的触发输入。
 
 ### 4. 对每个分系统 reverse-spec
 
@@ -92,7 +92,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 ### 6. 输出 reverse-spec 报告
 
-按本 skill 的 `references/reverse-spec-report.md` 的报告模板输出（识别的分系统 + 接口图 + 各分系统 spec 位置 + 已知风险 + 建议的下一步）。
+按 `references/reverse-spec-report.md` 的报告模板输出（识别的分系统 + 接口图 + 各分系统 spec 位置 + 已知风险 + 建议的下一步）。
 
 ## Guardrails
 

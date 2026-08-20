@@ -12,7 +12,7 @@ change 完成后归档。归档不是删除，是把"已完成的学习"沉淀�
 ## 依赖技能
 
 - `system-engineering`
-- `constraint-matrix`
+- `field-assessment`
 
 ## 服务的主基调原则
 
@@ -37,7 +37,7 @@ archive 后触发 profile 重新评估——这是总体设计部的职责：项
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集成循环"。
-2. **profile × tier 识别** — 调 `constraint-matrix`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（archive 需要表 3 判定 system-audit 频率触发）。会话内缓存，后续步骤直接引用。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（archive 需要表 3 判定 system-audit 频率触发）。会话内缓存，后续步骤直接引用。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——步骤 2 据此判断是否触发 / tasks 是否合规。
 
 ### 2. 前置检查
@@ -95,7 +95,7 @@ archive 是契约层的"闭合点"，必须触发三个后续接力（顺序执�
 
 #### 5.1 profile/tier 重新判读
 
-archive 完一个 change 后，项目的 profile 可能变化（比如 greenfield 走到 maintenance，或 brownfield 进入大重构）。**强制重新调用 `constraint-matrix` 的「识别流程」节**，重新判读 `$_TD_PROFILE` / `$_TD_TIER`。
+archive 完一个 change 后，项目的 profile 可能变化（比如 greenfield 走到 maintenance，或 brownfield 进入大重构）。**强制重新调用 `field-assessment` 的「识别流程」节**，重新判读 `$_TD_PROFILE` / `$_TD_TIER`。
 
 如果新判读结果与步骤 1 缓存的不同：
 
@@ -106,9 +106,9 @@ archive 完一个 change 后，项目的 profile 可能变化（比如 greenfiel
 
 #### 5.2 system-audit 频率触发检查
 
-archive 是"完成一个 change"的事件,正好对照表 3(system-audit 频率)。表 3 由 td-* 步骤 1 注入会话上下文;若未注入,调 `constraint-matrix` 注入后再读。
+archive 是"完成一个 change"的事件,正好对照表 3(system-audit 频率)。表 3 由 td-* 步骤 1 注入会话上下文;若未注入,调 `field-assessment` 注入后再读。
 
-**持久化计数器**:每次 archive 完成后,读 `openspec/.td-state/archive-counter.yaml`,把 `count` +1,写回文件。文件格式见 `constraint-matrix` 的 `references/file-templates.md`,文件由本步骤首次运行时按需创建。
+**持久化计数器**:每次 archive 完成后,读 `openspec/.td-state/archive-counter.yaml`,把 `count` +1,写回文件。文件格式见 `references/archive-counter-template.md`,文件由本步骤首次运行时按需创建。
 
 **达阈值判定**(频率数字一律查表 3 的 project scope 列,本文件不重复定义):
 

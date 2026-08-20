@@ -15,7 +15,7 @@ user-invocable: false
 
 ## constraint 强度
 
-强度本身见步骤 1 注入的表 1（若未注入,调 `constraint-matrix` 注入后再读）。本 tier 的注解：
+强度本身见步骤 1 注入的表 1（若未注入,调 `field-assessment` 注入后再读）。本 tier 的注解：
 
 - `wip-limit`：中系统并行开始有协调成本
 - `critical-buffer`：不确定性中等
@@ -33,7 +33,7 @@ user-invocable: false
 
 medium 系统的常见问题是"分系统边界模糊"。在 reverse-spec 时，把分系统边界画出来，作为后续改动的影响评估依据。
 
-**层次观归位**：分系统边界显式化是主基调第 4 条「层次观」在 tier-medium 的工程化——承认 medium 系统是多层级嵌套结构（顶层架构 → 模块设计 → 实现细节），不同层次需要分层对待。当 `constraint-matrix` 识别流程允许子系统独立定 tier 时，medium 系统的每个分系统也可能有自己的子系统层次。
+**层次观归位**：分系统边界显式化是主基调第 4 条「层次观」在 tier-medium 的工程化——承认 medium 系统是多层级嵌套结构（顶层架构 → 模块设计 → 实现细节），不同层次需要分层对待。当 `field-assessment` 识别流程允许子系统独立定 tier 时，medium 系统的每个分系统也可能有自己的子系统层次。
 
 ### 2. 公共契约变更触发 human-in-loop
 

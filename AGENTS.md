@@ -15,7 +15,7 @@
 
 **任何对本仓库的更改——无论改 SKILL.md、命令文件、plugin.json，还是 AGENTS.md 本身——动笔前必须先完成下列分析步骤，全部执行完才能开始用户要求的改动。跳过这一步直接改 = 把局部失调注入系统。**
 
-理由：本 plugin 的 27 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`constraint-matrix` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
+理由：本 plugin 的 27 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
 
 ### 分析步骤（必须按序执行，每步产出可见证据）
 
@@ -38,7 +38,7 @@
 
 5. **判断改动是否触及契约边界**
    - 检查被改 skill 是否被 td-* 契约层 skill 引用——若是，改动可能影响 OpenSpec artifact 流的运行时语义，需在改动前显式声明"这会改变 X skill 的 Y 行为，影响 td-propose/td-apply/... 的 Z 步"。
-   - 检查被改 skill 是否在 `constraint-matrix` 的表 1/表 2/表 3 里被引用为强度来源——若是，改动可能改变 profile × tier 配置层的单一事实源，需声明影响范围。
+   - 检查被改 skill 是否在 `field-assessment` 的表 1/表 2/表 3 里被引用为强度来源——若是，改动可能改变 profile × tier 配置层的单一事实源，需声明影响范围。
 
 6. **写一句话风险评估**
    - 基于图谱和契约边界判断，写明："本次改动的 blast radius 是 N 个 skill，其中 M 个是契约层，最大风险是 ……"
@@ -103,7 +103,7 @@ total-design/
 │   │   └── verification-before-completion/
 │   │
 │   ├── 配置层（7 个）
-│   │   ├── constraint-matrix/  ← profile × tier × constraint 强度矩阵的单一事实源；user-invocable: false
+│   │   ├── field-assessment/  ← profile × tier × constraint 强度矩阵的单一事实源；user-invocable: false
 │   │   ├── profile-greenfield/ ← 3 个现场 profile，user-invocable: false
 │   │   ├── profile-brownfield/
 │   │   ├── profile-maintenance/
@@ -226,7 +226,7 @@ manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
 
 两个维度都以 skill 形态存在，agent 根据现场判读激活哪一组。
 
-**冲突优先级**：profile 与 tier 强度冲突时，**以 tier 为准**——tier 决定约束强度与流程重量（"不强求重流程"这类松绑优先），profile 只决定流程侧重（入口动作、TDD 边界、special rules），不改变强度。profile 的"默认激活的层"强度描述是默认值，最终强度以 `constraint-matrix` 表 1/表 2/表 3 为单一事实源。
+**冲突优先级**：profile 与 tier 强度冲突时，**以 tier 为准**——tier 决定约束强度与流程重量（"不强求重流程"这类松绑优先），profile 只决定流程侧重（入口动作、TDD 边界、special rules），不改变强度。profile 的"默认激活的层"强度描述是默认值，最终强度以 `field-assessment` 表 1/表 2/表 3 为单一事实源。
 
 ### 3. 触发式而非 hook 强制
 
@@ -261,8 +261,8 @@ atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.
 **td-* 标准步骤 1**（每个 td-* skill 的"### 1. 激活主基调与配置层"都按此序列自包含书写，只注入强度不做判断）：
 
 1. **`system-engineering`** — 主基调四条进入上下文。各 td-* skill 在这一条后补自己的注解（如"reverse-spec 是总体设计部在接手阶段的工作"）。
-2. **profile × tier 识别** — 调用 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）+ 表 3（system-audit 频率，仅 archive/apply 需要）读入上下文。会话内缓存，后续步骤直接引用。
-3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `constraint-matrix` 的强度值读入上下文，**不在步骤 1 判断是否触发**。"是否触发"是步骤 2 的事。
+2. **profile × tier 识别** — 调用 `field-assessment` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）+ 表 3（system-audit 频率，仅 archive/apply 需要）读入上下文。会话内缓存，后续步骤直接引用。
+3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `field-assessment` 的强度值读入上下文，**不在步骤 1 判断是否触发**。"是否触发"是步骤 2 的事。
 
 ## commit 风格
 
