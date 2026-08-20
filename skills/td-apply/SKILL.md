@@ -20,9 +20,13 @@ argument-hint: <change-name>
 
 apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。每个任务对系统整体的影响，必须由 agent 持续持有。
 
+**核心论点归位——"总体性能不等于各部分性能之和"**：本 skill 步骤 7.2 的"系统级验证（跨分系统边界，硬步骤）"是整个 plugin 最直接体现这个核心论点的一段。钱学森在《创建系统学》里明确说："系统的总体性能不等于各部分性能之和；关键是整体协调。"plugin 把这个论点工程化为：所有任务测试全绿只证明每个分系统局部正确，不能证明分系统整合后整体行为符合契约——所以 `td-apply` 步骤 7.2 必须做跨分系统边界验证。本 skill 步骤 7.2 定义触发条件与 tier 分层强度，执行语义在 `verification-before-completion` 第 6 节。
+
 **系统工程主基调第 2 条：总体设计部。**
 
 apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-loop` 让用户（总体设计部）拍。
+
+**《工程控制论》反馈控制回路归位**：apply 是反馈控制回路的控制执行 + 实时误差检测环节——TDD 是契约级实时误差检测（RED 失败 = 契约偏离），verification 是系统级实时误差检测（跨分系统边界验证失败 = 整合偏离）。apply 不是"实施代码"，是"执行反馈控制回路里的控制动作 + 实时误差检测"。
 
 ## 输入 - change 名。空则推导或问用户"想 apply 哪个 change"
 
@@ -42,8 +46,16 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
 
-- **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。
-- **`wip-limit`**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段没拦，这里补拦）
+- **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节（含"预期行为模型"字段）？没有 → 不算 apply-ready，停下来问用户。
+- **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `tier-large` 的「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。这与 `td-propose` 步骤 7 的"tier-large 总体设计文档必填"检查对称——两处都校验，避免漏检。
+- **`wip-limit`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。**阻塞本步骤，不执行步骤 3**。执行 `wip-limit` 的「硬约束 + override 机制」：
+  1. 报告当前活跃 change 列表 + WIP 上限 + 当前 tier
+  2. 给用户两个选项：(a) 先 `/td-archive` 一个再 apply；(b) 显式 override
+  3. 用户选 (a) → 引导走 `/td-archive`，本 change 的 apply 暂停
+  4. 用户选 (b) → 进入 override 流程（触发 `brooks-law` 强制提醒 + `critical-buffer` 隐性 buffer 压缩评估 + 要求用户显式确认风险 + 在 change 的 proposal.md 记录"apply 阶段 override WIP 上限，用户已确认风险"）
+  5. override 确认完成 → 才继续执行步骤 3
+
+  **不允许"提示一下就放行"**——apply 阶段的 WIP 补拦与 propose 阶段的 WIP 硬阻塞是对称设计，两处都必须执行硬阻塞 + override 机制。
 - **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按当前 tier 比例,查表 1 的 critical-buffer 行。表 1 由 td-* 步骤 1 注入会话上下文;若未注入,调 `constraint-matrix` 注入后再读）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - 其余 constraint（brooks-law / delay-decision / human-in-loop）在实施过程中按需触发，不在本步预判。
 
@@ -104,6 +116,8 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 - `tier-large`：强制完整集成测试 + 契约测试，逐条对照"影响哪些分系统"清单
 
 边界验证发现跨分系统问题 → 触发 `systematic-debugging` 找根因；若 root cause 在 plan 之外（proposal 的影响评估漏了分系统）→ 停下来问用户：是补 proposal 的评估还是改代码？
+
+**层次观归位**：当 `constraint-matrix` 识别流程允许子系统独立定 tier 时，本步骤的跨分系统边界验证应**按子系统层次分别验证**——每个子系统有自己的边界验证强度（按该子系统的 tier），跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则）。这不是把"一个 tier-large 的边界验证"拆成"多个 tier-small 的边界验证"——而是承认复杂巨系统是多层级嵌套结构（主基调第 4 条「层次观」），不同层次的子系统需要分层对待。
 
 #### 7.3 current-change audit（按表 3 频率）
 

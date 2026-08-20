@@ -24,6 +24,8 @@ explore 是总体设计部在"想"的阶段的工作——不是分系统工程�
 
 explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的尊重。
 
+**《工程控制论》反馈控制回路归位**：explore 是反馈控制回路的前馈控制准备环节——在 propose 建立控制目标之前，先收集信息、探索候选方向，降低前馈控制目标的预测误差。explore 不是"随便聊聊"，是"为前馈控制目标收集先验信息"。
+
 ## 输入 - 用户想探索的话题、问题、想法
 
 **用户输入内容的对象是本项目，禁止溢出范围**
@@ -56,6 +58,8 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 ### 4. 头脑风暴
 
 调用 `brainstorming` skill 的 1–4 步工作方式——**不执行** brainstorming 的第 5–6 步（分段确认、保存 spec 文档）：explore 阶段不落盘 spec，成果以对话形式交付（见步骤 6）。若用户要求把探索结果落盘为 spec 草稿，提示走 `/td-propose`（brainstorming 的保存步骤在那里执行）。
+
+**与 `delay-decision` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策——不闭合 spec，等更多信息再 propose。当用户想"赶紧 propose 闭合 spec"时，触发 `delay-decision` 提醒："explore 不落盘 spec 是延迟决策的体现，信息不足时强行闭合会损失信息（主基调第 3 条综合集成）。"这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
 
 ### 5. 系统工程视角评估
 

@@ -18,7 +18,9 @@ OpenSpec 契约层入口。在写代码之前，让人和 AI 对"建什么、为
 
 **系统工程主基调第 3 条：从定性到定量的综合集成。**
 
-proposal 里的"系统工程影响评估"节是这个原则的工程化体现——agent 不只写"what"和"how"，必须写"这会对系统整体产生什么影响"，完成从定性到定量的综合集成。
+proposal 里的"系统工程影响评估"节是这个原则的工程化体现——agent 不只写"what"和"how"，必须写"这会对系统整体产生什么影响"，完成从定性到定量的综合集成。其中"预期行为模型"字段是综合集成的"模型"载体（见 `system-engineering` 的「主基调四条」第 3 条「模型载体」节）。
+
+**《工程控制论》反馈控制回路归位**：propose 是反馈控制回路的前馈控制环节——在实施前预测"系统工程影响"，建立控制目标（proposal 的"预期行为模型"）。这个前馈控制目标在 `/td-apply` 步骤 7.2 系统级验证里被实时检测，在 `/td-archive` 步骤 3"实际 vs 预期"复盘里被事后校正。propose 不是"写个文档"，是"建立反馈控制回路的前馈控制目标"。
 
 ## 输入
 
@@ -60,7 +62,14 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
 
-- `wip-limit`：当前活跃 change 数已达上限？已达 → 报告列表 + 提示"先 archive 或 finish 现有 change 再起新的"，但不强制阻塞。
+- `wip-limit`（硬阻塞 + override）：当前活跃 change 数已达上限？已达 → **阻塞本步骤，不执行步骤 4**。执行 `wip-limit` 的「硬约束 + override 机制」：
+  1. 报告当前活跃 change 列表 + WIP 上限 + 当前 tier
+  2. 给用户两个选项：(a) 先 `/td-archive` 一个再 propose；(b) 显式 override
+  3. 用户选 (a) → 引导走 `/td-archive`，本 change 暂停
+  4. 用户选 (b) → 进入 override 流程（触发 `brooks-law` 强制提醒 + `critical-buffer` 隐性 buffer 压缩评估 + 要求用户显式确认风险 + 在 proposal.md 记录"override WIP 上限，用户已确认风险"）
+  5. override 确认完成 → 才继续执行步骤 4
+
+  **不允许"提示一下就放行"**——这是把硬约束降级为软约束，违反主基调第 4 条"不能并行硬解"的硬约束语义。
 - `human-in-loop`：用户描述是否清晰到可以 propose？不清楚 → 用 `AskUserQuestion` 问"想做什么 change"。
 - **TODO 池检查**：读 `openspec/todo.md`（不存在 → 跳过本子项，视为空池，不主动创建文件）。todo.md 的主条目/change 子项/优先级/分节规则见本 skill 的 `references/todo-format.md`。
   - 列出全部**未勾选**（`- [ ]`）主条目作为候选池，**按优先级排序呈现**（P0 → P1 → P2，未标注视为 P2）。
@@ -114,15 +123,32 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 ```markdown
 ## 系统工程影响评估
 
-（服务钱学森系统工程主基调第 3 条"从定性到定量的综合集成"）
+（服务钱学森系统工程主基调第 3 条"从定性到定量的综合集成"——专家判断 + 数据 + 模型反复迭代上升到定量认识）
 
 - 影响哪些分系统：
 - 整体性能预期变化：
 - 这是局部优化还是全局协调：
 - 如果是局部优化，对全局失调的风险：
+- 预期行为模型：这个改动的预期系统行为是什么？用什么数据/测试验证这个预期？（这是综合集成的"模型"载体——见 `system-engineering` 的「主基调四条」第 3 条「模型载体」节）
 ```
 
 没填这一节的 proposal 不算 apply-ready。
+
+**"预期行为模型"字段的执行语义**：
+
+- 这个字段是 `/td-archive` 步骤 3"实际 vs 预期"复盘的对照锚点之一——archive 时要回答"预期行为模型是否被实际行为验证？如果没有，模型需要怎么修正？"
+- 这个字段也是 `/td-apply` 步骤 7.2 系统级验证的输入——系统级验证要验证"预期行为模型"是否在跨分系统整合后仍然成立。
+
+#### proposal.md 必填：tier-large 总体设计文档
+
+若 `$_TD_TIER == tier-large`，proposal 里必须附"总体设计文档"（见 `tier-large` 的「总体设计文档必填」节）：
+
+- 这个改动在系统层次里的位置
+- 影响的所有分系统
+- 与最近 archive 的 change 的关系
+- 是否触发跨分系统协调
+
+没这份文档，proposal 不算 apply-ready。本检查与 `td-apply` 步骤 2 的前置检查对称——tier-large 的总体设计文档必填在 propose 和 apply 两处都校验，避免漏检。
 
 #### tasks.md 必填：关键链标注与 project buffer
 

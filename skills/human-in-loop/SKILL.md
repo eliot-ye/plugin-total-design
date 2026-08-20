@@ -21,6 +21,7 @@ user-invocable: false
 3. **生产环境影响**：部署、迁移、权限变更、数据修改
 4. **超出当前 change scope 的影响**：改动会波及 change 之外的代码或系统
 5. **agent 自己的置信度低**：agent 不确定方案是否对齐用户意图时
+6. **WIP 硬约束 override**（见 `wip-limit` 的「硬约束 + override 机制」节）：用户想并行硬解超过 wip-limit 上限的 change 时，必须显式确认风险——这与 `brooks-law` 的"加人手前显式确认"是对称设计。
 
 ### 强度叠加规则
 
@@ -29,6 +30,8 @@ user-invocable: false
 `constraint-matrix` 表 1 第 5 行定义各 tier 的 human-in-loop **额外触发条件**（如 tier-medium 的"+ 公共契约变更"、tier-large 的"+ 总体设计文档审阅"）。表 2 定义各 profile 的**场景加成**（如 brownfield 的"+ 改老代码前"、maintenance 的"+ 生产环境改动前"）。
 
 最终生效强度 = 通用基线 5 类 ∪ 表 1 tier 加成 ∪ 表 2 profile 加成。三者叠加，不替换。改老代码既算基线第 4 类"超 scope 影响"也被 brownfield 加成点名，叠加只是强调，不矛盾。
+
+**第 6 类（WIP 硬约束 override）的叠加语义**：第 6 类是 `wip-limit` override 流程触发的，**不参与 profile × tier 叠加**——它是 WIP 硬约束的 override 通道，与 profile/tier 强度无关。但 override 流程里触发的 `brooks-law` / `critical-buffer` 评估，仍按当前 tier 强度执行。
 
 ### 不需要停下来的场景
 
@@ -56,3 +59,4 @@ user-invocable: false
 
 - 与 `delay-decision` 配合：可逆决策延迟，但延迟期内触及不可逆点时，本 skill 触发
 - 与 `brooks-law` 配合：用户考虑"加人手"时，brooks-law 提醒，本 skill 要求用户显式确认
+- 与 `wip-limit` 配合：用户想并行硬解超过 wip-limit 上限的 change 时，wip-limit 硬阻塞，本 skill 在 override 流程里要求用户显式确认风险——与 brooks-law 的"加人手前显式确认"是对称设计。

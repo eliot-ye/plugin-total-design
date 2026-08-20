@@ -22,7 +22,17 @@ user-invocable: false
 
 ## 在各 tier 下的 constraint 强度
 
-强度本身见 `constraint-matrix` skill 的表 1 与表 2。profile-greenfield 不再加成其余 4 个 constraint——强度由 tier 决定。
+强度本身见 `constraint-matrix` skill 的表 1（5 个 constraint 在 3 个 tier 下的强度）与表 2（3 个 profile 在 human-in-loop 上的场景加成）。
+
+**profile-greenfield 在表 2 的加成**：
+
+| profile | tier-small | tier-medium | tier-large |
+|---|---|---|---|
+| `profile-greenfield` | — | + 公共契约变更 | + 总体设计文档审阅 |
+
+"—" 表示该格无 profile 场景加成，仅用表 1 第 5 行的 tier 基线。3 个 profile 在 tier-small 下都没有超出 tier 基线的加成。
+
+**profile-greenfield 不再加成其余 4 个 constraint**（`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision`）——强度由 tier 决定。profile 只决定流程侧重（greenfield 侧重 explore→propose 的完整路径），不改变各 tier 的强度。
 
 ## 特殊规则
 

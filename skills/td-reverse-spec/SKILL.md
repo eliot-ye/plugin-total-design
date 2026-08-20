@@ -67,6 +67,8 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 不要过细——目标是识别"分系统"级别，不是"文件"级别。通常 3–8 个分系统。
 
+**层次观归位**：分系统切分是主基调第 4 条「层次观」在 reverse-spec 阶段的工程化——承认复杂巨系统是多层级嵌套结构，先识别"分系统"层次的边界，再在每个分系统内部识别更细的层次。当分系统之间的边界明显（例如独立部署的微服务、独立仓库的子项目）时，本步骤的切分结果是 `constraint-matrix` 识别流程"子系统独立定 tier"机制的触发输入。
+
 ### 4. 对每个分系统 reverse-spec
 
 读分系统的代码，反推 spec：
@@ -85,6 +87,8 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 - 接口的稳定性（哪些是公共契约，哪些是内部实现）
 - 循环依赖
 - 隐式依赖（共享数据库、共享配置）
+
+**与 `requesting-code-review` 架构 review 的连接**：本步骤识别的"循环依赖、隐式依赖"正是 `requesting-code-review` 的 `references/architecture-review-checklist.md` 里"低耦合"维度的检查项。reverse-spec 阶段识别的接口稳定性，是后续 `/td-propose` 步骤 9 架构 review 的输入——架构 review 时要对照 reverse-spec 报告里的接口稳定性，判断新 change 是否破坏了既有分系统的公共契约。
 
 ### 6. 输出 reverse-spec 报告
 

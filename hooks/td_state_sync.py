@@ -18,6 +18,21 @@ from datetime import datetime
 
 REPORT_NAME_RE = re.compile(r"(\d{8}-\d{6})-([a-z-]+)\.md$")
 
+# 报告内容完整性校验：audit 报告至少含下列 marker 之一，
+# 才会被 sync_audit_history 补 audit-history.yaml 记录。
+# 这是防止"空报告 / 不完整报告被固化"的边界。
+MINIMAL_MARKERS = ("## System Audit", "### 主基调对照")
+
+
+def is_complete_report(path):
+    """报告含 MINIMAL_MARKERS 之一才视为完整。"""
+    try:
+        with open(path, encoding="utf-8") as f:
+            content = f.read()
+        return any(marker in content for marker in MINIMAL_MARKERS)
+    except OSError:
+        return False
+
 
 def find_project_root(cwd):
     """从 cwd 向上找含 openspec/ 目录的项目根。"""
@@ -97,7 +112,10 @@ def sync_audit_history(state_dir):
                 if m:
                     known.add(m.group(1).strip())
 
-    missing = [r for r in reports if r not in known]
+    missing = [
+        r for r in reports
+        if r not in known and is_complete_report(os.path.join(audits_dir, r))
+    ]
     if not missing:
         return
 
@@ -127,6 +145,18 @@ def sync_audit_history(state_dir):
             f.write("    scope: %s\n" % scope)
             f.write("    report: %s\n" % report)
             f.write("    severe_count: %d\n" % count_severe(os.path.join(audits_dir, report)))
+
+    # 不完整报告的兜底：把它们的名字写到 audits/.incomplete.log，
+    # 下次 /td-system-audit project scope 时由 agent 主动检查并决定是补写还是删除。
+    incomplete = [
+        r for r in reports
+        if r not in known and not is_complete_report(os.path.join(audits_dir, r))
+    ]
+    if incomplete:
+        incomplete_log = os.path.join(audits_dir, ".incomplete.log")
+        with open(incomplete_log, "a", encoding="utf-8") as f:
+            for r in incomplete:
+                f.write("%s\n" % r)
 
 
 def main():

@@ -33,6 +33,8 @@ user-invocable: false
 
 medium 系统的常见问题是"分系统边界模糊"。在 reverse-spec 时，把分系统边界画出来，作为后续改动的影响评估依据。
 
+**层次观归位**：分系统边界显式化是主基调第 4 条「层次观」在 tier-medium 的工程化——承认 medium 系统是多层级嵌套结构（顶层架构 → 模块设计 → 实现细节），不同层次需要分层对待。当 `constraint-matrix` 识别流程允许子系统独立定 tier 时，medium 系统的每个分系统也可能有自己的子系统层次。
+
 ### 2. 公共契约变更触发 human-in-loop
 
 medium 系统里，API 形状、数据库 schema、配置格式这些"公共契约"开始有跨分系统影响。改这些前必触发 human-in-loop。

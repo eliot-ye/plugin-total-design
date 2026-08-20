@@ -9,6 +9,14 @@ profile: <profile-greenfield | profile-brownfield | profile-maintenance>
 tier: <tier-small | tier-medium | tier-large>
 judged_at: <ISO8601 时间戳>
 judge_reason: <一句话判据，如"已上线 + 有 CI/CD → maintenance；文件 120 个 → large">
+# 子系统独立定 tier（可选，仅当系统内部有明显分系统边界时）
+subsystems:
+  - name: <subsystem-A>
+    tier: <tier-small | tier-medium | tier-large>
+    judge_reason: <一句话判据>
+  - name: <subsystem-B>
+    tier: <tier-small | tier-medium | tier-large>
+    judge_reason: <一句话判据>
 ```
 
 ## archive-counter.yaml（td-archive 维护）

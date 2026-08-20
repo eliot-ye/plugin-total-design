@@ -147,6 +147,7 @@ name: <skill-name>
 description: <一句话描述，会进 system prompt>
 user-invocable: true | false
 argument-hint: <参数提示>          ← 仅 user-invocable: true 的命令式 skill 需要
+disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 user-invocable: true 兼容（前者禁自动，后者允许显式调用）。本字段合法性待 atomcode 官方文档确认；若 loader 不识别，本字段会被忽略，不影响 user-invocable 语义
 ---
 
 # <Skill Title>

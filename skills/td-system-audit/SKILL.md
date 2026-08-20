@@ -24,6 +24,8 @@ argument-hint: "<scope: current-change | project>  (可选, 默认 current-chang
 
 audit 的对照标准是主基调四条，不是"代码质量"或"进度"——这是系统工程视角的审计，不是项目管理视角的审计。
 
+**《工程控制论》反馈控制回路归位**：本 skill 步骤 7"修复后重跑 audit 闭环"是典型的反馈控制回路——检测到严重问题（误差检测）→ 触发修复（校正动作）→ 重跑 audit（再检测）→ 确认问题消除（回路闭合）。重跑上限 3 次是控制器的饱和限，超限触发 `human-in-loop` 是"系统超出自动控制范围、需要人介入"。这是《工程控制论》反馈控制原理在 plugin 里的最直接工程化。
+
 ## 输入 - audit 的范围。空则默认 `current-change`
 
 - `current-change`：审计当前活跃的 change
@@ -59,6 +61,8 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 - **current-change**：当前活跃 change 的 proposal/design/tasks/specs
 - **project**：所有活跃 change + 最近 archive 的 3 个 change 的"实际 vs 预期"复盘，**并纳入 `openspec/specs/` 下的主 spec baseline**——这是 reverse-spec / archive sync 沉淀下来的分系统契约与不变量，作为 audit 对照"局部改动是否破坏既有分系统契约"的锚点。`openspec/specs/` 为空（项目从未 reverse-spec、也未 archive 过任何 change）→ 跳过 baseline 锚点，仅审计活跃 change 与最近 archive 复盘。
 
+**层次观归位**：当 `constraint-matrix` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**——每个子系统有自己的"局部优化制造全局失调"风险，跨子系统的依赖链是跨子系统的关键链。audit 报告里应区分"子系统内部失调"和"跨子系统边界失调"，后者按"最高 tier 子系统"的强度处理（保守原则）。
+
 ### 3. 对照主基调四条审计
 
 对审计对象，逐条审计。逐条检查清单见本 skill 的 `references/audit-report-template.md` 的「主基调对照清单」节——按四条主基调逐条打勾，违反项标注并触发对应 constraint skill（见步骤 6）。
@@ -87,6 +91,8 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 - 关键链缓冲被压缩 → 触发 `critical-buffer`，重新规划 tasks
 - agent 自己拍板了 → 触发 `human-in-loop`，回去问用户
 - 可逆决策被过早闭合 → 触发 `delay-decision`，重新打开决策
+- **同时开太多 change（WIP 超限）** → 触发 `wip-limit` 的「硬约束 + override 机制」，阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override
+- **"局部最优但全局失调"** → 触发 `human-in-loop`，让用户（总体设计部）判断这是真全局失调还是可接受的局部优化。本 plugin 没有专门的"全局失调"constraint skill——这个判断必须由总体设计部做，不能由 agent 自己拍板（主基调第 2 条）。
 
 ### 7. 修复后重跑 audit 闭环
 
