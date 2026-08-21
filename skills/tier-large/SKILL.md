@@ -8,14 +8,13 @@ user-invocable: false
 
 ## 判断依据
 
-- 文件数：100+
-- 团队规模：多团队
-- 部署单元：多个
+文件数 / 团队规模 / 部署单元的判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
+
 - 系统层次：多层嵌套的分系统，可能有跨仓库依赖
 
 ## system-audit 频率
 
-见步骤 1 注入的表 3（tier-large：current-change 每完成 1 个 change，project 每周一次）。本文件不重复定义频率数字。
+见步骤 1 注入的表 3（tier-large：current-change 每完成 1 个 change，project 每周一次）。
 
 ## 特殊规则
 
@@ -39,17 +38,17 @@ large 系统的每个 change，proposal 里必须附"总体设计文档"：
 
 ### 2. WIP 限制
 
-大系统并行硬解几乎必然制造失调。同一时刻至多允许的活跃 change 数按表 1 的 wip-limit 行取值（表 1 见 `field-assessment/references/strength-matrix.md`），本文件不重复数字。
+大系统并行硬解几乎必然制造失调。同一时刻至多允许的活跃 change 数按表 1 的 wip-limit 行取值（表 1 见 `field-assessment/references/strength-matrix.md`）。
 
 如果用户坚持要并行，触发 `brooks-law` 强制提醒，并要求用户显式确认风险。
 
 ### 3. 关键链 buffer
 
-大系统的不确定性最高——集成问题、跨团队协调、生产环境意外。buffer 比例按表 1 的 critical-buffer 行取值，本文件不重复数字。buffer 不是"浪费"，是"必然需要的容量"。
+大系统的不确定性最高——集成问题、跨团队协调、生产环境意外。buffer 比例按表 1 的 critical-buffer 行取值。buffer 不是"浪费"，是"必然需要的容量"。
 
 ### 4. 周期性 system-audit
 
-大系统的"局部优化制造全局失调"风险最高。`project` scope audit 频率见表 3 的 tier-large project scope 行（表 3 见 `field-assessment/references/audit-frequency.md`）。本文件不重复定义频率数字。
+大系统的"局部优化制造全局失调"风险最高。`project` scope audit 频率见表 3 的 tier-large project scope 行（表 3 见 `field-assessment/references/audit-frequency.md`）。
 
 audit 报告里特别关注：
 

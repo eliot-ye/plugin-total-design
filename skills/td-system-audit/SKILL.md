@@ -24,7 +24,7 @@ argument-hint: "<scope: current-change | project>  (可选, 默认 current-chang
 
 audit 的对照标准是主基调四条，不是"代码质量"或"进度"——这是系统工程视角的审计，不是项目管理视角的审计。
 
-**《工程控制论》反馈控制回路归位**：本 skill 步骤 7"修复后重跑 audit 闭环"是典型的反馈控制回路——检测到严重问题（误差检测）→ 触发修复（校正动作）→ 重跑 audit（再检测）→ 确认问题消除（回路闭合）。重跑上限 3 次是控制器的饱和限，超限触发 `human-in-loop` 是"系统超出自动控制范围、需要人介入"。这是《工程控制论》反馈控制原理在 plugin 里的最直接工程化。
+**《工程控制论》反馈控制回路归位**：步骤 7"修复后重跑 audit 闭环"是反馈控制回路的具体形态（重跑上限 3 次是控制器饱和限，超限触发 `human-in-loop`）。归位锚点见 `system-engineering` 的「反馈控制回路」节。
 
 ## 输入 - audit 的范围。空则默认 `current-change`
 
@@ -94,7 +94,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 | agent 自己拍板了 | `human-in-loop`（回去问用户） |
 | 可逆决策被过早闭合 | `delay-decision`（重新打开决策） |
 | 同时开太多 change（WIP 超限） | `wip-limit` 的「硬约束 + override 机制」（阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override） |
-| 局部最优但全局失调 | `human-in-loop`（让总体设计部判断）。本 plugin 没有专门的"全局失调"constraint skill——这个判断必须由总体设计部做，不能由 agent 自己拍板（主基调第 2 条） |
+| 局部最优但全局失调 | `human-in-loop`（让总体设计部判断）。本工作流没有专门的"全局失调"constraint skill——这个判断必须由总体设计部做，不能由 agent 自己拍板（主基调第 2 条） |
 
 注：本表为问题→修复映射，各 constraint skill 的「触发时机」节已反向声明"被 `/td-system-audit` 触发修复时"。
 

@@ -53,7 +53,7 @@ user-invocable: false
 - agent 自己在 design.md 里写"先选 A 方案，以后再改"——这种写法需要检查：A 是可逆的吗？
 - 多个候选方案都还在桌上，用户想"赶紧定一个"
 - **被 `/td-system-audit` 触发修复时**：audit 发现"可逆决策被过早闭合"问题时触发本 skill 重新打开决策。
-- **与 `td-explore` 的连接**：`td-explore` 步骤 4 说"explore 阶段不落盘 spec，成果以对话形式交付"——"不落盘 spec"本质上是延迟决策（不闭合 spec，等更多信息再 propose）。当用户想"赶紧 propose 闭合 spec"时，本 skill 可触发提醒"explore 不落盘 spec 是延迟决策的体现，信息不足时强行闭合会损失信息"（主基调第 3 条综合集成）。
+- **与 `td-explore` 的连接**：`td-explore` 阶段"不落盘 spec"本质上是延迟决策（不闭合 spec，等更多信息再 propose，详见 `td-explore` 步骤 4 的「与 `delay-decision` 的连接」段）。当用户想"赶紧 propose 闭合 spec"时，本 skill 触发提醒"信息不足时强行闭合会损失信息"（主基调第 3 条综合集成）。
 
 ## 触发时 agent 应做的事
 

@@ -58,7 +58,7 @@ user-invocable: false
 
 ## 按 tier 调整
 
-project buffer 比例按表 1 的 critical-buffer 行取值(按当前 tier)。本 skill 不重复定义数字。
+project buffer 比例按表 1 的 critical-buffer 行取值(按当前 tier)。
 
 tier 越大，系统越复杂，不确定性越高，缓冲越厚。
 

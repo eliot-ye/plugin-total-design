@@ -24,7 +24,7 @@ archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集
 
 archive 后触发 profile 重新评估——这是总体设计部的职责：项目状态变化了，工作方式要跟着调整。
 
-**《工程控制论》反馈控制回路归位**：archive 是反馈控制回路的事后误差检测 + 校正环节——"实际 vs 预期"复盘（含"模型验证"字段）是事后误差检测（检测 proposal 的"预期行为模型"与实际行为的偏差），"模型验证"字段是校正动作（修正下一个 propose 的预测模型）。archive 不是"收工归档"，是"闭合反馈控制回路，把这次的误差转化为下次的预测模型修正"。
+**《工程控制论》反馈控制回路归位**：archive 是反馈控制回路的事后误差检测 + 校正环节——"实际 vs 预期"复盘是事后误差检测，"模型验证"字段是校正动作（修正下一个 propose 的预测模型）。归位锚点见 `system-engineering` 的「反馈控制回路」节。
 
 ## 输入 - 要 archive 的 change 名。空则推导或问用户。
 
@@ -38,7 +38,7 @@ archive 后触发 profile 重新评估——这是总体设计部的职责：项
 
 1. **`system-engineering`** — 主基调四条进入上下文。archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集成循环"。
 2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（archive 需要表 3 判定 system-audit 频率触发）。会话内缓存，后续步骤直接引用。
-3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——步骤 2 据此判断是否触发 / tasks 是否合规。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断是否触发 / tasks 是否合规。
 
 ### 2. 前置检查
 
@@ -56,7 +56,7 @@ archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预�
 - **模型验证**：proposal 的"预期行为模型"是否被实际行为验证？
   - 如果验证通过 → 模型成立，记录"预期行为模型已验证"。
   - 如果验证失败 → 模型需要修正，记录"预期行为模型与实际偏差：<偏差描述>，模型修正建议：<...>"。这是综合集成循环的闭合动作——把"这次发现的偏差"转化为"下一个 propose 的预测模型修正"（见 `system-engineering` 的「反馈控制回路」节）。
-  - 如果 proposal 没填"预期行为模型"字段（旧 change 兼容）→ 跳过本字段，仅用前三个字段做复盘。本兜底仅兼容本 plugin 之前版本的旧 change；新 change 的 proposal 必填此字段（`td-propose` 步骤 7），理论上不应走到本分支。
+  - 如果 proposal 没填"预期行为模型"字段（旧 change 兼容）→ 跳过本字段，仅用前三个字段做复盘。本兜底仅兼容旧版本产生的旧 change；新 change 的 proposal 必填此字段（`td-propose` 步骤 7），理论上不应走到本分支。
 
 复盘的对照源有两个，按"有则用、缺则降级"原则叠加：
 
@@ -77,7 +77,7 @@ openspec archive "<name>"
 
 如果只想归档不同步 specs（infra / doc-only change），加 `--skip-specs`。
 
-**归档成功后 TODO 子项勾选**：读 `openspec/todo.md`，查找含 `  - [ ] change: <name>` 子项的主条目——把该 change 对应的子项勾选为 `  - [x] change: <name>`。然后检查该主条目：**全部子项都已勾选** → 主条目勾选 `[x]`；**仍有子项未勾选** → 主条目保持 `- [ ]`。找不到对应子项或文件不存在 → 跳过，不主动创建文件。
+**归档成功后 TODO 子项勾选**：按 `td-propose` 的 `references/todo-format.md`「勾选时机」规则操作——读 `openspec/todo.md`，查找含 `change: <name>` 子项的主条目，勾选对应子项；主条目下**全部子项都已勾选** → 主条目勾选 `[x]`；**仍有子项未勾选** → 主条目保持 `- [ ]`。找不到对应子项或文件不存在 → 跳过，不主动创建文件。
 
 **Purpose TBD housekeeping 检查**：`openspec archive` sync 主 spec 时，新生成的主 spec `## Purpose` 节会保留 td-archive 模板默认值 `TBD - created by archiving change <name>. Update Purpose after archive.`——这是已知的 sync 副作用，不能让 TBD 残留到下一次 audit。sync 完成后立即按 `references/purpose-tbd-housekeeping.md` 执行子流程（读涉及主 spec → grep `^TBD - created by archiving` → 命中则本步骤内补写一句话 Purpose → 再次 grep 确认无残留）。
 
@@ -102,7 +102,7 @@ archive 是"完成一个 change"的事件,正好对照表 3(system-audit 频率,
 
 **持久化计数器**:每次 archive 完成后,读 `openspec/.td-state/archive-counter.yaml`,把 `count` +1,写回文件。文件格式见 `references/archive-counter-template.md`,文件由本步骤首次运行时按需创建。
 
-**达阈值判定**(频率数字一律查表 3 的 project scope 列,本文件不重复定义):
+**达阈值判定**(频率数字一律查表 3 的 project scope 列):
 
 | tier | 驱动源 | 判定方式 | 文件不存在时 |
 |---|---|---|---|

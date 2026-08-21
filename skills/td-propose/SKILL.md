@@ -20,7 +20,7 @@ OpenSpec 契约层入口。在写代码之前，让人和 AI 对"建什么、为
 
 proposal 里的"系统工程影响评估"节是这个原则的工程化体现——agent 不只写"what"和"how"，必须写"这会对系统整体产生什么影响"，完成从定性到定量的综合集成。其中"预期行为模型"字段是综合集成的"模型"载体（见 `system-engineering` 的「主基调四条」第 3 条「模型载体」节）。
 
-**《工程控制论》反馈控制回路归位**：propose 是反馈控制回路的前馈控制环节——在实施前预测"系统工程影响"，建立控制目标（proposal 的"预期行为模型"）。这个前馈控制目标在 `/td-apply` 步骤 7.2 系统级验证里被实时检测，在 `/td-archive` 步骤 3"实际 vs 预期"复盘里被事后校正。propose 不是"写个文档"，是"建立反馈控制回路的前馈控制目标"。
+**《工程控制论》反馈控制回路归位**：propose 是反馈控制回路的前馈控制环节——建立控制目标（proposal 的"预期行为模型"），在 apply 步骤 7.2 被实时检测、在 archive 步骤 3 被事后校正。归位锚点见 `system-engineering` 的「反馈控制回路」节。
 
 ## 输入
 
@@ -42,7 +42,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 1. **`system-engineering`** — 主基调四条进入上下文。propose 的每个判断都在主基调四条框架下做。
 2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）。会话内缓存，后续步骤直接引用。
-3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——步骤 3 据此判断 wip-limit / human-in-loop 是否触发。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断 wip-limit / human-in-loop 是否触发。
 
 ### 2. 读现场背景（config.yaml context）
 
@@ -62,7 +62,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
 
-- `wip-limit`（硬阻塞 + override）：当前活跃 change 数已达上限？已达 → **阻塞本步骤，不执行步骤 4**，执行 `wip-limit` 的「硬约束 + override 机制」节（权威描述在该 skill，本文件不重复；override 通过后继续步骤 4）。
+- `wip-limit`（硬阻塞 + override）：当前活跃 change 数已达上限？已达 → **阻塞本步骤，不执行步骤 4**，执行 `wip-limit` 的「硬约束 + override 机制」节（权威描述在该 skill；override 通过后继续步骤 4）。
 - `human-in-loop`：用户描述是否清晰到可以 propose？不清楚 → 用 `AskUserQuestion` 问"想做什么 change"。
 - **TODO 池检查**：读 `openspec/todo.md`（不存在 → 跳过本子项，视为空池，不主动创建文件）。todo.md 的主条目/change 子项/优先级/分节规则见 `references/todo-format.md`。
   - 列出全部**未勾选**（`- [ ]`）主条目作为候选池，**按优先级排序呈现**（P0 → P1 → P2，未标注视为 P2）。
@@ -111,7 +111,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 
 ### 7. artifact 必填项检查
 
-每个 artifact 写完后，对照本 plugin 对 OpenSpec 模板的**新增要求**做必填项检查。缺项 → 回步骤 6 补写，不能跳到步骤 8。
+每个 artifact 写完后，对照本工作流对 OpenSpec 模板的**新增要求**做必填项检查。缺项 → 回步骤 6 补写，不能跳到步骤 8。
 
 #### proposal.md 必填节：系统工程影响评估
 
@@ -136,12 +136,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 
 #### proposal.md 必填：tier-large 总体设计文档
 
-若 `$_TD_TIER == tier-large`，proposal 里必须附"总体设计文档"（见 `tier-large` 的「总体设计文档必填」节）：
-
-- 这个改动在系统层次里的位置
-- 影响的所有分系统
-- 与最近 archive 的 change 的关系
-- 是否触发跨分系统协调
+若 `$_TD_TIER == tier-large`，proposal 里必须附"总体设计文档"——文档的必填字段（改动在系统层次里的位置 / 影响的分系统 / 与最近 archive 的 change 的关系 / 是否触发跨分系统协调）见 `tier-large` 的「总体设计文档必填」节，此处不复制字段列表，以该节为单一事实源。
 
 没这份文档，proposal 不算 apply-ready。本检查与 `td-apply` 步骤 2 的前置检查对称——tier-large 的总体设计文档必填在 propose 和 apply 两处都校验，避免漏检。
 

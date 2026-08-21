@@ -12,14 +12,7 @@ user-invocable: true
 
 **主基调第 1 条：系统工程。** bug 不是"代码错了"，是"系统行为偏离契约"。修 bug 之前必须理解系统在哪一层偏离了。
 
-**《工程控制论》反馈控制回路归位**：本 skill 的 4-phase 流程是典型的反馈控制回路——
-
-- Phase 1 Reproduce = 误差检测（复现 bug = 检测系统行为偏离契约的误差）
-- Phase 2 Isolate = 误差定位（二分法缩小问题范围）
-- Phase 3 Root Cause = 误差归因（找到系统在哪一层偏离了契约）
-- Phase 4 Fix & Verify = 误差校正 + 再检测（修复 root cause + 跑复现步骤确认 bug 没了 + 跑全量测试确认没引入新 bug + 加回归测试防止它回来）
-
-这是《工程控制论》反馈控制原理在 plugin 里的最纯粹工程化——"检测到误差后必须执行校正动作，否则反馈控制回路就是断的"。
+**《工程控制论》反馈控制回路归位**：4-phase 流程是反馈控制回路的具体形态——Reproduce 检测、Isolate 定位、Root Cause 归因、Fix & Verify 校正 + 再检测。归位锚点见 `system-engineering` 的「反馈控制回路」节。
 
 ## 触发时机
 

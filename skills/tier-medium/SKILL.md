@@ -8,14 +8,13 @@ user-invocable: false
 
 ## 判断依据
 
-- 文件数：10–100
-- 团队规模：单团队多人
-- 部署单元：1–3 个
+文件数 / 团队规模 / 部署单元的判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
+
 - 系统层次：有明显的模块/分系统边界
 
 ## system-audit 频率
 
-见表 3 的 tier-medium 行（project scope 每完成 3 个 change，current-change 每个关键链任务完成时；表 3 见 `field-assessment/references/audit-frequency.md`）。本文件不重复定义频率数字。
+见表 3 的 tier-medium 行（project scope 每完成 3 个 change，current-change 每个关键链任务完成时；表 3 见 `field-assessment/references/audit-frequency.md`）。
 
 ## 特殊规则
 

@@ -69,7 +69,6 @@ openspec/.td-state/
 ├── profile-tier.yaml        ← field-assessment 维护：profile/tier 判读缓存 + 触发重判的时间戳
 ├── archive-counter.yaml     ← td-archive 维护：累计归档计数（system-audit 频率触发用）
 ├── audit-history.yaml       ← td-system-audit 维护：audit 时间戳序列
-├── critical-buffer.yaml     ← critical-buffer 维护：关键链缓冲消耗
 └── audits/                  ← td-system-audit 维护：每次完整 audit 报告
 ```
 

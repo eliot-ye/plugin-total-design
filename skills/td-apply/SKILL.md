@@ -20,13 +20,13 @@ argument-hint: <change-name>
 
 apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。每个任务对系统整体的影响，必须由 agent 持续持有。
 
-**核心论点归位——"总体性能不等于各部分性能之和"**：本 skill 步骤 7.2 的"系统级验证（跨分系统边界，硬步骤）"是整个 plugin 最直接体现这个核心论点的一段。钱学森在《创建系统学》里明确说："系统的总体性能不等于各部分性能之和；关键是整体协调。"plugin 把这个论点工程化为：所有任务测试全绿只证明每个分系统局部正确，不能证明分系统整合后整体行为符合契约——所以 `td-apply` 步骤 7.2 必须做跨分系统边界验证。本 skill 步骤 7.2 定义触发条件与 tier 分层强度，执行语义在 `verification-before-completion` 第 6 节。
+**核心论点归位——"总体性能不等于各部分性能之和"**：步骤 7.2 的"系统级验证（跨分系统边界，硬步骤）"是核心论点最直接的体现。钱学森在《创建系统学》里明确说："系统的总体性能不等于各部分性能之和；关键是整体协调。"本工作流把这个论点工程化为：所有任务测试全绿只证明每个分系统局部正确，不能证明分系统整合后整体行为符合契约——所以 `td-apply` 步骤 7.2 必须做跨分系统边界验证。步骤 7.2 定义触发条件与 tier 分层强度，执行语义在 `verification-before-completion` 第 6 节。
 
 **系统工程主基调第 2 条：总体设计部。**
 
 apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-loop` 让用户（总体设计部）拍。
 
-**《工程控制论》反馈控制回路归位**：apply 是反馈控制回路的控制执行 + 实时误差检测环节——TDD 是契约级实时误差检测（RED 失败 = 契约偏离），verification 是系统级实时误差检测（跨分系统边界验证失败 = 整合偏离）。apply 不是"实施代码"，是"执行反馈控制回路里的控制动作 + 实时误差检测"。
+**《工程控制论》反馈控制回路归位**：apply 是反馈控制回路的控制执行 + 实时误差检测环节（TDD 契约级、verification 系统级）。归位锚点见 `system-engineering` 的「反馈控制回路」节。
 
 ## 输入 - change 名。空则推导或问用户"想 apply 哪个 change"
 
@@ -40,7 +40,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 1. **`system-engineering`** — 主基调四条进入上下文。apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。
 2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 7.3）。
-3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——步骤 2 据此判断是否触发 / tasks 是否合规。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断是否触发 / tasks 是否合规。
 
 ### 2. 前置检查
 
@@ -48,7 +48,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节（含"预期行为模型"字段）？没有 → 不算 apply-ready，停下来问用户。
 - **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `tier-large` 的「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。与 `td-propose` 步骤 7 的检查在两处分别校验，避免漏检。
-- **`wip-limit`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。**阻塞本步骤，不执行步骤 3**，执行 `wip-limit` 的「硬约束 + override 机制」节（权威描述在该 skill，本文件不重复；override 通过后继续步骤 3）。propose 与 apply 两处都必须执行硬阻塞 + override 机制。
+- **`wip-limit`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。**阻塞本步骤，不执行步骤 3**，执行 `wip-limit` 的「硬约束 + override 机制」节（权威描述在该 skill；override 通过后继续步骤 3）。propose 与 apply 两处都必须执行硬阻塞 + override 机制。
 - **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按当前 tier 比例,查表 1 的 critical-buffer 行;表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - 其余 constraint（brooks-law / delay-decision / human-in-loop）在实施过程中按需触发，不在本步预判。
 
@@ -61,9 +61,9 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 3. `specs/` 下的 spec 文件
 4. `tasks.md`（实施步骤）
 
-### 4. 架构 review + 触发行为层
+### 4. 架构 review 复核 + 触发行为层
 
-**进入任务实施前，先触发 `requesting-code-review` 的架构 review**——对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合（检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review（与 `td-propose` 步骤 9 的架构 critical 闭环对称）。
+**进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 9 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 9 结论，直接进入任务实施**；**有改动 → 重新触发 `requesting-code-review` 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合，检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
 
 架构 review 通过后，按 `tasks.md` 的任务序列实施。行为层 skill 嵌套触发，不是平铺：
 
@@ -81,7 +81,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 - `brooks-law`：用户想加人手 / 并行 subagent 时
 - `delay-decision`：遇到可逆决策时
-- `human-in-loop`：遇到 5 类必停场景时（见该 skill）
+- `human-in-loop`：遇到必停场景时（见该 skill）
 
 ### 6. 更新 tasks.md
 

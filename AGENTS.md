@@ -83,7 +83,7 @@ total-design/
 ├── LICENSE
 ├── .gitignore
 │
-├── skills/                  ← 26 个 skill，全部目录式（每个目录下是 SKILL.md）
+├── skills/                  ← 27 个 skill，全部目录式（每个目录下是 SKILL.md）
 │   │
 │   ├── 约束层（6 个）
 │   │   ├── system-engineering/ ← 钱学森主基调；user-invocable: false
@@ -111,21 +111,23 @@ total-design/
 │   │   ├── tier-medium/
 │   │   └── tier-large/
 │   │
-│   └── 契约层 skill（6 个，与下方 command 一一对应）
+│   └── 契约层 skill（7 个，与下方 command 一一对应）
 │       ├── td-propose/
 │       ├── td-explore/
 │       ├── td-apply/
 │       ├── td-reverse-spec/
 │       ├── td-archive/
-│       └── td-system-audit/
+│       ├── td-system-audit/
+│       └── td-init/
 │
-└── commands/                ← 7 个 slash 命令入口（6 个极薄，逻辑在同名 skill 里；td-list 例外，见下）
+└── commands/                ← 8 个 slash 命令入口（7 个极薄，逻辑在同名 skill 里；td-list 例外，见下）
     ├── td-propose.md
     ├── td-explore.md
     ├── td-apply.md
     ├── td-reverse-spec.md
     ├── td-archive.md
     ├── td-system-audit.md
+    ├── td-init.md
     └── td-list.md            ← 只读命令，无同名 skill，逻辑直接写在命令文件里
 
 hooks/                      ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
@@ -164,7 +166,7 @@ disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 
 **必须有 `## 服务的主基调原则` 一节的 skill：**
 
 - 约束层 5 个局部规律（`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop`）—— 显式 link 到 `system-engineering` 主基调的某一条
-- 契约层 6 个 td-* skill —— 同上
+- 契约层 7 个 td-* skill —— 同上
 
 `system-engineering` 自己是主基调本身，不需要这一节。行为层 / 配置层 skill 可选这一节，但写了更清晰。
 
@@ -202,7 +204,7 @@ args: none|option|required
 **立刻调用 `<command-name>` skill，参数 `$ARGUMENTS`。**       ← 如果 args 是 none，可以不需要下半句
 ```
 
-6 个命令文件 (`td-propose` / `td-explore` / `td-apply` / `td-reverse-spec` / `td-archive` / `td-system-audit`) 都遵循这个极薄模板——命令只是 slash 入口，真正的逻辑在同名 skill (`skills/<td-*>/SKILL.md`) 里。这样同一份逻辑既能被 slash command 触发，也能被 agent 自动触发。
+7 个命令文件 (`td-propose` / `td-explore` / `td-apply` / `td-reverse-spec` / `td-archive` / `td-system-audit` / `td-init`) 都遵循这个极薄模板——命令只是 slash 入口，真正的逻辑在同名 skill (`skills/<td-*>/SKILL.md`) 里。这样同一份逻辑既能被 slash command 触发，也能被 agent 自动触发。
 
 **例外：`td-list`**——只读命令（`openspec list` 列活跃 change），无同名 skill，逻辑直接写在命令文件里，不遵循极薄模板。它不需要被 agent 自动触发（只是查询入口），故不为其建 skill。
 
@@ -250,15 +252,15 @@ atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.
 
 - **skill 名**：kebab-case，无冒号（atomcode `validate_skill_name` 规则）
 - **命令名**：`td-<verb>` 或 `td-<noun>`，扁平 kebab-case
-- **文件名**：`SKILL.md`（目录式；本 plugin 26 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
+- **文件名**：`SKILL.md`（目录式；本 plugin 27 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
 - **主基调 skill**：`system-engineering`，是所有局部约束的前提，不单独触发（`user-invocable: false`）
 - **skill body 内引用其他 skill 用逻辑名**（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀（atomcode 下为 `total-design:<name>`）——这是预留多平台扩展的关键设计。skill frontmatter 不写 `aliases`，调用名一律由平台加载器按 plugin 名拼接
 
 ### td-* skill 共享片段
 
-6 个 td-* skill 的 body 里曾经各自重复"平台命名表""逻辑名说明""步骤 1 激活主基调与配置层"。这三段按本节规范**自包含书写**——因为 SKILL.md 禁止引用 AGENTS.md（见上方"SKILL 不可引用 AGENTS 文件"），td-* skill 的 body 不能"指向本节"，必须把规范内容写进各自文件。本节是给本仓库开发 agent 的统一规范，不是运行时资产：
+7 个 td-* skill 的 body 里曾经各自重复"平台命名表""逻辑名说明""步骤 1 激活主基调与配置层"。这三段按本节规范**自包含书写**——因为 SKILL.md 禁止引用 AGENTS.md（见上方"SKILL 不可引用 AGENTS 文件"），td-* skill 的 body 不能"指向本节"，必须把规范内容写进各自文件。本节是给本仓库开发 agent 的统一规范，不是运行时资产：
 
-**平台命名**：6 个 td-* skill 在不同平台下的调用名由当前平台的加载器按 plugin 名拼前缀（atomcode 下为 `total-design:<name>`），不写入 frontmatter。body 不再放平台命名表，引用其他 skill 一律用逻辑名，由当前平台加载器负责拼前缀。
+**平台命名**：7 个 td-* skill 在不同平台下的调用名由当前平台的加载器按 plugin 名拼前缀（atomcode 下为 `total-design:<name>`），不写入 frontmatter。body 不再放平台命名表，引用其他 skill 一律用逻辑名，由当前平台加载器负责拼前缀。
 
 **td-* 标准步骤 1**（每个 td-* skill 的"### 1. 激活主基调与配置层"都按此序列自包含书写，只注入强度不做判断）：
 

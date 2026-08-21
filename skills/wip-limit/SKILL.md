@@ -14,7 +14,7 @@ user-invocable: false
 
 ## 规则
 
-同时活跃的 change 数量上限按当前 tier 查表 1 的 wip-limit 行取值（表 1 见 `field-assessment/references/strength-matrix.md`）。本 skill 不重复定义数字。
+同时活跃的 change 数量上限按当前 tier 查表 1 的 wip-limit 行取值（表 1 见 `field-assessment/references/strength-matrix.md`）。
 
 "活跃"定义：已经 `/td-propose` 但还没 `/td-archive` 的 change。
 
@@ -36,11 +36,6 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
    - 用户确认后，在 change 的 `proposal.md` 里记录"override WIP 上限，用户已确认风险"——作为后续 `/td-system-audit` 的输入。
    - 才继续执行后续步骤。
 
-### 不做的事
-
-- 不"提示一下就放行"——这是把硬约束降级为软约束，违反主基调第 4 条"不能并行硬解"的硬约束语义。
-- 不"一刀切禁止"——硬约束 + override 机制保留触发式哲学，用户显式 override 时松绑。
-
 ## 触发时机
 
 - 用户想 `/td-propose` 一个新 change，但活跃 change 数已达上限
@@ -50,18 +45,12 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
 
 ## 触发时 agent 应做的事
 
-按 `## 规则` 节的「硬约束 + override 机制」执行。具体动作：
-
-1. 报告当前活跃 change 列表 + WIP 上限 + 当前 tier
-2. 阻塞当前 `/td-propose` 或 `/td-apply`，不执行后续步骤
-3. 给出两个选项：(a) 先 `/td-archive` 一个再 propose/apply；(b) 显式 override
-4. 等待用户决策
-5. 用户选 override → 进入 override 流程（触发 brooks-law + critical-buffer 评估 + 要求显式确认）
-6. override 确认完成 → 继续执行后续步骤
+执行 `## 规则` 节的「硬约束 + override 机制」（权威流程在该节，本处不重复）。具体动作即该节步骤 1–4：报告当前活跃 change 列表 + WIP 上限 + 当前 tier → 阻塞 → 给两个选项 → 等决策 → override 流程 → 继续。
 
 ## 不做的事
 
 - 不自动 archive 用户的 change
 - 不隐藏规则让用户"自由发挥"——自由发挥在复杂系统里就是失控
-- 不"提示一下就放行"——硬约束必须阻塞或要求 override，"提示放行"等于把硬约束降级为软约束
+- 不"提示一下就放行"——硬约束必须阻塞或要求 override，"提示放行"等于把硬约束降级为软约束（违反主基调第 4 条"不能并行硬解"的硬约束语义）
+- 不"一刀切禁止"——硬约束 + override 机制保留触发式哲学，用户显式 override 时松绑
 - 不让 override 滥用——连续 override 时升级提醒强度（见 `## 触发时机` 节的"override 后的二次检测"）
