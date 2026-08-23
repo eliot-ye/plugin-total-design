@@ -1,6 +1,6 @@
 ---
 name: tier-medium
-description: 中型系统复杂度 tier。10-100 文件，多模块。constraints 中等强制，system-audit 每个重大改动后。
+description: 中型系统复杂度 tier。10-100 文件，多模块。constraints 中等强制，system-audit 频率按表 3（见 field-assessment）。
 user-invocable: false
 ---
 
