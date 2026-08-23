@@ -227,6 +227,14 @@ manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
 - **`skills` / `commands` 字段是路径数组**，本 plugin 用 `["./skills"]` / `["./commands"]`，加载器会自动递归发现所有 `SKILL.md` 和命令文件
 - **没有 `constraints` / `profiles` / `tiers` 字段**——这些必须以 skill 形态存在
 
+### 版本发布流程（version bump 与发布文档同步）
+
+**任何 `version` 变更（`plugin.json` + `marketplace.json` 同步 bump）必须与 CHANGELOG.md、RELEASE_NOTES.md 的更新在同一个逻辑变更内完成**——不允许只 bump 版本不更新发布文档。三者版本号必须一致（版本号只在 `plugin.json` + `marketplace.json` 两处定义，description 保持纯 ASCII）。
+
+- **CHANGELOG.md**：按 Keep a Changelog 格式在文件顶部新增当前版本条目（最新在上），按 Fixed / Changed / Docs 等类别记录；历史条目只读，不修改（过时的"发布提示"类临时标注可更新为已结清状态，但不改动已发布的变更记录）。
+- **RELEASE_NOTES.md**：更新为当前版本发布说明——本版本定位（新增/修复/重构版）、行为变更表（升级用户感知的差异）、升级步骤（bump 版本号同步）、完整变更列表指向 CHANGELOG 对应条目。
+- **发布欠账**：内容演进但版本未 bump = 发布欠账（见「dev 态与使用态分叉」节），发布时在同一个逻辑变更内结清 version + CHANGELOG + RELEASE_NOTES 三项。
+
 ## 使用态 LLM 视角审核标准
 
 **任何对本仓库内容资产（SKILL.md / 命令文件 / references）的审核——周期性自审、发布前审、修复前审——必须以使用态 LLM 的视角按下列四个维度检查，并产出可验证的审核报告。** 审核是改动的前置门：发现问题按类别整理，进入「依赖图谱与分析」门禁后修复。
