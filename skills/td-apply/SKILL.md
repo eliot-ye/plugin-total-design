@@ -26,7 +26,7 @@ apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"�
 
 apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-loop` 让用户（总体设计部）拍。
 
-**《工程控制论》反馈控制回路归位**：apply 是反馈控制回路的控制执行 + 实时误差检测环节（TDD 契约级、verification 系统级）。归位锚点见 `system-engineering` 的「反馈控制回路」节。
+**《工程控制论》反馈控制回路归位**：apply 是控制执行 + 实时误差检测环节（TDD 契约级、verification 系统级）。
 
 ## 输入 - change 名。空则推导或问用户"想 apply 哪个 change"
 

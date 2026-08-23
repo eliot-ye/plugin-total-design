@@ -12,7 +12,7 @@ user-invocable: true
 
 **主基调第 1 条：系统工程。** bug 不是"代码错了"，是"系统行为偏离契约"。修 bug 之前必须理解系统在哪一层偏离了。
 
-**《工程控制论》反馈控制回路归位**：4-phase 流程是反馈控制回路的具体形态——Reproduce 检测、Isolate 定位、Root Cause 归因、Fix & Verify 校正 + 再检测。归位锚点见 `system-engineering` 的「反馈控制回路」节。
+**《工程控制论》反馈控制回路归位**：4-phase 流程是反馈控制回路的具体形态（Reproduce 检测、Isolate 定位、Root Cause 归因、Fix & Verify 校正 + 再检测）。
 
 ## 触发时机
 
