@@ -17,18 +17,18 @@ user-invocable: false
 | 层 | 强度 |
 |---|---|
 | OpenSpec 契约层 | **中**：proposal 轻量化，spec delta 小步走 |
-| Superpowers 行为层 | **中**：新功能走 TDD，bug 走 systematic-debugging |
+| 行为层（skills） | **中**：新功能走 TDD，bug 走 systematic-debugging |
 | 工程管理约束层 | **强**：瓶颈=部署/审查，缓冲留给回归测试 |
 
 ## 在各 tier 下的 constraint 强度
 
-强度由 `field-assessment` 单一判定（表 1 / 表 2，见 `field-assessment/references/strength-matrix.md`）。本 profile 不再加成其余 4 个 constraint——强度由 tier 决定，profile 只决定流程侧重。
+本 profile 不改变 constraint 强度：强度由 tier 决定（引用约定见 `field-assessment` 识别流程的「下游引用强度的约定」节）。
 
 ## 特殊规则
 
 ### 1. 生产环境改动前必触发 human-in-loop
 
-涉及生产环境的改动（部署、迁移、权限、数据修改），agent **必须**停下来问用户。不得自行推进。
+涉及生产环境的改动（部署、迁移、权限、数据修改），agent **必须**停下来问用户。不得自行推进。这属 `human-in-loop` 通用基线第 3 类（生产环境影响），所有 profile × tier 生效（表 2 的 maintenance "+ 生产环境改动前"加成与基线重叠，只是强调，不改变强度）。
 
 ### 2. bug 走 systematic-debugging
 

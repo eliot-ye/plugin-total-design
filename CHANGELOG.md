@@ -2,9 +2,20 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
-## [1.3.0] - 2026-08-23
+## [1.3.1] - 2026-08-23
 
-> **发布提示**：本版本内容已就绪但 `plugin.json` 仍为 1.2.0。发布时需：bump version 至 1.3.0（`plugin.json` + `marketplace.json` 同步）→ 重新发布/安装 → `atomcode plugin trust`（hook 命令哈希已变更，不重新 trust 则 SessionEnd 兜底不激活）。
+### Fixed
+
+- **消除平台工具名泄漏**：td-propose 移除正文中的 `request_user_input` 平台工具名，改为平台无关的"询问用户机制"表述（使用态 LLM 视角审核维度 4 修复）。
+- **补齐依赖技能节**：critical-buffer / brooks-law / delay-decision / human-in-loop 新增「依赖技能」节，wip-limit 依赖节补列 `field-assessment`——依赖技能节与正文实际引用一致（维度 1 修复）。
+- **收敛 profile 重复段落**：3 个 profile 的「在各 tier 下的 constraint 强度」节由三处逐字重复收敛为引用式，统一锚定 `field-assessment` 识别流程的「下游引用强度的约定」节（维度 2/3 修复）。
+
+### Changed
+
+- 版本 bump 至 1.3.1：`plugin.json` + `marketplace.json` 同步（1.3.0 条目中的发布欠账已结清）。
+- `marketplace.json` 移除指向 claude-code-marketplace 的 `$schema` 引用（多平台扩展准备）。
+
+## [1.3.0] - 2026-08-23
 
 ### Changed（行为变更）
 

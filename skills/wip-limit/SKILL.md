@@ -6,6 +6,13 @@ user-invocable: false
 
 # WIP 限制
 
+## 依赖技能
+
+- `brooks-law`
+- `critical-buffer`
+- `human-in-loop`
+- `field-assessment`
+
 ## 服务的主基调原则
 
 **系统工程主基调第 4 条：开放的复杂巨系统。** 复杂巨系统不能并行硬解。同时开太多 change，彼此的相互作用无法被 agent 同时持有——每个 change 都半途而废，整体性能下降。

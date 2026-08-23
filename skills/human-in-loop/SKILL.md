@@ -6,6 +6,13 @@ user-invocable: false
 
 # 人在回路
 
+## 依赖技能
+
+- `delay-decision`
+- `wip-limit`
+- `brooks-law`
+- `field-assessment`
+
 ## 服务的主基调原则
 
 **系统工程主基调第 2 条：总体设计部。** 巨系统里有些判断必须留给总体设计部，不能由分系统工程师（agent）自己决定。
@@ -42,7 +49,7 @@ user-invocable: false
 
 ## 触发机制
 
-本 skill 不靠 hook 强制，靠 agent 自觉识别上述场景。当 agent 识别到上述第 1–5 类场景时，**必须暂停**，用 `AskUserQuestion` 工具或等价机制问用户，**不得自行推进**。
+本 skill 不靠 hook 强制，靠 agent 自觉识别上述场景。当 agent 识别到上述第 1–5 类场景时，**必须暂停**，停下来询问用户，**不得自行推进**。
 
 ## 触发时 agent 应做的事
 

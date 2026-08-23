@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 判断依据
 
-文件数 / 团队规模 / 部署单元的判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
+判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
 
 - 系统层次：多层嵌套的分系统，可能有跨仓库依赖
 
@@ -40,7 +40,7 @@ large 系统的每个 change，proposal 里必须附"总体设计文档"：
 
 大系统并行硬解几乎必然制造失调。同一时刻至多允许的活跃 change 数按表 1 的 wip-limit 行取值（表 1 见 `field-assessment/references/strength-matrix.md`）。
 
-如果用户坚持要并行，触发 `brooks-law` 强制提醒，并要求用户显式确认风险。
+如果用户坚持要并行，执行 `wip-limit` 的「硬约束 + override 机制」——override 回路编排由 `wip-limit` 单一持有（brooks-law 提醒 → critical-buffer 评估 → human-in-loop 第 6 类确认 → 记录），本处不重复简化版。
 
 ### 3. 关键链 buffer
 
@@ -56,7 +56,7 @@ audit 报告里特别关注：
 - 关键链 buffer 是否被压缩
 - 是否有"应该触发 human-in-loop 但没触发"的决策
 
-**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**，audit 报告里区分"子系统内部失调"和"跨子系统边界失调"——后者按"最高 tier 子系统"的强度处理（保守原则）。子系统独立定 tier 的执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
+**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 按子系统层次分别审计（分层审计的完整语义见 `td-system-audit` 步骤 2，此处不重复）——执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
 
 ## 与其他 tier 的切换
 

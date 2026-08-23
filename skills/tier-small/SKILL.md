@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 判断依据
 
-文件数 / 团队规模 / 部署单元的判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
+判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
 
 - 系统层次：扁平，无明显分系统边界
 
@@ -20,7 +20,7 @@ user-invocable: false
 
 ### 1. 不强求重流程
 
-小系统容易 over-engineering。profile × constraint 已经给小系统松绑，不要"因为 superpowers 这么说"就强行走全套 SDD。
+小系统容易 over-engineering。profile × constraint 已经给小系统松绑，不要"因为流程模板这么说"就强行走全套 SDD。
 
 ### 2. 简单优先
 

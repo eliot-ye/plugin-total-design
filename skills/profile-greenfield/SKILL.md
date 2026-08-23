@@ -17,12 +17,12 @@ user-invocable: false
 | 层 | 强度 |
 |---|---|
 | OpenSpec 契约层 | **强**：proposal 先行，必须填"系统工程影响评估" |
-| Superpowers 行为层 | **强**：full SDD，brainstorming → writing-plans → TDD → review → verify 全走 |
+| 行为层（skills） | **强**：full SDD，brainstorming → writing-plans → TDD → review → verify 全走 |
 | 工程管理约束层 | **中**：WIP 限制启动，brooks-law 提醒，delay-decision 强 |
 
 ## 在各 tier 下的 constraint 强度
 
-强度由 `field-assessment` 单一判定（表 1 / 表 2，见 `field-assessment/references/strength-matrix.md`）。本 profile 不再加成其余 4 个 constraint——强度由 tier 决定，profile 只决定流程侧重。
+本 profile 不改变 constraint 强度：强度由 tier 决定（引用约定见 `field-assessment` 识别流程的「下游引用强度的约定」节）。
 
 ## 特殊规则
 

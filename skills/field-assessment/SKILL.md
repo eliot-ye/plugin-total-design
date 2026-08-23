@@ -18,4 +18,4 @@ user-invocable: false
 
 ## 如何被引用
 
-每个 td-* skill 的"步骤 1"调用本 skill 的识别流程（`references/identification-flow.md`），判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1 + 表 2（+ 表 3，仅 archive/apply 需要）读入上下文。
+每个 td-* skill 的"步骤 1"调用本 skill 的识别流程（`references/identification-flow.md`），判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1 + 表 2（+ 表 3，archive / apply / system-audit 需要）读入上下文。

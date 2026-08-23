@@ -1,6 +1,6 @@
 ---
 name: tier-medium
-description: 中型系统复杂度 tier。10-100 文件，多模块。constraints 中等强制，system-audit 每个重大改动后。
+description: 中型系统复杂度 tier。10-100 文件，多模块。constraints 中等强制，system-audit 频率按表 3（见 field-assessment）。
 user-invocable: false
 ---
 
@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 判断依据
 
-文件数 / 团队规模 / 部署单元的判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
+判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
 
 - 系统层次：有明显的模块/分系统边界
 
@@ -24,9 +24,9 @@ medium 系统的常见问题是"分系统边界模糊"。在 reverse-spec 时，
 
 **层次观归位**：分系统边界显式化是主基调第 4 条「层次观」在 tier-medium 的工程化——承认 medium 系统是多层级嵌套结构（顶层架构 → 模块设计 → 实现细节），不同层次需要分层对待。当 `field-assessment` 识别流程允许子系统独立定 tier 时，medium 系统的每个分系统也可能有自己的子系统层次。
 
-### 2. 公共契约变更触发 human-in-loop
+### 2. 公共契约变更属 human-in-loop 基线第 1 类
 
-medium 系统里，API 形状、数据库 schema、配置格式这些"公共契约"开始有跨分系统影响。改这些前必触发 human-in-loop。
+medium 系统里，API 形状、数据库 schema、配置格式这些"公共契约"开始有跨分系统影响。改这些前必触发 `human-in-loop`——这属该 skill 的通用基线第 1 类（公共契约变更），所有 profile × tier 生效（表 1 注解明确"不重复列为 tier 加成"），本处不再视为 medium 独有加成。
 
 ### 3. 关键链诊断
 
