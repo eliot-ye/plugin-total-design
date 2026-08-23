@@ -22,7 +22,7 @@ user-invocable: false
 
 ## 在各 tier 下的 constraint 强度
 
-强度由 `field-assessment` 单一判定（表 1 / 表 2），本 profile 不再加成 constraint——强度由 tier 决定，profile 只决定流程侧重。
+本 profile 不改变 constraint 强度：强度由 tier 决定（引用约定见 `field-assessment` 识别流程的「下游引用强度的约定」节）。
 
 ## 特殊规则
 

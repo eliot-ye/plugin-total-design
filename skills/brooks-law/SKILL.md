@@ -6,6 +6,12 @@ user-invocable: false
 
 # Brooks 定律提醒
 
+## 依赖技能
+
+- `critical-buffer`
+- `wip-limit`
+- `field-assessment`
+
 ## 服务的主基调原则
 
 **系统工程主基调第 1 条：系统工程。** 总体性能 ≠ 各部分之和；协调成本随人数呈 O(n²) 增长。

@@ -28,7 +28,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 - **kebab-case change 名**：如 `add-user-auth`
 - **自然语言描述**：agent 从中推导 kebab-case 名
-- **空**：用询问用户机制（如 `request_user_input` 等价工具）问用户"想做什么 change"
+- **空**：用询问用户机制问用户"想做什么 change"
 
 #### 内容
 

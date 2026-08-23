@@ -11,6 +11,7 @@ user-invocable: false
 - `brooks-law`
 - `critical-buffer`
 - `human-in-loop`
+- `field-assessment`
 
 ## 服务的主基调原则
 

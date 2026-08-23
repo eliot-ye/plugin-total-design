@@ -6,6 +6,11 @@ user-invocable: false
 
 # 关键链缓冲保护
 
+## 依赖技能
+
+- `wip-limit`
+- `field-assessment`
+
 ## 服务的主基调原则
 
 **系统工程主基调第 1 条：系统工程。** 整体性能取决于瓶颈，不是平均值。

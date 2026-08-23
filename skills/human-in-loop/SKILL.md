@@ -6,6 +6,13 @@ user-invocable: false
 
 # 人在回路
 
+## 依赖技能
+
+- `delay-decision`
+- `wip-limit`
+- `brooks-law`
+- `field-assessment`
+
 ## 服务的主基调原则
 
 **系统工程主基调第 2 条：总体设计部。** 巨系统里有些判断必须留给总体设计部，不能由分系统工程师（agent）自己决定。
