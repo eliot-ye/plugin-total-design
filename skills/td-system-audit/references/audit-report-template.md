@@ -1,3 +1,5 @@
+<!-- 本文件的二/三级标题（如 `## System Audit 报告`、`### 主基调对照`）被 hooks/td_state_sync.py 的 _load_report_markers 动态读取为报告完整性 marker——改标题无需同步 hook，hook 自动跟随；但删除「## 报告模板」节或大改标题结构时，请确认 hook 仍能从本文件提取到标题。 -->
+
 # Audit 报告模板与主基调对照清单
 
 ## 主基调对照清单
