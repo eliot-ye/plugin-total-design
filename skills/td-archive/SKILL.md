@@ -87,7 +87,7 @@ archive 是契约层的"闭合点"，必须触发三个后续接力（顺序执�
 
 #### 5.1 profile/tier 重新判读
 
-archive 完一个 change 后，项目的 profile 可能变化（比如 greenfield 走到 maintenance，或 brownfield 进入大重构）。**强制重新调用 `field-assessment` 的「识别流程」节**，重新判读 `$_TD_PROFILE` / `$_TD_TIER`。
+archive 完一个 change 后，项目的 profile 可能变化（greenfield 走到 maintenance，或 brownfield 进入大重构）。**强制重新调用 `field-assessment` 的「识别流程」节**，重新判读 `$_TD_PROFILE` / `$_TD_TIER`。重判策略见 `field-assessment` 的 `references/identification-flow.md`「### 4. 缓存判读结果」节的"重判策略"段——读到该段执行，本节不重复。
 
 如果新判读结果与步骤 1 缓存的不同：
 

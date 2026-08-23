@@ -65,23 +65,23 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 **进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 9 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 9 结论，直接进入任务实施**；**有改动 → 重新触发 `requesting-code-review` 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合，检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
 
-架构 review 通过后，按 `tasks.md` 的任务序列实施。行为层 skill 嵌套触发，不是平铺：
+架构 review 通过后，按 `tasks.md` 的任务序列实施。行为层触发序列：
 
 1. **`writing-plans`**（若 tasks.md 粒度不够细）：细化任务序列
-2. **`executing-plans`**（按任务序列执行，内部嵌套触发以下 skill）：
+2. **`executing-plans`**（按任务序列执行，内部按任务粒度嵌套触发以下 skill）：
    - **`test-driven-development`**：每个任务先写失败测试，再写实现
    - **`requesting-code-review`**：checkpoint 时做 review
    - **`verification-before-completion`**：每个任务完成前必须跑验证命令
 
-`executing-plans` 是行为层执行的核心入口，TDD / review / verify 在 `executing-plans` 内部按任务粒度嵌套触发。
+`executing-plans` 是行为层执行的核心入口，TDD / review / verify 在 `executing-plans` 内部按任务粒度嵌套触发。executing-plans 内部触发的 human-in-loop / systematic-debugging 是**任务粒度**的（如 checkpoint 必停、RED 失败），与本步骤 5 的 apply 全局粒度触发不重复。
 
-### 5. 触发工程管理约束
+### 5. 触发 apply 全局粒度的工程管理约束
 
-实施过程中，按需触发：
+步骤 4 的 executing-plans 内部已触发任务粒度的 human-in-loop / systematic-debugging（如 checkpoint 必停、RED 失败）。本步骤触发的是 **apply 全局粒度**的约束，不与任务粒度重复：
 
-- `brooks-law`：用户想加人手 / 并行 subagent 时
-- `delay-decision`：遇到可逆决策时
-- `human-in-loop`：遇到必停场景时（见该 skill）
+- `brooks-law`：用户在 apply 期间想加人手 / 并行 subagent 加速时
+- `delay-decision`：apply 期间遇到顶层架构层次的可逆决策时（与任务粒度的"实现细节可逆决策"不重叠）
+- `human-in-loop`：apply 期间遇到"超出当前 change scope 的影响"等 apply 全局必停场景时（任务粒度的 checkpoint 必停由 executing-plans 负责）
 
 ### 6. 更新 tasks.md
 

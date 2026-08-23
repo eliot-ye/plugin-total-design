@@ -26,7 +26,7 @@ user-invocable: false
 
 专家的定性判断 + 数据 + 模型 → 反复迭代 → 上升到定量认识；人和机器结合，不是纯算法。
 
-模型是把定性判断上升到定量认识的桥梁。在 plugin 里，这个"模型"载体是 OpenSpec 的 spec/design artifact（分系统的契约与不变量）——proposal 的"系统工程影响评估"节是预期模型，archive 的"实际 vs 预期"复盘是模型验证。下游 skill 必须显式持有"spec 是综合集成的模型载体"这个判断，不能把 spec 当成纯文档。
+模型是把定性判断上升到定量认识的桥梁。在本工作流里，这个"模型"载体是 OpenSpec 的 spec/design artifact（分系统的契约与不变量）——proposal 的"系统工程影响评估"节是预期模型，archive 的"实际 vs 预期"复盘是模型验证。下游 skill 必须显式持有"spec 是综合集成的模型载体"这个判断，不能把 spec 当成纯文档。
 
 **对工作流的含义：** OpenSpec proposal 里必须回答"这改动会影响哪些分系统、整体性能会怎么变"——这是从定性到定量的综合集成在 artifact 层的体现。agent 不能只写"what"和"how"，必须写"这会对系统整体产生什么影响"。
 
@@ -47,7 +47,7 @@ user-invocable: false
 - **apply（控制执行 + 实时误差检测）**：按 tasks.md 实施，TDD 是契约级误差检测，verification 是系统级误差检测。
 - **archive（反馈控制回路闭合）**："实际 vs 预期"复盘是事后误差检测，修正下一个 propose 的预测模型。
 
-plugin 里多个闭环实现都是这个反馈控制回路的具体形态：`td-system-audit` 步骤 7"修复后重跑 audit 闭环"、`systematic-debugging` 4-phase 闭环、`executing-plans` 步骤 3 的 human checkpoint、`verification-before-completion` 第 6 节系统级验证。下游 skill 触发这些闭环时，应意识到这是《工程控制论》反馈控制原理在 plugin 里的工程化，不是孤立的"重跑一下"。
+本工作流里多个闭环实现都是这个反馈控制回路的具体形态：`td-system-audit` 步骤 7"修复后重跑 audit 闭环"、`systematic-debugging` 4-phase 闭环、`executing-plans` 步骤 3 的 human checkpoint、`verification-before-completion` 第 6 节系统级验证。下游 skill 触发这些闭环时，应意识到这是《工程控制论》反馈控制原理在本工作流里的工程化，不是孤立的"重跑一下"。
 
 ## 如何使用本 skill
 

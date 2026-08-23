@@ -22,9 +22,7 @@ user-invocable: false
 
 ## 在各 tier 下的 constraint 强度
 
-强度由 `field-assessment` 定义（表 1 的 5 个 constraint 强度 + 表 2 的 profile 场景加成，见 `field-assessment/references/strength-matrix.md`）。
-
-**profile-brownfield 不再加成其余 4 个 constraint**（`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision`）——强度由 tier 决定。profile 只决定流程侧重（brownfield 侧重 reverse-spec→propose 的接手路径），不改变各 tier 的强度。
+强度由 `field-assessment` 单一判定（表 1 / 表 2，见 `field-assessment/references/strength-matrix.md`）。本 profile 不再加成其余 4 个 constraint——强度由 tier 决定，profile 只决定流程侧重。
 
 ## 特殊规则
 

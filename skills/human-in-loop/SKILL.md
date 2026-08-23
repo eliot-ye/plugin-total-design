@@ -30,7 +30,7 @@ user-invocable: false
 
 `field-assessment` 表 1 第 5 行定义各 tier 的 human-in-loop **额外触发条件**（如 tier-medium 的"+ 公共契约变更"、tier-large 的"+ 总体设计文档审阅"）。表 2 定义各 profile 的**场景加成**（如 brownfield 的"+ 改老代码前"、maintenance 的"+ 生产环境改动前"）。
 
-最终生效强度 = 第 1–5 类通用基线 ∪ 表 1 tier 加成 ∪ 表 2 profile 加成。三者叠加，不替换。改老代码既算基线第 4 类"超 scope 影响"也被 brownfield 加成点名，叠加只是强调，不矛盾。
+最终生效强度 = 第 1–5 类通用基线 **+** 表 1 tier 加成 **+** 表 2 profile 加成，三者叠加都生效，不替换。改老代码既算基线第 4 类"超 scope 影响"也被 brownfield 加成点名，叠加只是强调，不矛盾。
 
 **第 6、7 类的叠加语义**：第 6 类（WIP override）和第 7 类（audit 触发修复）是**特定流程的触发通道**，**不参与 profile × tier 叠加**——它们分别由 `wip-limit` override 流程和 `/td-system-audit` 触发，与 profile/tier 强度无关。但 override 流程里触发的 `brooks-law` / `critical-buffer` 评估，仍按当前 tier 强度执行。
 

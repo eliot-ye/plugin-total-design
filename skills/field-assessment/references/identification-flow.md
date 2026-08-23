@@ -36,11 +36,21 @@ agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `
 
 ### 4. 缓存判读结果
 
-判读结果写入 `openspec/.td-state/profile-tier.yaml` 持久化，跨会话保留。触发重新判读的时机（命中即删除 profile-tier.yaml 的缓存值、重跑"### 2"+"### 3"）：
+判读结果写入 `openspec/.td-state/profile-tier.yaml` 持久化，跨会话保留。触发重新判读的时机（命中即执行下述"重判策略"）：
 
 - `/td-archive` 完成后（项目状态可能变化）—— archive 步骤 5.1 已负责触发重判
 - `/td-system-audit` 发现 profile/tier 与实际不符
 - 用户显式说"项目阶段变了"
+
+**重判策略**（td-archive 5.1 / td-system-audit / 用户显式触发都适用）：
+
+1. 读 `profile-tier.yaml` 缓存值（文件不存在 → 视为空缓存，跳到步骤 2 现判）。
+2. 重跑「### 2. 判读 profile」+「### 3. 判读 tier」得到新判读结果。
+3. 新判读与缓存对比：
+   - **一致** → 更新 `judged_at` 时间戳（保持 profile/tier 不变），不提示用户。
+   - **不一致** → 覆盖写 `profile-tier.yaml` 为新结果，由调用方（如 td-archive 5.1）用 `AskUserQuestion` 提示用户"项目状态已从 `<old>` 变为 `<new>`"。
+
+重判**不"删缓存文件"**——是"读缓存 → 重判 → 比对 → 按比对结果写回"。
 
 ### 5. 注入强度
 

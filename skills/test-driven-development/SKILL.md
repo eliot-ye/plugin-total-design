@@ -10,7 +10,7 @@ user-invocable: true
 
 **主基调第 1 条：系统工程。** 测试不是"代码质量的副产物"，是系统行为的契约。没有契约，agent 写的代码就是"自说自话"。
 
-**契约的层次性**：TDD 的 RED-GREEN-REFACTOR 是**分系统层次**的契约（单个任务的行为契约）。但 plugin 里还有**系统整体层次**的契约——已 archive 的 change sync 到 `openspec/specs/` 的主 spec 契约。当 TDD 的"删除代码"强制与已 archive 的 spec 契约冲突时，**系统整体层次契约优先**：先触发 `human-in-loop` 让用户决定是改 spec 契约还是保留代码，而不是直接删除代码破坏已 archive 的 spec 契约。
+**契约的层次性**：TDD 的 RED-GREEN-REFACTOR 是**分系统层次**的契约（单个任务的行为契约）。但本工作流里还有**系统整体层次**的契约——已 archive 的 change sync 到 `openspec/specs/` 的主 spec 契约。当 TDD 的"删除代码"强制与已 archive 的 spec 契约冲突时，**系统整体层次契约优先**：先触发 `human-in-loop` 让用户决定是改 spec 契约还是保留代码，而不是直接删除代码破坏已 archive 的 spec 契约。
 
 ## 触发时机
 

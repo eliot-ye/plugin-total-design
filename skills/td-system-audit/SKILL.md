@@ -51,7 +51,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。audit 的对照标准就是主基调四条，没有主基调框架，audit 会退化成"代码质量审查"。
-2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（audit 频率是否达标，查表 3）。会话内缓存，后续步骤直接引用。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。读表 3 是为了 audit 报告里能引用"本次 audit 距上次 project scope audit 间隔 X 个 change"，频率达阈值的判定由 `td-archive` 步骤 5.2 负责（那里维护 `archive-counter.yaml` 并达阈值判定）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
 ### 2. 收集审计对象

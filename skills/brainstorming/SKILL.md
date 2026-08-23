@@ -6,6 +6,12 @@ user-invocable: true
 
 # Brainstorming — 总体设计部工作方式
 
+## 依赖技能
+
+- `system-engineering`
+- `delay-decision`
+- `human-in-loop`
+
 ## 服务的主基调原则
 
 **主基调第 2 条：总体设计部。** brainstorming 不是分系统工程师"问用户要需求"，是总体设计部在"想"的阶段工作——站在系统全局立场，多视角反复迭代。
