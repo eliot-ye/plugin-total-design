@@ -1,10 +1,18 @@
 ---
 name: executing-plans
-description: 批量执行任务，带 human checkpoint。服务主基调第 2 条。触发场景：tasks.md 已写好，用户说"开始执行" / "go" / "按 plan 干"时——关键链任务后停下来 checkpoint。
+description: 批量执行任务，带 human checkpoint。服务主基调第 2 条。触发场景：`td-apply` 流程内按 tasks.md 序列实施时（执行入口是 `/td-apply`，本 skill 由 apply 内部调用；用户直接说"开始执行"/"go" 应走 `/td-apply`）——关键链任务后停下来 checkpoint。
 user-invocable: true
 ---
 
 # Executing Plans
+
+## 依赖技能
+
+- `human-in-loop`
+- `requesting-code-review`
+- `systematic-debugging`
+- `test-driven-development`
+- `verification-before-completion`
 
 ## 服务的主基调原则
 

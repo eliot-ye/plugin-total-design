@@ -10,15 +10,15 @@
 | `critical-buffer` | 20% project buffer | 35% project buffer | 50% project buffer |
 | `brooks-law` | 不强制 | 提醒 | 强制 |
 | `delay-decision` | 强 | 强 | 强 |
-| `human-in-loop` | — | + 公共契约变更 | + 总体设计文档审阅 |
+| `human-in-loop` | — | — | + 总体设计文档审阅 |
 
 ### 表 1 第 5 行（human-in-loop）语义说明
 
 **表 1 第 5 行是叠加在 `human-in-loop` skill 的第 1–5 类通用基线之上的 tier 额外触发条件，不是绝对强度值。** 第 1–5 类通用基线在所有 profile × tier 下都生效——这是"必须停"的下限。
 
 - tier-small"—"：无额外 tier 触发条件，仅用第 1–5 类通用基线。
-- tier-medium"+ 公共契约变更"：tier 基线之外，公共契约变更额外触发 human-in-loop。
-- tier-large"+ 总体设计文档审阅"：tier 基线之外，总体设计文档需要审阅时额外触发 human-in-loop。
+- tier-medium"—"：无额外 tier 触发条件，仅用第 1–5 类通用基线（"公共契约变更"属基线第 1 类，所有 tier 生效，不在此重复列为 tier 加成）。
+- tier-large"+ 总体设计文档审阅"：基线之外，总体设计文档需要审阅时额外触发 human-in-loop。
 
 ### 表 1 critical-buffer 行计算基准
 
@@ -38,7 +38,7 @@ tier-small 20% project buffer 偏低于 CCPM 标准（通常 30%）。tier-small
 | `critical-buffer` | 不确定性较低 | 不确定性中等 | 不确定性最高 |
 | `brooks-law` | 小团队加人手影响有限，不强制 | 中团队加人手要考虑 onboarding，提醒 | 大系统加人手几乎必然拖慢，强制 |
 | `delay-decision` | 表 1 说"强"（三个 tier 都强）。小系统回滚成本低，更该延迟——这是"强"在小系统的具体含义 | 强 | 强（仅模块层以下延迟；顶层架构进 tier-large 总体设计文档，不靠延迟决策处理） |
-| `human-in-loop` | —（无额外 tier 触发条件，仅用 human-in-loop skill 的第 1–5 类通用基线） | + 公共契约变更 | + 总体设计文档审阅 |
+| `human-in-loop` | —（无额外 tier 触发条件，仅用 human-in-loop skill 的第 1–5 类通用基线） | —（同 tier-small；公共契约变更属基线第 1 类，不重复列为 tier 加成） | + 总体设计文档审阅 |
 
 ## 表 2：profile 在 human-in-loop 上的场景加成
 

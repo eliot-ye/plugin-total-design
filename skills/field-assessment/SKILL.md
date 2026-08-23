@@ -14,7 +14,7 @@ user-invocable: false
 
 ## 内容编排
 
-本 skill 的正文是编排层，实际内容在 `references/` 下四个文件（强度矩阵 / audit 频率 / 识别流程 / 子系统独立定 tier）。下游 skill 通过 `field-assessment` 的识别流程读这四个文件。
+本 skill 是配置入口，实际内容在 `references/` 下四个文件（强度矩阵 / audit 频率 / 识别流程 / 子系统独立定 tier）。下游 skill 通过 `field-assessment` 的识别流程读这四个文件。
 
 ## 如何被引用
 

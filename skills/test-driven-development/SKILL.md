@@ -6,6 +6,13 @@ user-invocable: true
 
 # Test-Driven Development
 
+## 依赖技能
+
+- `human-in-loop`
+- `system-engineering`
+- `systematic-debugging`
+- `writing-plans`
+
 ## 服务的主基调原则
 
 **主基调第 1 条：系统工程。** 测试不是"代码质量的副产物"，是系统行为的契约。没有契约，agent 写的代码就是"自说自话"。

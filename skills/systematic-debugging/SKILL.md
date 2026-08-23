@@ -6,6 +6,10 @@ user-invocable: true
 
 # Systematic Debugging
 
+## 依赖技能
+
+- `human-in-loop`
+
 ## 服务的主基调原则
 
 **主基调第 3 条：从定性到定量的综合集成。** debug 是这个原则的最纯粹体现——从"现象"（定性）到"根因"（定量）的反复迭代。

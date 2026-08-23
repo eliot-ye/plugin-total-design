@@ -121,7 +121,6 @@ def sync_audit_history(state_dir):
 
     os.makedirs(state_dir, exist_ok=True)
     with open(history_path, "a", encoding="utf-8") as f:
-        m = re.match(r"\s*audits:\s*$", "")
         if os.path.exists(history_path) and os.path.getsize(history_path) > 0:
             # 已有内容：确保文件以换行结尾再追加列表项
             with open(history_path, "r", encoding="utf-8") as rf:

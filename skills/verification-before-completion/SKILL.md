@@ -6,6 +6,11 @@ user-invocable: true
 
 # Verification Before Completion
 
+## 依赖技能
+
+- `human-in-loop`
+- `systematic-debugging`
+
 ## 服务的主基调原则
 
 **主基调第 3 条：从定性到定量的综合集成。** 声明"完成"是从定量（验证证据）回到定性（"它好了"）的综合。没有定量证据的定性声明，是幻觉。

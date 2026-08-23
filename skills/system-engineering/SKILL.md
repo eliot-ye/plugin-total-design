@@ -1,6 +1,6 @@
 ---
 name: system-engineering
-description: 钱学森系统工程主基调。所有局部 constraint skill 的前提。每个 constraint skill 必须在正文开头声明它服务主基调的哪一条。
+description: 钱学森系统工程主基调。所有局部 constraint skill 的前提。
 user-invocable: false
 ---
 
@@ -25,6 +25,8 @@ user-invocable: false
 ### 3. 从定性到定量的综合集成
 
 专家的定性判断 + 数据 + 模型 → 反复迭代 → 上升到定量认识；人和机器结合，不是纯算法。
+
+#### 模型载体
 
 模型是把定性判断上升到定量认识的桥梁。在本工作流里，这个"模型"载体是 OpenSpec 的 spec/design artifact（分系统的契约与不变量）——proposal 的"系统工程影响评估"节是预期模型，archive 的"实际 vs 预期"复盘是模型验证。下游 skill 必须显式持有"spec 是综合集成的模型载体"这个判断，不能把 spec 当成纯文档。
 
@@ -55,5 +57,5 @@ user-invocable: false
 
 当 agent 调用 `/td-system-audit` 时，本 skill 是审计的对照标准。
 
-当 agent 触发任何反馈控制闭环（`td-system-audit` 步骤 7、`systematic-debugging` 4-phase、`executing-plans` human checkpoint、`verification-before-completion` 第 6 节）时，本 skill 的「反馈控制回路」节是这些闭环的归位锚点。
+当 agent 触发任何反馈控制闭环（见「反馈控制回路」节的列举）时，本 skill 的「反馈控制回路」节是这些闭环的归位锚点。
 

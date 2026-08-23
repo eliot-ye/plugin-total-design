@@ -65,7 +65,7 @@ archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预�
 
 - 如果验证通过 → 模型成立，记录"预期行为模型已验证"。
 - 如果验证失败 → 模型需要修正，记录"预期行为模型与实际偏差：<偏差描述>，模型修正建议：<...>"。这是综合集成循环的闭合动作——把"这次发现的偏差"转化为"下一个 propose 的预测模型修正"（见 `system-engineering` 的「反馈控制回路」节）。
-- 如果 proposal 没填"预期行为模型"字段（旧 change 兼容）→ 跳过本字段，仅用前三个字段做复盘。本兜底仅兼容旧版本产生的旧 change；新 change 的 proposal 必填此字段（`td-propose` 步骤 7），理论上不应走到本分支。
+- 如果 proposal 没填"预期行为模型"字段（旧 change 兼容）→ 跳过本字段，仅用前三个字段做复盘。本兜底仅兼容旧版本产生的旧 change；新 change 的 proposal 必填此字段（`td-propose` 步骤 6.c），理论上不应走到本分支。
 
 复盘的对照源有两个，按"有则用、缺则降级"原则叠加：
 
@@ -107,11 +107,11 @@ archive 完一个 change 后，项目的 profile 可能变化（greenfield 走�
 
 #### 5.2 system-audit 频率触发检查
 
-archive 是"完成一个 change"的事件,正好对照表 3(system-audit 频率,见 `field-assessment/references/audit-frequency.md`)。
+archive 是"完成一个 change"的事件，正好对照表 3（system-audit 频率，见 `field-assessment/references/audit-frequency.md`）。
 
-**持久化计数器**:每次 archive 完成后,读 `openspec/.td-state/archive-counter.yaml`,把 `count` +1,写回文件。文件格式见 `references/archive-counter-template.md`,文件由本步骤首次运行时按需创建。
+**持久化计数器**：每次 archive 完成后，读 `openspec/.td-state/archive-counter.yaml`，把 `count` +1，写回文件。文件格式见 `references/archive-counter-template.md`，文件由本步骤首次运行时按需创建。
 
-**达阈值判定**(频率数字一律查表 3 的 project scope 列):
+**达阈值判定**（频率数字一律查表 3 的 project scope 列）：
 
 | tier | 驱动源 | 判定方式 | 文件不存在时 |
 |---|---|---|---|

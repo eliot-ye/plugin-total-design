@@ -14,7 +14,7 @@ user-invocable: false
 
 ## system-audit 频率
 
-见步骤 1 注入的表 3（tier-large：current-change 每完成 1 个 change，project 每周一次）。
+见表 3 的 tier-large 行（current-change 每完成 1 个 change，project 每周一次；表 3 见 `field-assessment/references/audit-frequency.md`）。
 
 ## 特殊规则
 
@@ -29,9 +29,9 @@ large 系统的每个 change，proposal 里必须附"总体设计文档"：
 
 没这份文档，不允许 `/td-apply`。
 
-**执行层校验由 `td-propose` 步骤 7 和 `td-apply` 步骤 2 负责**：
+**执行层校验由 `td-propose` 步骤 6.c 和 `td-apply` 步骤 2 负责**：
 
-- `td-propose` 步骤 7 的"artifact 必填项检查"应包含"tier-large 时总体设计文档必填"——缺文档 → 回步骤 6 补写，不能跳到步骤 8。
+- `td-propose` 步骤 6.c 的"必填项检查"应包含"tier-large 时总体设计文档必填"——缺文档 → 回 6.b 补写，不能进入 6.d。
 - `td-apply` 步骤 2 的"前置检查"应包含"tier-large 时总体设计文档必填"——缺文档 → 阻塞 apply，提示用户回 `/td-propose` 补文档。
 
 本 skill 只声明"总体设计文档必填"的规则，执行层校验由 td-propose / td-apply 负责，避免在本 skill 重复校验逻辑。

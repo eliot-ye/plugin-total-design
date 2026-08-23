@@ -13,6 +13,7 @@ argument-hint: <topic or question>
 
 - `system-engineering`
 - `field-assessment`
+- `brainstorming`
 
 ## 服务的主基调原则
 
@@ -28,7 +29,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 ## 输入 - 用户想探索的话题、问题、想法
 
-**用户输入内容的对象是本项目，禁止溢出范围**
+**探索范围限定在本项目内。**
 
 #### 内容
 

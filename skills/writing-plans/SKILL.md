@@ -6,16 +6,24 @@ user-invocable: true
 
 # Writing Plans
 
+## 依赖技能
+
+- `critical-buffer`
+- `delay-decision`
+- `field-assessment`
+- `requesting-code-review`
+- `test-driven-development`
+
 ## 服务的主基调原则
 
 **主基调第 1 条：系统工程。** 每个任务不能只看自己，必须标注"这个局部动作影响哪些分系统"。
 
 ## 与 td-propose / td-apply 的边界
 
-tasks.md 分两个阶段完成:
+tasks.md 分两个阶段完成：
 
-1. **`/td-propose` 阶段**:创建 tasks.md 骨架——任务序列 + 关键链标注 + project buffer（按 `critical-buffer` skill 的规则）。这是 proposal 的"实施计划"部分。
-2. **`/td-apply` 阶段**:若 tasks.md 粒度还不够细，本 skill 再次触发细化。
+1. **`/td-propose` 阶段**：创建 tasks.md 骨架——任务序列 + 关键链标注 + project buffer（按 `critical-buffer` skill 的规则）。这是 proposal 的"实施计划"部分。
+2. **`/td-apply` 阶段**：若 tasks.md 粒度还不够细，本 skill 再次触发细化。
 
 关键链标注在 propose 阶段完成，apply 阶段只做校验和细化。
 

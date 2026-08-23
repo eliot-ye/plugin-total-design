@@ -52,13 +52,13 @@ user-invocable: false
 ## 触发时 agent 应做的事
 
 1. 在 tasks.md 里显式标注关键链路径
-2. 在关键链末端留 project buffer(比例按表 1 的 critical-buffer 行取值,按当前 tier;表 1 见 `field-assessment/references/strength-matrix.md`)
+2. 在关键链末端留 project buffer（比例按表 1 的 critical-buffer 行取值，按当前 tier；表 1 见 `field-assessment/references/strength-matrix.md`）
 3. 拒绝把缓冲当"可压缩的余量"——它是系统吸收不确定性的容量
 4. 当用户要求压缩时，先问："这是真瓶颈还是非瓶颈？非瓶颈压缩不影响整体性能。"
 
 ## 按 tier 调整
 
-project buffer 比例按表 1 的 critical-buffer 行取值(按当前 tier)。
+project buffer 比例按表 1 的 critical-buffer 行取值（按当前 tier）。
 
 tier 越大，系统越复杂，不确定性越高，缓冲越厚。
 

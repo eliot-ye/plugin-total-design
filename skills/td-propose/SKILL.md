@@ -80,7 +80,7 @@ openspec new change "<name>"
 
 **若本 change 来自 TODO 池条目**（步骤 3 挑中的）：创建后回写 `openspec/todo.md`，在该主条目下**新增一个 change 子项** `  - [ ] change: <name>`（缩进两空格；同一条主条目承接多个 change 时追加多个子项，一个 change 一个子项）。**不勾选主条目**——勾选是 `td-archive` 的职责，且要等主条目下全部 change 子项归档后才勾。change 子项是 archive 时定位对应条目的锚点。
 
-**本回写是对 todo.md 的单向关联标记，不是 change 资产引用 todo.md**——change 资产（proposal/design/tasks）仍然不得出现对 `openspec/todo.md` 的任何引用（见 Guardrails「提案不引用 TODO 池」）。关联方向是 todo.md → change 子项（todo.md 侧标记"这个 change 来自我"），不是 change → todo.md。两层分层隔离不被本回写破坏。
+**关联方向是 todo.md → change 子项**（todo.md 侧标记"这个 change 来自我"）——change 资产（proposal/design/tasks）仍不得出现对 `openspec/todo.md` 的任何引用（见 Guardrails「提案不引用 TODO 池」）。
 
 ### 5. 获取 artifact 构建顺序
 
@@ -150,7 +150,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 tasks.md 必须：
 
 - 标注关键链（critical chain）：哪条任务序列是项目的关键路径
-- 留 project buffer:按当前 tier 比例(查表 1 的 critical-buffer 行,会话内已缓存;表 1 见 `field-assessment/references/strength-matrix.md`)
+- 留 project buffer：按当前 tier 比例（查表 1 的 critical-buffer 行，会话内已缓存；表 1 见 `field-assessment/references/strength-matrix.md`）
 
 粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `critical-buffer` skill 的标注规范。
 

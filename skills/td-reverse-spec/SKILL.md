@@ -40,19 +40,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 ### 2. 识别代码库状态
 
-扫描目标代码库：
-
-- 文件数、代码行数
-- 主要目录结构
-- 有无 `tests/`、CI 配置、`package.json` 等
-- 最近 git 提交频率
-
-判断依据如下，但**不重新判读 profile**——步骤 1 已通过 `field-assessment` 判读并缓存 `$_TD_PROFILE` / `$_TD_TIER`，本步骤直接消费，不与缓存打架：
-
-- 文件数、代码行数
-- 主要目录结构
-- 有无 `tests/`、CI 配置、`package.json` 等
-- 最近 git 提交频率
+扫描目标代码库（文件数、代码行数、目录结构、`tests/`/CI/`package.json` 有无、git 提交频率），但**不重新判读 profile**——步骤 1 已通过 `field-assessment` 判读并缓存 `$_TD_PROFILE` / `$_TD_TIER`，本步骤直接消费，不与缓存打架：
 
 中途接手通常判读为 `profile-brownfield`。若步骤 1 判出其他 profile：`profile-greenfield`（代码库其实是脚手架）→ reverse-spec 可以粗粒度甚至跳过，见 `profile-greenfield` 的切换规则；`profile-maintenance`（已上线项目）→ reverse-spec 粒度按 tier 走，见该 profile 的切换规则。
 
@@ -88,7 +76,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 - 循环依赖
 - 隐式依赖（共享数据库、共享配置）
 
-**与 `requesting-code-review` 架构 review 的连接**：本步骤识别的"循环依赖、隐式依赖"正是 `requesting-code-review` 的 `references/architecture-review-checklist.md` 里"低耦合"维度的检查项。reverse-spec 阶段识别的接口稳定性，是后续 `/td-propose` 步骤 9 架构 review 的输入——架构 review 时要对照 reverse-spec 报告里的接口稳定性，判断新 change 是否破坏了既有分系统的公共契约。
+**与 `requesting-code-review` 架构 review 的连接**：本步骤识别的"循环依赖、隐式依赖"正是 `requesting-code-review` 的 `references/architecture-review-checklist.md` 里"低耦合"维度的检查项。reverse-spec 阶段识别的接口稳定性，是后续 `/td-propose` 步骤 7 架构 review 的输入——架构 review 时要对照 reverse-spec 报告里的接口稳定性，判断新 change 是否破坏了既有分系统的公共契约。
 
 ### 6. 输出 reverse-spec 报告
 

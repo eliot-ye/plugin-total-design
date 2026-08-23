@@ -6,6 +6,10 @@ user-invocable: true
 
 # Requesting Code Review
 
+## 依赖技能
+
+- `human-in-loop`
+
 ## 服务的主基调原则
 
 **主基调第 2 条：总体设计部。** review 不是"找 bug"，是"总体设计部对分系统工程师的工作做系统全局检查"——这个改动符合系统总体设计吗？它制造了新的失调吗？
