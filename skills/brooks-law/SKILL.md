@@ -1,10 +1,10 @@
 ---
 name: brooks-law
-description: 加人手前的强制提醒。服务系统工程主基调第 1 条"系统工程"——总体协调成本随人数非线性增长。
+description: 加人手前的协调成本提醒。服务系统工程主基调第 1 条"系统工程"——总体协调成本随人数非线性增长。
 user-invocable: false
 ---
 
-# Brooks 定律强制提醒
+# Brooks 定律提醒
 
 ## 服务的主基调原则
 
@@ -14,7 +14,7 @@ Brooks 在《人月神话》里说："向一个进度落后的项目加人手，
 
 ## 规则
 
-当用户想"加人手"（招人、加 agent、并行多 subagent）来加快进度时，agent 必须强制触发本 skill，提醒三件事：
+当用户想"加人手"（招人、加 agent、并行多 subagent）来加快进度时，agent 触发本 skill 提醒三件事（强度按表 1 的 brooks-law 行：tier-small 不强制——轻提示即可；tier-medium 提醒；tier-large 强制；表 1 见 `field-assessment/references/strength-matrix.md`）：
 
 1. **协调成本**：新人 onboarding 时间 + 现有成员沟通开销增加
 2. **可并行性**：这个任务真的可并行吗？还是它的关键链是串行的？（参考 `critical-buffer` skill）
@@ -23,7 +23,7 @@ Brooks 在《人月神话》里说："向一个进度落后的项目加人手，
 ## 触发时机
 
 - 用户说"再招一个"/"加个 agent"/"并行多开几个 subagent"
-- `/td-apply` 时用户要求"dispatching-parallel-agents" 加速
+- `/td-apply` 时用户要求并行多个 subagent 加速
 - change 的 tasks.md 里出现"多人协作"或"并行"字样
 - **WIP override 时被 `wip-limit` 触发**：用户对 WIP 超限显式 override 时，`wip-limit` 的 override 流程会触发本 skill 做强制提醒（见 `wip-limit` 的「硬约束 + override 机制」节）。
 
@@ -31,7 +31,7 @@ Brooks 在《人月神话》里说："向一个进度落后的项目加人手，
 
 1. 引用 Brooks 定律原文意思
 2. 列出三个反思问题（上面 1/2/3）
-3. 让用户**显式确认**："我已经考虑过协调成本，仍要加人手"——才继续
+3. 让用户**显式确认**："我已经考虑过协调成本，仍要加人手"——才继续（tier-small 不强制，提示即可；tier-medium 建议确认；tier-large 必须确认）
 4. 如果用户确认，记录到 change 的 design.md 里，作为"已知风险"
 
 ## 不做的事

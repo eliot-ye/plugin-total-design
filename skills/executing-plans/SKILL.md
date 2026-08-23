@@ -8,6 +8,7 @@ user-invocable: true
 
 ## 依赖技能
 
+- `field-assessment`
 - `human-in-loop`
 - `requesting-code-review`
 - `systematic-debugging`
@@ -76,7 +77,7 @@ checkpoint 格式：
 
 1. 触发 `systematic-debugging`：4-phase root cause
 2. 如果 root cause 在 plan 之外，停下来问用户
-3. 不"硬刚"——失败 3 次就停下来反思 plan
+3. 不"硬刚"——失败 3 次就停下来反思 plan（2 次触发 `systematic-debugging`、3 次反思 plan，两个阈值见 `systematic-debugging` 触发时机）
 
 ## 与其他 skill 的关系
 

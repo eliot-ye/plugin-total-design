@@ -20,7 +20,7 @@ user-invocable: false
 
 ### 1. 不强求重流程
 
-小系统容易 over-engineering。profile × constraint 已经给小系统松绑，不要"因为 superpowers 这么说"就强行走全套 SDD。
+小系统容易 over-engineering。profile × constraint 已经给小系统松绑，不要"因为流程模板这么说"就强行走全套 SDD。
 
 ### 2. 简单优先
 

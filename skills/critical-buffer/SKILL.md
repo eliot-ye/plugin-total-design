@@ -58,9 +58,7 @@ user-invocable: false
 
 ## 按 tier 调整
 
-project buffer 比例按表 1 的 critical-buffer 行取值（按当前 tier）。
-
-tier 越大，系统越复杂，不确定性越高，缓冲越厚。
+tier 越大，系统越复杂，不确定性越高，缓冲越厚。project buffer 比例按表 1 的 critical-buffer 行取值（取值规则见上文「触发时 agent 应做的事」第 2 条，此处不重复）。
 
 ### 层次观归位
 

@@ -28,7 +28,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 - **kebab-case change 名**：如 `add-user-auth`
 - **自然语言描述**：agent 从中推导 kebab-case 名
-- **空**：用 `AskUserQuestion` 问用户"想做什么 change"
+- **空**：用询问用户机制（如 `request_user_input` 等价工具）问用户"想做什么 change"
 
 #### 内容
 
@@ -63,7 +63,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
 
 - `wip-limit`（硬阻塞 + override）：当前活跃 change 数已达上限？已达 → **阻塞本步骤，不执行步骤 4**，执行 `wip-limit` 的「硬约束 + override 机制」节（权威描述在该 skill；override 通过后继续步骤 4）。
-- `human-in-loop`：用户描述是否清晰到可以 propose？不清楚 → 用 `AskUserQuestion` 问"想做什么 change"。
+- `human-in-loop`：用户描述是否清晰到可以 propose？不清楚 → 用询问用户机制问"想做什么 change"。
 - **TODO 池检查**：读 `openspec/todo.md`（不存在 → 跳过本子项，视为空池，不主动创建文件）。todo.md 的主条目/change 子项/优先级/分节规则见 `references/todo-format.md`。
   - 列出全部**未勾选**（`- [ ]`）主条目作为候选池，**按优先级排序呈现**（P0 → P1 → P2，未标注视为 P2）。
   - 若输入内容为空或用户没有明确 change 描述 → 询问用户让用户从候选池挑一个条目（或"不挑了，直接描述新 change"）。用户挑中某条目 → change 名从条目语义推导。
@@ -92,7 +92,7 @@ openspec status --change "<name>" --json
 
 ### 6. 循环创建 artifact（含必填项检查）
 
-用 `TodoWrite` 工具跟踪进度。循环体对每个 artifact 执行下述四子步，全部 `applyRequires` artifact 走完且必填项全过才进入步骤 7。
+用任务跟踪工具跟踪进度。循环体对每个 artifact 执行下述四子步，全部 `applyRequires` artifact 走完且必填项全过才进入步骤 7。
 
 **6.a 合并会话内已有探索产物**：若本次会话已产出 `brainstorming` 的 spec 草稿或 `td-explore` 的候选方向评估（对话形式或落盘草稿），把其中的候选方向取舍与"系统工程影响"评估合并进 proposal 骨架，作为 6.c 必填项的输入。没有产物则跳过，直接从 template 构建。
 

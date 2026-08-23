@@ -48,7 +48,7 @@ agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `
 2. 重跑「### 2. 判读 profile」+「### 3. 判读 tier」得到新判读结果。
 3. 新判读与缓存对比：
    - **一致** → 更新 `judged_at` 时间戳（保持 profile/tier 不变），不提示用户。
-   - **不一致** → 覆盖写 `profile-tier.yaml` 为新结果，同步更新 `judge_reason` 字段为新判据（如"greenfield 走到 maintenance,因为已上线 + 有 CI/CD"），由调用方（如 td-archive 5.1）用 `AskUserQuestion` 提示用户"项目状态已从 `<old>` 变为 `<new>`"。
+   - **不一致** → 覆盖写 `profile-tier.yaml` 为新结果，同步更新 `judge_reason` 字段为新判据（如"greenfield 走到 maintenance,因为已上线 + 有 CI/CD"），由调用方（如 td-archive 5.1）提示用户"项目状态已从 `<old>` 变为 `<new>`"。
 
 重判**不"删缓存文件"**——是"读缓存 → 重判 → 比对 → 按比对结果写回"。
 

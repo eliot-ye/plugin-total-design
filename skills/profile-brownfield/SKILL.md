@@ -17,7 +17,7 @@ user-invocable: false
 | 层 | 强度 |
 |---|---|
 | OpenSpec 契约层 | **极强**：先 reverse-spec，再 propose。没 reverse-spec 不准 propose 大改动。 |
-| Superpowers 行为层 | **中**：TDD 只在新代码强制，避免"加测试就改坏老代码" |
+| 行为层（skills） | **中**：TDD 只在新代码强制，避免"加测试就改坏老代码" |
 | 工程管理约束层 | **强**：关键链诊断，找最薄弱环节 |
 
 ## 在各 tier 下的 constraint 强度
@@ -40,7 +40,7 @@ user-invocable: false
 
 ### 3. 避免改坏老代码
 
-改老代码前，触发 `human-in-loop`：这块老代码你确定要动吗？有没有更小范围的改法？
+改老代码前，触发 `human-in-loop`（tier-medium / tier-large 生效——表 2 的 brownfield 加成；tier-small 下表 2 为"—"，仅走 human-in-loop 基线第 1–5 类）：这块老代码你确定要动吗？有没有更小范围的改法？
 
 ## 与其他 profile 的切换
 

@@ -42,7 +42,7 @@ user-invocable: false
 
 ## 触发机制
 
-本 skill 不靠 hook 强制，靠 agent 自觉识别上述场景。当 agent 识别到上述第 1–5 类场景时，**必须暂停**，用 `AskUserQuestion` 工具或等价机制问用户，**不得自行推进**。
+本 skill 不靠 hook 强制，靠 agent 自觉识别上述场景。当 agent 识别到上述第 1–5 类场景时，**必须暂停**，停下来询问用户，**不得自行推进**。
 
 ## 触发时 agent 应做的事
 

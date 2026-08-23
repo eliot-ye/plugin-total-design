@@ -40,7 +40,7 @@ large 系统的每个 change，proposal 里必须附"总体设计文档"：
 
 大系统并行硬解几乎必然制造失调。同一时刻至多允许的活跃 change 数按表 1 的 wip-limit 行取值（表 1 见 `field-assessment/references/strength-matrix.md`）。
 
-如果用户坚持要并行，触发 `brooks-law` 强制提醒，并要求用户显式确认风险。
+如果用户坚持要并行，执行 `wip-limit` 的「硬约束 + override 机制」——override 回路编排由 `wip-limit` 单一持有（brooks-law 提醒 → critical-buffer 评估 → human-in-loop 第 6 类确认 → 记录），本处不重复简化版。
 
 ### 3. 关键链 buffer
 

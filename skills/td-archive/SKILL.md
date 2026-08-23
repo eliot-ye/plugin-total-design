@@ -101,7 +101,7 @@ archive 完一个 change 后，项目的 profile 可能变化（greenfield 走�
 如果新判读结果与步骤 1 缓存的不同：
 
 - 更新会话缓存为新 profile/tier
-- 用 `AskUserQuestion` 提示用户："项目状态已从 `<old-profile>` × `<old-tier>` 变为 `<new-profile>` × `<new-tier>`。后续 constraint 强度按新配置走。"
+- 提示用户："项目状态已从 `<old-profile>` × `<old-tier>` 变为 `<new-profile>` × `<new-tier>`。后续 constraint 强度按新配置走。"
 
 判读结果与缓存一致 → 跳过提示，不骚扰用户。
 
