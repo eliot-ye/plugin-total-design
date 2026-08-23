@@ -90,13 +90,13 @@ openspec status --change "<name>" --json
 
 解析 JSON 拿到 `applyRequires`、`artifacts`、`planningHome`、`changeRoot`、`artifactPaths`、`actionContext`。
 
-### 6. 按依赖顺序创建 artifact
+### 6. 循环创建 artifact（含必填项检查）
 
-用 `TodoWrite` 工具跟踪进度。每个 artifact：
+用 `TodoWrite` 工具跟踪进度。循环体对每个 artifact 执行下述四子步，全部 `applyRequires` artifact 走完且必填项全过才进入步骤 7。
 
-**先消费行为层产物**：若本次会话已产出 `brainstorming` 的 spec 草稿或 `td-explore` 的候选方向评估（对话形式或落盘草稿），把其中的候选方向取舍与"系统工程影响"评估合并进 proposal 骨架，作为步骤 7 必填项的输入。没有产物则跳过，直接从 template 构建。
+**6.a 合并会话内已有探索产物**：若本次会话已产出 `brainstorming` 的 spec 草稿或 `td-explore` 的候选方向评估（对话形式或落盘草稿），把其中的候选方向取舍与"系统工程影响"评估合并进 proposal 骨架，作为 6.c 必填项的输入。没有产物则跳过，直接从 template 构建。
 
-每个 artifact：
+**6.b 创建 artifact**：
 
 ```bash
 openspec instructions <artifact-id> --change "<name>" --json
@@ -109,11 +109,9 @@ openspec instructions <artifact-id> --change "<name>" --json
 
 greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空，第一个 change 的 proposal 还要建立初始 spec baseline——这是后续所有改动的影响评估依据。
 
-### 7. artifact 必填项检查
+**6.c 必填项检查**（每个 artifact 写完后立即做，缺项 → 回 6.b 补写，不进 6.d）：
 
-每个 artifact 写完后，对照本工作流对 OpenSpec 模板的**新增要求**做必填项检查。缺项 → 回步骤 6 补写，不能跳到步骤 8。
-
-#### proposal.md 必填节：系统工程影响评估
+- **proposal.md 必填节：系统工程影响评估**
 
 ```markdown
 ## 系统工程影响评估
@@ -134,13 +132,20 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 - 这个字段是 `/td-archive` 步骤 3"实际 vs 预期"复盘的对照锚点之一——archive 时要回答"预期行为模型是否被实际行为验证？如果没有，模型需要怎么修正？"
 - 这个字段也是 `/td-apply` 步骤 7.2 系统级验证的输入——系统级验证要验证"预期行为模型"是否在跨分系统整合后仍然成立。
 
-#### proposal.md 必填：tier-large 总体设计文档
+- **proposal.md 必填：tier-large 总体设计文档**
 
-若 `$_TD_TIER == tier-large`，proposal 里必须附"总体设计文档"——文档的必填字段（改动在系统层次里的位置 / 影响的分系统 / 与最近 archive 的 change 的关系 / 是否触发跨分系统协调）见 `tier-large` 的「总体设计文档必填」节，此处不复制字段列表，以该节为单一事实源。
+若 `$_TD_TIER == tier-large`，proposal 里必须附"总体设计文档"，4 个必填字段：
+
+1. 这个改动在系统层次里的位置
+2. 影响的所有分系统
+3. 与最近 archive 的 change 的关系
+4. 是否触发跨分系统协调
+
+（字段定义的单一事实源见 `tier-large` 的「总体设计文档必填」节）
 
 没这份文档，proposal 不算 apply-ready。本检查与 `td-apply` 步骤 2 的前置检查对称——tier-large 的总体设计文档必填在 propose 和 apply 两处都校验，避免漏检。
 
-#### tasks.md 必填：关键链标注与 project buffer
+- **tasks.md 必填：关键链标注与 project buffer**
 
 tasks.md 必须：
 
@@ -149,31 +154,25 @@ tasks.md 必须：
 
 粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `critical-buffer` skill 的标注规范。
 
-### 8. 循环直到所有 applyRequires artifact 完成
-
-每创建完一个 artifact：
+**6.d 循环判定**：
 
 ```bash
 openspec status --change "<name>" --json
 ```
 
-检查每个 `applyRequires` 里的 artifact ID 是否 `status: "done"`。
+检查每个 `applyRequires` 里的 artifact ID 是否 `status: "done"`。未完成 → 回 6.b 处理下一个；全完成且必填项全过 → 进步骤 7。
 
-### 9. 架构 review（proposal 定型后）
+### 7. 架构 review（proposal 定型后）
 
 所有 artifact 创建完成后，**进入实施前先做架构 review**。
 
 调 `requesting-code-review` 的架构 review（见该 skill 第 5 节），review 对象是 proposal 的分系统切分与设计决策，检查清单见该 skill 的 `references/architecture-review-checklist.md`。
 
-分级与阻塞语义：
+分级定义见 `requesting-code-review` 第 5 节（critical / warning / nit，单一事实源）。本步骤只持有阻塞后回路：critical（坏的分系统切分 / 循环依赖 / 隐式依赖）→ 阻塞，回步骤 6 改 proposal 再重新 review；warning → 记录到 proposal，可延后；nit → 可忽略。
 
-- **critical**（坏的分系统切分 / 循环依赖 / 隐式依赖）→ **阻塞**，回步骤 6 改 proposal 再重新 review
-- **warning**（接口偏大、职责偏散）→ 记录到 proposal，可延后
-- **nit**（命名等）→ 可忽略
+架构 review 通过（无 critical）才进入步骤 8。
 
-架构 review 通过（无 critical）才进入步骤 10。
-
-### 10. 显示最终状态
+### 8. 显示最终状态
 
 ```bash
 openspec status --change "<name>"

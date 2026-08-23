@@ -29,12 +29,13 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
    - 告诉用户："tier-XXX 下 WIP 上限是 N，当前活跃 N 个。并行硬解复杂巨系统会制造全局失调（主基调第 4 条）。"
    - 给出两个选项：(a) 先 `/td-archive` 一个再 propose/apply；(b) 显式 override。
    - 等待用户决策。
-4. **override 流程（用户选 override 时）**：
-   - 触发 `brooks-law` 强制提醒（加人手前的协调成本反思）。
-   - 触发 `critical-buffer` 评估（并行 change 对关键链 buffer 的影响，见 `critical-buffer` 的「隐性 buffer 压缩」节）。
-   - 触发 `human-in-loop` 第 6 类（WIP 硬约束 override）——本 skill 是第 6 类的唯一触发源，由 `human-in-loop` 负责执行"显式确认风险"的回路。
-   - 用户确认后，在 change 的 `proposal.md` 里记录"override WIP 上限，用户已确认风险"——作为后续 `/td-system-audit` 的输入。
-   - 才继续执行后续步骤。
+4. **override 流程（用户选 override 时）**——本 skill 是 override 回路的单一编排点，子步序列如下：
+
+   a. 触发 `brooks-law` 强制提醒（加人手前的协调成本反思）。
+   b. 触发 `critical-buffer` 评估（并行 change 对关键链 buffer 的影响，见 `critical-buffer` 的「隐性 buffer 压缩」节）。
+   c. 调 `human-in-loop` 第 6 类执行"显式确认风险"回路（`human-in-loop` 在本回路里只做"描述风险 + 列选项 + 等用户确认"，序列由本节编排）。
+   d. 用户确认后，在 change 的 `proposal.md` 里记录"override WIP 上限，用户已确认风险"——作为后续 `/td-system-audit` 的输入。
+   e. 才继续执行后续步骤。
 
 ## 触发时机
 

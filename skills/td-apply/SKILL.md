@@ -81,7 +81,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 - `brooks-law`：用户在 apply 期间想加人手 / 并行 subagent 加速时
 - `delay-decision`：apply 期间遇到顶层架构层次的可逆决策时（与任务粒度的"实现细节可逆决策"不重叠）
-- `human-in-loop`：apply 期间遇到"超出当前 change scope 的影响"等 apply 全局必停场景时（任务粒度的 checkpoint 必停由 executing-plans 负责）
+- `human-in-loop`：apply 期间遇到"超出当前 change scope 的影响"等 apply 全局必停场景时（任务粒度的 checkpoint 必停由 executing-plans 负责）。步骤 7.2 边界验证失败时的"root cause 在 plan 之外 → 停下来问用户"也走本类 apply 全局必停通道。
 
 ### 6. 更新 tasks.md
 
