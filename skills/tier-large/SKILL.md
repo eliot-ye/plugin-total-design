@@ -56,7 +56,7 @@ audit 报告里特别关注：
 - 关键链 buffer 是否被压缩
 - 是否有"应该触发 human-in-loop 但没触发"的决策
 
-**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**，audit 报告里区分"子系统内部失调"和"跨子系统边界失调"——后者按"最高 tier 子系统"的强度处理（保守原则）。子系统独立定 tier 的执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
+**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 按子系统层次分别审计（分层审计的完整语义见 `td-system-audit` 步骤 2，此处不重复）——执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
 
 ## 与其他 tier 的切换
 
