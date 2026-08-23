@@ -12,7 +12,7 @@ change 完成后归档。归档不是删除，是把"已完成的学习"沉淀�
 ## 依赖技能
 
 - `system-engineering`
-- `constraint-matrix`
+- `field-assessment`
 
 ## 服务的主基调原则
 
@@ -23,6 +23,8 @@ archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集
 **系统工程主基调第 2 条：总体设计部。**
 
 archive 后触发 profile 重新评估——这是总体设计部的职责：项目状态变化了，工作方式要跟着调整。
+
+**《工程控制论》反馈控制回路归位**：archive 是事后误差检测 + 校正环节（"实际 vs 预期"复盘是事后误差检测，"模型验证"字段修正下一个 propose 的预测模型）。
 
 ## 输入 - 要 archive 的 change 名。空则推导或问用户。
 
@@ -35,8 +37,8 @@ archive 后触发 profile 重新评估——这是总体设计部的职责：项
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集成循环"。
-2. **profile × tier 识别** — 执行 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（archive 需要表 3 判定 system-audit 频率触发）。会话内缓存，后续步骤直接引用。
-3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——步骤 2 据此判断是否触发 / tasks 是否合规。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（archive 需要表 3 判定 system-audit 频率触发）。会话内缓存，后续步骤直接引用。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断是否触发 / tasks 是否合规。
 
 ### 2. 前置检查
 
@@ -45,11 +47,30 @@ archive 后触发 profile 重新评估——这是总体设计部的职责：项
 
 ### 3. 强制"实际 vs 预期"复盘（硬步骤）
 
-archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预期"——对照 proposal 的"系统工程影响评估"节，记录：
+archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预期"——对照 proposal 的"系统工程影响评估"节（含"预期行为模型"字段），按下表逐字段复盘：
 
-- 预期影响的分系统 vs 实际影响的分系统
-- 预期整体性能变化 vs 实际变化
+| proposal 侧（预期） | archive 侧（实际） |
+|---|---|
+| 影响哪些分系统 | 实际影响的分系统 |
+| 整体性能预期变化 | 实际整体性能变化 |
+| 这是局部优化还是全局协调 | 实际是局部优化还是全局协调 |
+| 如果是局部优化，对全局失调的风险 | 局部优化的实际全局影响（主基调第 1 条事后回检） |
+| 预期行为模型 | 模型验证（实际行为是否验证预期模型） |
+
+补充字段（表格未覆盖的复盘项）：
+
 - 预期之外的副作用（这是后续 `/td-system-audit` 的输入）
+
+**模型验证**字段的展开：
+
+- 如果验证通过 → 模型成立，记录"预期行为模型已验证"。
+- 如果验证失败 → 模型需要修正，记录"预期行为模型与实际偏差：<偏差描述>，模型修正建议：<...>"。这是综合集成循环的闭合动作——把"这次发现的偏差"转化为"下一个 propose 的预测模型修正"（见 `system-engineering` 的「反馈控制回路」节）。
+- 如果 proposal 没填"预期行为模型"字段（旧 change 兼容）→ 跳过本字段，仅用前三个字段做复盘。本兜底仅兼容旧版本产生的旧 change；新 change 的 proposal 必填此字段（`td-propose` 步骤 6.c），理论上不应走到本分支。
+
+复盘的对照源有两个，按"有则用、缺则降级"原则叠加：
+
+1. **proposal 的"系统工程影响评估"节** —— 永远存在（propose 必填项），是"预期"侧的主锚点。
+2. **`openspec/specs/` 下的主 spec baseline** —— 若该 change 改动的分系统在 `openspec/specs/<subsystem>/spec.md` 有 reverse-spec 或前序 archive sync 沉淀的 baseline，把 baseline 作为"改之前真实状态"的对照源之一，复盘要回答"change 的 spec delta 是否破坏了 baseline 声明的契约 / 不变量"。**baseline 不存在**（greenfield 首个 change、或该分系统从未被 reverse-spec）→ 跳过本对照源，仅用 proposal 自述做复盘，不阻塞 archive。
 
 没这一节，archive 拒绝继续。这是 `/td-system-audit` "实际 vs 预期"审计的数据来源——闭环必须闭合。
 
@@ -65,7 +86,9 @@ openspec archive "<name>"
 
 如果只想归档不同步 specs（infra / doc-only change），加 `--skip-specs`。
 
-**归档成功后 TODO 子项勾选**：读 `openspec/todo.md`，查找含 `  - [ ] change: <name>` 子项的主条目——把该 change 对应的子项勾选为 `  - [x] change: <name>`。然后检查该主条目：**全部子项都已勾选** → 主条目勾选 `[x]`；**仍有子项未勾选** → 主条目保持 `- [ ]`。找不到对应子项或文件不存在 → 跳过，不主动创建文件。
+**归档成功后 TODO 子项勾选**：按 `td-propose` 的 `references/todo-format.md`「勾选时机」规则操作——读 `openspec/todo.md`，查找含 `change: <name>` 子项的主条目，勾选对应子项；主条目下**全部子项都已勾选** → 主条目勾选 `[x]`；**仍有子项未勾选** → 主条目保持 `- [ ]`。找不到对应子项或文件不存在 → 跳过，不主动创建文件。
+
+**Purpose TBD housekeeping 检查**：`openspec archive` sync 主 spec 时，新生成的主 spec `## Purpose` 节会保留 td-archive 模板默认值 `TBD - created by archiving change <name>. Update Purpose after archive.`——这是已知的 sync 副作用，不能让 TBD 残留到下一次 audit。sync 完成后立即按 `references/purpose-tbd-housekeeping.md` 执行子流程（读涉及主 spec → grep `^TBD - created by archiving` → 命中则本步骤内补写一句话 Purpose → 再次 grep 确认无残留）。
 
 ### 5. archive 后接力动作
 
@@ -73,7 +96,7 @@ archive 是契约层的"闭合点"，必须触发三个后续接力（顺序执�
 
 #### 5.1 profile/tier 重新判读
 
-archive 完一个 change 后，项目的 profile 可能变化（比如 greenfield 走到 maintenance，或 brownfield 进入大重构）。**强制重新调用 `constraint-matrix` 的「识别流程」节**，重新判读 `$_TD_PROFILE` / `$_TD_TIER`。
+archive 完一个 change 后，项目的 profile 可能变化（greenfield 走到 maintenance，或 brownfield 进入大重构）。**强制重新调用 `field-assessment` 的「识别流程」节**，重新判读 `$_TD_PROFILE` / `$_TD_TIER`。重判策略见 `field-assessment` 的 `references/identification-flow.md`「### 4. 缓存判读结果」节的"重判策略"段——读到该段执行，本节不重复。
 
 如果新判读结果与步骤 1 缓存的不同：
 
@@ -84,11 +107,11 @@ archive 完一个 change 后，项目的 profile 可能变化（比如 greenfiel
 
 #### 5.2 system-audit 频率触发检查
 
-archive 是"完成一个 change"的事件，正好对照 `constraint-matrix` 表 3 的 system-audit 频率。
+archive 是"完成一个 change"的事件，正好对照表 3（system-audit 频率，见 `field-assessment/references/audit-frequency.md`）。
 
-**持久化计数器**：每次 archive 完成后，读 `openspec/.td-state/archive-counter.yaml`，把 `count` +1，写回文件。文件格式见 `constraint-matrix` 的 `references/file-templates.md`，文件由本步骤首次运行时按需创建。
+**持久化计数器**：每次 archive 完成后，读 `openspec/.td-state/archive-counter.yaml`，把 `count` +1，写回文件。文件格式见 `references/archive-counter-template.md`，文件由本步骤首次运行时按需创建。
 
-**达阈值判定**（频率数字一律查 `constraint-matrix` 表 3 的 project scope 列，本文件不重复定义）：
+**达阈值判定**（频率数字一律查表 3 的 project scope 列）：
 
 | tier | 驱动源 | 判定方式 | 文件不存在时 |
 |---|---|---|---|

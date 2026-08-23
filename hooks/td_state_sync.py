@@ -18,6 +18,62 @@ from datetime import datetime
 
 REPORT_NAME_RE = re.compile(r"(\d{8}-\d{6})-([a-z-]+)\.md$")
 
+# 报告内容完整性校验：audit 报告至少含下列 marker 之一，
+# 才会被 sync_audit_history 补 audit-history.yaml 记录。
+# 这是防止"空报告 / 不完整报告被固化"的边界。
+#
+# marker 不硬编码标题字符串，而是从 audit 报告模板（插件安装副本里的
+# skills/td-system-audit/references/audit-report-template.md）动态读取标题行：
+# 模板标题改动时 hook 自动跟随，避免"模板与 hook 两处维护同一字符串"导致
+# 改模板后 hook 静默失效（单一事实源，耦合方向 = 模板 → hook）。
+# 模板读取失败时回退到内置默认值，hook 永不因模板问题崩溃。
+HEADING_RE = re.compile(r"^#{2,3} ")
+FALLBACK_MARKERS = ("## System Audit", "### 主基调对照")
+
+
+def _load_report_markers():
+    """从 audit 报告模板的「报告模板」代码块内读取标题行作为完整性 marker。
+
+    只收集代码块（```markdown ... ```）内的二/三级标题——那是报告落盘时实际
+    输出的标题，检查清单节的标题不属于报告内容，不收。
+    优先从插件安装目录（ATOMCODE_PLUGIN_ROOT / CLAUDE_PLUGIN_ROOT 环境变量）
+    读取；环境变量缺失、模板不可读或代码块内无标题时回退 FALLBACK_MARKERS。
+    """
+    root = os.environ.get("ATOMCODE_PLUGIN_ROOT") or os.environ.get("CLAUDE_PLUGIN_ROOT")
+    if root:
+        template = os.path.join(
+            root, "skills", "td-system-audit", "references", "audit-report-template.md"
+        )
+        try:
+            with open(template, encoding="utf-8") as f:
+                lines = f.readlines()
+        except OSError:
+            pass
+        else:
+            in_block = False
+            markers = []
+            for line in lines:
+                s = line.strip()
+                if s.startswith("```"):
+                    in_block = not in_block
+                    continue
+                if in_block and HEADING_RE.match(s):
+                    markers.append(s)
+            if markers:
+                return tuple(markers)
+    return FALLBACK_MARKERS
+
+
+def is_complete_report(path):
+    """报告含模板标题 marker 之一才视为完整。"""
+    markers = _load_report_markers()
+    try:
+        with open(path, encoding="utf-8") as f:
+            content = f.read()
+        return any(marker in content for marker in markers)
+    except OSError:
+        return False
+
 
 def find_project_root(cwd):
     """从 cwd 向上找含 openspec/ 目录的项目根。"""
@@ -97,13 +153,15 @@ def sync_audit_history(state_dir):
                 if m:
                     known.add(m.group(1).strip())
 
-    missing = [r for r in reports if r not in known]
+    missing = [
+        r for r in reports
+        if r not in known and is_complete_report(os.path.join(audits_dir, r))
+    ]
     if not missing:
         return
 
     os.makedirs(state_dir, exist_ok=True)
     with open(history_path, "a", encoding="utf-8") as f:
-        m = re.match(r"\s*audits:\s*$", "")
         if os.path.exists(history_path) and os.path.getsize(history_path) > 0:
             # 已有内容：确保文件以换行结尾再追加列表项
             with open(history_path, "r", encoding="utf-8") as rf:
@@ -127,6 +185,18 @@ def sync_audit_history(state_dir):
             f.write("    scope: %s\n" % scope)
             f.write("    report: %s\n" % report)
             f.write("    severe_count: %d\n" % count_severe(os.path.join(audits_dir, report)))
+
+    # 不完整报告的兜底：把它们的名字写到 audits/.incomplete.log，
+    # 下次 /td-system-audit project scope 时由 agent 主动检查并决定是补写还是删除。
+    incomplete = [
+        r for r in reports
+        if r not in known and not is_complete_report(os.path.join(audits_dir, r))
+    ]
+    if incomplete:
+        incomplete_log = os.path.join(audits_dir, ".incomplete.log")
+        with open(incomplete_log, "a", encoding="utf-8") as f:
+            for r in incomplete:
+                f.write("%s\n" % r)
 
 
 def main():

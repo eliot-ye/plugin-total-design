@@ -6,6 +6,10 @@ user-invocable: true
 
 # Requesting Code Review
 
+## 依赖技能
+
+- `human-in-loop`
+
 ## 服务的主基调原则
 
 **主基调第 2 条：总体设计部。** review 不是"找 bug"，是"总体设计部对分系统工程师的工作做系统全局检查"——这个改动符合系统总体设计吗？它制造了新的失调吗？
@@ -88,7 +92,7 @@ warning 不阻塞，但要记录在 tasks.md 的"已知问题"里。
 
 review 对象不是代码，是 proposal 的分系统切分与设计决策。此时改架构成本最低。
 
-检查清单（高内聚 / 低耦合）见本 skill 的 `references/architecture-review-checklist.md`。分级与阻塞语义如下（与 code review 共用）：
+检查清单（高内聚 / 低耦合）见 `references/architecture-review-checklist.md`。分级与阻塞语义如下（与 code review 共用）：
 
 - **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖——**阻塞 apply**，先回 propose 改 proposal 再继续
 - **warning**：接口偏大、职责偏散——记录到 proposal，可延后

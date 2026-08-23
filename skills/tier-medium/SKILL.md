@@ -8,30 +8,21 @@ user-invocable: false
 
 ## 判断依据
 
-- 文件数：10–100
-- 团队规模：单团队多人
-- 部署单元：1–3 个
+文件数 / 团队规模 / 部署单元的判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
+
 - 系统层次：有明显的模块/分系统边界
-
-## constraint 强度
-
-强度本身见 `constraint-matrix` skill 的表 1。本 tier 的注解：
-
-- `wip-limit`：中系统并行开始有协调成本
-- `critical-buffer`：不确定性中等
-- `brooks-law`：中团队加人手要考虑 onboarding，提醒
-- `delay-decision`：强
-- `human-in-loop`：+ 公共契约变更
 
 ## system-audit 频率
 
-见 `constraint-matrix` 表 3（tier-medium：project scope 每完成 3 个 change，current-change 每个关键链任务完成时）。本文件不重复定义频率数字。
+见表 3 的 tier-medium 行（project scope 每完成 3 个 change，current-change 每个关键链任务完成时；表 3 见 `field-assessment/references/audit-frequency.md`）。
 
 ## 特殊规则
 
 ### 1. 分系统边界显式化
 
 medium 系统的常见问题是"分系统边界模糊"。在 reverse-spec 时，把分系统边界画出来，作为后续改动的影响评估依据。
+
+**层次观归位**：分系统边界显式化是主基调第 4 条「层次观」在 tier-medium 的工程化——承认 medium 系统是多层级嵌套结构（顶层架构 → 模块设计 → 实现细节），不同层次需要分层对待。当 `field-assessment` 识别流程允许子系统独立定 tier 时，medium 系统的每个分系统也可能有自己的子系统层次。
 
 ### 2. 公共契约变更触发 human-in-loop
 

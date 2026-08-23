@@ -8,24 +8,13 @@ user-invocable: false
 
 ## 判断依据
 
-- 文件数：3–10
-- 团队规模：单人或单团队
-- 部署单元：1 个
+文件数 / 团队规模 / 部署单元的判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
+
 - 系统层次：扁平，无明显分系统边界
-
-## constraint 强度
-
-强度本身见 `constraint-matrix` skill 的表 1。本 tier 的注解：
-
-- `wip-limit`：小系统允许稍微并行
-- `critical-buffer`：不确定性较低
-- `brooks-law`：小团队加人手影响有限，不强制
-- `delay-decision`：表 1 说"强"（三个 tier 都强）。小系统回滚成本低，更该延迟——这是"强"在小系统的具体含义
-- `human-in-loop`：仅不可逆决策
 
 ## system-audit 频率
 
-见 `constraint-matrix` 表 3（tier-small：project scope 每完成 5 个 change，current-change 不要求）。本文件不重复定义频率数字。
+见表 3 的 tier-small 行（project scope 每完成 5 个 change，current-change 不要求；表 3 见 `field-assessment/references/audit-frequency.md`）。
 
 ## 特殊规则
 

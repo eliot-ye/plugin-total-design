@@ -13,7 +13,7 @@ argument-hint: (无参数)
 ## 依赖技能
 
 - `system-engineering`
-- `constraint-matrix`
+- `field-assessment`
 
 ## 服务的主基调原则
 
@@ -32,7 +32,7 @@ init 是"把系统的工作方式先立起来"——先有 specs 基线、change
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。init 是"把系统的工作方式先立起来"。
-2. **profile × tier 识别** — 执行 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`。greenfield 项目（仓库空或只有脚手架）通常判为 `profile-greenfield`；init 阶段 profile/tier 可能还没建立 `.td-state/` 缓存，按"文件不存在现判"处理。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`。greenfield 项目（仓库空或只有脚手架）通常判为 `profile-greenfield`；init 阶段 profile/tier 可能还没建立 `.td-state/` 缓存，按"文件不存在现判"处理。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
 ### 2. 检查 OpenSpec 结构
@@ -64,7 +64,7 @@ init 是"把系统的工作方式先立起来"——先有 specs 基线、change
   - `openspec/.gitignore` 不存在 → 创建该文件并写入
   - 已存在 → 追加（不覆盖已有内容）；若已包含 `.td-state/` 条目 → 跳过（幂等）
 
-**为什么**：`.td-state/` 下所有状态文件（`profile-tier.yaml` / `archive-counter.yaml` / `audit-history.yaml` / `audits/`）都能从文件系统事实推导（`archive/` 目录、`audits/*.md` 等），提交进 git 只会制造假冲突——两人同时 archive / audit 时对同一份 YAML 读改写，git 报冲突或静默丢失。忽略后冲突面归零，文件仍留在本地，plugin（含 `SessionEnd` hook）照常读写。
+**为什么**：`.td-state/` 下所有状态文件（`profile-tier.yaml` / `archive-counter.yaml` / `audit-history.yaml` / `audits/`）都能从文件系统事实推导（`archive/` 目录、`audits/*.md` 等），提交进 git 只会制造假冲突——两人同时 archive / audit 时对同一份 YAML 读改写，git 报冲突或静默丢失。忽略后冲突面归零，文件仍留在本地，本工作流（含 `SessionEnd` hook）照常读写。
 
 **必须提交、不要 ignore， 文件可以不存在**：`openspec/config.yaml`（团队共享 context）、`openspec/specs/`（主 spec）、`openspec/changes/`（change 资产）、`openspec/todo.md`。
 
@@ -82,7 +82,7 @@ git ls-files openspec/.td-state/
 git rm -r --cached openspec/.td-state/
 ```
 
-  `.td-state/` 文件仍留在本地（plugin 正常读写），只是不再进版本库。确认后执行，并建议提交这次变更。
+  `.td-state/` 文件仍留在本地（本工作流正常读写），只是不再进版本库。确认后执行，并建议提交这次变更。
 - **无输出** → 跳过。
 
 ### 5. 首次引导填 config.yaml context

@@ -95,7 +95,7 @@ total-design/
 ├── skills/                 ← 27 个 skill，全部目录式 SKILL.md
 │   ├── 约束层（6 个）
 │   ├── 行为层（7 个，Superpowers 转译）
-│   ├── 配置层（7 个，constraint-matrix + 3 profile + 3 tier）
+│   ├── 配置层（7 个，field-assessment + 3 profile + 3 tier）
 │   └── 契约层（7 个 td-*，与下方 command 一一对应）
 │
 ├── commands/               ← 8 个 slash 命令入口（7 个极薄，逻辑在同名 skill；td-list 只读无 skill）
@@ -190,7 +190,7 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
   - 契约层 7 个 td-*（与 7 个 td-* command 一一对应；`td-list` 只读命令无同名 skill）
 - **`user-invocable: false`**（13 个）：agent 自动触发，不暴露在 `/` 菜单
   - 约束层 6 个（钱学森主基调 + 5 条局部规律）
-  - 配置层 7 个（constraint-matrix + 3 profile + 3 tier）
+  - 配置层 7 个（field-assessment + 3 profile + 3 tier）
 
 ### 约束层（钱学森系统工程主基调 + 局部规律）
 
@@ -221,7 +221,7 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 **矩阵单一事实源（`user-invocable: false`）：**
 
-- `constraint-matrix` — profile × tier × constraint 强度矩阵的单一事实源；3 个 profile 和 3 个 tier skill 都引用本 skill，强度只在这里改
+- `field-assessment` — profile × tier × constraint 强度矩阵的单一事实源；3 个 profile 和 3 个 tier skill 都引用本 skill，强度只在这里改
 
 **profile 维度（仓库状态，全部 `user-invocable: false`）：**
 

@@ -12,7 +12,8 @@ argument-hint: <topic or question>
 ## 依赖技能
 
 - `system-engineering`
-- `constraint-matrix`
+- `field-assessment`
+- `brainstorming`
 
 ## 服务的主基调原则
 
@@ -24,9 +25,11 @@ explore 是总体设计部在"想"的阶段的工作——不是分系统工程�
 
 explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的尊重。
 
+**《工程控制论》反馈控制回路归位**：explore 是前馈控制准备环节（为 propose 的控制目标收集先验信息、降低预测误差）。
+
 ## 输入 - 用户想探索的话题、问题、想法
 
-**用户输入内容的对象是本项目，禁止溢出范围**
+**探索范围限定在本项目内。**
 
 #### 内容
 
@@ -39,7 +42,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。
-2. **profile × tier 识别** — 执行 `constraint-matrix` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2。会话内缓存，后续步骤直接引用。explore 不写 artifact、不动代码，constraint 强度对其直接影响较小，但 profile 决定 explore 的侧重点（greenfield 重候选方向，brownfield 重"动老代码的影响"，maintenance 重"生产稳定性"），所以 profile/tier 仍需判读完成。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2。profile 决定 explore 的侧重点（greenfield 重候选方向，brownfield 重"动老代码的影响"，maintenance 重"生产稳定性"）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
 ### 2. 读现场背景（config.yaml context）
@@ -57,6 +60,10 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 调用 `brainstorming` skill 的 1–4 步工作方式——**不执行** brainstorming 的第 5–6 步（分段确认、保存 spec 文档）：explore 阶段不落盘 spec，成果以对话形式交付（见步骤 6）。若用户要求把探索结果落盘为 spec 草稿，提示走 `/td-propose`（brainstorming 的保存步骤在那里执行）。
 
+**产物要求**：explore 阶段必须产出**至少 2 个候选方向**，每个标注系统工程影响（影响哪些分系统 / 整体性能预期变化 / 可逆性）。产物留在会话上下文里（explore 不落盘 spec，见步骤 6 的 Guardrails）。`/td-propose` 步骤 3 的"greenfield explore 检查"会读会话历史判定是否已有 ≥2 个候选方向——少于 2 个时 propose 阶段会拦下来要求先 explore。
+
+**与 `delay-decision` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策——不闭合 spec，等更多信息再 propose。当用户想"赶紧 propose 闭合 spec"时，触发 `delay-decision` 提醒："explore 不落盘 spec 是延迟决策的体现，信息不足时强行闭合会损失信息（主基调第 3 条综合集成）。"这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
+
 ### 5. 系统工程视角评估
 
 对每个候选方向，评估：
@@ -69,7 +76,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 评估侧重按步骤 1 判读的 `$_TD_PROFILE` 调整：
 
 - `profile-greenfield`：重候选方向的**取舍与可逆性**——没有存量约束，方向选错成本低，但要用 `delay-decision` 避免"想到了就建"和"先把架构设计完美"两个陷阱
-- `profile-brownfield`：重**动老代码的影响**——候选方向会触碰哪些存量分系统、改动范围能否最小化、是否触发公共契约变更（对照 `human-in-loop` 5 类场景）
+- `profile-brownfield`：重**动老代码的影响**——候选方向会触碰哪些存量分系统、改动范围能否最小化、是否触发公共契约变更（对照 `human-in-loop` 的必停场景）
 - `profile-maintenance`：重**生产稳定性**——候选方向对线上契约、部署 pipeline、回归测试的影响，是否需要在生产环境改动前停下问用户
 
 ### 6. 总结给用户看
