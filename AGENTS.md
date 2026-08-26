@@ -83,57 +83,35 @@ total-design/
 ├── LICENSE
 ├── .gitignore
 │
-├── skills/                  ← 27 个 skill，全部目录式（每个目录下是 SKILL.md）
-│   │
-│   ├── 约束层（6 个）
-│   │   ├── system-engineering/ ← 钱学森主基调；user-invocable: false
-│   │   ├── wip-limit/          ← 5 条局部规律，每个都服务主基调某一条
-│   │   ├── critical-buffer/   （各目录下均有 SKILL.md，下同）
-│   │   ├── brooks-law/
-│   │   ├── delay-decision/
-│   │   └── human-in-loop/
-│   │
-│   ├── 行为层（7 个，Superpowers 转译）
-│   │   ├── brainstorming/
-│   │   ├── writing-plans/
-│   │   ├── executing-plans/
-│   │   ├── test-driven-development/
-│   │   ├── requesting-code-review/
-│   │   ├── systematic-debugging/
-│   │   └── verification-before-completion/
-│   │
-│   ├── 配置层（7 个）
-│   │   ├── field-assessment/  ← profile × tier × constraint 强度矩阵的单一事实源；user-invocable: false
-│   │   ├── profile-greenfield/ ← 3 个现场 profile，user-invocable: false
-│   │   ├── profile-brownfield/
-│   │   ├── profile-maintenance/
-│   │   ├── tier-small/         ← 3 个系统复杂度 tier，user-invocable: false
-│   │   ├── tier-medium/
-│   │   └── tier-large/
-│   │
-│   └── 契约层 skill（7 个，与下方 command 一一对应）
-│       ├── td-propose/
-│       ├── td-explore/
-│       ├── td-apply/
-│       ├── td-reverse-spec/
-│       ├── td-archive/
-│       ├── td-system-audit/
-│       └── td-init/
+├── skills/                  ← 英文版（默认加载入口，plugin.json 指向 ./skills）
+├── commands/                ← 英文版（默认加载入口，plugin.json 指向 ./commands）
 │
-└── commands/                ← 8 个 slash 命令入口（7 个极薄，逻辑在同名 skill 里；td-list 例外，见下）
-    ├── td-propose.md
-    ├── td-explore.md
-    ├── td-apply.md
-    ├── td-reverse-spec.md
-    ├── td-archive.md
-    ├── td-system-audit.md
-    ├── td-init.md
-    └── td-list.md            ← 只读命令，无同名 skill，逻辑直接写在命令文件里
-
-hooks/                      ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
-├── hooks.json              ← hook 声明（plugin.json 的 "hooks" 字段指向本文件）
-└── td_state_sync.py        ← 会话结束时从文件系统事实校正 .td-state/ 状态文件
+├── zh-CN/                   ← 中文版（与根目录 skills/commands 一一对应）
+│   ├── skills/              ← 27 个中文 skill（结构镜像根目录 skills/）
+│   └── commands/            ← 8 个中文 command（结构镜像根目录 commands/）
+│
+└── hooks/                   ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
+    ├── hooks.json           ← hook 声明（plugin.json 的 "hooks" 字段指向本文件）
+    └── td_state_sync.py     ← 会话结束时从文件系统事实校正 .td-state/ 状态文件
 ```
+
+### skills/commands 内容编排（英文默认 + 中文对应）
+
+本 plugin 采用**英文为默认加载语言、中文为对应副本**的双语结构：
+
+- **根目录 `skills/` + `commands/`**：英文版。`plugin.json` 的 `skills` / `commands` 字段指向 `["./skills"]` / `["./commands"]`，加载器默认加载这一份。
+- **`zh-CN/skills/` + `zh-CN/commands/`**：中文版。结构与根目录 1:1 镜像（同样的子目录、同样的 references/、同样的文件名）。不写入 `plugin.json`，由用户/平台手动指向（如多语言加载器扩展时）。
+
+**文件清单对应关系**（必须 1:1，详见「双语对应与同步修改」节）：
+
+根目录 `skills/` 下 27 个 skill（全部目录式，每个目录下是 `SKILL.md`，部分带 `references/`）：
+
+- 约束层（6 个）：`system-engineering`（主基调，`user-invocable: false`）/ `wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop`
+- 行为层（7 个，Superpowers 转译）：`brainstorming` / `writing-plans` / `executing-plans` / `test-driven-development` / `requesting-code-review` / `systematic-debugging` / `verification-before-completion`
+- 配置层（7 个）：`field-assessment`（单一事实源，`user-invocable: false`）/ `profile-greenfield` / `profile-brownfield` / `profile-maintenance` / `tier-small` / `tier-medium` / `tier-large`
+- 契约层（7 个，与下方 command 一一对应）：`td-propose` / `td-explore` / `td-apply` / `td-reverse-spec` / `td-archive` / `td-system-audit` / `td-init`
+
+根目录 `commands/` 下 8 个 slash 命令入口（7 个极薄，逻辑在同名 skill 里；`td-list` 例外，逻辑直接写在命令文件里）：`td-propose.md` / `td-explore.md` / `td-apply.md` / `td-reverse-spec.md` / `td-archive.md` / `td-system-audit.md` / `td-init.md` / `td-list.md`
 
 ## 编辑规则
 
@@ -148,6 +126,35 @@ hooks/                      ← 1 个 hook：状态持久化兜底（SessionEnd 
 1. **使用态加载的是安装副本，不是仓库**：会话的 skill 列表与使用态 LLM 实际调用的 skill 都来自安装副本。做"使用态 LLM 视角"的审核/验证前，先 `diff -rq <仓库>/skills <安装副本>/skills` 确认结论适用哪个版本，并在结论里注明"审的是 dev 态源（工作仓库）"还是"审的是使用态安装副本"。
 2. **仓库改动不自动生效到使用态**：内容演进后须 bump `plugin.json` version + 重新发布/安装 + `atomcode plugin trust`，使用态 LLM 才会加载新内容。"内容已演进但版本未 bump"属于发布动作的欠账，发布时处理，开发过程中不反复当作仓库内缺陷上报。
 3. **分叉期症状判断**：分叉期间若发现"使用态缺某个 skill / 多出旧 skill（仓库 `skills/` 里不存在的，如旧配置层 skill）"，先对照安装副本确认属于常态分叉，再排查是否真问题。
+
+### 双语对应与同步修改
+
+本 plugin 维护**英文（根目录 `skills/` + `commands/`）和中文（`zh-CN/skills/` + `zh-CN/commands/`）两套对应副本**。两套必须语义一致、结构 1:1 对应。
+
+**目录对应关系**：
+
+| 英文（默认加载） | 中文（对应副本） |
+|---|---|
+| `skills/<name>/SKILL.md` | `zh-CN/skills/<name>/SKILL.md` |
+| `skills/<name>/references/<file>.md` | `zh-CN/skills/<name>/references/<file>.md` |
+| `commands/<name>.md` | `zh-CN/commands/<name>.md` |
+
+**双语同步硬约束**（违反 = bug）：
+
+1. **文件清单 1:1 对应**：根目录 `skills/` 下每个文件，在 `zh-CN/skills/` 下必须有同名同路径的对应文件；反之亦然。新增/删除/移动任一语言的文件，必须同步另一个语言。校验命令：`diff <(cd skills && find . | sort) <(cd zh-CN/skills && find . | sort)` 应无输出。
+2. **frontmatter 字段对应**：`name` / `user-invocable` / `args` / `argument-hint` 的值两套必须**逐字符一致**（这些是逻辑标识，不是自然语言）。`description` 字段两套各自用对应语言书写，但**触发词语义必须对应**（中文 description 触发"propose"时，英文 description 也应触发"propose"，不能一个触发"propose"另一个触发"explore"）。
+3. **正文结构对应**：两套副本的 markdown 结构（标题层级、节数、列表项数、表格行列数）必须对应。中文版有 `## 服务的主基调原则` 节，英文版必须有对应 `## Served Keynote Principle(s)` 节。
+4. **逻辑名/命令名/路径/CLI 命令/环境变量** 两套必须**逐字符一致**（这些是跨语言不变量）：`wip-limit` / `/td-propose` / `field-assessment/references/strength-matrix.md` / `openspec list` / `$_TD_TIER` 等。
+5. **修改任一语言，必须同步另一个语言**：改了英文 `skills/wip-limit/SKILL.md` 的某节，必须同步改中文 `zh-CN/skills/wip-limit/SKILL.md` 的对应节；反之亦然。**只改一种语言 = 制造双语失调，是 bug**。提交时 commit message 应体现双语同步（如 `fix: correct wip-limit override flow (en + zh-CN)`）。
+6. **翻译漂移校验**：定期跑一致性校验——文件清单 diff（步骤 1 的命令）、逻辑名 grep 计数对比（`grep -c '\`wip-limit\`' skills/` vs `zh-CN/skills/`，每个逻辑名都应计数一致）。计数不一致 = 某一方漏改/多改 = bug。
+
+**为什么是硬约束**：本 plugin 的使用态消费者是 LLM。如果英文版和中文版语义漂移，不同语言环境下的 agent 会触发不同行为，等于把"单一事实源"分裂成两份冲突的事实源——违反钱学森系统工程主基调第 1 条"整体性能不等于各部分之和"。双语对应不是翻译质量问题，是系统一致性问题。
+
+**开发流程**：
+
+- 修改任一 SKILL.md / command 文件时，先在 `## 依赖图谱与分析` 的「枚举改动目标」步骤里列出**两种语言**的对应文件（如"改 `skills/wip-limit/SKILL.md` + `zh-CN/skills/wip-limit/SKILL.md`"）。
+- 改完一种语言后，**立即**同步另一种语言，不要留"待翻译"欠账（欠账 = 双语失调窗口）。
+- PR 自检清单加一条：文件清单 1:1 对应校验通过。
 
 ### SKILL.md 编辑
 

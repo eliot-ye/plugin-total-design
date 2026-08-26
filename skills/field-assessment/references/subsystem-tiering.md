@@ -1,12 +1,12 @@
-# 子系统独立定 tier（层次观归位，主基调第 4 条）
+# Subsystem Independent Tiering (hierarchical view positioning, keynote principle 4)
 
-表 1 的 tier-small / tier-medium / tier-large 是**平面**维度，没有处理"系统内部的层次性"。钱学森系统工程强调"系统的层次结构"（主基调第 4 条「层次观」），复杂巨系统是多层级嵌套结构——一个 tier-large 的多仓库系统，每个仓库可能是 tier-small；一个 tier-large 的微服务系统，每个微服务可能是 tier-medium。
+Table 1's tier-small / tier-medium / tier-large are **planar** dimensions and do not address "the hierarchical nature within a system." Qian Xuesen's systems engineering emphasizes "the hierarchical structure of systems" (keynote principle 4, "hierarchical view")—a complex giant system is a multi-level nested structure: a tier-large multi-repo system may have each repo be tier-small; a tier-large microservices system may have each microservice be tier-medium.
 
-## 子系统独立定 tier 机制
+## Subsystem Independent Tiering Mechanism
 
-- **触发条件**：`td-reverse-spec` 步骤 3「分系统切分」识别出"有明显分系统边界"时，或 `td-init` / `/td-system-audit` project scope 发现"系统层次跨 tier 边界"时。
-- **执行规则**：每个子系统独立按 `identification-flow.md`「### 3. 判读 tier」的 tier 判据定 tier。跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则——按最复杂的子系统对待跨子系统边界）。
-- **持久化**：`openspec/.td-state/profile-tier.yaml` 支持多子系统条目（每个子系统一条 `subsystem-<name>` 记录），文件模板见 `identification-flow.md` 的「### profile-tier.yaml 模板」节。
-- **与 `td-apply` 步骤 7.2 的协同**：跨分系统边界验证的 tier 分层强度，按"受影响分系统中最高 tier"处理——避免"tier-small 子系统和 tier-large 子系统之间的边界只用冒烟级集成验证"的疏漏。
+- **Trigger condition**: `td-reverse-spec` step 3 "subsystem partitioning" identifies "obvious subsystem boundaries," or `td-init` / `/td-system-audit` project scope discovers "system hierarchy spans tier boundaries."
+- **Execution rule**: Each subsystem is tiered independently per the tier criteria in `identification-flow.md`'s "### 3. Assess tier." Dependencies spanning subsystems are treated using the "highest-tier subsystem" strength (conservative principle—treat cross-subsystem boundaries according to the most complex subsystem).
+- **Persistence**: `openspec/.td-state/profile-tier.yaml` supports multiple subsystem entries (one `subsystem-<name>` record per subsystem); the file template is in the "### profile-tier.yaml template" section of `identification-flow.md`.
+- **Coordination with `td-apply` step 7.2**: The tier-graded strength for cross-subsystem boundary verification is treated per "the highest tier among affected subsystems"—avoiding the oversight of "the boundary between a tier-small subsystem and a tier-large subsystem only uses smoke-level integration verification."
 
-这不是把"一个 tier-large 的关键链"拆成"多个 tier-small 的关键链"——而是承认复杂巨系统是多层级嵌套结构，不同层次的子系统需要分层对待。
+This is not splitting "one tier-large critical chain" into "multiple tier-small critical chains"—but rather acknowledging that a complex giant system is a multi-level nested structure, and that subsystems at different levels need to be treated in layers.

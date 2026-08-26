@@ -1,64 +1,64 @@
 ---
 name: tier-large
-description: 大型系统复杂度 tier。100+ 文件 / 多团队 / 多仓库。constraints 强制，system-audit 周期性，要求总体设计文档。
+description: Large system complexity tier. 100+ files / multi-team / multi-repo. constraints are enforced, system-audit is periodic, general design document required.
 user-invocable: false
 ---
 
-# Tier: Large（大型系统）
+# Tier: Large (large system)
 
-## 判断依据
+## Assessment Basis
 
-判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
+See the "### 3. Assess tier" section of the `field-assessment` identification flow for criteria (take the highest when any holds).
 
-- 系统层次：多层嵌套的分系统，可能有跨仓库依赖
+- System hierarchy: multi-level nested subsystems, possibly with cross-repo dependencies
 
-## system-audit 频率
+## system-audit frequency
 
-见表 3 的 tier-large 行（current-change 每完成 1 个 change，project 每周一次；表 3 见 `field-assessment/references/audit-frequency.md`）。
+See Table 3's tier-large row (current-change: every 1 change completed; project: once per week; Table 3 is in `field-assessment/references/audit-frequency.md`).
 
-## 特殊规则
+## Special Rules
 
-### 1. 总体设计文档必填
+### 1. General design document is mandatory
 
-large 系统的每个 change，proposal 里必须附"总体设计文档"：
+For every change in a large system, the proposal must include a "general design document":
 
-- 这个改动在系统层次里的位置
-- 影响的所有分系统
-- 与最近 archive 的 change 的关系
-- 是否触发跨分系统协调
+- The position of this change within the system hierarchy
+- All subsystems affected
+- The relationship with recently archived changes
+- Whether cross-subsystem coordination is triggered
 
-没这份文档，不允许 `/td-apply`。
+Without this document, `/td-apply` is not allowed.
 
-**执行层校验由 `td-propose` 步骤 6.c 和 `td-apply` 步骤 2 负责**：
+**Execution-layer validation is the responsibility of `td-propose` step 6.c and `td-apply` step 2**:
 
-- `td-propose` 步骤 6.c 的"必填项检查"应包含"tier-large 时总体设计文档必填"——缺文档 → 回 6.b 补写，不能进入 6.d。
-- `td-apply` 步骤 2 的"前置检查"应包含"tier-large 时总体设计文档必填"——缺文档 → 阻塞 apply，提示用户回 `/td-propose` 补文档。
+- `td-propose` step 6.c's "required field check" should include "general design document is mandatory for tier-large"—missing document → go back to 6.b to write it, cannot proceed to 6.d.
+- `td-apply` step 2's "pre-check" should include "general design document is mandatory for tier-large"—missing document → blocks apply, prompts user to go back to `/td-propose` to add the document.
 
-本 skill 只声明"总体设计文档必填"的规则，执行层校验由 td-propose / td-apply 负责，避免在本 skill 重复校验逻辑。
+This skill only declares the "general design document is mandatory" rule; execution-layer validation is the responsibility of td-propose / td-apply, avoiding duplication of validation logic in this skill.
 
-### 2. WIP 限制
+### 2. WIP limit
 
-大系统并行硬解几乎必然制造失调。同一时刻至多允许的活跃 change 数按表 1 的 wip-limit 行取值（表 1 见 `field-assessment/references/strength-matrix.md`）。
+Parallel work in a large system almost certainly creates dyscoordination if forced. The maximum number of active changes allowed at any given time is taken from the wip-limit row of Table 1 (Table 1 is in `field-assessment/references/strength-matrix.md`).
 
-如果用户坚持要并行，执行 `wip-limit` 的「硬约束 + override 机制」——override 回路编排由 `wip-limit` 单一持有（brooks-law 提醒 → critical-buffer 评估 → human-in-loop 第 6 类确认 → 记录），本处不重复简化版。
+If the user insists on parallelism, execute `wip-limit`'s "hard constraint + override mechanism"—the override circuit orchestration is held solely by `wip-limit` (brooks-law reminder → critical-buffer assessment → human-in-loop type 6 confirmation → record), and is not repeated in simplified form here.
 
-### 3. 关键链 buffer
+### 3. Critical chain buffer
 
-大系统的不确定性最高——集成问题、跨团队协调、生产环境意外。buffer 比例按表 1 的 critical-buffer 行取值。buffer 不是"浪费"，是"必然需要的容量"。
+Uncertainty is highest in large systems—integration issues, cross-team coordination, production environment surprises. The buffer ratio is taken from the critical-buffer row of Table 1. Buffer is not "waste," it is "capacity that is inevitably needed."
 
-### 4. 周期性 system-audit
+### 4. Periodic system-audit
 
-大系统的"局部优化制造全局失调"风险最高。`project` scope audit 频率见表 3 的 tier-large project scope 行（表 3 见 `field-assessment/references/audit-frequency.md`）。
+Large systems have the highest risk of "local optimization creating global dyscoordination." The `project` scope audit frequency follows Table 3's tier-large project scope row (Table 3 is in `field-assessment/references/audit-frequency.md`).
 
-audit 报告里特别关注：
+The audit report pays special attention to:
 
-- 最近是否有分系统在做"自己最优但损害邻居"的改动
-- 关键链 buffer 是否被压缩
-- 是否有"应该触发 human-in-loop 但没触发"的决策
+- Whether any subsystem has recently made changes that are "optimal for itself but harm its neighbors"
+- Whether critical chain buffer has been compressed
+- Whether there are decisions that "should have triggered human-in-loop but didn't"
 
-**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 按子系统层次分别审计（分层审计的完整语义见 `td-system-audit` 步骤 2，此处不重复）——执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
+**Hierarchical view positioning**: When the `field-assessment` identification flow allows subsystem independent tiering, project scope audit is performed per subsystem hierarchy (the full semantics of layered audit are in `td-system-audit` step 2, not repeated here)—execution rules are in `field-assessment`'s `references/subsystem-tiering.md`.
 
-## 与其他 tier 的切换
+## Switching to Other tiers
 
-- 系统简化到 100 文件以下 → 切 `tier-medium`
-- 系统拆分成多个独立子系统 → 每个子系统独立定 tier
+- System simplifies to under 100 files → switch to `tier-medium`
+- System splits into multiple independent subsystems → each subsystem is tiered independently

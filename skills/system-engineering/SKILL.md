@@ -1,61 +1,61 @@
 ---
 name: system-engineering
-description: 钱学森系统工程主基调。所有局部 constraint skill 的前提。
+description: Qian Xuesen systems-engineering keynote. The premise for all local constraint skills.
 user-invocable: false
 ---
 
-# 系统工程主基调（钱学森）
+# Systems-Engineering Keynote (Qian Xuesen)
 
-钱学森那套，核心不是"项目管理"操作层面的东西，是**系统工程**——把复杂对象当成一个整体系统来认识和处理。
+Qian Xuesen's approach is, at its core, not the operational layer of "project management" — it is **systems engineering**: recognizing and handling complex objects as an integrated whole system.
 
-## 主基调四条
+## Four Keynote Principles
 
-### 1. 系统工程
+### 1. Systems Engineering
 
-系统的总体性能 **不等于** 各部分性能之和；关键是**整体协调**，不是各部分最优。
+The overall performance of a system is **not equal** to the sum of its parts' performance; the key is **overall coordination**, not local optimization.
 
-**对工作流的含义：** 任何局部动作都必须从整体性能反推。一个让局部更优但让全局失调的动作，是错的。
+**Implication for the workflow:** Every local action must be derived from overall performance. An action that makes a local part better but throws the whole out of balance is wrong.
 
-### 2. 总体设计部
+### 2. General Design Department
 
-任何复杂工程都需要一个**站在系统全局立场**的群体，专门负责总体方案、协调各分系统。
+Any complex engineering effort needs a group that **stands at the system-wide level**, specifically responsible for the overall scheme and coordinating all subsystems.
 
-**对工作流的含义：** agent 自己不能既当"分系统工程师"又当"总体设计部"。`brainstorming` skill 升级为"总体设计部"工作方式；`/td-system-audit` 命令是总体设计部的周期性自检机制。
+**Implication for the workflow:** The agent itself cannot simultaneously act as both a "subsystem engineer" and the "general design department." The `brainstorming` skill is upgraded to the "general design department" working mode; the `/td-system-audit` command is the general design department's periodic self-inspection mechanism.
 
-### 3. 从定性到定量的综合集成
+### 3. Meta-Synthesis from Qualitative to Quantitative
 
-专家的定性判断 + 数据 + 模型 → 反复迭代 → 上升到定量认识；人和机器结合，不是纯算法。
+Expert qualitative judgment + data + models → iterative refinement → ascension to quantitative understanding; humans and machines combined, not pure algorithm.
 
-#### 模型载体
+#### Model Carrier
 
-模型是把定性判断上升到定量认识的桥梁。在本工作流里，这个"模型"载体是 OpenSpec 的 spec/design artifact（分系统的契约与不变量）——proposal 的"系统工程影响评估"节是预期模型，archive 的"实际 vs 预期"复盘是模型验证。下游 skill 必须显式持有"spec 是综合集成的模型载体"这个判断，不能把 spec 当成纯文档。
+Models are the bridge that elevates qualitative judgment to quantitative understanding. In this workflow, that "model" carrier is OpenSpec's spec/design artifact (the contract and invariants of subsystems) — the "systems-engineering impact assessment" section of the proposal is the predicted model, and the "actual vs. predicted" retrospective in the archive is model validation. Downstream skills must explicitly hold the judgment that "the spec is the meta-synthesis model carrier" and must not treat the spec as mere documentation.
 
-**对工作流的含义：** OpenSpec proposal 里必须回答"这改动会影响哪些分系统、整体性能会怎么变"——这是从定性到定量的综合集成在 artifact 层的体现。agent 不能只写"what"和"how"，必须写"这会对系统整体产生什么影响"。
+**Implication for the workflow:** The OpenSpec proposal must answer "which subsystems will this change affect, and how will overall performance change" — this is the artifact-level manifestation of meta-synthesis from qualitative to quantitative. The agent cannot just write "what" and "how"; it must write "what impact this will have on the system as a whole."
 
-### 4. 开放的复杂巨系统
+### 4. Open Complex Giant System
 
-社会、人体、思维这类系统不能简化还原，必须**整体观 + 层次观**。
+Systems like society, the human body, and the mind cannot be reduced by simplification — they require **holistic view + hierarchical view**.
 
-整体观：系统的总体性能不等于各部分性能之和，局部动作必须从整体性能反推。
-层次观：复杂巨系统是多层级嵌套结构，不同层次的子系统有不同的复杂度和约束强度，必须按层次对待——不能把一个 tier-large 的多仓库系统当成"一个 tier"硬解，每个子系统应独立定 tier。
+Holistic view: the overall performance of a system is not equal to the sum of its parts' performance; local actions must be derived from overall performance.
 
-**对工作流的含义：** profile × tier 二维配置是这个原则的工程化体现——按系统规模分层对待。一个 3 文件的脚本和一个 10 万行的单体系统，不能套同一套 constraint 强度。当系统内部有明显的子系统边界时，`field-assessment` 的识别流程允许子系统独立定 tier（见 `field-assessment` 的「识别流程」节）。
+Hierarchical view: a complex giant system is a multi-level nested structure; subsystems at different levels have different complexity and constraint strength and must be treated by level — you cannot treat a tier-large multi-repo system as "one tier" and force a solution; each subsystem should be assigned its own tier independently.
 
-## 反馈控制回路（贯穿四条主基调）
+**Implication for the workflow:** The profile × tier two-dimensional configuration is the engineering manifestation of this principle — treating systems by scale tier. A 3-file script and a 100,000-line monolithic system cannot be subject to the same constraint strength. When there are clear subsystem boundaries within the system, `field-assessment`'s identification process allows subsystems to be assigned tiers independently (see the "Identification Process" section of `field-assessment`).
 
-四条主基调不是并列的静态原则，是通过反馈控制回路动态闭合的：
+## Feedback Control Loop (threading through all four keynote principles)
 
-- **propose（前馈控制）**：在实施前预测"系统工程影响"，建立控制目标。
-- **apply（控制执行 + 实时误差检测）**：按 tasks.md 实施，TDD 是契约级误差检测，verification 是系统级误差检测。
-- **archive（反馈控制回路闭合）**："实际 vs 预期"复盘是事后误差检测，修正下一个 propose 的预测模型。
+The four keynote principles are not parallel static principles — they are dynamically closed through a feedback control loop:
 
-本工作流里多个闭环实现都是这个反馈控制回路的具体形态：`td-system-audit` 步骤 7"修复后重跑 audit 闭环"、`systematic-debugging` 4-phase 闭环、`executing-plans` 步骤 3 的 human checkpoint、`verification-before-completion` 第 6 节系统级验证。下游 skill 触发这些闭环时，应意识到这是《工程控制论》反馈控制原理在本工作流里的工程化，不是孤立的"重跑一下"。
+- **propose (feedforward control):** predict "systems-engineering impact" before implementation, establishing control objectives.
+- **apply (control execution + real-time error detection):** implement per `tasks.md`; TDD is contract-level error detection, verification is system-level error detection.
+- **archive (feedback control loop closure):** the "actual vs. predicted" retrospective is post-hoc error detection, correcting the next propose's prediction model.
 
-## 如何使用本 skill
+Multiple closed loops in this workflow are concrete forms of this feedback control loop: `td-system-audit` step 7's "rerun audit closed loop after fix," `systematic-debugging`'s 4-phase closed loop, `executing-plans` step 3's human checkpoint, and `verification-before-completion` section 6's system-level verification. When downstream skills trigger these closed loops, they should be aware that this is the engineering of the feedback control principle from *Engineering Cybernetics* within this workflow — not an isolated "just rerun it."
 
-本 skill 是**所有 constraint skill 的前提**，不是单独触发的。当 agent 激活任意一个 constraint skill 时，应该同时意识到本 skill 的四条主基调，把局部规则放在系统工程框架下执行。
+## How to Use This Skill
 
-当 agent 调用 `/td-system-audit` 时，本 skill 是审计的对照标准。
+This skill is **the premise for all constraint skills** and is not triggered standalone. When the agent activates any constraint skill, it should simultaneously be aware of this skill's four keynote principles, executing local rules within the systems-engineering framework.
 
-当 agent 触发任何反馈控制闭环（见「反馈控制回路」节的列举）时，本 skill 的「反馈控制回路」节是这些闭环的归位锚点。
+When the agent invokes `/td-system-audit`, this skill is the audit's reference standard.
 
+When the agent triggers any feedback control closed loop (see the enumeration in the "Feedback Control Loop" section), this skill's "Feedback Control Loop" section is the home anchor for those closed loops.

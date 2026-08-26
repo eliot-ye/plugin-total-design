@@ -1,64 +1,64 @@
-# 强度矩阵（单一事实源）
+# Strength Matrix (single source of truth)
 
-本文件是表 1 + 表 2 的单一事实源，下游 skill 通过 `field-assessment` 识别流程读入（见 `identification-flow.md` 的「### 5. 注入强度」节）。改强度只改本文件。
+This file is the single source of truth for Table 1 + Table 2, read in through the `field-assessment` identification flow by downstream skills (see the "### 5. Inject Strength" section in `identification-flow.md`). To change strength values, edit only this file.
 
-## 表 1：5 个 constraint 在 3 个 tier 下的强度
+## Table 1: strength of the 5 constraints across 3 tiers
 
 | constraint | tier-small | tier-medium | tier-large |
 |---|---|---|---|
-| `wip-limit` | 上限 5 | 上限 4 | 上限 3 |
+| `wip-limit` | upper limit 5 | upper limit 4 | upper limit 3 |
 | `critical-buffer` | 20% project buffer | 35% project buffer | 50% project buffer |
-| `brooks-law` | 不强制 | 提醒 | 强制 |
-| `delay-decision` | 强 | 强 | 强 |
-| `human-in-loop` | — | — | + 总体设计文档审阅 |
+| `brooks-law` | not enforced | reminder | enforced |
+| `delay-decision` | strong | strong | strong |
+| `human-in-loop` | — | — | + general design document review |
 
-### 表 1 第 5 行（human-in-loop）语义说明
+### Semantic notes for Table 1, row 5 (human-in-loop)
 
-**表 1 第 5 行是叠加在 `human-in-loop` skill 的第 1–5 类通用基线之上的 tier 额外触发条件，不是绝对强度值。** 第 1–5 类通用基线在所有 profile × tier 下都生效——这是"必须停"的下限。
+**Row 5 of Table 1 is a tier-specific additional trigger condition layered on top of the human-in-loop skill's generic baseline of types 1–5; it is not an absolute strength value.** The generic baseline of types 1–5 is in effect under all profile × tier combinations—this is the "must stop" floor.
 
-- tier-small"—"：无额外 tier 触发条件，仅用第 1–5 类通用基线。
-- tier-medium"—"：无额外 tier 触发条件，仅用第 1–5 类通用基线（"公共契约变更"属基线第 1 类，所有 tier 生效，不在此重复列为 tier 加成）。
-- tier-large"+ 总体设计文档审阅"：基线之外，总体设计文档需要审阅时额外触发 human-in-loop。
+- tier-small "—": no additional tier trigger condition; only the generic baseline of types 1–5 applies.
+- tier-medium "—": no additional tier trigger condition; only the generic baseline of types 1–5 applies ("public contract changes" belong to baseline type 1, effective in all tiers, and are not repeated here as a tier addition).
+- tier-large "+ general design document review": in addition to the baseline, the general design document requires review, which triggers human-in-loop as an extra condition.
 
-### 表 1 critical-buffer 行计算基准
+### Calculation basis for the Table 1 critical-buffer row
 
-**project buffer = 关键链总估时 × 表 1 critical-buffer 行比例**（按当前 tier）。不是单个任务估时的累加，不是项目总工期的比例。
+**project buffer = total estimated time of the critical chain × Table 1 critical-buffer row ratio** (per the current tier). It is not the sum of individual task estimates, nor a percentage of the total project duration.
 
-**feeding buffer**：支流汇入点的 feeding buffer 比例 = **支流链估时 × 表 1 critical-buffer 行同 tier 比例**。feeding buffer 与 project buffer 用同一比例，只是计算基准换成支流链估时。
+**feeding buffer**: the feeding buffer ratio at a tributary merge point = **tributary chain estimated time × Table 1 critical-buffer row ratio for the same tier**. The feeding buffer uses the same ratio as the project buffer; only the calculation basis changes to the tributary chain estimated time.
 
-tier-small 20% project buffer 偏低于 CCPM 标准（通常 30%）。tier-small 保留 20% 是基于小系统低不确定性的假设；如果 tier-small 项目实际有高不确定性（如新技术栈、不熟悉的 domain），agent 应主动建议提升 buffer 比例到 30%。
+tier-small's 20% project buffer is below the CCPM standard (typically 30%). tier-small retains 20% based on the assumption of low uncertainty in small systems; if a tier-small project actually has high uncertainty (e.g., new tech stack, unfamiliar domain), the agent should proactively suggest raising the buffer ratio to 30%.
 
-### 表 1 注解（3 tier × 5 constraint）
+### Table 1 annotations (3 tiers × 5 constraints)
 
-本表是三个 tier skill 的「constraint 强度」注解合并而来，避免三处重复。
+This table merges the "constraint strength" annotations from the three tier skills to avoid repetition in three places.
 
-| constraint | tier-small 注解 | tier-medium 注解 | tier-large 注解 |
+| constraint | tier-small annotation | tier-medium annotation | tier-large annotation |
 |---|---|---|---|
-| `wip-limit` | 小系统允许稍微并行 | 中系统并行开始有协调成本 | 大系统并行硬解 = 失控 |
-| `critical-buffer` | 不确定性较低 | 不确定性中等 | 不确定性最高 |
-| `brooks-law` | 小团队加人手影响有限，不强制 | 中团队加人手要考虑 onboarding，提醒 | 大系统加人手几乎必然拖慢，强制 |
-| `delay-decision` | 表 1 说"强"（三个 tier 都强）。小系统回滚成本低，更该延迟——这是"强"在小系统的具体含义 | 强 | 强（仅模块层以下延迟；顶层架构进 tier-large 总体设计文档，不靠延迟决策处理） |
-| `human-in-loop` | —（无额外 tier 触发条件，仅用 human-in-loop skill 的第 1–5 类通用基线） | —（同 tier-small；公共契约变更属基线第 1 类，不重复列为 tier 加成） | + 总体设计文档审阅 |
+| `wip-limit` | small systems allow slightly more parallelism | medium systems begin to have coordination costs from parallelism | parallel work in large systems = hard solution = loss of control |
+| `critical-buffer` | lower uncertainty | medium uncertainty | highest uncertainty |
+| `brooks-law` | small team, adding headcount has limited impact, not enforced | medium team, adding headcount requires onboarding consideration, reminder | large system, adding headcount almost certainly slows things down, enforced |
+| `delay-decision` | Table 1 says "strong" (strong in all three tiers). Small systems have low rollback cost, so delay is even more appropriate—this is the specific meaning of "strong" in small systems | strong | strong (delay only at module level and below; top-level architecture goes into the tier-large general design document, not handled via delay-decision) |
+| `human-in-loop` | — (no additional tier trigger condition; only the human-in-loop skill's generic baseline of types 1–5 applies) | — (same as tier-small; public contract changes belong to baseline type 1, not repeated as a tier addition) | + general design document review |
 
-## 表 2：profile 在 human-in-loop 上的场景加成
+## Table 2: profile-specific scenario additions for human-in-loop
 
-表 2 只列 **profile 独有**的场景加成——tier 基线的额外触发条件已在表 1 第 5 行定义，自动叠加，不在表 2 重复。
+Table 2 lists only **profile-specific** scenario additions—the tier baseline's additional trigger conditions are already defined in Table 1, row 5, and are automatically layered on; they are not repeated in Table 2.
 
 | profile | tier-small | tier-medium | tier-large |
 |---|---|---|---|
-| `profile-brownfield` | — | + 改老代码前 | + 改老代码前 |
-| `profile-maintenance` | — | + 生产环境改动前 | — |
+| `profile-brownfield` | — | + before modifying old code | + before modifying old code |
+| `profile-maintenance` | — | + before production environment changes | — |
 
-`profile-greenfield` 无超出 tier 基线的独有场景加成（其强度即表 1 第 5 行的 tier 基线），不单列。
+`profile-greenfield` has no profile-specific scenario additions beyond the tier baseline (its strength is the tier baseline from Table 1, row 5), and is not listed separately.
 
-"—" 表示该格无 profile 场景加成，仅用表 1 第 5 行的 tier 基线。2 个有加成的 profile 在 tier-small 下都没有超出 tier 基线的加成。
+"—" means that cell has no profile scenario addition; only the tier baseline from Table 1, row 5 applies. The two profiles with additions do not have additions beyond the tier baseline under tier-small.
 
-最终 human-in-loop 强度 = `human-in-loop` skill 的第 1–5 类通用基线 ∪ 表 1 第 5 行 tier 加成 ∪ 表 2 profile 场景加成。三者叠加，不替换。
+Final human-in-loop strength = `human-in-loop` skill's generic baseline of types 1–5 ∪ Table 1, row 5 tier additions ∪ Table 2 profile scenario additions. The three are layered, not substituted.
 
-### 表 2 profile-maintenance × tier-large 说明
+### Notes on Table 2 profile-maintenance × tier-large
 
-maintenance × large 下的强度由 tier-large 表 1 行决定（wip-limit 上限 3 / critical-buffer 50% / brooks-law 强制 / delay-decision 强 / human-in-loop + 总体设计文档审阅）。profile-maintenance 只决定流程侧重（轻量 proposal + 生产稳定性），不改变这些强度。
+Strength under maintenance × large is determined by the tier-large Table 1 row (wip-limit upper limit 3 / critical-buffer 50% / brooks-law enforced / delay-decision strong / human-in-loop + general design document review). profile-maintenance only determines process emphasis (lightweight proposal + production stability) and does not change these strengths.
 
-system-audit 周期性由表 3（`audit-frequency.md`）决定，不在表 2 范围内。
+system-audit is periodic, determined by Table 3 (`audit-frequency.md`), and is not within the scope of Table 2.
 
-表 3（system-audit 频率）见 `audit-frequency.md`——audit 频率的共现方与 constraint 强度不同，独立成文件。
+Table 3 (system-audit frequency) is in `audit-frequency.md`—audit frequency's co-occurrence parties differ from constraint strength, so it is kept as a separate file.

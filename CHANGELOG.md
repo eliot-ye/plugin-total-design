@@ -2,6 +2,21 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.4.0] - 2026-08-26
+
+### Changed（行为变更）
+
+- **双语化结构**：本 plugin 从单一中文版重构为**英文（默认加载）+ 中文（zh-CN 对应副本）**的双语结构。根目录 `skills/` / `commands/` 为英文版（`plugin.json` 默认指向），`zh-CN/skills/` / `zh-CN/commands/` 为中文版，两套结构 1:1 镜像。
+- **默认加载语言切换为英文**：`plugin.json` 的 `skills: ["./skills"]` / `commands: ["./commands"]` 现指向英文版。国际化友好，非中文环境 agent 直接读英文 frontmatter description 触发。
+- **AGENTS.md 新增「双语对应与同步修改」节**：作为编辑规则的硬约束子节，规定文件清单 1:1 对应、frontmatter 逻辑字段逐字符一致、正文结构对应、逻辑名/命令名/路径/CLI 命令/环境变量跨语言不变、修改任一语言必须立即同步另一种语言、翻译漂移校验命令。
+- **AGENTS.md 目录结构节更新**：反映 `zh-CN/` 子目录的新结构，补充 skills/commands 内容编排说明（英文默认 + 中文对应）。
+
+### Docs
+
+- **双语同步硬约束**：违反文件清单 1:1 对应、frontmatter 逻辑字段不一致、正文结构不对应、跨语言不变量漂移、只改一种语言不同步另一种 = bug。校验命令：`diff <(cd skills && find . | sort) <(cd zh-CN/skills && find . | sort)` 应无输出。
+- **翻译漂移校验**：`grep -c '\`<logical-name>\`' skills/` vs `zh-CN/skills/`，每个逻辑名计数应一致。计数不一致 = 某一方漏改/多改 = bug。
+- **commit 风格补充**：双语同步提交时 commit message 应体现 en + zh-CN（如 `fix: correct wip-limit override flow (en + zh-CN)`）。
+
 ## [1.3.1] - 2026-08-23
 
 ### Fixed

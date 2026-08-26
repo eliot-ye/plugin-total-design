@@ -1,73 +1,73 @@
 ---
 name: delay-decision
-description: 可逆决策的过早闭合会损失信息。服务系统工程主基调第 3 条"从定性到定量的综合集成"。
+description: Premature closure of reversible decisions loses information. Serves systems-engineering keynote principle 3 (Meta-Synthesis from Qualitative to Quantitative).
 user-invocable: false
 ---
 
-# 延迟决策
+# Delay Decision
 
-## 依赖技能
+## Dependent Skills
 
 - `td-explore`
 - `tier-large`
 
-## 服务的主基调原则
+## Served Keynote Principle(s)
 
-**系统工程主基调第 3 条：从定性到定量的综合集成。** 认识是从定性到定量反复迭代上升的，过早闭合会损失信息。
+**Systems-engineering keynote principle 3: Meta-Synthesis from Qualitative to Quantitative.** Understanding ascends from qualitative to quantitative through iterative refinement; premature closure loses information.
 
-来自精益软件开发的"延迟决策"原则（Poppendieck）。前提是钱学森综合集成方法——决策不是"在某一时刻选最优"，是"在不断收集信息的过程中保留可逆性，直到必须闭合时才闭合"。
+Derived from the "decide as late as possible" principle of Lean software development (Poppendieck). The premise is Qian Xuesen's meta-synthesis method — a decision is not "choose the best at a certain moment," but "preserve reversibility while continuously collecting information, and close only when you must."
 
-## 规则
+## Rules
 
-### 区分两类决策
+### Distinguish Two Types of Decisions
 
-| 类型 | 例子 | 处理方式 |
+| Type | Example | Handling |
 |---|---|---|
-| **可逆决策**（two-way door） | 选哪个库、命名风格、内部 API 形状 | 延迟，先用最简单的方案往前走，等信息足够再回头定 |
-| **不可逆决策**（one-way door） | 数据库选型、公共 API、部署架构 | 早定，定之前必须 `/td-explore` 充分 |
+| **Reversible decision** (two-way door) | Which library to choose, naming style, internal API shape | Delay; first move forward with the simplest approach, and come back to decide when information is sufficient |
+| **Irreversible decision** (one-way door) | Database selection, public API, deployment architecture | Decide early; must `/td-explore` thoroughly before deciding |
 
-### 决策的层次性
+### Hierarchy of Decisions
 
-可逆/不可逆二分法是平面的，没有考虑**决策所在的系统层次**。钱学森系统工程强调"系统的层次结构"（主基调第 4 条「层次观」），不同层次的决策有不同的可逆性：
+The reversible/irreversible dichotomy is flat; it does not account for **the system level at which the decision resides**. Qian Xuesen's systems engineering emphasizes "the hierarchical structure of systems" (keynote principle 4's "hierarchical view"); decisions at different levels have different reversibilities:
 
-| 系统层次 | 决策例子 | 默认可逆性 |
+| System level | Decision example | Default reversibility |
 |---|---|---|
-| **顶层架构**（系统层次） | 系统边界、分系统切分、跨分系统契约 | 通常不可逆——顶层架构变更会牵动所有分系统 |
-| **模块设计**（分系统层次） | 模块内部结构、分系统内部 API 形状 | 通常可逆——分系统内部重构不影响其他分系统 |
-| **实现细节**（组件层次） | 命名、辅助函数形状、注释风格 | 几乎总是可逆——改动成本低、影响范围小 |
+| **Top-level architecture** (system level) | System boundaries, subsystem partitioning, cross-subsystem contracts | Usually irreversible — changing top-level architecture ripples through all subsystems |
+| **Module design** (subsystem level) | Internal module structure, intra-subsystem API shape | Usually reversible — internal subsystem refactoring does not affect other subsystems |
+| **Implementation details** (component level) | Naming, helper function shape, comment style | Almost always reversible — low change cost, small impact scope |
 
-这个层次性与 tier 强相关：
+This hierarchy correlates strongly with tier:
 
-- **tier-small**：系统扁平，三层层次性合一，可逆/不可逆二分法够用。
-- **tier-medium**：系统有明显的模块/分系统边界，顶层架构决策和模块设计决策需要分层对待。
-- **tier-large**：系统多层嵌套，顶层架构决策应被"总体设计文档"捕获（见 `tier-large` 的「总体设计文档必填」节），而不是仅靠延迟决策处理。
+- **tier-small:** the system is flat; the three levels collapse into one; the reversible/irreversible dichotomy is sufficient.
+- **tier-medium:** the system has clear module/subsystem boundaries; top-level architecture decisions and module design decisions need to be treated by level.
+- **tier-large:** the system is multi-level nested; top-level architecture decisions should be captured by a "general design document" (see `tier-large`'s "General Design Document Required" section), rather than being handled by delay-decision alone.
 
-**执行规则**：当 `$_TD_TIER == tier-large` 且当前决策属于顶层架构层次时，本 skill 应提示用户"顶层架构决策应进入 `tier-large` 要求的总体设计文档，而不是仅靠延迟决策处理"。
+**Execution rule:** when `$_TD_TIER == tier-large` and the current decision belongs to the top-level architecture level, this skill should prompt the user: "Top-level architecture decisions should go into the general design document required by `tier-large`, rather than being handled by delay-decision alone."
 
-### 延迟不等于拖延
+### Delay Is Not Procrastination
 
-延迟的是"最终决策"，不是"开始行动"。在延迟期内：
+What is delayed is the "final decision," not "starting to act." During the delay period:
 
-- 用 stub / mock / interface 往前走
-- 收集使用场景的真实信号
-- 同时保留 2–3 个候选方案的 runnable 示例
+- Move forward using stub / mock / interface
+- Collect real signals from usage scenarios
+- Keep runnable examples of 2–3 candidate approaches
 
-### 触发时机
+### Trigger Timing
 
-- 用户在 `/td-propose` 时对某个设计点犹豫不决
-- agent 自己在 design.md 里写"先选 A 方案，以后再改"——这种写法需要检查：A 是可逆的吗？
-- 多个候选方案都还在桌上，用户想"赶紧定一个"
-- **被 `/td-system-audit` 触发修复时**：audit 发现"可逆决策被过早闭合"问题时触发本 skill 重新打开决策。
-- **与 `td-explore` 的连接**：`td-explore` 阶段"不落盘 spec"本质上是延迟决策（不闭合 spec，等更多信息再 propose，详见 `td-explore` 步骤 4 的「与 `delay-decision` 的连接」段）。当用户想"赶紧 propose 闭合 spec"时，本 skill 触发提醒"信息不足时强行闭合会损失信息"（主基调第 3 条综合集成）。
+- The user hesitates on a design point during `/td-propose`
+- The agent itself writes "let's pick approach A first, and change later" in `design.md` — this phrasing needs checking: is A reversible?
+- Multiple candidate approaches are still on the table and the user wants to "just pick one"
+- **When triggered for remediation by `/td-system-audit`:** when audit finds the "reversible decision closed prematurely" problem, trigger this skill to reopen the decision.
+- **Connection to `td-explore`:** the `td-explore` phase's "do not persist spec" is essentially delay-decision (not closing the spec, waiting for more information before proposing; see the "Connection to `delay-decision`" paragraph in `td-explore` step 4). When the user wants to "hurry up and propose to close the spec," this skill triggers a reminder that "forcing closure when information is insufficient will lose information" (keynote principle 3, meta-synthesis).
 
-## 触发时 agent 应做的事
+## What the Agent Should Do When Triggered
 
-1. 判断当前决策是可逆还是不可逆
-2. 如果可逆：建议先用最简单方案往前走，把决策延迟到"信息足够时"（定义"足够"的标准）
-3. 如果不可逆：建议先 `/td-explore`，不要在 information 不足时强行闭合
-4. 在 design.md 里显式标注：`[可逆决策 - 延迟]` 或 `[不可逆决策 - 已闭合于 YYYY-MM-DD]`
+1. Determine whether the current decision is reversible or irreversible
+2. If reversible: suggest first moving forward with the simplest approach, delaying the decision until "information is sufficient" (define the criterion for "sufficient")
+3. If irreversible: suggest first running `/td-explore`, and not forcing closure when information is insufficient
+4. Explicitly annotate in `design.md`: `[reversible decision - delayed]` or `[irreversible decision - closed on YYYY-MM-DD]`
 
-## 不做的事
+## What Not to Do
 
-- 不把"延迟决策"曲解成"啥都别决定"——那是懒人指南，不是精益原则
-- 不对所有决策一刀切延迟——不可逆决策早定是纪律
+- Do not twist "delay decision" into "decide nothing" — that is a slacker's guide, not a Lean principle
+- Do not blanket-delay all decisions — deciding irreversible decisions early is discipline

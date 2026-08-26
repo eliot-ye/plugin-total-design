@@ -1,107 +1,107 @@
 ---
 name: td-init
-description: 初始化 total-design 工作流：检查 OpenSpec 结构 + 配置 .gitignore 防多人协作假冲突。触发场景：用户说"初始化"、"td init"、"开始用 td"、"搭 td 工作流"、"加 .gitignore"。
+description: Initialize the total-design workflow: check OpenSpec structure + configure .gitignore to prevent false conflicts in multi-person collaboration. Trigger scenarios: the user says "initialize", "td init", "start using td", "set up td workflow", "add .gitignore".
 user-invocable: true
 disable-model-invocation: true
-argument-hint: (无参数)
+argument-hint: (no arguments)
 ---
 
 # td-init
 
-初始化 total-design 工作流的一次性入口。保证两件事就绪：**OpenSpec 契约层结构**（specs / changes）和**多人协作的 git 边界**（`.td-state/` 不进版本库）。
+The one-time entry point for initializing the total-design workflow. Ensures two things are ready: the **OpenSpec contract-layer structure** (specs / changes) and the **multi-person collaboration git boundary** (`.td-state/` does not enter version control).
 
-## 依赖技能
+## Dependencies
 
 - `system-engineering`
 - `field-assessment`
 
-## 服务的主基调原则
+## Served Keynote Principle(s)
 
-**系统工程主基调第 1 条：系统工程。**
+**Systems-engineering keynote principle 1: Systems engineering.**
 
-init 是"把系统的工作方式先立起来"——先有 specs 基线、change 目录、git 边界，后续每个局部动作才有从整体性能反推的立足点。没有框架就开工，是"局部动作制造全局失调"的第一个来源。
+init is "setting up the way the system works first" — first establish the specs baseline, the change directory, and the git boundary, so that each subsequent local action has a footing derived from overall performance. Starting work without a framework is the first source of "local actions creating global imbalance."
 
-**系统工程主基调第 2 条：总体设计部。**
+**Systems-engineering keynote principle 2: General design department.**
 
-多人协作的 git 边界（`.td-state/` 可推导状态不进版本库）是总体设计部视角的工程决策：状态能从文件系统事实推导，就不该让 git 冲突假装它很重要。
+The multi-person collaboration git boundary (`.td-state/` derivable state does not enter version control) is an engineering decision from the general design department's perspective: if state can be derived from filesystem facts, git conflicts should not pretend it matters.
 
-## 步骤
+## Steps
 
-### 1. 激活主基调与配置层
+### 1. Activate keynote and configuration layer
 
-激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
+Activate keynote and configuration layer. Only inject strengths, do not make judgments; execute the following three-step sequence:
 
-1. **`system-engineering`** — 主基调四条进入上下文。init 是"把系统的工作方式先立起来"。
-2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`。greenfield 项目（仓库空或只有脚手架）通常判为 `profile-greenfield`；init 阶段 profile/tier 可能还没建立 `.td-state/` 缓存，按"文件不存在现判"处理。
-3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
+1. **`system-engineering`** — The four keynote principles enter context. init is "setting up the way the system works first."
+2. **profile × tier identification** — Call `field-assessment`, read `$_TD_PROFILE` / `$_TD_TIER`. Greenfield projects (empty repo or only scaffolding) are usually judged as `profile-greenfield`; at the init stage the `.td-state/` cache may not yet exist for profile/tier, handle as "file does not exist, judge now."
+3. **Other constraints** — Only read strength values into context; do not decide whether they trigger in this step.
 
-### 2. 检查 OpenSpec 结构
+### 2. Check OpenSpec structure
 
-检查 `openspec/` 目录是否存在：
+Check whether the `openspec/` directory exists:
 
-- **不存在** → 初始化 OpenSpec 契约层：
-  1. 检查 `openspec` CLI 是否可用（`openspec --version`）。
-  2. **CLI 不可用 → 代劳创建基础结构**（不阻塞初始化，用文件工具创建目录）：
-     - `openspec/specs/` — 主 spec 目录
-     - `openspec/changes/` — 活跃 change 目录
-     - `openspec/changes/archive/` — 归档 change 目录
-     - 提示用户："`openspec` CLI 未安装，已代劳创建基础结构。后续 `/td-propose` / `/td-apply` / `/td-archive` 依赖 CLI，建议安装 `npm install -g @fission-ai/openspec@latest`。"
-  3. **CLI 可用 → 运行 `openspec init`** 建立基础结构（与代劳方案产物一致，CLI 就绪时用官方路径更稳）。
-- **已存在** → 跳过，继续步骤 3。
+- **Does not exist** → Initialize the OpenSpec contract layer:
+  1. Check whether the `openspec` CLI is available (`openspec --version`).
+  2. **CLI not available → Create the base structure on its behalf** (does not block initialization; use file tools to create directories):
+     - `openspec/specs/` — main spec directory
+     - `openspec/changes/` — active change directory
+     - `openspec/changes/archive/` — archived change directory
+     - Prompt the user: "`openspec` CLI is not installed; the base structure has been created on its behalf. Subsequent `/td-propose` / `/td-apply` / `/td-archive` depend on the CLI; it is recommended to install `npm install -g @fission-ai/openspec@latest`."
+  3. **CLI available → Run `openspec init`** to establish the base structure (output identical to the fallback approach; when the CLI is ready, the official path is more robust).
+- **Already exists** → Skip; continue to Step 3.
 
-### 3. 配置 .gitignore（核心步骤）
+### 3. Configure .gitignore (core step)
 
-检查项目根 `.gitignore` 是否已包含 `openspec/.td-state/`：
+Check whether the project root `.gitignore` already includes `openspec/.td-state/`:
 
-- **已包含** → 跳过，提示"已配置"。
-- **未包含** → 在 `openspec/.gitignore` 创建/追加以下片段（不碰根 `.gitignore`；嵌套 gitignore 的路径相对 `openspec/` 目录，规则只作用于 openspec 子树，不会误伤根目录其他内容）：
+- **Already includes it** → Skip; prompt "already configured."
+- **Does not include it** → Create/append the following snippet in `openspec/.gitignore` (does not touch the root `.gitignore`; the nested gitignore's paths are relative to the `openspec/` directory, and the rules only apply to the openspec subtree, not affecting other content in the root directory):
 
 ```gitignore
-# total-design 本地状态：全部可从文件系统事实推导，不进版本库
+# total-design local state: all derivable from filesystem facts, not version-controlled
 .td-state/
 ```
 
-  - `openspec/.gitignore` 不存在 → 创建该文件并写入
-  - 已存在 → 追加（不覆盖已有内容）；若已包含 `.td-state/` 条目 → 跳过（幂等）
+  - `openspec/.gitignore` does not exist → create the file and write to it
+  - Already exists → append (do not overwrite existing content); if it already contains a `.td-state/` entry → skip (idempotent)
 
-**为什么**：`.td-state/` 下所有状态文件（`profile-tier.yaml` / `archive-counter.yaml` / `audit-history.yaml` / `audits/`）都能从文件系统事实推导（`archive/` 目录、`audits/*.md` 等），提交进 git 只会制造假冲突——两人同时 archive / audit 时对同一份 YAML 读改写，git 报冲突或静默丢失。忽略后冲突面归零，文件仍留在本地，本工作流（含 `SessionEnd` hook）照常读写。
+**Why**: All state files under `.td-state/` (`profile-tier.yaml` / `archive-counter.yaml` / `audit-history.yaml` / `audits/`) can be derived from filesystem facts (the `archive/` directory, `audits/*.md`, etc.); committing them to git only creates false conflicts — when two people archive / audit simultaneously, they read-modify-write the same YAML, and git reports a conflict or silently loses data. After ignoring, the conflict surface drops to zero, files remain local, and this workflow (including the `SessionEnd` hook) continues to read and write normally.
 
-**必须提交、不要 ignore， 文件可以不存在**：`openspec/config.yaml`（团队共享 context）、`openspec/specs/`（主 spec）、`openspec/changes/`（change 资产）、`openspec/todo.md`。
+**Must be committed, do not ignore, file may not exist**: `openspec/config.yaml` (team-shared context), `openspec/specs/` (main spec), `openspec/changes/` (change assets), `openspec/todo.md`.
 
-### 4. 老项目迁移检查
+### 4. Legacy project migration check
 
-用 `git ls-files` 检查 `.td-state/` 是否已被 git 跟踪（加 .gitignore 之前就提交过的老项目）：
+Use `git ls-files` to check whether `.td-state/` is already tracked by git (a legacy project that was committed before `.gitignore` was added):
 
 ```bash
 git ls-files openspec/.td-state/
 ```
 
-- **有输出** → 提示用户执行一次取消跟踪（**必须先征得用户确认**，这是破坏性 git 操作）：
+- **Has output** → Prompt the user to perform a one-time untrack (**must obtain user confirmation first**; this is a destructive git operation):
 
 ```bash
 git rm -r --cached openspec/.td-state/
 ```
 
-  `.td-state/` 文件仍留在本地（本工作流正常读写），只是不再进版本库。确认后执行，并建议提交这次变更。
-- **无输出** → 跳过。
+  The `.td-state/` files remain local (this workflow reads and writes normally); they simply no longer enter version control. Execute after confirmation, and suggest committing this change.
+- **No output** → Skip.
 
-### 5. 首次引导填 config.yaml context
+### 5. First-time guided config.yaml context fill
 
-与 `td-propose` 步骤 2 同一引导流程：读 `openspec/config.yaml` 的 `context` 字段；若为空或模板默认值，一次问完 tech stack / conventions / domain 三个问题，答案写入 `context` 字段。用户跳过 → 保持空，不阻塞。init 阶段问一次，后续 td-propose / td-explore 都能读到，避免重复打扰。
+Same guided flow as `td-propose` Step 2: read the `context` field of `openspec/config.yaml`; if empty or at template default, ask all three questions at once — tech stack / conventions / domain — and write the answers into the `context` field. User skips → leave it empty, non-blocking. Asking once at init means subsequent td-propose / td-explore calls can all read it, avoiding repeated interruptions.
 
-### 6. 完成输出
+### 6. Completion output
 
-输出初始化结果：
+Output initialization results:
 
-- OpenSpec 结构：就绪（新建 / 已有）
-- `.gitignore`：根目录已有 / openspec/.gitignore 已创建或追加 / 无需
-- 老项目迁移：已完成 / 无需 / 待用户确认
-- config context：已填写 / 跳过
+- OpenSpec structure: ready (newly created / already exists)
+- `.gitignore`: root directory already has it / openspec/.gitignore created or appended / not needed
+- Legacy project migration: completed / not needed / pending user confirmation
+- config context: filled in / skipped
 
 ## Guardrails
 
-- **不覆盖**已有 `.gitignore` / `openspec/.gitignore` 内容，只追加
-- `git rm --cached` 是破坏性 git 操作，**必须用户确认后**才执行
-- 不修改 `openspec/specs/`、`openspec/changes/` 下的任何内容
-- CLI 不可用时代劳创建**目录结构**即可——不创建/不伪造 artifact、spec、change 内容（那是 td-propose / td-reverse-spec 的职责）；CLI 可用时优先用 `openspec init`
-- 可重复执行：幂等，已配置的项跳过
+- **Do not overwrite** existing `.gitignore` / `openspec/.gitignore` content; only append
+- `git rm --cached` is a destructive git operation; **must obtain user confirmation** before executing
+- Do not modify any content under `openspec/specs/` or `openspec/changes/`
+- When the CLI is not available, only create the **directory structure** on its behalf — do not create/fabricate artifact, spec, or change content (that is the responsibility of td-propose / td-reverse-spec); when the CLI is available, prefer `openspec init`
+- Re-runnable: idempotent; already-configured items are skipped

@@ -1,20 +1,20 @@
-# 任务必填字段模板与风险等级
+# Task Required Field Template and Risk Levels
 
-## 必填字段模板
+## Required Field Template
 
 ```markdown
 - [ ] <task description>
-  - 文件：<exact file paths>
-  - 风险：<high | medium | low>
-  - 验证：<how to verify this task is done>
-  - 分系统影响：<which subsystems this touches>
-  - 依赖：<other tasks that must complete first>
+  - file: <exact file paths>
+  - risk: <high | medium | low>
+  - verification: <how to verify this task is done>
+  - subsystem impact: <which subsystems this touches>
+  - dependency: <other tasks that must complete first>
 ```
 
-## 风险等级判定
+## Risk Level Determination
 
-供 `test-driven-development` 决定测试强度、`requesting-code-review` 决定 review 深度：
+Used by `test-driven-development` to decide test intensity, and by `requesting-code-review` to decide review depth:
 
-- **high**：核心路径 / 跨多个分系统 / 数据一致性 / 安全 / 不可逆决策 → 完整边界用例 + review 必查
-- **medium**：常规功能 → 标准 TDD 强度（正常路径 + 关键边界）
-- **low**：机械改动（重命名、文档、纯配置）→ 冒烟验证即可
+- **high**: core path / spans multiple subsystems / data consistency / security / irreversible decision → full boundary test suite + mandatory review
+- **medium**: regular functionality → standard TDD intensity (normal path + key boundaries)
+- **low**: mechanical changes (rename, docs, pure config) → smoke verification is sufficient

@@ -1,70 +1,70 @@
 ---
 name: critical-buffer
-description: 关键链缓冲保护。服务系统工程主基调第 1 条"系统工程"和第 2 条"总体设计部"。
+description: Critical chain buffer protection. Serves systems-engineering keynote principle 1 (Systems Engineering) and principle 2 (General Design Department).
 user-invocable: false
 ---
 
-# 关键链缓冲保护
+# Critical Chain Buffer Protection
 
-## 依赖技能
+## Dependent Skills
 
 - `wip-limit`
 - `field-assessment`
 
-## 服务的主基调原则
+## Served Keynote Principle(s)
 
-**系统工程主基调第 1 条：系统工程。** 整体性能取决于瓶颈，不是平均值。
+**Systems-engineering keynote principle 1: Systems Engineering.** Overall performance depends on the bottleneck, not the average.
 
-**系统工程主基调第 2 条：总体设计部。** 瓶颈识别必须站在系统全局立场，不能由分系统工程师各自判断。
+**Systems-engineering keynote principle 2: General Design Department.** Bottleneck identification must stand at the system-wide level; it cannot be left to each subsystem engineer's own judgment.
 
-来自 Goldratt 的约束理论（TOC）和关键链项目管理（CCPM）。前提是钱学森系统工程——没有总体设计部视角，瓶颈识别就会变成"各分系统都觉得自己是瓶颈"的扯皮。
+Derived from Goldratt's Theory of Constraints (TOC) and Critical Chain Project Management (CCPM). The premise is Qian Xuesen's systems engineering — without the general design department perspective, bottleneck identification degenerates into a tug-of-war where "every subsystem thinks it is the bottleneck."
 
-## 规则
+## Rules
 
-### 识别关键链
+### Identify the Critical Chain
 
-关键链是 tasks 序列里的**最长路径**——考虑资源约束后耗时最长的路径，不是任务最多的路径。
+The critical chain is the **longest path** in the tasks sequence — the path that takes the longest time after accounting for resource constraints, not the path with the most tasks.
 
-### 保护缓冲
+### Protect the Buffer
 
-关键链末端的 project buffer 和支流汇入点的 feeding buffer **不能被压缩**。
+The project buffer at the end of the critical chain and the feeding buffer at tributary convergence points **must not be compressed**.
 
-常见错误：
-- "估计 2 小时，实际 1 小时就够了" → 压缩缓冲
-- "可以并行做这几个任务" → 没识别资源冲突
-- "打个 90% 的安全余量" → 余量被均匀分到每个任务，没有集中缓冲
+Common mistakes:
+- "Estimated 2 hours, actually 1 hour is enough" → compressing the buffer
+- "These tasks can be done in parallel" → failing to identify resource conflicts
+- "Let's put a 90% safety margin" → the margin is distributed evenly across every task, with no concentrated buffer
 
-### 隐性 buffer 压缩（WIP 超限时）
+### Implicit Buffer Compression (When WIP Is Exceeded)
 
-显性 buffer 压缩（用户直接要求"压缩估时"）由本 skill 的「保护缓冲」规则防御。但还有一种隐性 buffer 压缩：
+Explicit buffer compression (the user directly requesting "compress the estimates") is defended against by this skill's "Protect the Buffer" rule. But there is also implicit buffer compression:
 
-**WIP 超限时的隐性 buffer 压缩**：当活跃 change 数超过 `wip-limit` 上限时，agent 的注意力是有限资源，N 个并行 change 分摊下来，每个 change 得到的关注度只有 1/N，相当于每个 change 的关键链 buffer 被"注意力分散"隐性压缩了。
+**Implicit buffer compression when WIP is exceeded:** when the number of active changes exceeds the `wip-limit` upper limit, the agent's attention is a finite resource; distributed across N parallel changes, each change receives only 1/N of attention — effectively, each change's critical chain buffer is implicitly compressed by "attention dispersion."
 
-这种隐性压缩不会在单个 change 的 `critical-buffer` 检测中被发现——每个 change 内部看起来关键链标注完整、buffer 比例合规。但跨 change 整合时，注意力分散导致的隐性 buffer 压缩会爆发为跨 change 全局失调。
+This implicit compression will not be detected within any single change's `critical-buffer` check — internally, each change appears to have complete critical chain annotations and compliant buffer ratios. But during cross-change integration, the implicit buffer compression caused by attention dispersion will erupt as cross-change global imbalance.
 
-**防御机制**：
-- `wip-limit` 的硬阻塞 + override 机制是第一道防线（见 `wip-limit` 的「硬约束 + override 机制」节）。
-- override 发生时，本 skill 应在 override 流程里被触发，评估"并行 N+1 个 change 对每个 change 关键链 buffer 的隐性压缩程度"。
-- 评估输出到 override 确认记录里，作为后续 `/td-system-audit` project scope 的输入。
+**Defense mechanism:**
+- `wip-limit`'s hard block + override mechanism is the first line of defense (see `wip-limit`'s "Hard Constraint + Override Mechanism" section).
+- When an override occurs, this skill should be triggered within the override flow to assess "the degree of implicit compression of each change's critical chain buffer from running N+1 changes in parallel."
+- The assessment output goes into the override confirmation record, as input for the subsequent `/td-system-audit` project scope.
 
-## 触发时机
+## Trigger Timing
 
-- 用户在 `/td-propose` 或 `/td-apply` 时要求"加快进度"或"压缩估时"
-- agent 自己生成 tasks.md 时
-- 多个 change 在排队，用户想插队
-- **被 `/td-system-audit` 触发修复时**：audit 发现"关键链缓冲被压缩"问题时，触发本 skill 重新规划 tasks。
+- The user requests "speed up progress" or "compress estimates" during `/td-propose` or `/td-apply`
+- The agent generates `tasks.md` itself
+- Multiple changes are queued and the user wants to jump the line
+- **When triggered for remediation by `/td-system-audit`:** when audit finds the "critical chain buffer compressed" problem, trigger this skill to re-plan tasks.
 
-## 触发时 agent 应做的事
+## What the Agent Should Do When Triggered
 
-1. 在 tasks.md 里显式标注关键链路径
-2. 在关键链末端留 project buffer（比例按表 1 的 critical-buffer 行取值，按当前 tier；表 1 见 `field-assessment/references/strength-matrix.md`）
-3. 拒绝把缓冲当"可压缩的余量"——它是系统吸收不确定性的容量
-4. 当用户要求压缩时，先问："这是真瓶颈还是非瓶颈？非瓶颈压缩不影响整体性能。"
+1. Explicitly annotate the critical chain path in `tasks.md`
+2. Leave a project buffer at the end of the critical chain (ratio per the critical-buffer row of Table 1 for the current tier; Table 1 is in `field-assessment/references/strength-matrix.md`)
+3. Refuse to treat the buffer as "compressible slack" — it is the system's capacity to absorb uncertainty
+4. When the user requests compression, first ask: "Is this the real bottleneck or a non-bottleneck? Compressing a non-bottleneck does not affect overall performance."
 
-## 按 tier 调整
+## Adjustment by Tier
 
-tier 越大，系统越复杂，不确定性越高，缓冲越厚。project buffer 比例按表 1 的 critical-buffer 行取值（取值规则见上文「触发时 agent 应做的事」第 2 条，此处不重复）。
+The larger the tier, the more complex the system, the higher the uncertainty, and the thicker the buffer. The project buffer ratio is taken from the critical-buffer row of Table 1 (the value rule is in "What the Agent Should Do When Triggered" item 2 above; not repeated here).
 
-### 层次观归位
+### Hierarchical View Homecoming
 
-当系统内部有明显的子系统边界时（`field-assessment` 识别流程允许子系统独立定 tier），本 skill 的关键链标注应**按子系统层次分别标注**——每个子系统有自己的关键链和 project buffer，子系统之间的依赖链是跨子系统的关键链。子系统独立定 tier 的执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
+When there are clear subsystem boundaries within the system (`field-assessment`'s identification process allows subsystems to be assigned tiers independently), this skill's critical chain annotation should be **annotated separately by subsystem level** — each subsystem has its own critical chain and project buffer, and the dependency chain between subsystems is the cross-subsystem critical chain. Execution rules for subsystems assigned tiers independently are in `field-assessment`'s `references/subsystem-tiering.md`.

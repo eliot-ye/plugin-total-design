@@ -1,21 +1,20 @@
 ---
 name: field-assessment
-description: 现场判读 profile × tier 并注入 constraint 强度。激活任意 constraint skill 时，应同时查本 skill 确认当前 profile × tier 下的强度
+description: Assess the profile × tier in the field and inject constraint strengths. When any constraint skill is activated, consult this skill to confirm the strength under the current profile × tier.
 user-invocable: false
 ---
 
-# 现场评估（profile × tier 判读 + 强度注入）
+# Field Assessment (profile × tier assessment + strength injection)
 
-本 skill 是所有 profile / tier / constraint skill 引用的**配置入口**：判读现场 profile × tier，把三张强度表的值注入会话上下文。
+This skill is the **configuration entry point** referenced by all profile / tier / constraint skills: it assesses the profile × tier in the field and injects the values from the three strength tables into the session context.
 
-## 服务的主基调原则
+## Served Keynote Principle(s)
 
-**系统工程主基调第 4 条：开放的复杂巨系统。** 复杂巨系统不能套同一套 constraint 强度——必须按系统规模（tier）和现场状态（profile）分层对待。本 skill 是这个原则的工程化入口。
+**Systems-engineering keynote principle 4: open complex giant system.** A complex giant system cannot be subjected to one uniform set of constraint strengths—it must be treated in layers according to system scale (tier) and field state (profile). This skill is the engineering entry point for this principle.
 
-## 内容编排
+## Content Layout
 
-本 skill 是配置入口，实际内容在 `references/` 下四个文件（强度矩阵 / audit 频率 / 识别流程 / 子系统独立定 tier）。下游 skill 通过 `field-assessment` 的识别流程读这四个文件。
+This skill is the configuration entry point; the actual content lives in the four files under `references/` (strength matrix / audit frequency / identification flow / subsystem independent tiering). Downstream skills read these four files through the `field-assessment` identification flow.
+## How It Is Referenced
 
-## 如何被引用
-
-每个 td-* skill 的"步骤 1"调用本 skill 的识别流程（`references/identification-flow.md`），判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1 + 表 2（+ 表 3，archive / apply / system-audit 需要）读入上下文。
+Step 1 of every td-* skill invokes the identification flow of this skill (`references/identification-flow.md`), assesses `$_TD_PROFILE` / `$_TD_TIER`, and reads Table 1 + Table 2 (+ Table 3, needed by archive / apply / system-audit) into context.

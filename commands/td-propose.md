@@ -1,10 +1,10 @@
 ---
 name: td-propose
-description: 创建 change，生成 proposal/design/tasks artifact。OpenSpec 契约层入口。
+description: Create a change, generating proposal/design/tasks artifacts. Entry point for the OpenSpec contract layer.
 argument-hint: <change-name or description>
 args: optional
 ---
 
 # td-propose
 
-**立刻调用 `td-propose` skill，参数 `$ARGUMENTS`。**
+**Immediately invoke `td-propose` skill, arguments `$ARGUMENTS`.**

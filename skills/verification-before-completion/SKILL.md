@@ -1,88 +1,88 @@
 ---
 name: verification-before-completion
-description: 声明完成前必须跑验证命令，evidence before assertions。服务主基调第 3 条。触发场景：agent 即将声称"任务完成" / "bug 修复" / "可以 commit 了"时——先验证再下结论。
+description: Must run verification commands before declaring completion, evidence before assertions. Serves systems-engineering keynote principle 3. Trigger scenario: when the agent is about to claim "task complete" / "bug fixed" / "ready to commit"—verify first, then draw conclusions.
 user-invocable: true
 ---
 
 # Verification Before Completion
 
-## 依赖技能
+## Dependency Skills
 
 - `human-in-loop`
 - `systematic-debugging`
 
-## 服务的主基调原则
+## Served Keynote Principle(s)
 
-**主基调第 3 条：从定性到定量的综合集成。** 声明"完成"是从定量（验证证据）回到定性（"它好了"）的综合。没有定量证据的定性声明，是幻觉。
+**Systems-engineering keynote principle 3: Meta-synthesis from qualitative to quantitative.** Declaring "complete" is the synthesis from quantitative (verification evidence) back to qualitative ("it's good"). A qualitative declaration without quantitative evidence is a hallucination.
 
-**主基调第 1 条：系统工程。** "完成"不是"我写完了"，是"系统行为符合契约"。契约符合度必须用证据证明，不能用感觉断言。
+**Systems-engineering keynote principle 1: Systems engineering.** "Complete" is not "I finished writing"; it is "system behavior conforms to the contract". Contract conformance must be proven with evidence, not asserted by feeling.
 
-**核心论点归位——"总体性能不等于各部分性能之和"**：第 6 节"系统级验证（跨分系统边界）"是核心论点最直接的体现。钱学森在《创建系统学》里明确说："系统的总体性能不等于各部分性能之和；关键是整体协调。"本工作流把这个论点工程化为：所有任务测试全绿只证明每个分系统局部正确，不能证明分系统整合后整体行为符合契约——所以必须有跨分系统边界验证。第 6 节的执行语义（接口/契约测试、数据流传递、边界 mock）就是这个核心论点的执行层。
+**Core thesis placement—"Overall system performance is not the sum of the performance of its parts"**: Section 6 "System-level verification (cross-subsystem boundaries)" is the most direct embodiment of the core thesis. Qian Xuesen explicitly states in 《创建系统学》: "The overall performance of a system is not the sum of the performance of its parts; the key is overall coordination." This workflow engineers this thesis as: all task tests being green only proves each subsystem is locally correct; it cannot prove that after subsystem integration, the overall behavior conforms to the contract—hence cross-subsystem boundary verification is mandatory. The execution semantics of Section 6 (interface/contract tests, data flow propagation, boundary mocks) are the execution layer of this core thesis.
 
-**《工程控制论》反馈控制回路归位**：verification 是实时误差检测环节（第 6 节系统级验证是"系统整合层次"的实时误差检测，与 `td-apply` 步骤 7.2 协同闭合回路）。
+**Feedback control loop placement (《工程控制论》)**: verification is the real-time error detection step (Section 6's system-level verification is real-time error detection at the "system integration level", closing the loop in coordination with `td-apply` step 7.2).
 
-## 触发时机
+## Trigger Timing
 
-- agent 即将声称"任务完成" / "bug 修复" / "测试通过" / "可以 commit 了"
-- 任何"我搞定了"类的声明之前
-- `executing-plans` 里任务标记 `[x]` 之前
-- `requesting-code-review` 给出"可以继续"之前
+- When the agent is about to claim "task complete" / "bug fixed" / "tests passed" / "ready to commit"
+- Before any "I'm done" type declaration
+- Before a task is marked `[x]` in `executing-plans`
+- Before `requesting-code-review` gives a "can continue"
 
-## 工作方式
+## Working Style
 
-### 1. 列出验证命令
+### 1. List verification commands
 
-对每个"完成"声明，先列出**具体的验证命令**：
+For each "complete" declaration, first list the **specific verification commands**:
 
-- 跑测试：`<test command>`
-- 跑 linter：`<lint command>`
-- 跑 build：`<build command>`
-- 跑 type check：`<type check command>`
+- Run tests: `<test command>`
+- Run linter: `<lint command>`
+- Run build: `<build command>`
+- Run type check: `<type check command>`
 
-### 2. 实际跑这些命令
+### 2. Actually run these commands
 
-不是"我觉得会过"，是**实际执行**，拿到输出。
+Not "I think it'll pass", but **actually execute**, and get the output.
 
-### 3. 检查输出
+### 3. Check the output
 
-- 退出码是 0 吗？
-- 输出里有 warning / error 吗？
-- 测试覆盖了应该测的场景吗？
+- Is the exit code 0?
+- Are there warnings / errors in the output?
+- Does test coverage cover the scenarios that should be tested?
 
-### 4. 给出 evidence-based 声明
+### 4. Give evidence-based declarations
 
-错误声明："任务完成了。"
-正确声明："任务完成。跑了 `pytest tests/test_auth.py`，12 个测试全绿。跑了 `mypy`，没 type error。"
+Wrong declaration: "The task is complete."
+Correct declaration: "Task complete. Ran `pytest tests/test_auth.py`, all 12 tests green. Ran `mypy`, no type errors."
 
-### 5. 如果验证失败
+### 5. If verification fails
 
-**不要**：
-- 立即"修一下"再跑——先理解为什么失败
-- 声明"基本完成，就差这点"——要么完成，要么没完成
-- 跳过失败的验证，先 commit——commit 失败的代码是污染
+**Don't**:
+- Immediately "tweak it" and re-run—first understand why it failed
+- Declare "basically done, just this little bit"—either it's done or it's not
+- Skip the failed verification and commit first—committing failed code is contamination
 
-**要**：
-- 触发 `systematic-debugging` 走 4-phase 流程
-- 如果修不了，触发 `human-in-loop` 停下来问用户
+**Do**:
+- Trigger `systematic-debugging` to go through the 4-phase flow
+- If it can't be fixed, trigger `human-in-loop` to stop and ask the user
 
-### 6. 系统级验证（跨分系统边界）
+### 6. System-level verification (cross-subsystem boundaries)
 
-本节与 `td-apply` 步骤 7.2 的分工：步骤 7.2 定义触发条件与 tier 分层强度，本节定义执行语义。在 `td-apply` 流程里，本节在步骤 7.1 change-level 验证通过之后触发；单独触发本 skill 时，若上游已有 change-level 验证产物，可直接进入本节。
+Division of labor between this section and `td-apply` step 7.2: step 7.2 defines the trigger conditions and tier-stratified intensity; this section defines the execution semantics. Within the `td-apply` flow, this section is triggered after step 7.1's change-level verification passes; when this skill is triggered independently, if upstream already has change-level verification artifacts, you can go directly to this section.
 
-change-level 验证通过 ≠ 系统整合正确。**"总体性能不等于各部分性能之和"（主基调第 1 条）**：所有任务测试全绿只证明每个分系统局部正确，不能证明分系统整合后整体行为符合契约。这是 `## 服务的主基调原则` 节归位的核心论点——跨分系统边界验证是这个核心论点的执行层。
+Change-level verification passing ≠ system integration is correct. **"Overall system performance is not the sum of the performance of its parts" (systems-engineering keynote principle 1)**: all task tests being green only proves each subsystem is locally correct; it cannot prove that after subsystem integration, the overall behavior conforms to the contract. This is the core thesis placed in the `## Served Keynote Principle(s)` section—cross-subsystem boundary verification is the execution layer of this core thesis.
 
-当 change 的 proposal 标注了"影响哪些分系统"时，change-level 验证之后必须追加**跨分系统边界验证**：
+When a change's proposal annotates "which subsystems are affected", after change-level verification, **cross-subsystem boundary verification** must be appended:
 
-- 受影响分系统之间的接口/契约测试（集成边界，不是单测）
-- 数据流跨分系统传递的正确性
-- 边界 mock：一个分系统的行为变更是否破坏相邻分系统的契约
+- Interface/contract tests between affected subsystems (integration boundaries, not unit tests)
+- Correctness of data flow propagation across subsystems
+- Boundary mocks: does a behavior change in one subsystem break the contract of an adjacent subsystem
 
-边界验证的触发与 tier 分层强度由 `td-apply` 步骤 7.2 定义，本 skill 负责执行层语义：边界验证也走本 skill 的 1–5 节流程——列出验证命令、实跑、检查输出、evidence-based 声明、失败触发 `systematic-debugging`。
+The triggering and tier-stratified intensity of boundary verification are defined by `td-apply` step 7.2; this skill is responsible for the execution-layer semantics: boundary verification also follows this skill's sections 1–5 flow—list verification commands, actually run them, check output, give evidence-based declarations, and on failure trigger `systematic-debugging`.
 
-## 硬约束
+## Hard Constraints
 
-### 不接受以下偷懒
+### Don't accept the following shortcuts
 
-- **"目测通过"**：UI 改动也要验证——snapshot test、E2E test、至少手动截图对比。"我看了一下觉得对"不是验证。
-- **"应该没问题"**："我没改那块代码，应该没问题"——经典翻车点。跑全量测试，确认真的没问题。
-- **"之前测过"**："这个测试我之前跑过"——代码变了，之前的测试结果就失效。重跑。
+- **"Looks correct by eye"**: UI changes also need verification—snapshot test, E2E test, or at least manual screenshot comparison. "I looked at it and it seems right" is not verification.
+- **"Should be fine"**: "I didn't touch that code, it should be fine"—a classic faceplant. Run the full test suite to confirm it's really fine.
+- **"Tested before"**: "I ran this test before"—the code changed, so the previous test results are invalidated. Re-run.

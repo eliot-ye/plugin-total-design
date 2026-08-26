@@ -1,12 +1,12 @@
-# audit-history.yaml 模板
+# audit-history.yaml Template
 
-`td-system-audit` 维护的持久化文件。每次 audit 落盘后，同步更新 `openspec/.td-state/audit-history.yaml`：追加一条本次 audit 的记录。文件由本步骤首次运行时按需创建。
+The persistent file maintained by `td-system-audit`. After each audit is persisted to disk, `openspec/.td-state/audit-history.yaml` is synchronously updated: append a record for this audit. The file is created on demand on first run of this step.
 
 ```yaml
 audits:
   - timestamp: <ISO8601>
     scope: <current-change | project>
-    report: <audits/ 下的报告文件名>
-    severe_count: <严重问题数>
-    next_due: <下次 project-scope audit 的 ISO8601 截止时间，仅 tier-large project scope 需要算"一周后">
+    report: <report filename under audits/>
+    severe_count: <number of severe issues>
+    next_due: <ISO8601 deadline for the next project-scope audit; only tier-large project scope needs to compute "one week later">
 ```

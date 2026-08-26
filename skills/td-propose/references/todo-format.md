@@ -1,50 +1,50 @@
-# openspec/todo.md 格式约定
+# openspec/todo.md Format Conventions
 
-`openspec/todo.md` 是项目级待办池（backlog）的单一文件。各 td-* skill 读写此文件的格式以此文件为准。
+`openspec/todo.md` is the single file for the project-level backlog (todo pool). All td-* skills read and write this file according to the format defined here.
 
-## 文件结构
+## File Structure
 
 ```markdown
-# TODO（待办池）
+# TODO (Backlog)
 
-项目级待办池。每条未勾选条目是一个潜在 change 的候选。
+Project-level backlog. Each unchecked entry is a candidate for a potential change.
 
-## 待办
+## Todo
 
-- [ ] [P1] 支持暗色模式
-- [ ] [P2] 优化首屏加载
+- [ ] [P1] Support dark mode
+- [ ] [P2] Optimize first-screen loading
 
-## 进行中
+## In Progress
 
-- [ ] [P0] 重构支付模块
+- [ ] [P0] Refactor payment module
   - [ ] change: refactor-payments
   - [ ] change: refactor-checkout
 
-## 已完成
+## Done
 
-- [x] [P1] 搭建 CI
+- [x] [P1] Set up CI
   - [x] change: setup-ci
 ```
 
-## 条目格式
+## Entry Format
 
-主条目 + change 子项两级结构：
+Two-level structure of main entries + change sub-items:
 
 ```markdown
-- [ ] <优先级> <一句话结果>
-  - [ ] change: <name>      ← 每个承接的 change 一个子项，缩进两空格
+- [ ] <priority> <one-sentence outcome>
+  - [ ] change: <name>      ← one sub-item per change carried, indented two spaces
 ```
 
-- **主条目**：`- [ ] <优先级> <一句话结果>`。优先级 `[P0]`（关键）/ `[P1]`（重要）/ `[P2]`（一般），可选，未标注视为 P2。`td-propose` 挑候选时按 P0 → P1 → P2 排序呈现。
-- **写作约束**：主条目必须是**可验证的一句话结果**（如"支持暗色模式"），不是问题陈述或过程描述（如"优化性能"）。落池时按此约束改写。
-- **change 子项**：`  - [ ] change: <name>`（缩进两空格），表示该 backlog 被某个 change 承接。`td-propose` 创建 change 时新增一个子项；已有子项就追加，一个 change 一个子项。
+- **Main entry**: `- [ ] <priority> <one-sentence outcome>`. Priority `[P0]` (critical) / `[P1]` (important) / `[P2]` (general), optional; unlabeled treated as P2. `td-propose` sorts candidates by P0 → P1 → P2 when presenting.
+- **Writing constraint**: the main entry must be a **verifiable one-sentence outcome** (e.g. "support dark mode"), not a problem statement or process description (e.g. "optimize performance"). Rewrite accordingly when adding to the pool.
+- **Change sub-item**: `  - [ ] change: <name>` (indented two spaces), indicating that this backlog entry is carried by a change. `td-propose` adds one sub-item when creating a change; if sub-items already exist, append — one sub-item per change.
 
-## 规则
+## Rules
 
-- **状态语义**：主条目 `- [ ]` = 未开始或进行中；主条目 `- [x]` = 已完成（全部 change 子项均已归档）。子项 `- [ ]` = 该 change 活跃；子项 `- [x]` = 该 change 已归档。
-- **勾选时机**：只有 `td-archive` 在 change 归档成功后操作——把该 change 对应的子项勾选 `[x]`；主条目下**全部子项都已勾选** → 主条目勾选 `[x]`，仍有子项未勾选 → 主条目保持 `- [ ]`。其他 skill 不得勾选条目或子项。
-- **追溯档案（子项永久保留）**：change 子项归档后**不移除**——它是"这条 backlog 最终被哪些 change 完成"的追溯档案；change 侧不写反向来源（保持单向），追溯就靠子项 + git log。
-- **git 策略**：todo.md 是共享事实源，**必须提交**（不 ignore）。它是单文件，多人协作按**条目粒度人工协调**——同一时间只由一个人 propose / 勾选同一条目；不同条目互不冲突。
-- **文件不存在**：视为空池，不主动创建。用户明确想记录 backlog 时才创建（`td-propose` 挑候选时不创建；`td-explore` / `td-system-audit` 落池且用户同意时创建）。
-- **分节**：`## 待办` / `## 进行中` / `## 已完成` 是建议性组织，非强制——文件未分节时，按主条目/子项的 `- [ ]` / `- [x]` 状态语义处理即可。
-- **不删条目**：完成的条目（含子项）保留在"已完成"节，作为 backlog 历史。删除只发生在用户明确要求时。
+- **State semantics**: main entry `- [ ]` = not started or in progress; main entry `- [x]` = done (all change sub-items have been archived). Sub-item `- [ ]` = that change is active; sub-item `- [x]` = that change has been archived.
+- **Check-off timing**: only `td-archive` operates after a change is successfully archived — it checks off the corresponding sub-item `[x]`; if **all sub-items** under a main entry are checked off → the main entry is checked off `[x]`; if any sub-item remains unchecked → the main entry stays `- [ ]`. No other skill may check off entries or sub-items.
+- **Traceability archive (sub-items retained permanently)**: change sub-items are **not removed** after archival — they serve as the traceability record of "which changes ultimately completed this backlog entry"; the change side does not write a reverse source (keeping it one-directional), so traceability relies on sub-items + git log.
+- **Git strategy**: todo.md is a shared source of truth and **must be committed** (not ignored). It is a single file; multi-person collaboration coordinates at **entry granularity** — only one person proposes / checks off the same entry at a time; different entries do not conflict.
+- **File does not exist**: treat as empty pool, do not proactively create. Only create when the user explicitly wants to record a backlog (`td-propose` does not create when picking candidates; `td-explore` / `td-system-audit` create when writing to the pool and the user agrees).
+- **Sectioning**: `## Todo` / `## In Progress` / `## Done` are advisory organization, non-mandatory — when the file is not sectioned, process by the `- [ ]` / `- [x]` state semantics of main entries / sub-items.
+- **Do not delete entries**: completed entries (including sub-items) are retained in the "Done" section as backlog history. Deletion only happens when the user explicitly requests it.

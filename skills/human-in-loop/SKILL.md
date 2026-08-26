@@ -1,70 +1,70 @@
 ---
 name: human-in-loop
-description: 何时必须停下来等用户拍板。服务系统工程主基调第 2 条"总体设计部"和第 3 条"综合集成"。
+description: When the agent must stop and wait for the user to decide. Serves systems-engineering keynote principle 2 (General Design Department) and principle 3 (Meta-Synthesis).
 user-invocable: false
 ---
 
-# 人在回路
+# Human in the Loop
 
-## 依赖技能
+## Dependent Skills
 
 - `delay-decision`
 - `wip-limit`
 - `brooks-law`
 - `field-assessment`
 
-## 服务的主基调原则
+## Served Keynote Principle(s)
 
-**系统工程主基调第 2 条：总体设计部。** 巨系统里有些判断必须留给总体设计部，不能由分系统工程师（agent）自己决定。
+**Systems-engineering keynote principle 2: General Design Department.** In a giant system, some judgments must be left to the general design department and cannot be decided by the subsystem engineers (the agent) themselves.
 
-**系统工程主基调第 3 条：综合集成。** 定性判断 + 数据 + 模型 → 反复迭代。人是定性判断的来源，机器是数据和模型的处理者，二者必须结合。
+**Systems-engineering keynote principle 3: Meta-Synthesis.** Qualitative judgment + data + models → iterative refinement. Humans are the source of qualitative judgment; machines are the processors of data and models; the two must be combined.
 
-## 规则
+## Rules
 
-### 必须停下来等用户拍板的场景
+### Scenarios That Must Stop and Wait for the User to Decide
 
-1. **公共契约变更**：API 形状、数据库 schema、配置文件格式、对外承诺的行为
-2. **不可逆决策**（见 `delay-decision` skill）
-3. **生产环境影响**：部署、迁移、权限变更、数据修改
-4. **超出当前 change scope 的影响**：改动会波及 change 之外的代码或系统
-5. **agent 自己的置信度低**：agent 不确定方案是否对齐用户意图时
-6. **WIP 硬约束 override**：由 `wip-limit` 的 override 流程触发（见 `wip-limit` 的「硬约束 + override 机制」节第 4 步）。本 skill 在 override 回路里负责"描述风险 + 列选项 + 等用户确认"，回路编排由 `wip-limit` 单一持有。
-7. **被 `/td-system-audit` 触发修复时**：audit 发现"局部最优但全局失调"或"agent 自己拍板了本应问用户的事"问题时，触发本 skill 让用户（总体设计部）判断这是真全局失调还是可接受的局部优化（对应 `td-system-audit` 步骤 6 的问题→修复映射表）。
+1. **Public contract changes:** API shape, database schema, configuration file format, externally committed behavior
+2. **Irreversible decisions** (see the `delay-decision` skill)
+3. **Production-environment impact:** deployment, migration, permission changes, data modification
+4. **Impact beyond the current change scope:** the change affects code or systems outside the change
+5. **The agent's own confidence is low:** the agent is unsure whether the approach aligns with the user's intent
+6. **WIP hard-constraint override:** triggered by `wip-limit`'s override flow (see `wip-limit`'s "Hard Constraint + Override Mechanism" section, step 4). Within the override loop, this skill is responsible for "describe risk + list options + wait for user confirmation"; the loop orchestration is held solely by `wip-limit`.
+7. **When triggered for remediation by `/td-system-audit`:** when audit finds the "locally optimal but globally imbalanced" or "the agent decided something it should have asked the user about" problem, trigger this skill to let the user (the general design department) judge whether this is a real global imbalance or an acceptable local optimization (corresponding to `td-system-audit` step 6's problem→fix mapping table).
 
-### 强度叠加规则
+### Intensity Stacking Rules
 
-以上第 1–5 类是**通用基线**，所有 profile × tier 下都生效——这是"必须停"的下限。
+Categories 1–5 above are the **universal baseline**, in effect across all profile × tier combinations — this is the lower bound of "must stop."
 
-`field-assessment` 表 1 第 5 行定义各 tier 的 human-in-loop **额外触发条件**（如 tier-large 的"+ 总体设计文档审阅"；tier-small / tier-medium 无额外条件）。表 2 定义各 profile 的**场景加成**（如 brownfield 的"+ 改老代码前"、maintenance 的"+ 生产环境改动前"）。
+`field-assessment` Table 1, row 5, defines each tier's human-in-loop **extra trigger conditions** (e.g., tier-large's "+ general design document review"; tier-small / tier-medium have no extra conditions). Table 2 defines each profile's **scenario bonuses** (e.g., brownfield's "+ before modifying old code"; maintenance's "+ before production-environment changes").
 
-最终生效强度 = 第 1–5 类通用基线 **+** 表 1 tier 加成 **+** 表 2 profile 加成，三者叠加都生效，不替换。表 2 的 profile 加成与基线场景重叠时（如 brownfield"改老代码前"与基线第 4 类超 scope 场景、maintenance"生产环境改动前"与基线第 3 类），叠加只是强调，不矛盾。
+Final effective intensity = categories 1–5 universal baseline **+** Table 1 tier bonus **+** Table 2 profile bonus; all three stack and are all in effect, not replacing each other. When Table 2's profile bonus overlaps with a baseline scenario (e.g., brownfield's "before modifying old code" and baseline category 4's beyond-scope scenario, or maintenance's "before production-environment changes" and baseline category 3), the stacking is just emphasis and is not contradictory.
 
-**第 6、7 类的叠加语义**：第 6 类（WIP override）和第 7 类（audit 触发修复）是**特定流程的触发通道**，**不参与 profile × tier 叠加**——它们分别由 `wip-limit` override 流程和 `/td-system-audit` 触发，与 profile/tier 强度无关。但 override 流程里触发的 `brooks-law` / `critical-buffer` 评估，仍按当前 tier 强度执行。
+**Stacking semantics for categories 6 and 7:** category 6 (WIP override) and category 7 (audit-triggered remediation) are **trigger channels for specific flows** and **do not participate in profile × tier stacking** — they are triggered by the `wip-limit` override flow and `/td-system-audit` respectively, independent of profile/tier intensity. But the `brooks-law` / `critical-buffer` assessments triggered within the override flow still execute at the current tier's intensity.
 
-### 不需要停下来的场景
+### Scenarios That Do Not Need to Stop
 
-1. 可逆决策的"先用最简单方案往前走"
-2. 在已闭合的设计框架内的实施细节
-3. verification 步骤（除非失败且 agent 不知如何修复）
+1. The "first move forward with the simplest approach" of a reversible decision
+2. Implementation details within an already-closed design framework
+3. verification steps (unless they fail and the agent does not know how to fix them)
 
-## 触发机制
+## Trigger Mechanism
 
-本 skill 不靠 hook 强制，靠 agent 自觉识别上述场景。当 agent 识别到上述第 1–5 类场景时，**必须暂停**，停下来询问用户，**不得自行推进**。
+This skill does not rely on hooks to force compliance; it relies on the agent's own awareness to recognize the scenarios above. When the agent recognizes any of the category 1–5 scenarios above, it **must pause**, stop and ask the user, and **must not advance on its own**.
 
-## 触发时 agent 应做的事
+## What the Agent Should Do When Triggered
 
-1. 描述当前状态："我正在做 X，遇到了 Y 决策点"
-2. 列出选项 + 每个选项的影响
-3. 给出 agent 的推荐 + 推荐理由
-4. 明确等待："请决定，我等你回复再继续"
+1. Describe the current state: "I am doing X, and I have reached decision point Y"
+2. List the options + the impact of each
+3. Give the agent's recommendation + the reasoning for the recommendation
+4. Wait explicitly: "Please decide; I will wait for your reply before continuing"
 
-## 不做的事
+## What Not to Do
 
-- 不对所有动作都"问一下"——那是骚扰，不是人在回路
-- 不在用户明确授权"自己往前走"后还反复停下来——用户授权过的范围，agent 自主推进
+- Do not "ask about" every single action — that is harassment, not human-in-the-loop
+- Do not repeatedly stop after the user has explicitly authorized "go ahead on your own" — within the scope the user has authorized, the agent advances autonomously
 
-## 与其他 skill 的关系
+## Relationship with Other Skills
 
-- 与 `delay-decision` 配合：可逆决策延迟，但延迟期内触及不可逆点时，本 skill 触发
-- 与 `brooks-law` 配合：用户考虑"加人手"时，brooks-law 提醒，本 skill 要求用户显式确认
-- 与 `wip-limit` 配合：用户想并行硬解超过 wip-limit 上限的 change 时，wip-limit 硬阻塞，本 skill 在 override 流程里要求用户显式确认风险（第 6 类）。
+- Works with `delay-decision`: reversible decisions are delayed, but when an irreversible point is touched during the delay period, this skill triggers
+- Works with `brooks-law`: when the user considers "adding people," `brooks-law` reminds, and this skill requires the user to explicitly confirm
+- Works with `wip-limit`: when the user wants to force-solve more changes in parallel than the wip-limit upper limit, `wip-limit` hard-blocks, and this skill requires the user to explicitly confirm the risk within the override flow (category 6)

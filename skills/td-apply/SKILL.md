@@ -1,131 +1,131 @@
 ---
 name: td-apply
-description: 实施任务，按 artifact 走。OpenSpec 契约层入口。触发场景：用户说"apply"、"实施"、"开始写代码"、"按 change 干"、"执行 tasks"、"开始执行"、"go"。执行入口统一走本 skill，行为层 executing-plans 由本流程内部调用。
+description: Implement tasks, following artifacts. OpenSpec contract-layer entry. Trigger scenarios: user says "apply", "implement", "start writing code", "work the change", "execute tasks", "start executing", "go". The execution entry point routes through this skill; the behavior layer `executing-plans` is called internally by this flow.
 user-invocable: true
 argument-hint: <change-name>
 ---
 
 # td-apply
 
-按 change 的 tasks.md 实施。这是从"契约"走向"代码"的桥。
+Implement following the change's `tasks.md`. This is the bridge from "contract" to "code".
 
-## 依赖技能
+## Dependencies
 
 - `system-engineering`
 - `field-assessment`
 
-## 服务的主基调原则
+## Served Keynote Principle(s)
 
-**系统工程主基调第 1 条：系统工程。**
+**Systems-engineering keynote principle 1: systems engineering.**
 
-apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。每个任务对系统整体的影响，必须由 agent 持续持有。
+apply is not "checking off the task list"; it is "advancing implementation from a systems-global standpoint." The impact of each task on the system as a whole must be continuously held by the agent.
 
-**核心论点归位——"总体性能不等于各部分性能之和"**：步骤 7.2 的"系统级验证（跨分系统边界，硬步骤）"是核心论点最直接的体现（论点与工程化解释的完整展开见 `verification-before-completion` 的「核心论点归位」节，此处不重复）。本步骤只定义触发条件与 tier 分层强度，执行语义在 `verification-before-completion` 第 6 节。
+**Core thesis aligned — "overall performance does not equal the sum of the parts' performance"**: Step 7.2's "system-level verification (cross-subsystem boundary, hard step)" is the most direct embodiment of the core thesis (the full elaboration of the thesis and its engineering interpretation is in the "Core thesis aligned" section of `verification-before-completion` and is not repeated here). This step only defines the trigger conditions and tier-layered strength; the execution semantics are in section 6 of `verification-before-completion`.
 
-**系统工程主基调第 2 条：总体设计部。**
+**Systems-engineering keynote principle 2: general design department.**
 
-apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-loop` 让用户（总体设计部）拍。
+Key decisions encountered during apply are not decided by the agent alone — trigger `human-in-loop` to let the user (the general design department) decide.
 
-**《工程控制论》反馈控制回路归位**：apply 是控制执行 + 实时误差检测环节（TDD 契约级、verification 系统级）。
+**《Engineering Cybernetics》 feedback control loop aligned**: apply is the control-execution + real-time error detection link (TDD at the contract level, verification at the system level).
 
-## 输入 - change 名。空则推导或问用户"想 apply 哪个 change"
+## Input - change name. If empty, infer or ask the user "which change do you want to apply?"
 
 `$ARGUMENTS`
 
-## 步骤
+## Steps
 
-### 1. 激活主基调与配置层
+### Step 1. Activate keynote and configuration layer
 
-激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
+Activate keynote and configuration layer. Inject strength values only, without making judgments — execute the following three-step sequence:
 
-1. **`system-engineering`** — 主基调四条进入上下文。apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。
-2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 7.3）。
-3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断是否触发 / tasks 是否合规。
+1. **`system-engineering`** — The four keynote principles enter context. apply is not "checking off the task list"; it is "advancing implementation from a systems-global standpoint."
+2. **profile × tier identification** — Call `field-assessment`, read `$_TD_PROFILE` / `$_TD_TIER`, and load Table 1 + Table 2 + Table 3. Cache within the session; subsequent steps reference directly. During apply, **do not proactively trigger project-scope system-audit**, but trigger current-change audit at the frequency specified by Table 3's current-change scope (see Step 7.3).
+3. **Other constraints** — Only read the strength values into context; do not judge whether to trigger in this step — subsequent steps judge whether to trigger / whether tasks comply based on these.
 
-### 2. 前置检查
+### Step 2. Pre-checks
 
-对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
+Against the strengths injected in Step 1 and the current change's status, judge whether to trigger:
 
-- **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 7.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"——与 `td-archive` 步骤 3 的旧 change 兜底对称（propose 6.c 对新 change 仍强制必填，本处只放行存量旧 change，不削弱 propose 侧约束）。
-- **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `tier-large` 的「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检。
-- **`wip-limit`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。**阻塞本步骤，不执行步骤 3**，执行 `wip-limit` 的「硬约束 + override 机制」节（权威描述在该 skill；override 通过后继续步骤 3）。propose 与 apply 两处都必须执行硬阻塞 + override 机制。
-- **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按当前 tier 比例，查表 1 的 critical-buffer 行；表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
-- 其余 constraint（brooks-law / delay-decision / human-in-loop）在实施过程中按需触发，不在本步预判。
+- **change completeness**: Are all artifacts present? Does the proposal have a "systems-engineering impact assessment" section? If not → not apply-ready; stop and ask the user. When the "expected behavior model" field is missing, **do not block**; downgrade with a prompt: "proposal is missing the 'expected behavior model' field (legacy change compatibility); during apply, actual behavior verification per Step 7.2 prevails; new changes should go back to `/td-propose` Step 6.c to fill it in." — This is symmetric with `td-archive` Step 3's legacy change fallback (propose 6.c remains mandatory for new changes; this only permits existing legacy changes and does not weaken the propose-side constraint).
+- **tier-large overall design document required**: If `$_TD_TIER == tier-large`, check whether the proposal attaches an "overall design document" (see the "Overall design document required" section for `tier-large`). If this document is missing → **block apply**, prompt the user to go back to `/td-propose` to add the document. This check and the one in `td-propose` Step 6.c are validated in two separate places to avoid missed detection.
+- **`wip-limit` (hard block + override, backstop)**: Has the number of currently active changes reached the limit? (Applying one at the limit means the propose-stage WIP hard block was penetrated by override, or the propose stage missed the block.) **Block this step; do not execute Step 3**; execute the "hard constraint + override mechanism" section of `wip-limit` (authoritative description is in that skill; after override passes, continue to Step 3). Both propose and apply must execute the hard block + override mechanism.
+- **`critical-buffer`**: Does `tasks.md` annotate the critical chain? Is a project buffer reserved (at the ratio for the current tier, per Table 1's critical-buffer row; Table 1 is in `field-assessment/references/strength-matrix.md`)? If not → trigger `writing-plans` to fill it in (critical chain annotation should be completed in the propose stage; here we only patch the gap).
+- Other constraints (brooks-law / delay-decision / human-in-loop) are triggered as needed during implementation; they are not pre-judged in this step.
 
-### 3. 读 change 的 artifact
+### Step 3. Read the change's artifacts
 
-按依赖顺序读：
+Read in dependency order:
 
-1. `proposal.md`（what & why）
-2. `design.md`（how）
-3. `specs/` 下的 spec 文件
-4. `tasks.md`（实施步骤）
+1. `proposal.md` (what & why)
+2. `design.md` (how)
+3. spec files under `specs/`
+4. `tasks.md` (implementation steps)
 
-### 4. 架构 review 复核 + 触发行为层
+### Step 4. Architecture review re-check + trigger behavior layer
 
-**进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 7 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，直接进入任务实施**；**有改动 → 重新触发 `requesting-code-review` 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合，检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
+**Before entering task implementation, re-check the architecture review conclusion**: `td-propose` Step 7 has already completed the architecture review and only releases apply if there are no criticals — this step only re-checks: were proposal / design modified after propose? **Unmodified → reuse the Step 7 conclusion, proceed directly to task implementation**; **modified → re-trigger the architecture review of `requesting-code-review`** (check the subsystem decomposition and design decisions against the proposal's "systems-engineering impact assessment" section and `design.md` for high cohesion / low coupling; the checklist is in that skill's `references/architecture-review-checklist.md`). **Unresolved architecture-level criticals → block apply**, prompt the user to go back to `/td-propose` Step 6 to fix the proposal, then re-review.
 
-架构 review 通过后，按 `tasks.md` 的任务序列实施。行为层触发序列：
+After the architecture review passes, implement following the task sequence in `tasks.md`. Behavior-layer trigger sequence:
 
-1. **`writing-plans`**（若 tasks.md 粒度不够细）：细化任务序列
-2. **`executing-plans`**（按任务序列执行，内部按任务粒度嵌套触发以下 skill）：
-   - **`test-driven-development`**：每个任务先写失败测试，再写实现
-   - **`requesting-code-review`**：checkpoint 时做 review
-   - **`verification-before-completion`**：每个任务完成前必须跑验证命令
+1. **`writing-plans`** (if `tasks.md` granularity is not fine enough): refine the task sequence
+2. **`executing-plans`** (execute following the task sequence; internally trigger the following skills at task granularity):
+   - **`test-driven-development`**: write a failing test for each task, then write the implementation
+   - **`requesting-code-review`**: do review at checkpoints
+   - **`verification-before-completion`**: must run verification commands before each task is considered complete
 
-`executing-plans` 是行为层执行的核心入口，TDD / review / verify 在 `executing-plans` 内部按任务粒度嵌套触发。executing-plans 内部触发的 human-in-loop / systematic-debugging 是**任务粒度**的（如 checkpoint 必停、RED 失败），与本步骤 5 的 apply 全局粒度触发不重复。
+`executing-plans` is the core entry point for behavior-layer execution; TDD / review / verify are triggered at task granularity inside `executing-plans`. The human-in-loop / systematic-debugging triggered inside executing-plans are **task-granularity** (e.g., checkpoint mandatory stop, RED failure) and do not duplicate the apply-global-granularity triggers in this Step 5.
 
-### 5. 触发 apply 全局粒度的工程管理约束
+### Step 5. Trigger apply-global-granularity engineering-management constraints
 
-步骤 4 的 executing-plans 内部已触发任务粒度的 human-in-loop / systematic-debugging（如 checkpoint 必停、RED 失败）。本步骤触发的是 **apply 全局粒度**的约束，不与任务粒度重复：
+Step 4's executing-plans has already triggered task-granularity human-in-loop / systematic-debugging (e.g., checkpoint mandatory stop, RED failure). This step triggers constraints at the **apply-global granularity**, not duplicating task granularity:
 
-- `brooks-law`：用户在 apply 期间想加人手 / 并行 subagent 加速时
-- `delay-decision`：apply 期间遇到顶层架构层次的可逆决策时（与任务粒度的"实现细节可逆决策"不重叠）
-- `human-in-loop`：apply 期间遇到"超出当前 change scope 的影响"等 apply 全局必停场景时（任务粒度的 checkpoint 必停由 executing-plans 负责）。步骤 7.2 边界验证失败时的"root cause 在 plan 之外 → 停下来问用户"也走本类 apply 全局必停通道。
+- `brooks-law`: when the user wants to add people / parallel subagents to speed up during apply
+- `delay-decision`: when encountering reversible decisions at the top-level architecture layer during apply (does not overlap with task-granularity "implementation-detail reversible decisions")
+- `human-in-loop`: when encountering apply-global mandatory-stop scenarios during apply such as "impact beyond the current change scope" (task-granularity checkpoint mandatory stops are the responsibility of executing-plans). The "root cause is outside the plan → stop and ask the user" from Step 7.2 boundary verification failure also goes through this apply-global mandatory-stop channel.
 
-### 6. 更新 tasks.md
+### Step 6. Update tasks.md
 
-每完成一个任务：
+For each completed task:
 
-- 把 `- [ ]` 改成 `- [x]`
-- 在任务后面加验证证据链接（测试输出、命令结果）
+- change `- [ ]` to `- [x]`
+- append a verification evidence link after the task (test output, command result)
 
-### 7. 完成判定
+### Step 7. Completion determination
 
-所有任务 `[x]` 后，做**两层最终验证**，两层都通过才算 done：
+After all tasks are `[x]`, perform **two-layer final verification**; both layers must pass to count as done:
 
-#### 7.1 change-level 验证
+#### 7.1 change-level verification
 
-触发 `verification-before-completion` 做 change-level 最终验证（全量测试 / lint / build / type check）。
+Trigger `verification-before-completion` to perform change-level final verification (full test / lint / build / type check).
 
-#### 7.2 系统级验证（跨分系统边界，硬步骤）
+#### 7.2 system-level verification (cross-subsystem boundary, hard step)
 
-**执行序列**：读 proposal 的"系统工程影响评估"节列出受影响分系统 → 按 tier 强度逐条跑跨分系统边界验证 → 发现问题触发 `systematic-debugging` 找根因 → root cause 在 plan 之外则停下来问用户。
+**Execution sequence**: read the proposal's "systems-engineering impact assessment" section to list affected subsystems → run cross-subsystem boundary verification per tier strength → if problems found, trigger `systematic-debugging` to find the root cause → if root cause is outside the plan, stop and ask the user.
 
-change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估"节列出的**受影响分系统**，逐条跑**跨分系统边界验证**——验证各分系统整合后的整体行为符合契约，而不只是每个任务局部绿。
+After change-level verification passes, check against the **affected subsystems** listed in the "systems-engineering impact assessment" section of `proposal.md`, and run **cross-subsystem boundary verification** for each — verifying that the integrated overall behavior of each subsystem conforms to the contract, not just that each task is locally green.
 
-"总体性能不等于各部分性能之和"（主基调第 1 条）——所有任务测试全绿不等于分系统整合正确。**执行语义由 `verification-before-completion` 第 6 节承载**（接口/契约测试、数据流传递、边界 mock 的具体做法在那里），本步骤只定义触发条件与 tier 分层强度（按步骤 1 注入的当前 tier）：
+"Overall performance does not equal the sum of the parts' performance" (keynote principle 1) — all tasks testing green does not mean the subsystem integration is correct. **The execution semantics are carried by section 6 of `verification-before-completion`** (the specific methods for interface/contract testing, data-flow transmission, and boundary mocks are there); this step only defines the trigger conditions and tier-layered strength (per the current tier injected in Step 1):
 
-- `tier-small`：对受影响分系统边界跑冒烟级集成验证
-- `tier-medium`：跑受影响边界的集成/契约测试
-- `tier-large`：强制完整集成测试 + 契约测试，逐条对照"影响哪些分系统"清单
+- `tier-small`: run smoke-level integration verification on affected subsystem boundaries
+- `tier-medium`: run integration/contract tests on affected boundaries
+- `tier-large`: mandatory complete integration tests + contract tests, checking item-by-item against the "which subsystems are affected" list
 
-边界验证发现跨分系统问题 → 触发 `systematic-debugging` 找根因；若 root cause 在 plan 之外（proposal 的影响评估漏了分系统）→ 停下来问用户：是补 proposal 的评估还是改代码？
+Boundary verification discovers a cross-subsystem problem → trigger `systematic-debugging` to find the root cause; if root cause is outside the plan (the proposal's impact assessment missed a subsystem) → stop and ask the user: should we supplement the proposal's assessment or change the code?
 
-**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，本步骤的跨分系统边界验证应**按子系统层次分别验证**——每个子系统按自己的 tier 强度验证，跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则）。子系统独立定 tier 的执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
+**Layered-view aligned**: When the `field-assessment` identification flow allows subsystem independent tiering, the cross-subsystem boundary verification in this step should **verify per subsystem layer** — each subsystem verifies at its own tier strength, and cross-subsystem dependency chains are handled at the strength of the "highest-tier subsystem" (conservative principle). The execution rules for subsystem independent tiering are in `field-assessment`'s `references/subsystem-tiering.md`.
 
-#### 7.3 current-change audit（按表 3 频率）
+#### 7.3 current-change audit (at Table 3 frequency)
 
-两层验证通过后，对照表 3 的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`（表 3 见 `field-assessment/references/audit-frequency.md`）：
+After both verification layers pass, check against Table 3's **current-change scope** frequency to decide whether to trigger `td-system-audit current-change` (Table 3 is in `field-assessment/references/audit-frequency.md`):
 
-- `tier-small`：不要求
-- `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 3），此处不再重复
-- `tier-large`：每完成 1 个 change 触发——本步骤即触发点
+- `tier-small`: not required
+- `tier-medium`: trigger at each critical-chain task completion — this granularity is the responsibility of `executing-plans`'s checkpoint (see that skill's Step 3); not repeated here
+- `tier-large`: trigger once per completed change — this step is that trigger point
 
-触发即调用 `/td-system-audit current-change`，把本次 change 的"实际 vs 预期"对照主基调过一遍。audit 报告落盘 `openspec/.td-state/audits/`，更新 `audit-history.yaml`。
+When triggered, call `/td-system-audit current-change`, running the "actual vs. expected" of this change against the keynote. The audit report is written to `openspec/.td-state/audits/`, and `audit-history.yaml` is updated.
 
 ## Guardrails
 
-- 不跳过任务，按 tasks.md 顺序
-- 每个任务必须有验证证据，"我觉得改对了"不算
-- 遇到 proposal 与实际代码冲突时，停下来问用户：是改 proposal 还是改代码？
+- Do not skip tasks; follow `tasks.md` order
+- Every task must have verification evidence; "I think I got it right" does not count
+- When proposal conflicts with actual code, stop and ask the user: fix the proposal or fix the code?

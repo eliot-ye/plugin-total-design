@@ -1,32 +1,32 @@
 ---
 name: tier-small
-description: 小型系统复杂度 tier。3-10 文件，单团队。constraints 弱强制，system-audit 频率低。
+description: Small system complexity tier. 3-10 files, single team. constraints are soft-enforced, system-audit frequency is low.
 user-invocable: false
 ---
 
-# Tier: Small（小型系统）
+# Tier: Small (small system)
 
-## 判断依据
+## Assessment Basis
 
-判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
+See the "### 3. Assess tier" section of the `field-assessment` identification flow for criteria (take the highest when any holds).
 
-- 系统层次：扁平，无明显分系统边界
+- System hierarchy: flat, no obvious subsystem boundaries
 
-## system-audit 频率
+## system-audit frequency
 
-见表 3 的 tier-small 行（project scope 每完成 5 个 change，current-change 不要求；表 3 见 `field-assessment/references/audit-frequency.md`）。
+See Table 3's tier-small row (project scope: every 5 changes completed; current-change not required; Table 3 is in `field-assessment/references/audit-frequency.md`).
 
-## 特殊规则
+## Special Rules
 
-### 1. 不强求重流程
+### 1. No heavy process required
 
-小系统容易 over-engineering。profile × constraint 已经给小系统松绑，不要"因为流程模板这么说"就强行走全套 SDD。
+Small systems are prone to over-engineering. profile × constraint already provides relaxation for small systems; don't run the full SDD "just because the process template says so."
 
-### 2. 简单优先
+### 2. Simplicity first
 
-任何"是不是该引入 X 工具"的决策，默认回答是"不引入"。小系统的美德是简单。
+For any "should we introduce tool X?" decision, the default answer is "don't introduce it." The virtue of a small system is simplicity.
 
-## 与其他 tier 的切换
+## Switching to Other tiers
 
-- 文件数增长到 10+ → 切 `tier-medium`
-- 系统开始有明显分系统 → 即使文件少，也考虑 `tier-medium`
+- File count grows to 10+ → switch to `tier-medium`
+- System starts to show obvious subsystems → consider `tier-medium` even if the file count is small

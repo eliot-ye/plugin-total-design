@@ -1,10 +1,10 @@
 ---
 name: td-archive
-description: 完成后归档。OpenSpec 契约层入口。
+description: Archive completed changes. Entry point for the OpenSpec contract layer.
 argument-hint: <change-name>
 args: optional
 ---
 
 # td-archive
 
-**立刻调用 `td-archive` skill，参数 `$ARGUMENTS`。**
+**Immediately invoke `td-archive` skill, arguments `$ARGUMENTS`.**
