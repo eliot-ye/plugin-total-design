@@ -9,7 +9,7 @@ argument-hint: <existing-codebase-path or empty for cwd>
 
 When taking over an existing codebase mid-flight, directly `/td-propose` changes is dangerous — you don't know what the existing code looks like at the spec layer. reverse-spec first reverse-engineers the spec from the code, establishes a baseline, then proposes changes on top of that baseline.
 
-## Dependencies
+## Dependent Skills
 
 - `system-engineering`
 - `field-assessment`

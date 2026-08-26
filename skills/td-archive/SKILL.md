@@ -9,7 +9,7 @@ argument-hint: <change-name>
 
 Archive the change after completion. Archiving is not deletion; it is the precipitation of "completed learnings."
 
-## Dependencies
+## Dependent Skills
 
 - `system-engineering`
 - `field-assessment`

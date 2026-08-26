@@ -6,7 +6,7 @@ user-invocable: true
 
 # Executing Plans
 
-## Dependency Skills
+## Dependent Skills
 
 - `field-assessment`
 - `human-in-loop`

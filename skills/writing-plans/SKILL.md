@@ -6,7 +6,7 @@ user-invocable: true
 
 # Writing Plans
 
-## Dependency Skills
+## Dependent Skills
 
 - `critical-buffer`
 - `delay-decision`

@@ -6,7 +6,7 @@ user-invocable: true
 
 # Test-Driven Development
 
-## Dependency Skills
+## Dependent Skills
 
 - `human-in-loop`
 - `system-engineering`

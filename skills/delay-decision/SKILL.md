@@ -40,7 +40,7 @@ This hierarchy correlates strongly with tier:
 
 - **tier-small:** the system is flat; the three levels collapse into one; the reversible/irreversible dichotomy is sufficient.
 - **tier-medium:** the system has clear module/subsystem boundaries; top-level architecture decisions and module design decisions need to be treated by level.
-- **tier-large:** the system is multi-level nested; top-level architecture decisions should be captured by a "general design document" (see `tier-large`'s "General Design Document Required" section), rather than being handled by delay-decision alone.
+- **tier-large:** the system is multi-level nested; top-level architecture decisions should be captured by a "general design document" (see `tier-large`'s "General design document is mandatory" section), rather than being handled by delay-decision alone.
 
 **Execution rule:** when `$_TD_TIER == tier-large` and the current decision belongs to the top-level architecture level, this skill should prompt the user: "Top-level architecture decisions should go into the general design document required by `tier-large`, rather than being handled by delay-decision alone."
 

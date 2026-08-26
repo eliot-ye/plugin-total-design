@@ -13,7 +13,6 @@ argument-hint: <topic or question>
 
 - `system-engineering`
 - `field-assessment`
-- `brainstorming`
 
 ## 服务的主基调原则
 

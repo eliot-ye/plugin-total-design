@@ -6,7 +6,7 @@ user-invocable: true
 
 # Brainstorming — General Design Department Working Style
 
-## Dependency Skills
+## Dependent Skills
 
 - `system-engineering`
 - `delay-decision`

@@ -6,7 +6,7 @@ user-invocable: true
 
 # Systematic Debugging
 
-## Dependency Skills
+## Dependent Skills
 
 - `human-in-loop`
 

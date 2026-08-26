@@ -9,7 +9,7 @@ argument-hint: <change-name or description>
 
 The OpenSpec contract-layer entry point. Before writing code, establishes a contract between human and AI about "what to build and why build it this way".
 
-## Dependencies
+## Dependent Skills
 
 - `system-engineering`
 - `field-assessment`
@@ -141,7 +141,7 @@ If `$_TD_TIER == tier-large`, the proposal must include a "general design docume
 3. Relationship to the most recently archived change
 4. Whether cross-subsystem coordination is triggered
 
-(The single source of truth for field definitions is in the "tier-large general design document required" section of `tier-large`)
+(The single source of truth for field definitions is in the "General design document is mandatory" section of `tier-large`)
 
 Without this document, the proposal is not apply-ready. This check is symmetric with `td-apply` step 2's precondition check — tier-large's general design document requirement is validated at both propose and apply, preventing missed checks.
 

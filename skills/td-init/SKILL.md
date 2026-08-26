@@ -10,7 +10,7 @@ argument-hint: (no arguments)
 
 The one-time entry point for initializing the total-design workflow. Ensures two things are ready: the **OpenSpec contract-layer structure** (specs / changes) and the **multi-person collaboration git boundary** (`.td-state/` does not enter version control).
 
-## Dependencies
+## Dependent Skills
 
 - `system-engineering`
 - `field-assessment`

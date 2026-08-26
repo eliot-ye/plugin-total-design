@@ -9,7 +9,7 @@ argument-hint: "<scope: current-change | project>  (optional, default current-ch
 
 The engineering instantiation of Qian Xuesen's "general design department" perspective. Periodically runs the agent's current work against the four systems-engineering keynote principles, identifying risks of "local optimization creating global imbalance."
 
-## Dependencies
+## Dependent Skills
 
 - `system-engineering`
 - `field-assessment`
@@ -96,7 +96,7 @@ For each severe issue, trigger the corresponding constraint skill for remediatio
 | Too many changes open simultaneously (WIP exceeded) | `wip-limit`'s "hard constraint + override mechanism" (block the next `/td-propose` or `/td-apply` until the user archives one or explicitly overrides) |
 | Local optimum but global imbalance | `human-in-loop` (let the general design department judge). This workflow has no dedicated "global imbalance" constraint skill — this judgment must be made by the general design department, not by the agent itself (keynote principle 2) |
 
-Note: This table is a problem→remediation mapping; each constraint skill's "Trigger timing" section already reverse-declares "when triggered for remediation by `/td-system-audit`."
+Note: This table is a problem→remediation mapping; each constraint skill already reverse-declares "when triggered for remediation by `/td-system-audit`" in its body (for `human-in-loop`, see its scenario 7).
 
 ### 7. Re-run audit after fix to close the loop
 

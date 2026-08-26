@@ -6,7 +6,7 @@ user-invocable: true
 
 # Verification Before Completion
 
-## Dependency Skills
+## Dependent Skills
 
 - `human-in-loop`
 - `systematic-debugging`

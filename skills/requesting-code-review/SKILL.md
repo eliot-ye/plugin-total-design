@@ -6,7 +6,7 @@ user-invocable: true
 
 # Requesting Code Review
 
-## Dependency Skills
+## Dependent Skills
 
 - `human-in-loop`
 

@@ -9,11 +9,10 @@ argument-hint: <topic or question>
 
 Does not create a change, does not write artifacts — just **explores**. When the user is not yet sure what to build, the agent helps them think it through.
 
-## Dependencies
+## Dependent Skills
 
 - `system-engineering`
 - `field-assessment`
-- `brainstorming`
 
 ## Served Keynote Principle(s)
 

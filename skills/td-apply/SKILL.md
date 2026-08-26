@@ -9,7 +9,7 @@ argument-hint: <change-name>
 
 Implement following the change's `tasks.md`. This is the bridge from "contract" to "code".
 
-## Dependencies
+## Dependent Skills
 
 - `system-engineering`
 - `field-assessment`
@@ -47,7 +47,7 @@ Activate keynote and configuration layer. Inject strength values only, without m
 Against the strengths injected in Step 1 and the current change's status, judge whether to trigger:
 
 - **change completeness**: Are all artifacts present? Does the proposal have a "systems-engineering impact assessment" section? If not → not apply-ready; stop and ask the user. When the "expected behavior model" field is missing, **do not block**; downgrade with a prompt: "proposal is missing the 'expected behavior model' field (legacy change compatibility); during apply, actual behavior verification per Step 7.2 prevails; new changes should go back to `/td-propose` Step 6.c to fill it in." — This is symmetric with `td-archive` Step 3's legacy change fallback (propose 6.c remains mandatory for new changes; this only permits existing legacy changes and does not weaken the propose-side constraint).
-- **tier-large overall design document required**: If `$_TD_TIER == tier-large`, check whether the proposal attaches an "overall design document" (see the "Overall design document required" section for `tier-large`). If this document is missing → **block apply**, prompt the user to go back to `/td-propose` to add the document. This check and the one in `td-propose` Step 6.c are validated in two separate places to avoid missed detection.
+- **tier-large general design document required**: If `$_TD_TIER == tier-large`, check whether the proposal attaches a "general design document" (see the "General design document is mandatory" section for `tier-large`). If this document is missing → **block apply**, prompt the user to go back to `/td-propose` to add the document. This check and the one in `td-propose` Step 6.c are validated in two separate places to avoid missed detection.
 - **`wip-limit` (hard block + override, backstop)**: Has the number of currently active changes reached the limit? (Applying one at the limit means the propose-stage WIP hard block was penetrated by override, or the propose stage missed the block.) **Block this step; do not execute Step 3**; execute the "hard constraint + override mechanism" section of `wip-limit` (authoritative description is in that skill; after override passes, continue to Step 3). Both propose and apply must execute the hard block + override mechanism.
 - **`critical-buffer`**: Does `tasks.md` annotate the critical chain? Is a project buffer reserved (at the ratio for the current tier, per Table 1's critical-buffer row; Table 1 is in `field-assessment/references/strength-matrix.md`)? If not → trigger `writing-plans` to fill it in (critical chain annotation should be completed in the propose stage; here we only patch the gap).
 - Other constraints (brooks-law / delay-decision / human-in-loop) are triggered as needed during implementation; they are not pre-judged in this step.

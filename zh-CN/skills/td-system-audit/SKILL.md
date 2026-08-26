@@ -2,7 +2,7 @@
 name: td-system-audit
 description: 周期性对照系统工程主基调自检，体现钱学森"总体设计部"视角。触发场景：用户说"audit"、"自检"、"复盘"、"对照主基调"、"最近推进不顺"。
 user-invocable: true
-argument-hint: "<scope: current-change | project>  (可选, 默认 current-change)"
+argument-hint: "<scope: current-change | project>  (optional, default current-change)"
 ---
 
 # td-system-audit
@@ -96,7 +96,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 | 同时开太多 change（WIP 超限） | `wip-limit` 的「硬约束 + override 机制」（阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override） |
 | 局部最优但全局失调 | `human-in-loop`（让总体设计部判断）。本工作流没有专门的"全局失调"constraint skill——这个判断必须由总体设计部做，不能由 agent 自己拍板（主基调第 2 条） |
 
-注：本表为问题→修复映射，各 constraint skill 的「触发时机」节已反向声明"被 `/td-system-audit` 触发修复时"。
+注：本表为问题→修复映射，各 constraint skill 正文已反向声明"被 `/td-system-audit` 触发修复时"（`human-in-loop` 见其场景 7）。
 
 ### 7. 修复后重跑 audit 闭环
 

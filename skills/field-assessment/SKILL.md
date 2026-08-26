@@ -15,6 +15,7 @@ This skill is the **configuration entry point** referenced by all profile / tier
 ## Content Layout
 
 This skill is the configuration entry point; the actual content lives in the four files under `references/` (strength matrix / audit frequency / identification flow / subsystem independent tiering). Downstream skills read these four files through the `field-assessment` identification flow.
+
 ## How It Is Referenced
 
 Step 1 of every td-* skill invokes the identification flow of this skill (`references/identification-flow.md`), assesses `$_TD_PROFILE` / `$_TD_TIER`, and reads Table 1 + Table 2 (+ Table 3, needed by archive / apply / system-audit) into context.
