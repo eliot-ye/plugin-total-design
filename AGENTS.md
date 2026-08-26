@@ -180,6 +180,17 @@ disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 
 <正文>
 ```
 
+**`## 依赖技能` 节的语义定义：**
+
+此节列出的是 skill 在会话级**必须提前加载到上下文**的依赖技能（即使用态 LLM 触发本 skill 时，需要已在上下文中的技能）。运行时按需触发/调用的技能**不列入此节**——它们在正文流程的特定步骤里按条件触发，不属于预加载。
+
+判定依据（参考 `td-* 标准步骤 1` 的"预加载 vs 按需触发"分界）：
+
+- **预加载（应列入）**：skill 触发时立即需要其内容在上下文中作为前提（如 `system-engineering` 主基调四条、`field-assessment` 的 profile×tier 识别 + 表 1/2/3 强度值）。
+- **按需触发（不列入）**：在正文流程的特定步骤按条件触发（如 `human-in-loop` 的强制停机场景、`wip-limit` 的 WIP 超限检查、`requesting-code-review` 的架构 review、`executing-plans` 的任务执行）。这些技能的触发时机由正文流程逻辑决定，不是会话级预加载。
+
+违反此定义 = 把运行时调用关系误当预加载关系列入依赖节，会造成使用态 LLM 在触发本 skill 时误以为必须预加载这些技能，混淆"预加载 vs 按需触发"的分界。
+
 **必须有 `## 服务的主基调原则` 一节的 skill：**
 
 - 约束层 5 个局部规律（`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop`）—— 显式 link 到 `system-engineering` 主基调的某一条
