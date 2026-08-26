@@ -10,12 +10,24 @@
 - **默认加载语言切换为英文**：`plugin.json` 的 `skills: ["./skills"]` / `commands: ["./commands"]` 现指向英文版。国际化友好，非中文环境 agent 直接读英文 frontmatter description 触发。
 - **AGENTS.md 新增「双语对应与同步修改」节**：作为编辑规则的硬约束子节，规定文件清单 1:1 对应、frontmatter 逻辑字段逐字符一致、正文结构对应、逻辑名/命令名/路径/CLI 命令/环境变量跨语言不变、修改任一语言必须立即同步另一种语言、翻译漂移校验命令。
 - **AGENTS.md 目录结构节更新**：反映 `zh-CN/` 子目录的新结构，补充 skills/commands 内容编排说明（英文默认 + 中文对应）。
+- **依赖节定义澄清（B1）**：`## 依赖技能` = 会话级**预加载清单**，运行时按需触发的技能不应列入。5 个 td-* 依赖节恢复为仅 `system-engineering` + `field-assessment`（`td-explore` 原有的 `brainstorming` 同属运行时激活，一并移除）。依据 `td-* 标准步骤 1` 的"预加载 vs 按需触发"分界。
+
+### Fixed
+
+- **锚点引用修正（A1）**：统一 en 侧 3 处对 `tier-large` 文档节标题的引用写法（`delay-decision` / `td-apply` / `td-propose`），文档名 overall → general，命中实际标题 "General design document is mandatory"。
+- **td-system-audit 反向触发注释（A2）**：en+zh 两处 :99 注释修正，`human-in-loop` 位置描述从错误的"触发时机"节改为"正文已反向声明（见其场景 7）"。
+- **依赖节头统一（A3）**：en 侧 14 个 SKILL.md 的依赖节标题统一为 `## Dependent Skills`（消除 `## Dependencies` / `## Dependency Skills` / `## Dependent Skills` 三种变体；zh 侧 `## 依赖技能` 已统一，不动）。
+- **argument-hint 双语逐字符一致（B2）**：4 对 argument-hint 统一为 en 写法（`td-init` 的 `(无参数)`→`(no arguments)`，`td-system-audit` 的 `(可选, 默认 current-change)`→`(optional, default current-change)`；含对应命令文件）。
+- **field-assessment 格式补全（C1）**：en `field-assessment:16` 补 `## How It Is Referenced` 前缺空行（与 zh 侧对齐）。
+- **命令术语一致性（C3）**：`commands/td-system-audit.md` description 修正 `baseline`→`keynote principles`、`total design department`→`general design department`，对齐 project 术语；同时修复命令文件 argument-hint 破坏（去引号+冒号改等号，破坏 YAML frontmatter）。
 
 ### Docs
 
 - **双语同步硬约束**：违反文件清单 1:1 对应、frontmatter 逻辑字段不一致、正文结构不对应、跨语言不变量漂移、只改一种语言不同步另一种 = bug。校验命令：`diff <(cd skills && find . | sort) <(cd zh-CN/skills && find . | sort)` 应无输出。
 - **翻译漂移校验**：`grep -c '\`<logical-name>\`' skills/` vs `zh-CN/skills/`，每个逻辑名计数应一致。计数不一致 = 某一方漏改/多改 = bug。
 - **commit 风格补充**：双语同步提交时 commit message 应体现 en + zh-CN（如 `fix: correct wip-limit override flow (en + zh-CN)`）。
+- **新增 `docs/audit-fix-gate-2026-08-26.md`**：记录使用态 LLM 视角审核修复的依赖图谱与分析前置门（步骤 1–6，含 16 个被改 skill 的出边、全 27 节点的依赖图谱邻接表、blast radius 与风险评估）。
+- **B1 回退说明**：docs 文件头部与步骤 1 表格、步骤 5/6 风险段均标注 B1 已回退。
 
 ## [1.3.1] - 2026-08-23
 
