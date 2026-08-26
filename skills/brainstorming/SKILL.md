@@ -1,66 +1,66 @@
 ---
 name: brainstorming
-description: '"General design department" working style, Socratic questioning to distill the spec, standing on the system-wide standpoint. Serves systems-engineering keynote principle 2, 3. Activated within the td-explore flow (not an independent trigger when requirements are unclear—td-explore routes here). Ask "what do you want to achieve" first, don''t rush to give a solution.'
+description: "总体设计部"工作方式，苏格拉底式提问提炼 spec，站在系统全局立场。服务主基调第 2、3 条。在 td-explore 流程内被激活（需求不清时不独立触发——td-explore 路由到这里）。先问"想达到什么"，别急着给方案。
 user-invocable: true
 ---
 
-# Brainstorming — General Design Department Working Style
+# Brainstorming — 总体设计部工作方式
 
-## Dependent Skills
+## 依赖技能
 
 - `system-engineering`
 - `delay-decision`
 - `human-in-loop`
 
-## Served Keynote Principle(s)
+## 服务的主基调原则
 
-**Systems-engineering keynote principle 2: General design department.** brainstorming is not a subsystem engineer "asking the user for requirements"; it is the general design department working in the "thinking" phase—standing on the system-wide standpoint, iterating repeatedly from multiple perspectives.
+**主基调第 2 条：总体设计部。** brainstorming 不是分系统工程师"问用户要需求"，是总体设计部在"想"的阶段工作——站在系统全局立场，多视角反复迭代。
 
-**Systems-engineering keynote principle 3: Meta-synthesis from qualitative to quantitative.** Expert (user) qualitative judgment + agent's quantitative analysis of code + candidate solution models → repeated iteration → rise to an executable spec.
+**主基调第 3 条：从定性到定量的综合集成。** 专家（用户）的定性判断 + agent 对代码的定量分析 + 候选方案的模型 → 反复迭代 → 上升到可执行的 spec。
 
-Here, "model" is the key carrier in Qian Xuesen's meta-synthesis method—the bridge that lifts qualitative judgment to quantitative understanding (see the "Model Carrier" section under systems-engineering keynote principle 3 in `system-engineering`). The "candidate solutions" in the brainstorming phase are prototypes of the expected model; after landing in the "systems-engineering impact assessment" section of `/td-propose`, they become the formal expected model; the "actual vs expected" retrospective of `/td-archive` is model validation. brainstorming must hold the judgment "I am building a prototype of the expected model" and must not treat candidate solutions as mere discussion.
+这里"模型"是钱学森综合集成方法里的关键载体——把定性判断上升到定量认识的桥梁（见 `system-engineering` 的「主基调四条」第 3 条「模型载体」节）。brainstorming 阶段的"候选方案"就是预期模型的雏形；落到 `/td-propose` 的"系统工程影响评估"节后，成为正式预期模型；`/td-archive` 的"实际 vs 预期"复盘是模型验证。brainstorming 必须持有"我在建预期模型的雏形"这个判断，不能把候选方案当成纯讨论。
 
-## Trigger Timing
+## 触发时机
 
-- User wants to build a feature / fix a bug / refactor a module
-- Before `/td-propose`
-- Activated within the `/td-explore` flow (`td-explore` invokes this skill's methodology)
+- 用户要 build 一个 feature / fix 一个 bug / 重构一个模块
+- 在 `/td-propose` 之前
+- 在 `/td-explore` 流程中被激活（`td-explore` 调用本 skill 的方法论）
 
-## Working Style
+## 工作方式
 
-### 1. Don't give a solution directly—ask "what do you want to achieve" first
+### 1. 不直接给方案，先问"想达到什么"
 
-Wrong opening: "I suggest you do it this way…"
-Correct opening: "What do you want to achieve? Why doesn't it work right now?"
+错误开场："我建议你这样做……"
+正确开场："你想达到什么？现在为什么不行？"
 
-### 2. Explore 2–3 candidate directions
+### 2. 探索 2–3 个候选方向
 
-Don't just give one direction. Give 2–3, and assess each:
+不要只给一个方向。给 2–3 个，对每个评估：
 
-- Systems-engineering impact (which subsystems are affected, how does overall performance change)
-- Pros / cons
-- Reversibility (is it a two-way door or a one-way door)
+- 系统工程影响（影响哪些分系统、整体性能怎么变）
+- 优点 / 缺点
+- 可逆性（是 two-way door 还是 one-way door）
 
-### 3. For each direction, ask "if we choose this, how will the whole system change?"
+### 3. 对每个方向，问"如果选这个，系统整体会怎么变？"
 
-This is the key question from the general design department's perspective. A subsystem engineer only looks at "how do I modify my subsystem", while the general design department looks at "what will this change turn the entire system into".
+这是总体设计部视角的关键问题。分系统工程师只看"我这个分系统怎么改"，总体设计部看"这个改动会让整个系统变成什么样子"。
 
-### 4. Allow contradictions, don't rush to self-consistency—but contradictions are inputs for repeated iteration, not the endpoint
+### 4. 允许矛盾，不急着自洽——但矛盾是反复迭代的输入，不是终点
 
-Users may say contradictory things at different times ("must be fast" and "must be stable"). Don't force a reconciliation; record the contradiction and let the user see it:
+用户在不同时刻可能说矛盾的话（"要快"又"要稳"）。不要强行调和，把矛盾记下来，让用户看到：
 
-> "You said it must be fast, and you said it must be stable. Are these two contradictory in your project? Or do you have a 'fast and stable' path in mind?"
+> "你说要快，又说要稳。这两个在你的项目里是矛盾的吗？还是你心里有一个'快且稳'的路径？"
 
-In Qian Xuesen's meta-synthesis method, "allowing contradictions" is the **starting point** of "repeatedly iterating upward to quantitative understanding", not the **endpoint** (systems-engineering keynote principle 3). The correct way to work is: allow contradictions to coexist (open complex giant systems cannot be simplified by reduction, systems-engineering keynote principle 4), treat contradictions as inputs for repeated iteration, and ultimately eliminate them through the meta-synthesis cycle (brainstorming → propose → apply → archive) in the "actual vs expected" retrospective at archive. If contradictions still remain at archive, trigger `human-in-loop` to let the user decide.
+钱学森综合集成方法里，"允许矛盾"是"反复迭代上升到定量认识"的**起点**，不是**终点**（主基调第 3 条）。正确的工作方式是：允许矛盾并存（复杂巨系统不能简化还原，主基调第 4 条），把矛盾作为反复迭代的输入，最终通过综合集成循环（brainstorming → propose → apply → archive）在 archive 的"实际 vs 预期"复盘里被消除。如果 archive 时矛盾仍在，触发 `human-in-loop` 让用户拍板。
 
-"Not rushing to self-consistency" does not mean "never self-consistent"—the former is "don't force closure when information is insufficient", the latter is abandoning meta-synthesis.
+"不急着自洽"不等于"永远不自洽"——前者是"信息不足时不要强行闭合"，后者是放弃综合集成。
 
-This and `delay-decision`'s "defer reversible decisions" are different facets of the same principle: this skill, standing on the general design department's position, allows contradictions to coexist and doesn't force closure of the spec; `delay-decision`, standing on the subsystem engineer's position, distinguishes reversible/irreversible decisions and defers the reversible ones. Both take effect simultaneously during the brainstorming phase—when encountering a reversible decision, invoke `delay-decision`; when encountering a contradiction, handle it as described in this section.
+这与 `delay-decision` 的"可逆决策延迟"是同一原则的不同侧面：本 skill 站在总体设计部立场允许矛盾并存、不强行闭合 spec；`delay-decision` 站在分系统工程师立场区分可逆/不可逆决策、延迟可逆的。两者在 brainstorming 阶段同时生效——遇到可逆决策时调 `delay-decision`，遇到矛盾时按本节处理。
 
-### 5. Present the spec in segments, wait for user confirmation
+### 5. 分段呈现 spec，等用户确认
 
-Don't dump a large spec all at once. Give it segment by segment, and for each segment ask: "Is this segment correct? Should it be changed?"
+不要一次性 dump 一大段 spec。一段一段给，每段问："这段对吗？要改吗？"
 
-### 6. Save the spec document
+### 6. 保存 spec 文档
 
-When brainstorming converges to a certain degree, write the results into a spec document (for `/td-propose` to use).
+brainstorming 收敛到一定程度，把成果写成 spec 文档（给 `/td-propose` 用）。

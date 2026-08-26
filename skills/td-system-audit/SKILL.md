@@ -1,116 +1,116 @@
 ---
 name: td-system-audit
-description: Periodically self-check against the systems-engineering keynote principles, embodying Qian Xuesen's "general design department" perspective. Trigger scenarios: the user says "audit", "self-check", "retrospective", "review against keynote principles", "progress has been rough lately".
+description: 周期性对照系统工程主基调自检，体现钱学森"总体设计部"视角。触发场景：用户说"audit"、"自检"、"复盘"、"对照主基调"、"最近推进不顺"。
 user-invocable: true
 argument-hint: "<scope: current-change | project>  (optional, default current-change)"
 ---
 
 # td-system-audit
 
-The engineering instantiation of Qian Xuesen's "general design department" perspective. Periodically runs the agent's current work against the four systems-engineering keynote principles, identifying risks of "local optimization creating global imbalance."
+钱学森"总体设计部"视角的工程化体现。周期性把 agent 当前的工作对照系统工程四条主基调过一遍，识别"局部优化制造全局失调"的风险。
 
-## Dependent Skills
+## 依赖技能
 
 - `system-engineering`
 - `field-assessment`
 
-## Served Keynote Principle(s)
+## 服务的主基调原则
 
-**Systems-engineering keynote principle 2: General design department.**
+**系统工程主基调第 2 条：总体设计部。**
 
-This command itself is the engineering instantiation of the general design department — periodic self-checking is the core responsibility of the general design department.
+本命令本身就是总体设计部的工程化体现——周期性自检是总体设计部的核心职责。
 
-**Systems-engineering keynote principle 1: Systems engineering.**
+**系统工程主基调第 1 条：系统工程。**
 
-The comparison standard for audit is the four keynote principles, not "code quality" or "progress" — this is an audit from the systems engineering perspective, not from the project management perspective.
+audit 的对照标准是主基调四条，不是"代码质量"或"进度"——这是系统工程视角的审计，不是项目管理视角的审计。
 
-**《Engineering Cybernetics》 feedback control loop restoration**: Step 7 "re-run audit after fix to close the loop" is the concrete form of the feedback control loop (re-run limit of 3 is the controller saturation limit; exceeding it triggers `human-in-loop`).
+**《工程控制论》反馈控制回路归位**：步骤 7"修复后重跑 audit 闭环"是反馈控制回路的具体形态（重跑上限 3 次是控制器饱和限，超限触发 `human-in-loop`）。
 
-## Input — the scope of the audit. Empty defaults to `current-change`
+## 输入 - audit 的范围。空则默认 `current-change`
 
-- `current-change`: audit the currently active change
-- `project`: audit the work approach of the entire project
+- `current-change`：审计当前活跃的 change
+- `project`：审计整个项目的工作方式
 
-#### Content
+#### 内容
 
 `$ARGUMENTS`
 
-## Trigger timing
+## 触发时机
 
-system-audit does not run only when the user explicitly invokes it. The agent should proactively suggest audit at the following times:
+system-audit 不是只在用户显式调用时才跑。agent 应在以下时机主动建议 audit：
 
-- **Frequency trigger**: Compare against Table 3 (system-audit frequency, per current tier's project scope / current-change scope thresholds; Table 3 is in `field-assessment/references/audit-frequency.md`). The source of truth for frequency is Table 3; this skill does not rewrite it — `td-archive` Step 5.2 already maintains the "cumulative archive counter"; when the threshold is reached, it suggests an audit.
-- **Signal trigger**:
-  - When the user expresses "feeling like progress hasn't been smooth lately"
-  - After the critical chain buffer has been compressed multiple times
+- **频率触发**：对照表 3（system-audit 频率，按当前 tier 的 project scope / current-change scope 阈值；表 3 见 `field-assessment/references/audit-frequency.md`）。频率事实源在表 3，本 skill 不重写——`td-archive` 步骤 5.2 已维护"累计 archive 计数器"，达阈值即建议。
+- **信号触发**：
+  - 用户表达"感觉最近推进不顺利"时
+  - 关键链缓冲被多次压缩后
 
-## Steps
+## 步骤
 
-### 1. Activate keynote and configuration layer
+### 1. 激活主基调与配置层
 
-Activate keynote and configuration layer. Only inject strengths, do not make judgments; execute the following three-step sequence:
+激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-1. **`system-engineering`** — The four keynote principles enter context. The comparison standard for audit is the four keynote principles; without the keynote framework, audit degenerates into "code quality review."
-2. **profile × tier identification** — Call `field-assessment`, read `$_TD_PROFILE` / `$_TD_TIER`, load Table 1 + Table 2 + Table 3. Cache within the session; subsequent steps reference directly. Reading Table 3 is so the audit report can reference "this audit is X changes since the last project scope audit"; the threshold-reached judgment is handled by `td-archive` Step 5.2 (which maintains `archive-counter.yaml` and makes the threshold-reached judgment).
-3. **Other constraints** — Only read strength values into context; do not decide whether they trigger in this step.
+1. **`system-engineering`** — 主基调四条进入上下文。audit 的对照标准就是主基调四条，没有主基调框架，audit 会退化成"代码质量审查"。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。读表 3 是为了 audit 报告里能引用"本次 audit 距上次 project scope audit 间隔 X 个 change"，频率达阈值的判定由 `td-archive` 步骤 5.2 负责（那里维护 `archive-counter.yaml` 并达阈值判定）。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
-### 2. Collect audit objects
+### 2. 收集审计对象
 
-Collect by scope:
+按 scope 收集：
 
-- **current-change**: the current active change's proposal/design/tasks/specs
-- **project**: all active changes + the "actual vs. expected" post-mortem review of the 3 most recently archived changes, **and include the main spec baseline under `openspec/specs/`** — this is the subsystem contracts and invariants sedimented from reverse-spec / archive sync, serving as the anchor for audit to compare whether "local changes broke existing subsystem contracts." If `openspec/specs/` is empty (the project has never reverse-spec'd, nor archived any change) → skip the baseline anchor; only audit active changes and recent archive post-mortem reviews.
+- **current-change**：当前活跃 change 的 proposal/design/tasks/specs
+- **project**：所有活跃 change + 最近 archive 的 3 个 change 的"实际 vs 预期"复盘，**并纳入 `openspec/specs/` 下的主 spec baseline**——这是 reverse-spec / archive sync 沉淀下来的分系统契约与不变量，作为 audit 对照"局部改动是否破坏既有分系统契约"的锚点。`openspec/specs/` 为空（项目从未 reverse-spec、也未 archive 过任何 change）→ 跳过 baseline 锚点，仅审计活跃 change 与最近 archive 复盘。
 
-**Layered-view restoration**: When the `field-assessment` identification flow allows subsystem independent tiering, project scope audit should **audit by subsystem layer separately**, distinguishing in the audit report between "intra-subsystem imbalance" and "cross-subsystem boundary imbalance" — the latter is handled at the strength of the "highest-tier subsystem" (conservative principle). Execution rules in `field-assessment`'s `references/subsystem-tiering.md`.
+**层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**，audit 报告里区分"子系统内部失调"和"跨子系统边界失调"——后者按"最高 tier 子系统"的强度处理（保守原则）。执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
 
-### 3. Audit against the four keynote principles
+### 3. 对照主基调四条审计
 
-For each audit object, audit item by item. The item-by-item checklist is in the "Keynote Principle Comparison Checklist" section of `references/audit-report-template.md` — check off each of the four keynote principles; mark violations and trigger the corresponding constraint skill (see Step 6).
+对审计对象，逐条审计。逐条检查清单见 `references/audit-report-template.md` 的「主基调对照清单」节——按四条主基调逐条打勾，违反项标注并触发对应 constraint skill（见步骤 6）。
 
-### 4. Output audit report
+### 4. 输出审计报告
 
-The report is output to both the conversation and persisted to disk. Disk path: `openspec/.td-state/audits/<YYYYMMDD-HHMMSS>-<scope>.md`. The directory is created on demand on first run of this step.
+报告同时输出到对话和落盘。落盘路径：`openspec/.td-state/audits/<YYYYMMDD-HHMMSS>-<scope>.md`。目录由本步骤首次运行时按需创建。
 
-The report follows the "Report Template" section of `references/audit-report-template.md` (Scope + keynote comparison table + problems found + suggested next actions).
+报告按 `references/audit-report-template.md` 的「报告模板」节输出（Scope + 主基调对照表 + 发现的问题 + 建议的下一步动作）。
 
-After persisting, synchronously update `openspec/.td-state/audit-history.yaml`: append a record for this audit. File format is in `references/audit-history-template.md`; the file is created on demand on first run of this step.
+落盘后，同步更新 `openspec/.td-state/audit-history.yaml`：追加一条本次 audit 的记录。文件格式见 `references/audit-history-template.md`，文件由本步骤首次运行时按需创建。
 
-**null semantics**: `audit-history.yaml` does not exist → this step creates the file and writes the first record; `audits/` directory does not exist → create it synchronously.
+**null 语义**：`audit-history.yaml` 不存在 → 本步骤创建文件并写入首条记录；`audits/` 目录不存在 → 同步创建。
 
-### 5. Backlog pool (optional)
+### 5. 问题落池（可选）
 
-After the audit report is output, for the report's "suggested next actions" (especially non-severe issues and follow-up items not to be fixed immediately), ask the user: "Do you want to record these in `openspec/todo.md` backlog pool?" — pooling = recording as backlog candidates, to be picked from the pool during `/td-propose`, not occupying WIP.
+审计报告输出后，对报告里"建议的下一步动作"（尤其是非严重问题、暂不立即修复的后续事项），询问用户："要不要把这些记进 `openspec/todo.md` 待办池？"——落池 = 记为 backlog 候选，等 `/td-propose` 时从池里挑，不占 WIP。
 
-- User agrees → following `td-propose`'s `references/todo-format.md` format, write entries to the todo section of `openspec/todo.md` (`- [ ] one-sentence description`; if file does not exist → create it).
-- User declines → skip, non-mandatory.
+- 用户同意 → 按 `td-propose` 的 `references/todo-format.md` 格式，把条目写入 `openspec/todo.md` 待办节（`- [ ] 一句话描述`；文件不存在 → 创建）。
+- 用户拒绝 → 跳过，不强制。
 
-### 6. Trigger remediation
+### 6. 触发修复
 
-For each severe issue, trigger the corresponding constraint skill for remediation:
+对每个严重问题，触发对应的 constraint skill 修复：
 
-| Severe issue type | Constraint skill triggered |
+| 严重问题类型 | 触发的 constraint skill |
 |---|---|
-| Critical chain buffer compressed | `critical-buffer` (re-plan tasks) |
-| Agent made the decision itself | `human-in-loop` (go back and ask the user) |
-| Reversible decision closed prematurely | `delay-decision` (reopen the decision) |
-| Too many changes open simultaneously (WIP exceeded) | `wip-limit`'s "hard constraint + override mechanism" (block the next `/td-propose` or `/td-apply` until the user archives one or explicitly overrides) |
-| Local optimum but global imbalance | `human-in-loop` (let the general design department judge). This workflow has no dedicated "global imbalance" constraint skill — this judgment must be made by the general design department, not by the agent itself (keynote principle 2) |
+| 关键链缓冲被压缩 | `critical-buffer`（重新规划 tasks） |
+| agent 自己拍板了 | `human-in-loop`（回去问用户） |
+| 可逆决策被过早闭合 | `delay-decision`（重新打开决策） |
+| 同时开太多 change（WIP 超限） | `wip-limit` 的「硬约束 + override 机制」（阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override） |
+| 局部最优但全局失调 | `human-in-loop`（让总体设计部判断）。本工作流没有专门的"全局失调"constraint skill——这个判断必须由总体设计部做，不能由 agent 自己拍板（主基调第 2 条） |
 
-Note: This table is a problem→remediation mapping; each constraint skill already reverse-declares "when triggered for remediation by `/td-system-audit`" in its body (for `human-in-loop`, see its scenario 7).
+注：本表为问题→修复映射，各 constraint skill 正文已反向声明"被 `/td-system-audit` 触发修复时"（`human-in-loop` 见其场景 7）。
 
-### 7. Re-run audit after fix to close the loop
+### 7. 修复后重跑 audit 闭环
 
-After severe issues are remediated, **re-run the audit of the same scope**, confirming:
+严重问题修复完成后，**重跑同一 scope 的 audit**，确认：
 
-- The previous severe issues have been eliminated
-- The remediation action did not introduce new "local optimization creating global imbalance"
+- 之前的严重问题已消除
+- 修复动作没引入新的"局部优化制造全局失调"
 
-Re-run at most 3 times. If severe issues remain after 3 runs → trigger `human-in-loop` to let the user decide how to handle it (continue fixing, adjust scope, or accept residual risk).
+重跑最多 3 次。3 次后仍有严重问题 → 触发 `human-in-loop`，让用户介入决定如何处理（继续修复、调整 scope、或接受残留风险）。
 
-Not re-running = the loop is not closed; the problem may return in a different form.
+不重跑 = 闭环没合，问题可能换形式回来。
 
 ## Guardrails
 
-- Audit is not "nitpicking and finding fault"; it is "the periodic self-check of the general design department" — the tone should be constructive
-- The audit report must include "suggested next actions," not just "you got this wrong"
-- Do not audit too frequently — once per change is sufficient; doing it more often turns into formalism
+- audit 不是"挑刺找骂"，是"总体设计部的周期性自检"——语气要建设性
+- audit 报告必须包含"建议的下一步动作"，不只是"你这里错了"
+- 不要 audit 太频繁——每个 change 一次足够，过多会变成形式主义

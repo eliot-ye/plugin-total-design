@@ -2,6 +2,25 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.5.0] - 2026-08-27
+
+### Changed（行为变更）
+
+- **删除英文副本，中文版移入根目录成为唯一版本**：1.4.0 的双语结构（英文根目录 + `zh-CN/` 中文副本）简化为单一中文版。根目录 `skills/` / `commands/` 的内容由中文版替换，`zh-CN/` 目录删除。`plugin.json` 的 `skills` / `commands` 路径不变（仍为 `["./skills"]` / `["./commands"]`），加载器加载的从英文版变为中文版。
+- **AGENTS.md 双语同步节精简**：「双语对应与同步修改」节从 6 条硬约束 + 双语开发流程缩减为单语说明 + 历史备注。目录结构节删除 `zh-CN/` 子目录。
+- **CONTRIBUTING.md 双语指南保留**：「中文 vs 英文」节原本就规定 skill 正文以中文为主，此节内容仍然适用（code / command / filename 保持英文），不动。
+
+### Removed
+
+- 删除 `zh-CN/` 目录（`zh-CN/skills/` 39 文件 + `zh-CN/commands/` 8 文件）。中文版内容已移入根目录 `skills/` + `commands/`。
+- 删除根目录 `skills/` + `commands/` 下的英文版内容（39 + 8 文件），由中文版替换。
+
+### Docs
+
+- AGENTS.md 目录结构节、skills/commands 内容编排节更新为单语中文。
+- RELEASE_NOTES.md 更新为 1.5.0 版本发布说明。
+- 历史条目（1.4.0 及更早）保留不动，其中对双语结构的描述属于历史记录。
+
 ## [1.4.0] - 2026-08-26
 
 ### Changed（行为变更）

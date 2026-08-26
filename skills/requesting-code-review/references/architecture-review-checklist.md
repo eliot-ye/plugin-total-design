@@ -1,26 +1,26 @@
-# Architecture Review Checklist (after proposal, before apply)
+# 架构 Review 检查清单（proposal 完成后、apply 前）
 
-The review target is the proposal's subsystem splitting and design decisions, not code. This is when changing the architecture costs the least.
+review 对象是 proposal 的分系统切分与设计决策，不是代码。此时改架构成本最低。
 
-## High Cohesion
+## 高内聚
 
-- Does each subsystem have a single responsibility (one subsystem does one thing)
-- Is each subsystem self-contained (clear data ownership)
-- Are responsibilities duplicated (two subsystems doing the same thing → merge signal)
+- 每个分系统职责是否单一（一个分系统只做一件事）
+- 分系统内部是否自包含（数据所有权清晰）
+- 职责是否重复（两个分系统做同一件事 → 合并信号）
 
-## Low Coupling
+## 低耦合
 
-- Are inter-subsystem interfaces minimized (only expose necessary contracts, internal implementation doesn't leak)
-- Are there circular dependencies (A ↔ B)
-- Are there implicit dependencies (shared database, shared config, temporal coupling)
-- Does a single change pull in too many subsystems (over-coupling signal)
+- 分系统间接口是否最小化（只暴露必要契约，内部实现不外泄）
+- 有无循环依赖（A ↔ B）
+- 有无隐式依赖（共享数据库、共享配置、时序耦合）
+- 一个改动是否牵动过多分系统（过度耦合信号）
 
-## Severity and Blocking
+## 分级与阻塞
 
-Shares severity definitions with code review (see `requesting-code-review` skill section 2):
+与 code review 共用分级（定义见 `requesting-code-review` skill 第 2 节）：
 
-- **critical**: bad subsystem splitting / circular dependencies / implicit dependencies—**blocks apply**, go back to propose to modify the proposal before continuing
-- **warning**: oversized interfaces, scattered responsibilities—record to the proposal, can defer
-- **nit**: naming etc.—can ignore
+- **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖——**阻塞 apply**，先回 propose 改 proposal 再继续
+- **warning**：接口偏大、职责偏散——记录到 proposal，可延后
+- **nit**：命名等——可忽略
 
-The critical of architecture review and the critical of code review both follow the "don't continue" rule—except here "don't continue" means don't enter task implementation.
+架构 review 的 critical 与 code review 的 critical 同样适用"不继续"规则——只是这里"不继续"意味着不进入任务实施。

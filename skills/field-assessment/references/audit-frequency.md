@@ -1,25 +1,25 @@
-# Audit Frequency (Table 3, single source of truth)
+# audit 频率（表 3，单一事实源）
 
-This file is the single source of truth for system-audit frequency. `td-system-audit` / `executing-plans` / the 3 tier skills reference this file.
+本文件是 system-audit 频率的唯一事实源。`td-system-audit` / `executing-plans` / 3 个 tier skill 引用本文件。
 
-## Table 3: system-audit frequency
+## 表 3：system-audit 频率
 
 | tier | project scope | current-change scope |
 |---|---|---|
-| `tier-small` | every 5 changes completed | not required |
-| `tier-medium` | every 3 changes completed | at each critical chain task completion |
-| `tier-large` | once per week | every 1 change completed |
+| `tier-small` | 每完成 5 个 change | 不要求 |
+| `tier-medium` | 每完成 3 个 change | 每个关键链任务完成时 |
+| `tier-large` | 每周一次 | 每完成 1 个 change |
 
-**Frequency under subsystem independent tiering**: When the system has subsystems that are independently tiered, the project scope audit frequency follows the "highest-tier subsystem" (conservative principle), and the current-change scope audit frequency follows the "highest tier among subsystems spanned by the current change."
+**子系统独立定 tier 时的频率**：当系统内部有子系统独立定 tier 时，project scope audit 频率按"最高 tier 子系统"处理（保守原则），current-change scope audit 频率按"当前 change 所跨子系统中最高 tier"处理。
 
-### Triggering skill ownership for current-change scope
+### current-change scope 的触发 skill 归属
 
-The triggering skill for current-change audit is divided by tier:
+current-change audit 的触发 skill 按 tier 分工：
 
-| tier | triggering skill | trigger point |
+| tier | 触发 skill | 触发位置 |
 |---|---|---|
-| `tier-small` | not required | — |
-| `tier-medium` | `executing-plans` step 3 | at each critical chain task completion |
-| `tier-large` | `td-apply` step 7.3 | every 1 change completed |
+| `tier-small` | 不要求 | — |
+| `tier-medium` | `executing-plans` 步骤 3 | 每个关键链任务完成时 |
+| `tier-large` | `td-apply` 步骤 7.3 | 每完成 1 个 change |
 
-project scope audit triggering is uniformly driven by `td-archive` step 5.2 (suggested when the archive counter reaches its threshold).
+project scope audit 的触发统一由 `td-archive` 步骤 5.2 驱动（archive 计数器达阈值即建议）。

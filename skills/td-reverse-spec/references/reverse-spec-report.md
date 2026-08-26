@@ -1,26 +1,26 @@
-# Reverse-Spec Report Template
+# Reverse-Spec 报告模板
 
 ```markdown
-## Reverse-Spec Report: <codebase>
+## Reverse-Spec 报告：<codebase>
 
-### Identified Subsystems
-1. <subsystem A> - <responsibility>
-2. <subsystem B> - <responsibility>
+### 识别的分系统
+1. <subsystem A> - <职责>
+2. <subsystem B> - <职责>
 ...
 
-### Inter-Subsystem Interface Diagram
-<ASCII diagram or mermaid>
+### 分系统间接口图
+<ASCII 图或 mermaid>
 
-### Spec for Each Subsystem
+### 各分系统 spec
 - <subsystem A>: openspec/specs/<A>/spec.md
 - <subsystem B>: openspec/specs/<B>/spec.md
 ...
 
-### Known Risks / Tech Debt
-- <risk 1>
-- <risk 2>
+### 已知风险 / 技术债
+- <风险 1>
+- <风险 2>
 
-### Suggested Next Steps
-- If you want to change a subsystem: `/td-propose <change-name>`
-- If a subsystem's spec is too complex: first `/td-explore` that subsystem
+### 建议的下一步
+- 如果想改某个分系统：`/td-propose <change-name>`
+- 如果某个分系统 spec 太复杂：先 `/td-explore` 那个分系统
 ```

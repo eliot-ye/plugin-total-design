@@ -1,48 +1,48 @@
 ---
 name: profile-brownfield
-description: Mid-project handover profile. Repo already has runnable code. reverse-spec first, TDD only for new code.
+description: 中途接手项目 profile。仓库已有可运行代码。reverse-spec 优先，TDD 只在新代码。
 user-invocable: false
 ---
 
-# Profile: Brownfield (mid-project handover)
+# Profile: Brownfield（中途接手）
 
-## Trigger Conditions
+## 触发条件
 
-- Repo already has runnable code (not scaffolding)
-- No live users or just recently went live
-- agent entering the repo for the first time, and the above conditions hold
+- 仓库已有可运行代码（不是脚手架）
+- 没有线上用户或刚上线不久
+- agent 第一次进仓库，且上述条件成立
 
-## Default Activated Layers
+## 默认激活的层
 
-| layer | strength |
+| 层 | 强度 |
 |---|---|
-| OpenSpec contract layer | **very strong**: reverse-spec first, then propose. No reverse-spec → no major proposals allowed. |
-| Behavior layer (skills) | **medium**: TDD enforced only for new code, avoiding "adding tests breaks old code" |
-| Engineering management constraint layer | **strong**: critical chain diagnosis, find the weakest link |
+| OpenSpec 契约层 | **极强**：先 reverse-spec，再 propose。没 reverse-spec 不准 propose 大改动。 |
+| 行为层（skills） | **中**：TDD 只在新代码强制，避免"加测试就改坏老代码" |
+| 工程管理约束层 | **强**：关键链诊断，找最薄弱环节 |
 
-## Constraint Strength Under Each tier
+## 在各 tier 下的 constraint 强度
 
-This profile does not change constraint strength: strength is determined by tier (see the "Convention for Downstream Strength References" section of the `field-assessment` identification flow).
+本 profile 不改变 constraint 强度：强度由 tier 决定（引用约定见 `field-assessment` 识别流程的「下游引用强度的约定」节）。
 
-## Special Rules
+## 特殊规则
 
-### 1. reverse-spec first
+### 1. reverse-spec 优先
 
-First thing upon entering the repo: `/td-reverse-spec`. Establish a baseline spec.
+进仓库第一件事：`/td-reverse-spec`。建立 baseline spec。
 
-If you `/td-propose` without reverse-spec, the agent will block: "You haven't yet built an understanding of the existing system; proposing major changes is high-risk. Do reverse-spec first?"
+没 reverse-spec 就 `/td-propose`，agent 会拦："你对现有系统还没建立认识，propose 大改动风险高。先 reverse-spec 吗？"
 
-### 2. TDD boundary
+### 2. TDD 边界
 
-- **New code**: full TDD (RED-GREEN-REFACTOR)
-- **Refactoring old code**: add characterization tests first (lock down existing behavior), then refactor
-- **Fixing old bugs**: use systematic-debugging; regression tests are mandatory
+- **新代码**：full TDD（RED-GREEN-REFACTOR）
+- **重构老代码**：先加 characterization test（锁定现有行为），再重构
+- **修老 bug**：用 systematic-debugging，回归测试是必须
 
-### 3. Avoid breaking old code
+### 3. 避免改坏老代码
 
-Before modifying old code, trigger `human-in-loop` (effective under tier-medium / tier-large—Table 2's brownfield addition; under tier-small, Table 2 is "—," so only the human-in-loop baseline of types 1–5 applies): Are you sure you want to touch this old code? Is there a smaller-scope way to change it?
+改老代码前，触发 `human-in-loop`（tier-medium / tier-large 生效——表 2 的 brownfield 加成；tier-small 下表 2 为"—"，仅走 human-in-loop 基线第 1–5 类）：这块老代码你确定要动吗？有没有更小范围的改法？
 
-## Switching to Other profiles
+## 与其他 profile 的切换
 
-- Codebase goes live + has real user traffic → switch to `profile-maintenance`
-- After reverse-spec, discover the codebase is actually "just-init'd scaffolding" → switch to `profile-greenfield`
+- 代码库上线 + 有真实用户流量 → 切 `profile-maintenance`
+- reverse-spec 后发现代码库其实是"刚 init 的脚手架" → 切 `profile-greenfield`

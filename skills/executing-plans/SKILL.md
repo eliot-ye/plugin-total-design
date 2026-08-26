@@ -1,12 +1,12 @@
 ---
 name: executing-plans
-description: Execute tasks in batch, with human checkpoints. Serves systems-engineering keynote principle 2. Trigger scenario: within the td-apply flow when implementing according to the tasks.md sequence (execution entry point is /td-apply; this skill is invoked internally by apply; when the user directly says "start executing" / "go" they should go through /td-apply)—stop for a checkpoint after critical chain tasks.
+description: 批量执行任务，带 human checkpoint。服务主基调第 2 条。触发场景：`td-apply` 流程内按 tasks.md 序列实施时（执行入口是 `/td-apply`，本 skill 由 apply 内部调用；用户直接说"开始执行"/"go" 应走 `/td-apply`）——关键链任务后停下来 checkpoint。
 user-invocable: true
 ---
 
 # Executing Plans
 
-## Dependent Skills
+## 依赖技能
 
 - `field-assessment`
 - `human-in-loop`
@@ -15,70 +15,70 @@ user-invocable: true
 - `test-driven-development`
 - `verification-before-completion`
 
-## Served Keynote Principle(s)
+## 服务的主基调原则
 
-**Systems-engineering keynote principle 2: General design department.** Execution is not "head-down grinding"; it is "the subsystem engineer (agent) works for a stretch, then the general design department (user) does a checkpoint".
+**主基调第 2 条：总体设计部。** 执行不是"闷头干"，是"分系统工程师（agent）干一段，总体设计部（用户）checkpoint 一次"。
 
-**Feedback control loop placement (《工程控制论》)**: The task execution flow is a contract-level error detection + correction loop; the Human checkpoint is general-design-department-level error detection + correction.
+**《工程控制论》反馈控制回路归位**：任务执行流程是契约级误差检测 + 校正回路，Human checkpoint 是总体设计部级误差检测 + 校正。
 
-## Trigger Timing
+## 触发时机
 
-- Plan is already written (`writing-plans` completed)
-- User says "start executing" / "go"
-- **current-change audit triggered** (triggered alongside this skill's Human checkpoint): tier stratification and trigger ownership are in `field-assessment/references/audit-frequency.md`'s "current-change scope trigger skill ownership" table (Table 3)—this skill is only responsible for `tier-medium` (triggered when each critical chain task completes); `tier-small` is not required, `tier-large` is handled by `td-apply` step 7.3, not repeated here.
+- plan 已经写好（`writing-plans` 完成）
+- 用户说"开始执行" / "go"
+- **current-change audit 触发**（随本 skill 的 Human checkpoint 触发）：tier 分层与触发归属见 `field-assessment/references/audit-frequency.md` 的「current-change scope 的触发 skill 归属」表（表 3）——本 skill 只负责 `tier-medium`（每个关键链任务完成时触发），`tier-small` 不要求，`tier-large` 由 `td-apply` 步骤 7.3 负责，本处不重复。
 
-## Working Style
+## 工作方式
 
-### 1. Execute in tasks.md order
+### 1. 按 tasks.md 顺序执行
 
-Don't skip tasks, don't parallelize (unless the plan explicitly marks parallelism).
+不跳任务，不并行（除非 plan 里显式标了并行）。
 
-### 2. Each task execution flow
+### 2. 每个任务执行流程
 
-1. Trigger `test-driven-development`: write a failing test first
-2. Write the implementation
-3. Run tests, confirm green
-4. Trigger `verification-before-completion`: run verification commands
-5. Update tasks.md: `- [ ]` → `- [x]`, add verification evidence
+1. 触发 `test-driven-development`：先写失败测试
+2. 写实现
+3. 跑测试，确认绿
+4. 触发 `verification-before-completion`：跑验证命令
+5. 更新 tasks.md：`- [ ]` → `- [x]`，加验证证据
 
 ### 3. Human checkpoint
 
-Stop and ask the user at the following moments:
+在以下时机停下来问用户：
 
-- After completing a critical chain task
-- When hitting a mandatory-stop scenario from the `human-in-loop` skill (categories 1–5 general baseline + tier/profile additions)
-- When actual task time significantly exceeds the estimate (>2x)
+- 完成一个关键链任务
+- 遇到 `human-in-loop` skill 的必停场景（第 1–5 类通用基线 + tier/profile 加成）
+- 任务实际耗时显著超过估时（>2x）
 
-**current-change audit**: Triggered alongside this checkpoint; frequency and tier stratification are in the current-change audit entry under "Trigger Timing" above.
+**current-change audit**：随本 checkpoint 触发，频率与 tier 分层见上方「触发时机」节的 current-change audit 条目。
 
-Checkpoint format:
+checkpoint 格式：
 
 ```
 ## Checkpoint <N>
 
-### Completed tasks
-- [x] <task A> — verification: <test output>
-- [x] <task B> — verification: <test output>
+### 完成的任务
+- [x] <task A> — 验证：<test output>
+- [x] <task B> — 验证：<test output>
 
-### Next steps
+### 下一步
 - <task C>
 - <task D>
 
-### Decisions needed from you
+### 需要你拍板的
 - <decision 1>
 - <decision 2>
 
-Continue?
+继续吗？
 ```
 
-### 4. Failure handling
+### 4. 失败处理
 
-When a task execution fails:
+任务执行失败时：
 
-1. Trigger `systematic-debugging`: 4-phase root cause
-2. If the root cause is outside the plan, stop and ask the user
-3. Don't "muscle through"—after 3 failures, stop and reflect on the plan (2 failures triggers `systematic-debugging`, 3 failures triggers plan reflection; both thresholds are in `systematic-debugging`'s trigger timing)
+1. 触发 `systematic-debugging`：4-phase root cause
+2. 如果 root cause 在 plan 之外，停下来问用户
+3. 不"硬刚"——失败 3 次就停下来反思 plan（2 次触发 `systematic-debugging`、3 次反思 plan，两个阈值见 `systematic-debugging` 触发时机）
 
-## Relationship with Other Skills
+## 与其他 skill 的关系
 
-- Works with `requesting-code-review`: does review at checkpoints
+- 与 `requesting-code-review` 配合：checkpoint 时做 review

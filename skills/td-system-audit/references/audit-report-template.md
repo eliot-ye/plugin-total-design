@@ -1,70 +1,70 @@
-<!-- The second/third-level headings in this file (e.g. `## System Audit Report`, `### Keynote Comparison`) are dynamically read as report-completeness markers by hooks/td_state_sync.py's _load_report_markers — changing headings requires no sync with the hook, the hook follows automatically; but when deleting the "## Report Template" section or heavily restructuring headings, please confirm the hook can still extract headings from this file. -->
+<!-- 本文件的二/三级标题（如 `## System Audit 报告`、`### 主基调对照`）被 hooks/td_state_sync.py 的 _load_report_markers 动态读取为报告完整性 marker——改标题无需同步 hook，hook 自动跟随；但删除「## 报告模板」节或大改标题结构时，请确认 hook 仍能从本文件提取到标题。 -->
 
-# Audit Report Template and Keynote Comparison Checklist
+# Audit 报告模板与主基调对照清单
 
-## Keynote Comparison Checklist
+## 主基调对照清单
 
-For each audit object, audit item by item:
+对审计对象，逐条审计：
 
-### Keynote Principle 1: Systems Engineering
+### 主基调 1：系统工程
 
-- [ ] Does each local action in the current work consider its impact on the system as a whole?
-- [ ] Is the proposal's "systems-engineering impact assessment" section filled in conscientiously (including the "expected behavior model" field)?
-- [ ] Are there signs of "local optimum but global imbalance"?
-  - If yes → Step 6 triggers `human-in-loop` to let the general design department judge whether this is a genuine global imbalance or an acceptable local optimization (this workflow has no dedicated "global imbalance" constraint skill; this judgment must be made by the general design department).
+- [ ] 当前工作的每个局部动作，是否考虑了对系统整体的影响？
+- [ ] proposal 的"系统工程影响评估"节是否填得认真（含"预期行为模型"字段）？
+- [ ] 有没有"局部最优但全局失调"的迹象？
+  - 若有 → 步骤 6 触发 `human-in-loop`，让总体设计部判断这是真全局失调还是可接受的局部优化（本工作流没有专门的"全局失调"constraint skill，这个判断必须由总体设计部做）。
 
-### Keynote Principle 2: General Design Department
+### 主基调 2：总体设计部
 
-- [ ] Is the agent "making decisions itself that the user should make"? (violation → trigger `human-in-loop`)
-- [ ] Are there places where the "subsystem engineer's perspective" overrides the "general design department's perspective"?
+- [ ] agent 是否在"自己拍板应该由用户拍的事"？（违反 → 触发 `human-in-loop`）
+- [ ] 是否有"分系统工程师视角"压过"总体设计部视角"的地方？
 
-### Keynote Principle 3: Meta-Synthesis from Qualitative to Quantitative
+### 主基调 3：从定性到定量的综合集成
 
-- [ ] Are the decisions in design.md iterated from qualitative to quantitative, or made by gut feel?
-- [ ] Were reversible decisions closed prematurely? (violation → trigger `delay-decision`)
-- [ ] Was an "actual vs. expected" post-mortem review performed at archive time (including the "model validation" field)?
-- [ ] Is the proposal's "expected behavior model" explicitly validated in the archive's "model validation"? Is the model deviation recorded as "a correction for the next propose's prediction model"?
-  - This is the closing action of the meta-synthesis cycle — the "model" is the bridge that elevates qualitative judgment to quantitative understanding (see `system-engineering`'s "Four Keynote Principles," principle 3, "Model Carrier" section).
+- [ ] design.md 里的决策是从定性到定量迭代出来的，还是凭感觉拍的？
+- [ ] 可逆决策是否被过早闭合？（违反 → 触发 `delay-decision`）
+- [ ] archive 时是否做了"实际 vs 预期"复盘（含"模型验证"字段）？
+- [ ] proposal 的"预期行为模型"是否在 archive 的"模型验证"里被显式验证？模型偏差是否被记录为"下一个 propose 的预测模型修正"？
+  - 这是综合集成循环的闭合动作——"模型"是把定性判断上升到定量认识的桥梁（见 `system-engineering` 的「主基调四条」第 3 条「模型载体」节）。
 
-### Keynote Principle 4: Open Complex Giant System
+### 主基调 4：开放的复杂巨系统
 
-- [ ] Is the current profile/tier configuration appropriate for the project's reality?
-- [ ] Is there a tendency to treat a "complex giant system" as a "simple system" and force a solution?
-  - Too many changes open simultaneously (WIP exceeded) → Step 6 triggers `wip-limit` hard block + override
-  - Compressing the critical chain buffer → Step 6 triggers `critical-buffer`
-- [ ] **Layered view**: When the system internally has subsystem independent tiering, are subsystems audited separately by layer?
-  - Each subsystem has its own "local optimization creating global imbalance" risk
-  - Cross-subsystem dependency chains are cross-subsystem critical chains
-  - Does the audit report distinguish between "intra-subsystem imbalance" and "cross-subsystem boundary imbalance"?
+- [ ] 当前 profile/tier 配置是否符合项目实际？
+- [ ] 有没有把"复杂巨系统"当"简单系统"硬解？
+  - 同时开太多 change（WIP 超限）→ 步骤 6 触发 `wip-limit` 硬阻塞 + override
+  - 压缩关键链缓冲 → 步骤 6 触发 `critical-buffer`
+- [ ] **层次观**：当系统内部有子系统独立定 tier 时，是否按子系统层次分别审计？
+  - 每个子系统有自己的"局部优化制造全局失调"风险
+  - 跨子系统的依赖链是跨子系统的关键链
+  - audit 报告里是否区分了"子系统内部失调"和"跨子系统边界失调"？
 
-## Report Template
+## 报告模板
 
 ```markdown
-## System Audit Report
+## System Audit 报告
 
 ### Scope
 <current-change | project>
 
-### Keynote Comparison
+### 主基调对照
 
-| Keynote principle | Pass | Violation |
+| 主基调 | 通过 | 违反 |
 |---|---|---|
-| 1. Systems engineering | ✓ | — |
-| 2. General design department | — | ⚠ The agent made decision X itself |
-| 3. Meta-synthesis | ✓ | — |
-| 4. Open complex giant system | — | ⚠ Critical chain buffer compressed to 15% |
+| 1. 系统工程 | ✓ | — |
+| 2. 总体设计部 | — | ⚠ agent 在 X 决策上自己拍板了 |
+| 3. 综合集成 | ✓ | — |
+| 4. 复杂巨系统 | — | ⚠ 关键链缓冲被压缩到 15% |
 
-### Problems Found
+### 发现的问题
 
-1. **[Severe]** <problem description>
-   - Keynote principle violated: <...>
-   - Suggested remediation: <...>
+1. **[严重]** <问题描述>
+   - 违反的主基调：<...>
+   - 建议修复：<...>
 
-2. **[Reminder]** <problem description>
+2. **[提醒]** <问题描述>
    - ...
 
-### Suggested Next Actions
+### 建议的下一步动作
 
-1. <action 1>
-2. <action 2>
+1. <动作 1>
+2. <动作 2>
 ```

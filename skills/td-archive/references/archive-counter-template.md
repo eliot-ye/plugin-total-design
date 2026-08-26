@@ -1,10 +1,10 @@
-# archive-counter.yaml template
+# archive-counter.yaml 模板
 
-The persistent file maintained by `td-archive` Step 5.2. After each archive completes, read `openspec/.td-state/archive-counter.yaml`, increment `count` by 1, and write back. The file is created on-demand by this step on first run.
+`td-archive` 步骤 5.2 维护的持久化文件。每次 archive 完成后，读 `openspec/.td-state/archive-counter.yaml`，把 `count` +1，写回文件。文件由本步骤首次运行时按需创建。
 
-It only tracks the cumulative count + the last archive identifier; timestamp determination is uniformly handled via `audit-history.yaml` (see `td-system-audit`'s `references/audit-history-template.md`).
+只管累计 count + 最近一次 archive 标识，时间戳判定统一走 `audit-history.yaml`（见 `td-system-audit` 的 `references/audit-history-template.md`）。
 
 ```yaml
-count: <cumulative number of archived changes>
-last_archive_name: <name of the most recently archived change>
+count: <累计已 archive 的 change 数>
+last_archive_name: <最近 archive 的 change 名>
 ```

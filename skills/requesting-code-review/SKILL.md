@@ -1,105 +1,105 @@
 ---
 name: requesting-code-review
-description: Review between tasks, critical issues block progress. Serves systems-engineering keynote principle 2. Trigger scenario: architecture review after propose and before apply; at critical chain task / checkpoint moments; when the user requests a review.
+description: 任务间的 review，critical issue 阻塞进度。服务主基调第 2 条。触发场景：propose 后、apply 前架构 review；关键链任务 / checkpoint 时；用户要求 review 时。
 user-invocable: true
 ---
 
 # Requesting Code Review
 
-## Dependent Skills
+## 依赖技能
 
 - `human-in-loop`
 
-## Served Keynote Principle(s)
+## 服务的主基调原则
 
-**Systems-engineering keynote principle 2: General design department.** Review is not "finding bugs"; it is "the general design department doing a system-wide inspection of the subsystem engineer's work"—does this change conform to the system's overall design? Does it create new disharmony?
+**主基调第 2 条：总体设计部。** review 不是"找 bug"，是"总体设计部对分系统工程师的工作做系统全局检查"——这个改动符合系统总体设计吗？它制造了新的失调吗？
 
-## Trigger Timing
+## 触发时机
 
-- **After `td-propose` is complete, before `td-apply` starts (architecture review)**—the proposal has just been finalized, before entering implementation, first check the subsystem splitting and design decisions; this is when changing the architecture costs the least
-- At `executing-plans` checkpoint moments
-- After completing each critical chain task
-- When the user explicitly requests a review
+- **`td-propose` 完成后、`td-apply` 动手前（架构 review）**——proposal 刚定型，进入实施前先检查分系统切分与设计决策，此时改架构成本最低
+- `executing-plans` 的 checkpoint 时机
+- 每完成一个关键链任务
+- 用户显式要求 review
 
-## Working Style
+## 工作方式
 
-### 1. Review dimensions
+### 1. Review 维度
 
-For the code under review, look at it from two dimensions:
+对被 review 的代码，从两个维度看：
 
-#### Spec compliance
+#### Spec compliance（契约符合度）
 
-- Does the code implement the tasks in tasks.md?
-- Does the code conform to the design decisions in design.md?
-- Does the code violate the boundaries stated in the proposal's "systems-engineering impact assessment"?
+- 代码实现了 tasks.md 里的任务吗？
+- 代码符合 design.md 里的设计决策吗？
+- 代码违反了 proposal 的"系统工程影响评估"里说的边界吗？
 
-#### Code quality
+#### Code quality（代码质量）
 
-- Is naming clear?
-- Code duplication (DRY)?
-- Function length / complexity?
-- Is error handling complete?
-- Does test coverage cover boundary cases?
+- 命名清晰吗？
+- 重复代码（DRY）？
+- 函数长度 / 复杂度？
+- 错误处理完整吗？
+- 测试覆盖了边界情况吗？
 
-### 2. Issue severity
+### 2. Issue 分级
 
-| Severity | Meaning | Handling |
+| 严重度 | 含义 | 处理 |
 |---|---|---|
-| **critical** | Violates spec / severe bug / security issue | **Blocking**, must fix before continuing |
-| **warning** | Code quality issues, minor bugs | Should fix, can defer |
-| **nit** | Style, naming | Can ignore |
+| **critical** | 违反 spec / 严重 bug / 安全问题 | **阻塞**，必须修复才能继续 |
+| **warning** | 代码质量问题、次要 bug | 应修复，可延后 |
+| **nit** | 风格、命名 | 可忽略 |
 
-### 3. Review report
+### 3. Review 报告
 
 ```markdown
-## Code Review: <task name>
+## Code Review：<task name>
 
 ### Spec Compliance
-- [ ] Implementation conforms to tasks.md
-- [ ] Implementation conforms to design.md
-- [ ] Implementation conforms to proposal systems-engineering impact assessment boundaries
+- [ ] 实现符合 tasks.md
+- [ ] 实现符合 design.md
+- [ ] 实现符合 proposal 系统工程影响评估边界
 
 ### Code Quality
-- Naming: <OK / issue>
-- DRY: <OK / issue>
-- Error handling: <OK / issue>
-- Test coverage: <OK / issue>
+- 命名：<OK / 问题>
+- DRY：<OK / 问题>
+- 错误处理：<OK / 问题>
+- 测试覆盖：<OK / 问题>
 
 ### Issues
 
 1. **[critical]** <issue>
-   - Location: <file:line>
-   - Suggestion: <fix>
+   - 位置：<file:line>
+   - 建议：<fix>
 
 2. **[warning]** <issue>
    ...
 
 ### Verdict
-<can continue / must fix critical first>
+<可以继续 / 必须先修 critical>
 ```
 
-### 4. Critical blocking
+### 4. Critical 阻塞
 
-If there is a critical issue:
+如果有 critical issue：
 
-1. **Don't continue to the next task**
-2. Immediately fix the critical issue
-3. Re-review after fixing
+1. **不继续下一个任务**
+2. 立即修复 critical issue
+3. 修复后重新 review
 
-warnings don't block, but should be recorded in tasks.md's "known issues".
+warning 不阻塞，但要记录在 tasks.md 的"已知问题"里。
 
-### 5. Architecture review (after proposal, before apply)
+### 5. 架构 review（proposal 完成后、apply 前）
 
-The review target is not code, but the proposal's subsystem splitting and design decisions. This is when changing the architecture costs the least.
+review 对象不是代码，是 proposal 的分系统切分与设计决策。此时改架构成本最低。
 
-The checklist (high cohesion / low coupling) is in `references/architecture-review-checklist.md`. Severity and blocking semantics are as follows (shared with code review):
+检查清单（高内聚 / 低耦合）见 `references/architecture-review-checklist.md`。分级与阻塞语义如下（与 code review 共用）：
 
-- **critical**: bad subsystem splitting / circular dependencies / implicit dependencies—**blocks apply**, go back to propose to modify the proposal before continuing
-- **warning**: oversized interfaces, scattered responsibilities—record to the proposal, can defer
-- **nit**: naming etc.—can ignore
+- **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖——**阻塞 apply**，先回 propose 改 proposal 再继续
+- **warning**：接口偏大、职责偏散——记录到 proposal，可延后
+- **nit**：命名等——可忽略
 
-The critical of architecture review and the critical of code review both follow the "don't continue" rule—except here "don't continue" means don't enter task implementation.
+架构 review 的 critical 与 code review 的 critical 同样适用"不继续"规则——只是这里"不继续"意味着不进入任务实施。
 
-## Relationship with Other Skills
+## 与其他 skill 的关系
 
-- Works with `human-in-loop`: critical issues are fixed by the agent if it can; if it can't, trigger human-in-loop
+- 与 `human-in-loop` 配合：critical issue 是 agent 自己能修就修，修不了触发 human-in-loop

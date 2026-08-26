@@ -1,131 +1,131 @@
 ---
 name: td-archive
-description: Archive after completion. OpenSpec contract-layer entry. Trigger scenarios: user says "archive", "wrap up", "close out", "this change is done".
+description: 完成后归档。OpenSpec 契约层入口。触发场景：用户说"archive"、"wrap up"、"close out"、"这个 change 完成了"。
 user-invocable: true
 argument-hint: <change-name>
 ---
 
 # td-archive
 
-Archive the change after completion. Archiving is not deletion; it is the precipitation of "completed learnings."
+change 完成后归档。归档不是删除，是把"已完成的学习"沉淀下来。
 
-## Dependent Skills
+## 依赖技能
 
 - `system-engineering`
 - `field-assessment`
 
-## Served Keynote Principle(s)
+## 服务的主基调原则
 
-**Systems-engineering keynote principle 3: meta-synthesis from qualitative to quantitative.**
+**系统工程主基调第 3 条：从定性到定量的综合集成。**
 
-archive is not "checking all the boxes and wrapping up"; it is "completing one meta-synthesis cycle from expected to actual." The retrospective on "actual vs. expected" before archive is the closure of this cycle.
+archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集成循环"。archive 前对"实际 vs 预期"的复盘，是这个循环的闭合。
 
-**Systems-engineering keynote principle 2: general design department.**
+**系统工程主基调第 2 条：总体设计部。**
 
-Triggering a profile re-assessment after archive is the responsibility of the general design department: project state has changed, so the way of working must adjust accordingly.
+archive 后触发 profile 重新评估——这是总体设计部的职责：项目状态变化了，工作方式要跟着调整。
 
-**《Engineering Cybernetics》 feedback control loop aligned**: archive is the post-hoc error detection + correction link (the "actual vs. expected" retrospective is post-hoc error detection; the "model validation" field correction feeds the next propose's prediction model).
+**《工程控制论》反馈控制回路归位**：archive 是事后误差检测 + 校正环节（"实际 vs 预期"复盘是事后误差检测，"模型验证"字段修正下一个 propose 的预测模型）。
 
-## Input - name of the change to archive. If empty, infer or ask the user.
+## 输入 - 要 archive 的 change 名。空则推导或问用户。
 
 `$ARGUMENTS`
 
-## Steps
+## 步骤
 
-### Step 1. Activate keynote and configuration layer
+### 1. 激活主基调与配置层
 
-Activate keynote and configuration layer. Inject strength values only, without making judgments — execute the following three-step sequence:
+激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-1. **`system-engineering`** — The four keynote principles enter context. archive is not "checking all the boxes and wrapping up"; it is "completing one meta-synthesis cycle from expected to actual."
-2. **profile × tier identification** — Call `field-assessment`, read `$_TD_PROFILE` / `$_TD_TIER`, and load Table 1 + Table 2 + Table 3 (archive needs Table 3 to determine system-audit frequency triggers). Cache within the session; subsequent steps reference directly.
-3. **Other constraints** — Only read the strength values into context; do not judge whether to trigger in this step — subsequent steps judge whether to trigger / whether tasks comply based on these.
+1. **`system-engineering`** — 主基调四条进入上下文。archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集成循环"。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（archive 需要表 3 判定 system-audit 频率触发）。会话内缓存，后续步骤直接引用。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断是否触发 / tasks 是否合规。
 
-### Step 2. Pre-checks
+### 2. 前置检查
 
-- Are all tasks in `tasks.md` marked `[x]`?
-- Has `verification-before-completion` been run? — This includes both change-level + system-level (cross-subsystem boundary, when the proposal annotates affected subsystems) verification layers; missing either does not count as complete.
+- 所有 tasks.md 里的任务都 `[x]` 了吗？
+- `verification-before-completion` 跑过了吗？——含 change-level + 系统级（跨分系统边界，proposal 标注了受影响分系统时）两层验证，缺一层不算完成。
 
-### Step 3. Mandatory "actual vs. expected" retrospective (hard step)
+### 3. 强制"实际 vs 预期"复盘（硬步骤）
 
-Before archiving, you **must** add a section "actual systems-engineering impact vs. expected" in the change — checking against the proposal's "systems-engineering impact assessment" section (including the "expected behavior model" field), item by item per the table below:
+archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预期"——对照 proposal 的"系统工程影响评估"节（含"预期行为模型"字段），按下表逐字段复盘：
 
-| proposal side (expected) | archive side (actual) |
+| proposal 侧（预期） | archive 侧（实际） |
 |---|---|
-| which subsystems are affected | subsystems actually affected |
-| expected overall performance change | actual overall performance change |
-| is this a local optimization or global coordination | actually a local optimization or global coordination |
-| if local optimization, the risk of global失调 | actual global impact of the local optimization (keynote principle 1 post-hoc re-check) |
-| expected behavior model | model validation (does actual behavior validate the expected model) |
+| 影响哪些分系统 | 实际影响的分系统 |
+| 整体性能预期变化 | 实际整体性能变化 |
+| 这是局部优化还是全局协调 | 实际是局部优化还是全局协调 |
+| 如果是局部优化，对全局失调的风险 | 局部优化的实际全局影响（主基调第 1 条事后回检） |
+| 预期行为模型 | 模型验证（实际行为是否验证预期模型） |
 
-Supplementary fields (retrospective items not covered by the table):
+补充字段（表格未覆盖的复盘项）：
 
-- unexpected side effects (these become input for the subsequent `/td-system-audit`)
+- 预期之外的副作用（这是后续 `/td-system-audit` 的输入）
 
-**Model validation** field expansion:
+**模型验证**字段的展开：
 
-- If validation passes → model holds; record "expected behavior model validated."
-- If validation fails → model needs correction; record "expected behavior model vs. actual deviation: <deviation description>, model correction suggestion: <...>." This is the closure action of the meta-synthesis cycle — converting "the deviation found this time" into "a prediction model correction for the next propose" (see the "feedback control loop" section of `system-engineering`).
-- If the proposal did not fill in the "expected behavior model" field (legacy change compatibility) → skip this field and do the retrospective using only the first three fields. This fallback is only for legacy changes produced by old versions; new changes must fill this field in the proposal (`td-propose` Step 6.c), so this branch should theoretically never be reached.
+- 如果验证通过 → 模型成立，记录"预期行为模型已验证"。
+- 如果验证失败 → 模型需要修正，记录"预期行为模型与实际偏差：<偏差描述>，模型修正建议：<...>"。这是综合集成循环的闭合动作——把"这次发现的偏差"转化为"下一个 propose 的预测模型修正"（见 `system-engineering` 的「反馈控制回路」节）。
+- 如果 proposal 没填"预期行为模型"字段（旧 change 兼容）→ 跳过本字段，仅用前三个字段做复盘。本兜底仅兼容旧版本产生的旧 change；新 change 的 proposal 必填此字段（`td-propose` 步骤 6.c），理论上不应走到本分支。
 
-The retrospective has two comparison sources, stacked by the principle "use if present, degrade if absent":
+复盘的对照源有两个，按"有则用、缺则降级"原则叠加：
 
-1. **proposal's "systems-engineering impact assessment" section** — always present (mandatory propose item); the primary anchor on the "expected" side.
-2. **main spec baseline under `openspec/specs/`** — if the subsystem modified by this change has a baseline in `openspec/specs/<subsystem>/spec.md` deposited by reverse-spec or a prior archive sync, use that baseline as one of the comparison sources for "the real state before the change." The retrospective must answer: "does the change's spec delta break any contract / invariant declared in the baseline?" **Baseline does not exist** (greenfield first change, or the subsystem was never reverse-spec'd) → skip this comparison source and do the retrospective using only the proposal's self-description; do not block archive.
+1. **proposal 的"系统工程影响评估"节** —— 永远存在（propose 必填项），是"预期"侧的主锚点。
+2. **`openspec/specs/` 下的主 spec baseline** —— 若该 change 改动的分系统在 `openspec/specs/<subsystem>/spec.md` 有 reverse-spec 或前序 archive sync 沉淀的 baseline，把 baseline 作为"改之前真实状态"的对照源之一，复盘要回答"change 的 spec delta 是否破坏了 baseline 声明的契约 / 不变量"。**baseline 不存在**（greenfield 首个 change、或该分系统从未被 reverse-spec）→ 跳过本对照源，仅用 proposal 自述做复盘，不阻塞 archive。
 
-Without this section, archive refuses to continue. This is the data source for `/td-system-audit`'s "actual vs. expected" audit — the loop must close.
+没这一节，archive 拒绝继续。这是 `/td-system-audit` "实际 vs 预期"审计的数据来源——闭环必须闭合。
 
-### Step 4. archive (including sync)
+### 4. archive（含 sync）
 
 ```bash
 openspec archive "<name>"
 ```
 
-`openspec archive` does two things:
-1. Moves the change from `openspec/changes/` to `openspec/changes/archive/`
-2. Automatically syncs the spec delta produced by the change to the main spec
+`openspec archive` 会做两件事：
+1. 把 change 从 `openspec/changes/` 移到 `openspec/changes/archive/`
+2. 自动把 change 产生的 spec delta sync 到主 spec
 
-If you only want to archive without syncing specs (infra / doc-only change), add `--skip-specs`.
+如果只想归档不同步 specs（infra / doc-only change），加 `--skip-specs`。
 
-**TODO sub-item check-off after successful archive**: Follow the `references/todo-format.md` "check-off timing" rules from `td-propose` — read `openspec/todo.md`, find the parent entry containing a `change: <name>` sub-item, check off the corresponding sub-item; if **all sub-items under the parent entry are checked off** → check off the parent entry `[x]`; if **some sub-items remain unchecked** → keep the parent entry as `- [ ]`. If the corresponding sub-item or file cannot be found → skip; do not proactively create a file.
+**归档成功后 TODO 子项勾选**：按 `td-propose` 的 `references/todo-format.md`「勾选时机」规则操作——读 `openspec/todo.md`，查找含 `change: <name>` 子项的主条目，勾选对应子项；主条目下**全部子项都已勾选** → 主条目勾选 `[x]`；**仍有子项未勾选** → 主条目保持 `- [ ]`。找不到对应子项或文件不存在 → 跳过，不主动创建文件。
 
-**Purpose TBD housekeeping check**: When `openspec archive` syncs the main spec, the newly generated main spec `## Purpose` section retains the td-archive template default `TBD - created by archiving change <name>. Update Purpose after archive.` — this is a known sync side effect, and TBD must not be left to the next audit. Immediately after sync completes, execute the sub-flow per `references/purpose-tbd-housekeeping.md` (read the affected main specs → grep `^TBD - created by archiving` → if hit, write a one-sentence Purpose within this step → grep again to confirm no residual TBD).
+**Purpose TBD housekeeping 检查**：`openspec archive` sync 主 spec 时，新生成的主 spec `## Purpose` 节会保留 td-archive 模板默认值 `TBD - created by archiving change <name>. Update Purpose after archive.`——这是已知的 sync 副作用，不能让 TBD 残留到下一次 audit。sync 完成后立即按 `references/purpose-tbd-housekeeping.md` 执行子流程（读涉及主 spec → grep `^TBD - created by archiving` → 命中则本步骤内补写一句话 Purpose → 再次 grep 确认无残留）。
 
-### Step 5. Post-archive follow-up actions
+### 5. archive 后接力动作
 
-archive is the "closure point" of the contract layer; it must trigger three follow-up relays (executed in sequence):
+archive 是契约层的"闭合点"，必须触发三个后续接力（顺序执行）：
 
-#### 5.1 profile/tier re-assessment
+#### 5.1 profile/tier 重新判读
 
-After archiving one change, the project's profile may change (greenfield moving to maintenance, or brownfield entering a major refactor). **Mandatory: re-call `field-assessment`'s "identification flow" section** to re-assess `$_TD_PROFILE` / `$_TD_TIER`. The re-assessment strategy is in `field-assessment`'s `references/identification-flow.md` "### 4. Cache assessment results" section, "re-assessment strategy" paragraph — read that paragraph and execute; this section does not repeat it.
+archive 完一个 change 后，项目的 profile 可能变化（greenfield 走到 maintenance，或 brownfield 进入大重构）。**强制重新调用 `field-assessment` 的「识别流程」节**，重新判读 `$_TD_PROFILE` / `$_TD_TIER`。重判策略见 `field-assessment` 的 `references/identification-flow.md`「### 4. 缓存判读结果」节的"重判策略"段——读到该段执行，本节不重复。
 
-If the new assessment differs from the Step 1 cache:
+如果新判读结果与步骤 1 缓存的不同：
 
-- Update the session cache to the new profile/tier
-- Prompt the user: "Project state has changed from `<old-profile>` × `<old-tier>` to `<new-profile>` × `<new-tier>`. Subsequent constraint strengths follow the new configuration."
+- 更新会话缓存为新 profile/tier
+- 提示用户："项目状态已从 `<old-profile>` × `<old-tier>` 变为 `<new-profile>` × `<new-tier>`。后续 constraint 强度按新配置走。"
 
-If the assessment matches the cache → skip the prompt; do not bother the user.
+判读结果与缓存一致 → 跳过提示，不骚扰用户。
 
-#### 5.2 system-audit frequency trigger check
+#### 5.2 system-audit 频率触发检查
 
-archive is the event of "completing one change," which aligns exactly with Table 3 (system-audit frequency, see `field-assessment/references/audit-frequency.md`).
+archive 是"完成一个 change"的事件，正好对照表 3（system-audit 频率，见 `field-assessment/references/audit-frequency.md`）。
 
-**Persistent counter**: After each archive completes, read `openspec/.td-state/archive-counter.yaml`, increment `count` by 1, and write back. The file format is in `references/archive-counter-template.md`; the file is created on-demand by this step on first run.
+**持久化计数器**：每次 archive 完成后，读 `openspec/.td-state/archive-counter.yaml`，把 `count` +1，写回文件。文件格式见 `references/archive-counter-template.md`，文件由本步骤首次运行时按需创建。
 
-**Threshold determination** (frequency numbers always from Table 3's project scope column):
+**达阈值判定**（频率数字一律查表 3 的 project scope 列）：
 
-| tier | driving source | determination method | when file does not exist |
+| tier | 驱动源 | 判定方式 | 文件不存在时 |
 |---|---|---|---|
-| `tier-small` / `tier-medium` | count-driven | `archive-counter.yaml`'s `count` ≥ Table 3 threshold | treat as `count: 0`, then add 1 for this event and re-evaluate |
-| `tier-large` | time-driven | most recent `scope: project` entry in `audit-history.yaml`, its `timestamp` is ≥ Table 3 threshold (one week) from now | treat as never having run a project audit; directly determine threshold reached |
+| `tier-small` / `tier-medium` | count 驱动 | `archive-counter.yaml` 的 `count` ≥ 表 3 阈值 | 视为 `count: 0`，本事件 +1 后再判 |
+| `tier-large` | 时间驱动 | `audit-history.yaml` 最近一条 `scope: project` 的 `timestamp` 距今 ≥ 表 3 阈值（一周） | 视为从未跑过 project audit，直接判达阈值 |
 
-Threshold reached → **proactively suggest** the user run `/td-system-audit project`; this is not mandatory, but rather "per keynote principle 2's general design department responsibility, it's time for a periodic self-check." Both files are created on-demand by this step on first run.
+达阈值 → **主动建议**用户跑 `/td-system-audit project`，不是强制，是"按主基调第 2 条总体设计部职责，该周期性自检了"。两个文件均由本步骤首次运行时按需创建。
 
-#### 5.3 WIP release check
+#### 5.3 WIP 释放检查
 
-After archiving, the number of active changes decreases. If there was a new change previously blocked due to the WIP limit, prompt the user: "WIP released (currently active `<n>` / limit `<limit>`), you can now `/td-propose` the X you wanted to do before."
+归档后，活跃 change 数减少。如果之前有因 WIP 限制阻塞的新 change，提示用户："WIP 释放了（当前活跃 `<n>` / 上限 `<limit>`），可以 `/td-propose` 之前想做的 X 了。"
 
 ## Guardrails
 
-- **Read-only after archiving**: files under `openspec/changes/archive/` are never modified
-- Must verify change completeness before archiving (all tasks done, all artifacts present)
-- Do not archive a change that is still in progress — if there are unfinished tasks, first ask the user whether to continue completing them or abandon them
+- **归档后只读**：`openspec/changes/archive/` 下的文件永远不修改
+- archive 前必须验证 change 完整性（所有任务 done、所有 artifact 存在）
+- 不要 archive 一个还在进行中的 change——如果有未完成任务，先问用户是继续完成还是放弃

@@ -1,99 +1,99 @@
 ---
 name: td-explore
-description: A low-stakes thinking partner — explore before writing code. The OpenSpec contract-layer entry point and the primary entry when requirements are unclear. Trigger scenarios: the user says "want to explore", "explore", "let me think first", "not sure what to build", "help me think through X". When the user wants to build/fix/refactor but the requirements are unclear, route here first; brainstorming is activated within this flow.
+description: 不带 stakes 的思考伙伴，写代码前先探索。OpenSpec 契约层入口，需求不清时的主入口。触发场景：用户说"想探索"、"explore"、"先想想"、"不确定要建什么"、"帮我想清楚 X"。用户想 build/fix/重构但需求不清时，优先路由到这里；brainstorming 在本流程内被激活。
 user-invocable: true
 argument-hint: <topic or question>
 ---
 
 # td-explore
 
-Does not create a change, does not write artifacts — just **explores**. When the user is not yet sure what to build, the agent helps them think it through.
+不创建 change、不写 artifact，只是**探索**。在用户还不确定要建什么的时候，agent 帮用户想清楚。
 
-## Dependent Skills
+## 依赖技能
 
 - `system-engineering`
 - `field-assessment`
 
-## Served Keynote Principle(s)
+## 服务的主基调原则
 
-**Systems-engineering keynote principle 2: the general design department.**
+**系统工程主基调第 2 条：总体设计部。**
 
-explore is the work of the general design department in the "thinking" phase — not subsystem engineers directly getting hands-on, but first exploring from a system-wide standpoint.
+explore 是总体设计部在"想"的阶段的工作——不是分系统工程师直接动手，是先在系统全局立场上探索。
 
-**Systems-engineering keynote principle 4: open complex giant system.**
+**系统工程主基调第 4 条：开放的复杂巨系统。**
 
-explore does not simplify and reduce problems; it allows contradictions to coexist, which is respect for complex giant systems.
+explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的尊重。
 
-**Engineering Cybernetics feedback control loop placement**: explore is the feedforward control preparation stage (collecting prior information for propose's control target, reducing prediction error).
+**《工程控制论》反馈控制回路归位**：explore 是前馈控制准备环节（为 propose 的控制目标收集先验信息、降低预测误差）。
 
-## Input - the topic, question, or idea the user wants to explore
+## 输入 - 用户想探索的话题、问题、想法
 
-**Exploration scope is limited to this project.**
+**探索范围限定在本项目内。**
 
-#### Content
+#### 内容
 
 `$ARGUMENTS`
 
-## Steps
+## 步骤
 
-### Step 1. Activate keynote and configuration layer
+### 1. 激活主基调与配置层
 
-Activate the keynote and configuration layer. Only inject strengths without making judgments; execute the following three-step sequence:
+激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-1. **`system-engineering`** — The four keynote principles enter the context.
-2. **profile × tier identification** — Call `field-assessment`, read `$_TD_PROFILE` / `$_TD_TIER`, load Table 1 + Table 2. The profile determines explore's emphasis (greenfield emphasizes candidate directions, brownfield emphasizes "impact of touching old code", maintenance emphasizes "production stability").
-3. **Remaining constraints** — Only read strength values into context; do not judge whether they trigger in this step.
+1. **`system-engineering`** — 主基调四条进入上下文。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2。profile 决定 explore 的侧重点（greenfield 重候选方向，brownfield 重"动老代码的影响"，maintenance 重"生产稳定性"）。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
-### Step 2. Read site context (config.yaml context)
+### 2. 读现场背景（config.yaml context）
 
-Same guided flow as `td-propose` Step 2: read the `context` field of `openspec/config.yaml` as the exploration site context; if empty or template default, ask all three questions (tech stack / conventions / domain) at once and write the answers into the `context` field. One-time investment; subsequent `/td-propose` / `/td-explore` calls all read it. User skips → leave empty, continue to Step 3 (non-blocking).
+与 `td-propose` 步骤 2 同一引导流程：读 `openspec/config.yaml` 的 `context` 字段作为探索现场背景；若为空或模板默认值，一次问完 tech stack / conventions / domain 三个问题，答案写入 `context` 字段。一次性投入，后续 td-propose / td-explore 都能读到。用户跳过 → 保持空，继续步骤 3（不阻塞）。
 
-### Step 3. Read existing context
+### 3. 读现有 context
 
-- Read the project's current state (git log, package.json, directory structure)
-- Read relevant existing specs (under `openspec/specs/`)
-- Read relevant existing changes (under `openspec/changes/`)
-- Read unchecked entries (`- [ ]`) from `openspec/todo.md` — this is the project-level candidate pool, serving as candidate direction input for exploration; file doesn't exist → skip, treat as empty pool
+- 读项目当前状态（git log、package.json、目录结构）
+- 读相关已有 spec（在 `openspec/specs/` 下）
+- 读相关已有 change（在 `openspec/changes/` 下）
+- 读 `openspec/todo.md` 的未勾选条目（`- [ ]`）——这是项目级候选池，作为探索的候选方向输入；文件不存在 → 跳过，视为空池
 
-### Step 4. Brainstorm
+### 4. 头脑风暴
 
-Invoke the Step 1–4 working method of the `brainstorming` skill — **do not execute** brainstorming's Steps 5–6 (staged confirmation, saving spec document): explore does not persist spec to disk; results are delivered in conversational form (see Step 6). If the user requests persisting exploration results as a spec draft, suggest running `/td-propose` (brainstorming's save step is executed there).
+调用 `brainstorming` skill 的 1–4 步工作方式——**不执行** brainstorming 的第 5–6 步（分段确认、保存 spec 文档）：explore 阶段不落盘 spec，成果以对话形式交付（见步骤 6）。若用户要求把探索结果落盘为 spec 草稿，提示走 `/td-propose`（brainstorming 的保存步骤在那里执行）。
 
-**Artifact requirements**: the explore stage must produce **at least 2 candidate directions**, each annotated with systems-engineering impact (which subsystems are affected / expected overall performance change / reversibility). The artifacts stay in the session context (explore does not persist spec to disk; see Step 6 Guardrails). `/td-propose` Step 3's "greenfield explore check" reads session history to determine whether ≥2 candidate directions already exist — fewer than 2 will cause the propose stage to block and require exploring first.
+**产物要求**：explore 阶段必须产出**至少 2 个候选方向**，每个标注系统工程影响（影响哪些分系统 / 整体性能预期变化 / 可逆性）。产物留在会话上下文里（explore 不落盘 spec，见步骤 6 的 Guardrails）。`/td-propose` 步骤 3 的"greenfield explore 检查"会读会话历史判定是否已有 ≥2 个候选方向——少于 2 个时 propose 阶段会拦下来要求先 explore。
 
-**Connection to `delay-decision`**: explore's "do not persist spec to disk" is essentially delaying the decision — not closing the spec, waiting for more information before proposing. When the user wants to "hurry up and propose to close the spec", trigger `delay-decision` to remind: "explore not persisting spec to disk is an expression of delayed decision-making; forcefully closing with insufficient information loses information (keynote principle 3, meta-synthesis)." This coordinates with `/td-propose` Step 3's "greenfield explore check" — greenfield projects explore first, then propose.
+**与 `delay-decision` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策——不闭合 spec，等更多信息再 propose。当用户想"赶紧 propose 闭合 spec"时，触发 `delay-decision` 提醒："explore 不落盘 spec 是延迟决策的体现，信息不足时强行闭合会损失信息（主基调第 3 条综合集成）。"这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
 
-### Step 5. Systems-engineering perspective assessment
+### 5. 系统工程视角评估
 
-For each candidate direction, assess:
+对每个候选方向，评估：
 
-- Which subsystems are affected
-- Expected overall performance change
-- Is this local optimization or global coordination
-- Risk to global coherence from local optimization
+- 影响哪些分系统
+- 整体性能预期变化
+- 是局部优化还是全局协调
+- 局部优化对全局失调的风险
 
-Assessment emphasis is adjusted by the `$_TD_PROFILE` read in Step 1:
+评估侧重按步骤 1 判读的 `$_TD_PROFILE` 调整：
 
-- `profile-greenfield`: emphasize **trade-offs and reversibility** of candidate directions — no legacy constraints, low cost of choosing the wrong direction, but use `delay-decision` to avoid the two traps of "build as soon as you think of it" and "perfect the architecture first"
-- `profile-brownfield`: emphasize **impact of touching old code** — which legacy subsystems will candidate directions touch, can the change scope be minimized, whether it triggers common contract changes (compare with `human-in-loop`'s mandatory-stop scenarios)
-- `profile-maintenance`: emphasize **production stability** — the impact of candidate directions on live contracts, deployment pipeline, regression tests, whether you need to stop and ask the user before changing the production environment
+- `profile-greenfield`：重候选方向的**取舍与可逆性**——没有存量约束，方向选错成本低，但要用 `delay-decision` 避免"想到了就建"和"先把架构设计完美"两个陷阱
+- `profile-brownfield`：重**动老代码的影响**——候选方向会触碰哪些存量分系统、改动范围能否最小化、是否触发公共契约变更（对照 `human-in-loop` 的必停场景）
+- `profile-maintenance`：重**生产稳定性**——候选方向对线上契约、部署 pipeline、回归测试的影响，是否需要在生产环境改动前停下问用户
 
-### Step 6. Summarize for the user
+### 6. 总结给用户看
 
-Present naturally what you've helped the user clarify, so they can see your understanding of the problem, the options you've found, and where things are still stuck. The rough structure below is for reference; adjust based on the actual conversation, don't be rigid:
+把你帮用户理清的内容自然地呈现出来，让用户清楚你对问题的理解、你发现了哪些选项、还卡在哪里。大致结构供参考，根据实际对话调整，不用拘泥：
 
-- **Current understanding**: restate the user's problem, confirm you understood it correctly
-- **Candidate directions**: each direction annotated with system impact
-- **Unresolved contradictions**: conflict points exposed in the conversation
-- **Suggested next step**: toward propose or continue exploring
+- **当前理解**：复述用户问题，确认理解对了
+- **候选方向**：每个方向标注系统影响
+- **未解决的矛盾**：对话中暴露的冲突点
+- **建议的下一步**：通向 propose 或继续探索
 
-### Step 7. Write exploration results to the pool (optional)
+### 7. 探索成果落池（可选）
 
-When exploration produces new directions that the user endorses but does not want to propose immediately, suggest writing them into the `## Todo` section of `openspec/todo.md` (entries as `- [ ] one-sentence description`; format per `td-propose`'s `references/todo-format.md`). File doesn't exist → ask the user whether to create it (exploration output would be the first candidate in a new pool). This is "write it down when you think of it, don't rush to create a change" — adding to the pool doesn't consume WIP; pick from the pool when running `td-propose`. User declines → skip, non-mandatory.
+探索产生了用户认可、但暂不立即 propose 的新方向时，建议写入 `openspec/todo.md` 的待办节（条目为 `- [ ] 一句话描述`，格式见 `td-propose` 的 `references/todo-format.md`）。文件不存在 → 问用户是否创建（探索产出是新池的第一个候选）。这是"想到了先记下来，别急着建 change"——记入池不占 WIP，等 `td-propose` 时从池里挑。用户拒绝落池 → 跳过，不强制。
 
 ## Guardrails
 
-- Do not create any change files
-- Do not modify code
-- Ideas in the conversation are allowed to contradict; don't rush to make them self-consistent
-- If the user wants to jump directly to propose, remind: "explore is for figuring out what to build; skipping it might lead you to propose the wrong direction. But you're the boss — if you say skip, we skip."
+- 不创建任何 change 文件
+- 不修改代码
+- 对话中的想法允许矛盾，不急着自洽
+- 如果用户想直接跳到 propose，提醒："explore 是为了想清楚建什么，跳过可能让你 propose 错方向。但你是 boss，你说跳就跳。"

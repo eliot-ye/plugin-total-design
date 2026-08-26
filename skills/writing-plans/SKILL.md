@@ -1,77 +1,77 @@
 ---
 name: writing-plans
-description: Break work into bite-sized tasks, annotating each task with its impact on subsystems. Serves systems-engineering keynote principle 1. Trigger scenario: user says "list a plan", "break down tasks", "plan it out", or during propose when building the tasks.md skeleton, or during apply when refining tasks.
+description: 把工作拆成 bite-sized 任务，每个任务标注对分系统的影响。服务主基调第 1 条。触发场景：用户说"列个计划"、"拆任务"、"规划一下"，或 propose 建 tasks.md 骨架、apply 细化任务时。
 user-invocable: true
 ---
 
 # Writing Plans
 
-## Dependent Skills
+## 依赖技能
 
 - `critical-buffer`
 - `delay-decision`
 - `field-assessment`
 - `requesting-code-review`
 
-(`test-driven-development` consumes the risk fields annotated by this skill, but this skill does not depend on it—it is not listed as a dependency skill to avoid a circular dependency with `test-driven-development`'s dependency skills section.)
+（`test-driven-development` 消费本 skill 标注的风险字段，但本 skill 不依赖它——它不列入依赖技能，避免与 `test-driven-development` 的依赖技能节构成循环依赖。）
 
-## Served Keynote Principle(s)
+## 服务的主基调原则
 
-**Systems-engineering keynote principle 1: Systems engineering.** Every task must not only look at itself; it must annotate "which subsystems this local action affects".
+**主基调第 1 条：系统工程。** 每个任务不能只看自己，必须标注"这个局部动作影响哪些分系统"。
 
-## Boundary with td-propose / td-apply
+## 与 td-propose / td-apply 的边界
 
-tasks.md is completed in two stages:
+tasks.md 分两个阶段完成：
 
-1. **`/td-propose` stage**: Create the tasks.md skeleton—task sequence + critical chain annotations + project buffer (per the `critical-buffer` skill's rules). This is the "implementation plan" part of the proposal.
-2. **`/td-apply` stage**: If the tasks.md granularity is still not fine enough, this skill is triggered again to refine.
+1. **`/td-propose` 阶段**：创建 tasks.md 骨架——任务序列 + 关键链标注 + project buffer（按 `critical-buffer` skill 的规则）。这是 proposal 的"实施计划"部分。
+2. **`/td-apply` 阶段**：若 tasks.md 粒度还不够细，本 skill 再次触发细化。
 
-Critical chain annotations are completed in the propose stage; the apply stage only does validation and refinement.
+关键链标注在 propose 阶段完成，apply 阶段只做校验和细化。
 
-## Trigger Timing
+## 触发时机
 
-- `/td-propose` stage: spec already exists, needs to be broken into a tasks.md skeleton
-- `/td-apply` stage: tasks.md already exists but the granularity is not fine enough
+- `/td-propose` 阶段：已有 spec，需要拆成 tasks.md 骨架
+- `/td-apply` 阶段：tasks.md 已存在但粒度不够细
 
-## Working Style
+## 工作方式
 
-### 1. Task splitting order: by system hierarchy first, then by time granularity
+### 1. 任务切分顺序：先按系统层次，再按时间粒度
 
-Qian Xuesen's systems engineering emphasizes the "hierarchical structure of systems" (systems-engineering keynote principle 4, "Hierarchy View"). Task decomposition should be done by hierarchy, not by flat time-granularity slicing.
+钱学森系统工程强调"系统的层次结构"（主基调第 4 条「层次观」）。任务分解应按层次进行，而不是按时间粒度平面切分。
 
-**Splitting order**:
+**切分顺序**：
 
-1. **First split by subsystem boundaries**: corresponds to `td-reverse-spec`'s subsystem splitting. One group of tasks per subsystem.
-2. **Then split by hierarchy within each subsystem**: top-level architecture → module design → implementation details. Within the same subsystem, top-level architecture tasks precede module design tasks, and module design tasks precede implementation detail tasks.
-3. **Finally check the time granularity of each task**: each task should be of a size the agent can complete in one go (2–5 minutes). Tasks that are too coarse continue to be split down by hierarchy.
+1. **先按分系统边界切分**：对应 `td-reverse-spec` 的分系统切分。每个分系统一组任务。
+2. **再按分系统内部的层次切分**：顶层架构 → 模块设计 → 实现细节。同一分系统内，顶层架构任务先于模块设计任务，模块设计任务先于实现细节任务。
+3. **最后检查每个任务的时间粒度**：每个任务应该是 agent 一次能做完的粒度（2–5 分钟可完成）。粒度太大的任务继续按层次往下拆。
 
-**Counter-examples**:
+**反面例子**：
 
-- ❌ "Put all UI changes in one group, all API changes in another group"—slicing by technology layer, breaking subsystem boundaries.
-- ✅ "auth subsystem: first modify the token validation module, then modify the session module; payment subsystem: first modify the order module, then modify the refund module"—slicing by subsystem boundary + hierarchy within subsystems.
+- ❌ "把所有 UI 改动放一组，所有 API 改动放一组"——按技术层切分，破坏了分系统边界。
+- ✅ "auth 分系统：先改 token 验证模块，再改 session 模块；payment 分系统：先改订单模块，再改退款模块"——按分系统边界 + 分系统内部层次切分。
 
-**Splitting rule when subsystems independently determine tiers**: When `field-assessment`'s identification flow allows subsystems to independently determine tiers, this skill's task splitting is broken down by subsystem hierarchy—each subsystem gets its own sub-task sequence, and inter-subsystem dependency tasks form the cross-subsystem critical chain. Execution rules are in `field-assessment`'s `references/subsystem-tiering.md`.
+**子系统独立定 tier 时的切分规则**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，本 skill 的任务切分按子系统层次分别拆——每个子系统一份子任务序列，子系统之间的依赖任务是跨子系统的关键链。执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
 
-### 2. Required fields for each task
+### 2. 每个任务必填字段
 
-The field template and risk-level determination are in `references/task-template.md` (five fields: file / risk / verification / subsystem impact / dependency + high/medium/low determination criteria).
+字段模板与风险等级判定见 `references/task-template.md`（文件 / 风险 / 验证 / 分系统影响 / 依赖 五个字段 + high/medium/low 判定标准）。
 
-Every task must carry a `risk` field (high / medium / low)—`test-driven-development` uses this to decide test intensity, and `requesting-code-review` uses it to decide review depth.
+每个任务必须带 `风险` 字段（high / medium / low）——`test-driven-development` 据此决定测试强度，`requesting-code-review` 据此决定 review 深度。
 
-### 3. Annotate the critical chain
+### 3. 标注关键链
 
-Use the `critical-buffer` skill's rules to annotate the critical chain path + project buffer in tasks.md.
+用 `critical-buffer` skill 的规则，在 tasks.md 里标注关键链路径 + project buffer。
 
-### 4. Don't write "deal with it later"
+### 4. 不写"以后再说"
 
-All tasks must either be in tasks.md or explicitly marked `[out of scope]`. "Deal with it later" is where plan rot begins.
+所有任务要么在 tasks.md 里，要么显式标 `[out of scope]`。"以后再说"是 plan 的腐烂开始。
 
-## Relationship with Other Skills
+## 与其他 skill 的关系
 
-- Works with `delay-decision`: if a reversible decision is encountered in the plan, mark it `[deferred decision]` instead of forcing a call
-- Works with `field-assessment`: when `field-assessment`'s identification flow allows subsystems to independently determine tiers, this skill's task splitting should **break down tasks by subsystem hierarchy**—each subsystem has its own task sequence, and inter-subsystem dependency tasks form the cross-subsystem critical chain.
+- 与 `delay-decision` 配合：plan 里如果遇到可逆决策，标 `[延迟决策]` 而不是强行拍
+- 与 `field-assessment` 配合：当 `field-assessment` 识别流程允许子系统独立定 tier 时，本 skill 的任务切分应**按子系统层次分别拆任务**——每个子系统有自己的任务序列，子系统之间的依赖任务是跨子系统的关键链。
 
-## What Not to Do
+## 不做的事
 
-- Don't write a "high-level plan"—the plan must be fine-grained enough for the agent to execute directly
-- Don't label all tasks as "critical chain"—the critical chain is the longest path, not all paths
+- 不写"high-level plan"——plan 要细到 agent 能直接执行
+- 不把所有任务都标"关键链"——关键链是最长路径，不是所有路径

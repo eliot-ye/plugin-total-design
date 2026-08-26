@@ -1,64 +1,64 @@
 ---
 name: wip-limit
-description: Limit the number of simultaneously active changes. Serves systems-engineering keynote principle 4: open complex giant systems cannot be force-solved in parallel.
+description: 限制同时活跃的 change 数量。服务系统工程主基调第 4 条"开放的复杂巨系统不能并行硬解"。
 user-invocable: false
 ---
 
-# WIP Limit
+# WIP 限制
 
-## Dependent Skills
+## 依赖技能
 
 - `brooks-law`
 - `critical-buffer`
 - `human-in-loop`
 - `field-assessment`
 
-## Served Keynote Principle(s)
+## 服务的主基调原则
 
-**Systems-engineering keynote principle 4: Open Complex Giant System.** A complex giant system cannot be force-solved in parallel. Opening too many changes at once means their mutual interactions cannot all be held by the agent simultaneously — every change gets abandoned halfway, and overall performance declines.
+**系统工程主基调第 4 条：开放的复杂巨系统。** 复杂巨系统不能并行硬解。同时开太多 change，彼此的相互作用无法被 agent 同时持有——每个 change 都半途而废，整体性能下降。
 
-"Cannot be force-solved in parallel" is a hard constraint, not a suggestion — violation means system imbalance. But Qian Xuesen's systems engineering also respects the "triggered not forced" philosophy: the hard constraint blocks by default, is relaxed when the user explicitly overrides, and triggers an additional mandatory reminder upon override.
+"不能并行硬解"是硬约束，不是建议——违反即系统失调。但钱学森系统工程也尊重"触发式而非强制"哲学：硬约束默认阻塞，用户显式 override 时松绑，override 时触发额外强制提醒。
 
-## Rules
+## 规则
 
-The upper limit on simultaneously active changes is taken from the wip-limit row of Table 1 for the current tier (Table 1 is in `field-assessment/references/strength-matrix.md`).
+同时活跃的 change 数量上限按当前 tier 查表 1 的 wip-limit 行取值（表 1 见 `field-assessment/references/strength-matrix.md`）。
 
-"Active" definition: a change that has been `/td-propose`-d but not yet `/td-archive`-d.
+"活跃"定义：已经 `/td-propose` 但还没 `/td-archive` 的 change。
 
-### Hard Constraint + Override Mechanism
+### 硬约束 + override 机制
 
-The WIP upper limit is a hard constraint; violation must have control-flow consequences. Execution rules:
+WIP 上限是硬约束，违反必须有控制流后果。执行规则：
 
-1. **Detect:** `/td-propose` or `/td-apply` reads the current number of active changes during its pre-check and compares it to the wip-limit upper limit.
-2. **Below the limit:** continue execution.
-3. **At the limit (default hard block):**
-   - Block the current `/td-propose` or `/td-apply`; do not execute subsequent steps.
-   - Tell the user: "Under tier-XXX the WIP limit is N, and there are currently N active. Force-solving a complex giant system in parallel creates global imbalance (keynote principle 4)."
-   - Offer two options: (a) `/td-archive` one first, then propose/apply; (b) explicitly override.
-   - Wait for the user's decision.
-4. **Override flow (when the user chooses to override)** — this skill is the single orchestration point for the override loop; the sub-step sequence is as follows:
+1. **检测**：`/td-propose` 或 `/td-apply` 在前置检查时，读当前活跃 change 数与 wip-limit 上限对比。
+2. **未达上限**：继续执行。
+3. **已达上限（默认硬阻塞）**：
+   - 阻塞当前 `/td-propose` 或 `/td-apply`，不执行后续步骤。
+   - 告诉用户："tier-XXX 下 WIP 上限是 N，当前活跃 N 个。并行硬解复杂巨系统会制造全局失调（主基调第 4 条）。"
+   - 给出两个选项：(a) 先 `/td-archive` 一个再 propose/apply；(b) 显式 override。
+   - 等待用户决策。
+4. **override 流程（用户选 override 时）**——本 skill 是 override 回路的单一编排点，子步序列如下：
 
-   a. Trigger the `brooks-law` mandatory reminder (coordination cost reflection before adding people).
-   b. Trigger `critical-buffer` assessment (the impact of parallel changes on the critical chain, see `critical-buffer`'s "Implicit Buffer Compression" section).
-   c. Invoke `human-in-loop` category 6 to execute the "explicit confirmation of risk" loop (`human-in-loop` only does "describe risk + list options + wait for user confirmation" within this loop; the sequence is orchestrated by this section).
-   d. After the user confirms, record "overrode WIP limit, user has confirmed the risk" in the change's `proposal.md` — as input for subsequent `/td-system-audit`.
-   e. Only then continue executing subsequent steps.
+   a. 触发 `brooks-law` 强制提醒（加人手前的协调成本反思）。
+   b. 触发 `critical-buffer` 评估（并行 change 对关键链 buffer 的影响，见 `critical-buffer` 的「隐性 buffer 压缩」节）。
+   c. 调 `human-in-loop` 第 6 类执行"显式确认风险"回路（`human-in-loop` 在本回路里只做"描述风险 + 列选项 + 等用户确认"，序列由本节编排）。
+   d. 用户确认后，在 change 的 `proposal.md` 里记录"override WIP 上限，用户已确认风险"——作为后续 `/td-system-audit` 的输入。
+   e. 才继续执行后续步骤。
 
-## Trigger Timing
+## 触发时机
 
-- The user wants to `/td-propose` a new change, but the number of active changes has reached the limit
-- The user wants to advance multiple changes at once
-- **Post-override second detection:** after the user explicitly overrides a WIP violation, the next time `/td-propose` or `/td-apply` again detects a WIP violation, this skill should additionally prompt within the override flow: "The last time was already an override; consecutive overrides will completely nullify the WIP hard constraint" — to prevent override abuse.
-- **When triggered for remediation by `/td-system-audit`:** when audit finds the "too many changes open simultaneously (WIP exceeded)" problem, trigger this skill's "Hard Constraint + Override Mechanism" section, blocking the next `/td-propose` or `/td-apply` until the user archives one or explicitly overrides.
+- 用户想 `/td-propose` 一个新 change，但活跃 change 数已达上限
+- 用户想同时推进多个 change
+- **override 后的二次检测**：用户对某次 WIP 超限显式 override 后，下一次 `/td-propose` 或 `/td-apply` 再次检测到 WIP 超限时，本 skill 应在 override 流程里额外提示"上次已 override 一次，连续 override 会让 WIP 硬约束彻底失效"——防止 override 滥用。
+- **被 `/td-system-audit` 触发修复时**：audit 发现"同时开太多 change（WIP 超限）"问题时，触发本 skill 的「硬约束 + override 机制」节，阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override。
 
-## What the Agent Should Do When Triggered
+## 触发时 agent 应做的事
 
-Execute the "Hard Constraint + Override Mechanism" in the `## Rules` section (the authoritative flow is in that section; not repeated here).
+执行 `## 规则` 节的「硬约束 + override 机制」（权威流程在该节，本处不重复）。
 
-## What Not to Do
+## 不做的事
 
-- Do not auto-archive the user's changes
-- Do not hide the rules to let the user "do as they please" — free rein in a complex system is loss of control
-- Do not "just warn and let it pass" — a hard constraint must block or require override; "warn and pass" degrades a hard constraint to a soft constraint (violating the hard-constraint semantics of keynote principle 4's "cannot be force-solved in parallel")
-- Do not "blanket prohibit" — the hard constraint + override mechanism preserves the triggered philosophy; the constraint is relaxed when the user explicitly overrides
-- Do not allow override abuse — escalate reminder intensity on consecutive overrides (see the "Post-override second detection" in the `## Trigger Timing` section)
+- 不自动 archive 用户的 change
+- 不隐藏规则让用户"自由发挥"——自由发挥在复杂系统里就是失控
+- 不"提示一下就放行"——硬约束必须阻塞或要求 override，"提示放行"等于把硬约束降级为软约束（违反主基调第 4 条"不能并行硬解"的硬约束语义）
+- 不"一刀切禁止"——硬约束 + override 机制保留触发式哲学，用户显式 override 时松绑
+- 不让 override 滥用——连续 override 时升级提醒强度（见 `## 触发时机` 节的"override 后的二次检测"）

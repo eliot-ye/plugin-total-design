@@ -1,96 +1,96 @@
 ---
 name: td-reverse-spec
-description: For taking over an existing project: first reverse-spec the existing code, then propose changes. Trigger scenarios: the user says "taking over a project", "reverse spec", "reverse-engineer the spec", "look at the existing code", "just took over this repo".
+description: 中途接手项目专用：先 reverse-spec 已有代码，再 propose 改动。触发场景：用户说"接手项目"、"reverse spec"、"反推 spec"、"看现有代码"、"刚接手这个库"。
 user-invocable: true
 argument-hint: <existing-codebase-path or empty for cwd>
 ---
 
 # td-reverse-spec
 
-When taking over an existing codebase mid-flight, directly `/td-propose` changes is dangerous — you don't know what the existing code looks like at the spec layer. reverse-spec first reverse-engineers the spec from the code, establishes a baseline, then proposes changes on top of that baseline.
+中途接手已有代码库时，直接 `/td-propose` 改动很危险——你不知道现有代码在 spec 层是什么样子。reverse-spec 先从代码反推 spec，建立 baseline，再在 baseline 上 propose 改动。
 
-## Dependent Skills
+## 依赖技能
 
 - `system-engineering`
 - `field-assessment`
 
-## Served Keynote Principle(s)
+## 服务的主基调原则
 
-**Systems-engineering keynote principle 2: General design department.**
+**系统工程主基调第 2 条：总体设计部。**
 
-reverse-spec is the work of the general design department during the handover phase — first establish the system's global view, then decide where to act.
+reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统全局视图，再决定动哪里。
 
-**Systems-engineering keynote principle 4: Open complex giant system.**
+**系统工程主基调第 4 条：开放的复杂巨系统。**
 
-Do not reduce and decompose simplistically; instead, first identify the layers (subsystem partitioning), then build understanding at each layer.
+不简化还原，而是先识别层次（分系统切分），再在每个层次上建立认识。
 
-## Input — the codebase path to reverse-spec. Empty means current working directory
+## 输入 - 要 reverse-spec 的代码库路径。空则用当前工作目录
 
 `$ARGUMENTS`
 
-## Steps
+## 步骤
 
-### 1. Activate keynote and configuration layer
+### 1. 激活主基调与配置层
 
-Activate keynote and configuration layer. Only inject strengths, do not make judgments; execute the following three-step sequence:
+激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-1. **`system-engineering`** — The four keynote principles enter context. reverse-spec is the work of the general design department during the handover phase — first establish the system's global view, then decide where to act.
-2. **profile × tier identification** — Call `field-assessment`, read `$_TD_PROFILE` / `$_TD_TIER`, load Table 1 + Table 2. Cache within the session; subsequent steps reference directly. reverse-spec itself is the entry action for `profile-brownfield`, but tier determines the granularity of reverse-spec (small: coarse-grained is fine; large: draw subsystem interface diagrams).
-3. **Other constraints** — Only read strength values into context; do not decide whether they trigger in this step.
+1. **`system-engineering`** — 主基调四条进入上下文。reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统全局视图，再决定动哪里。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2。会话内缓存，后续步骤直接引用。reverse-spec 本身是 profile-brownfield 的入口动作，但 tier 决定 reverse-spec 的粒度（small 粗粒度即可，large 要画分系统接口图）。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
-### 2. Identify codebase state
+### 2. 识别代码库状态
 
-Scan the target codebase (file count, lines of code, directory structure, presence of `tests/`/CI/`package.json`, git commit frequency), but **do not re-judge profile** — Step 1 already read and cached `$_TD_PROFILE` / `$_TD_TIER` via `field-assessment`; this step consumes them directly and does not conflict with the cache:
+扫描目标代码库（文件数、代码行数、目录结构、`tests/`/CI/`package.json` 有无、git 提交频率），但**不重新判读 profile**——步骤 1 已通过 `field-assessment` 判读并缓存 `$_TD_PROFILE` / `$_TD_TIER`，本步骤直接消费，不与缓存打架：
 
-Taking over mid-flight is usually judged as `profile-brownfield`. If Step 1 identified another profile: `profile-greenfield` (the codebase is actually scaffolding) → reverse-spec can be coarse-grained or even skipped; see the switching rules for `profile-greenfield`. `profile-maintenance` (a live, shipped project) → reverse-spec granularity follows tier; see the switching rules for that profile.
+中途接手通常判读为 `profile-brownfield`。若步骤 1 判出其他 profile：`profile-greenfield`（代码库其实是脚手架）→ reverse-spec 可以粗粒度甚至跳过，见 `profile-greenfield` 的切换规则；`profile-maintenance`（已上线项目）→ reverse-spec 粒度按 tier 走，见该 profile 的切换规则。
 
-### 3. Subsystem partitioning
+### 3. 分系统切分
 
-From the general design department's perspective, partition the codebase into several subsystems. Partitioning criteria:
+站在总体设计部视角，把代码库切成几个分系统（subsystem）。切分依据：
 
-- Directory boundaries
-- Module dependency graph
-- Deployment units
-- Data ownership boundaries
+- 目录边界
+- 模块依赖图
+- 部署单元
+- 数据所有权边界
 
-Do not go too fine — the goal is to identify at the "subsystem" level, not the "file" level. Usually 3–8 subsystems.
+不要过细——目标是识别"分系统"级别，不是"文件"级别。通常 3–8 个分系统。
 
-**Layered-view restoration**: Subsystem partitioning is the engineering instantiation of keynote principle 4's "layered view" during the reverse-spec phase. When boundaries between subsystems are clear, the partitioning result of this step is the triggering input for the `field-assessment` identification flow's "subsystem independent tiering" mechanism (execution rules in `field-assessment`'s `references/subsystem-tiering.md`).
+**层次观归位**：分系统切分是主基调第 4 条「层次观」在 reverse-spec 阶段的工程化。当分系统之间的边界明显时，本步骤的切分结果是 `field-assessment` 识别流程"子系统独立定 tier"机制的触发输入（执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`）。
 
-### 4. reverse-spec each subsystem
+### 4. 对每个分系统 reverse-spec
 
-Read the subsystem's code and reverse-engineer the spec:
+读分系统的代码，反推 spec：
 
-- What contract does this subsystem expose externally? (API, data formats, events)
-- Which other subsystems does this subsystem depend on?
-- What are this subsystem's key invariants?
-- What are this subsystem's known defects / tech debt?
+- 这个分系统对外提供的契约是什么？（API、数据格式、事件）
+- 这个分系统依赖哪些其他分系统？
+- 这个分系统的关键不变量是什么？
+- 这个分系统的已知缺陷 / 技术债？
 
-Write output to `openspec/specs/<subsystem-name>/spec.md`.
+输出到 `openspec/specs/<subsystem-name>/spec.md`。
 
-### 5. Identify inter-subsystem interfaces
+### 5. 识别分系统间接口
 
-Draw the dependencies between subsystems as a graph. Identify:
+把分系统之间的依赖关系画成图。识别：
 
-- Interface stability (which are public contracts, which are internal implementation)
-- Circular dependencies
-- Implicit dependencies (shared database, shared configuration)
+- 接口的稳定性（哪些是公共契约，哪些是内部实现）
+- 循环依赖
+- 隐式依赖（共享数据库、共享配置）
 
-**Connection to `requesting-code-review` architecture review**: The "circular dependencies, implicit dependencies" identified in this step are exactly the checklist items under the "low coupling" dimension in `requesting-code-review`'s `references/architecture-review-checklist.md`. The interface stability identified during the reverse-spec phase is the input to the architecture review in subsequent `/td-propose` Step 7 — during architecture review, compare against the interface stability in the reverse-spec report to judge whether a new change breaks an existing subsystem's public contract.
+**与 `requesting-code-review` 架构 review 的连接**：本步骤识别的"循环依赖、隐式依赖"正是 `requesting-code-review` 的 `references/architecture-review-checklist.md` 里"低耦合"维度的检查项。reverse-spec 阶段识别的接口稳定性，是后续 `/td-propose` 步骤 7 架构 review 的输入——架构 review 时要对照 reverse-spec 报告里的接口稳定性，判断新 change 是否破坏了既有分系统的公共契约。
 
-### 6. Output reverse-spec report
+### 6. 输出 reverse-spec 报告
 
-Output according to the report template in `references/reverse-spec-report.md` (identified subsystems + interface diagram + each subsystem's spec location + known risks + suggested next steps).
+按 `references/reverse-spec-report.md` 的报告模板输出（识别的分系统 + 接口图 + 各分系统 spec 位置 + 已知风险 + 建议的下一步）。
 
 ## Guardrails
 
-- **Do not modify original code** — reverse-spec is read-only (except for writing spec files)
-- Do not reverse-spec all subsystems to perfection — the goal is to establish a baseline, not to write a textbook
-- Prioritize reverse-spec of the subsystem you are **about to change**; other subsystems can be coarse-grained
+- **不修改原代码**——reverse-spec 只读不写（除了写 spec 文件）
+- 不要 reverse-spec 全部分系统到完美——目标是建立 baseline，不是写教科书
+- 优先 reverse-spec 你**接下来要改**的那个分系统，其他分系统粗粒度即可
 
-## Relationship to other commands
+## 与其他命令的关系
 
-- The outputs of reverse-spec (`openspec/specs/<subsystem>/spec.md` baseline + the reverse-spec report from Step 6) are referenced by `/td-propose`: Step 3's brownfield reverse-spec check consumes the baseline spec under `openspec/specs/` as the criterion for "established understanding," giving the proposal's "systems-engineering impact assessment" section its basis.
-- reverse-spec is not directly referenced by `/td-apply` — apply reads the change's internal artifacts (proposal/design/specs/tasks), not the main spec baseline. If the baseline is merged into the main spec after archive sync, apply still does not explicitly compare against the main spec (this is td-apply's own design choice).
-- `/td-archive` Step 3's "actual vs. expected" post-mortem review uses the baseline spec as one of the reference sources for "the true state before the change" (see that skill).
-- `/td-system-audit` under project scope includes the main spec baseline under `openspec/specs/` as an audit object (see that skill).
+- reverse-spec 的产物（`openspec/specs/<subsystem>/spec.md` baseline + 步骤 6 的 reverse-spec 报告）被 `/td-propose` 引用：步骤 3 的 brownfield reverse-spec 检查消费 `openspec/specs/` 下的 baseline spec 作为"已建立认识"的判据，proposal 的"系统工程影响评估"节才有依据。
+- reverse-spec 不直接被 `/td-apply` 引用——apply 读 change 内 artifact（proposal/design/specs/tasks），不读主 spec baseline。若 baseline 在 archive sync 后被合并进主 spec，apply 也不显式对照主 spec（这是 td-apply 自己的设计选择）。
+- `/td-archive` 步骤 3 的"实际 vs 预期"复盘会把 baseline spec 作为"改之前真实状态"的对照源之一（见该 skill）。
+- `/td-system-audit` 在 project scope 下会把 `openspec/specs/` 下的主 spec baseline 纳入审计对象（见该 skill）。

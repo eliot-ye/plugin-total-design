@@ -1,85 +1,85 @@
 ---
 name: test-driven-development
-description: RED-GREEN-REFACTOR, delete code written before tests. Serves systems-engineering keynote principle 1—tests are the contract for system behavior. Trigger scenario: before the user writes any code; immediately block when the user says "I'll write the code first, then add tests".
+description: RED-GREEN-REFACTOR，删除先于测试写的代码。服务主基调第 1 条——测试是系统行为的契约。触发场景：用户写任何代码之前；说"我先把代码写了，再加测试"时立即阻止。
 user-invocable: true
 ---
 
 # Test-Driven Development
 
-## Dependent Skills
+## 依赖技能
 
 - `human-in-loop`
 - `system-engineering`
 - `systematic-debugging`
 - `writing-plans`
 
-## Served Keynote Principle(s)
+## 服务的主基调原则
 
-**Systems-engineering keynote principle 1: Systems engineering.** Tests are not a "byproduct of code quality"; they are the contract for system behavior. Without a contract, the code the agent writes is just "talking to itself".
+**主基调第 1 条：系统工程。** 测试不是"代码质量的副产物"，是系统行为的契约。没有契约，agent 写的代码就是"自说自话"。
 
-**Hierarchy of contracts**: TDD's RED-GREEN-REFACTOR is a **subsystem-level** contract (the behavioral contract of a single task). But this workflow also has a **system-wide-level** contract—the main spec contract that already-archived changes sync to `openspec/specs/`. When TDD's "delete code" enforcement conflicts with an already-archived spec contract, the **system-wide-level contract takes precedence**: first trigger `human-in-loop` to let the user decide whether to change the spec contract or keep the code, rather than directly deleting the code and breaking the already-archived spec contract.
+**契约的层次性**：TDD 的 RED-GREEN-REFACTOR 是**分系统层次**的契约（单个任务的行为契约）。但本工作流里还有**系统整体层次**的契约——已 archive 的 change sync 到 `openspec/specs/` 的主 spec 契约。当 TDD 的"删除代码"强制与已 archive 的 spec 契约冲突时，**系统整体层次契约优先**：先触发 `human-in-loop` 让用户决定是改 spec 契约还是保留代码，而不是直接删除代码破坏已 archive 的 spec 契约。
 
-## Trigger Timing
+## 触发时机
 
-- During the `executing-plans` flow, when implementing each task
-- Before the user writes code (any code)
-- When the user says "I'll write the code first, then add tests"—immediately trigger this skill to block
+- 在 `executing-plans` 流程中，每个任务实施时
+- 用户写代码（任何代码）之前
+- 用户说"我先把代码写了，再加测试"——立即触发本 skill 阻止
 
-## Working Style
+## 工作方式
 
-### RED: Write a failing test first
+### RED：先写失败测试
 
-1. Look at the task's "verification" field and **risk level** (high / medium / low, annotated by `writing-plans`)
-2. Decide test intensity by risk level:
-   - **high** (core path / spans multiple subsystems / data consistency / security / irreversible): full boundary test suite (normal path + boundaries + exceptions)
-   - **medium** (regular functionality): normal path + key boundaries
-   - **low** (mechanical changes): smoke-level verification is sufficient
-3. Write a test that **will currently fail** (because the feature isn't implemented yet)
-4. Run the test, confirm it **really fails** (not a build error, not some other failure)
-5. If the test didn't fail, it means the feature already exists or the test was written wrong—stop
+1. 看任务的"验证"字段与**风险等级**（high / medium / low，由 `writing-plans` 标注）
+2. 按风险等级决定测试强度：
+   - **high**（核心路径 / 跨多个分系统 / 数据一致性 / 安全 / 不可逆）：完整边界用例集（正常路径 + 边界 + 异常）
+   - **medium**（常规功能）：正常路径 + 关键边界
+   - **low**（机械改动）：冒烟级验证即可
+3. 写一个测试，这个测试**当前会失败**（因为功能还没实现）
+4. 跑测试，确认它**真的失败**了（不是 build 错误、不是别的失败）
+5. 如果测试没失败，说明功能已经存在或测试写错了——停下来
 
-### GREEN: Write the minimal implementation
+### GREEN：写最小实现
 
-1. Write the **minimal** code that makes the test pass
-2. Don't "incidentally" add extra features—YAGNI
-3. Run the test, confirm green
-4. If it can't go green, go back to RED and adjust the test; don't muscle through in GREEN
+1. 写让测试通过的**最小**代码
+2. 不要"顺手"加额外功能——YAGNI
+3. 跑测试，确认绿
+4. 如果绿不了，回到 RED 调整测试，不要在 GREEN 里硬刚
 
-### REFACTOR: Refactor
+### REFACTOR：重构
 
-1. After tests are green, see if the code can be cleaner
-2. During refactoring, tests must stay green
-3. After refactoring, run the full test suite to confirm nothing else broke
+1. 测试绿之后，看代码能不能更干净
+2. 重构时测试必须保持绿
+3. 重构完跑全量测试，确认没破坏别的
 
-## Hard Constraints
+## 硬约束
 
-### Delete the products of "write code first, add tests later"
+### 删除"先写代码再加测试"的产物
 
-If the agent discovers code was already written but the corresponding test doesn't exist or was added after: **delete the code, start over from RED.** Not "add a test to catch up", but "start over".
+如果 agent 发现代码已经写了但对应测试不存在或后加：**删除代码，从 RED 重新开始。** 不是"补测试"，是"重来"。
 
-This rule seems aggressive, but it prevents the rot of "tests only exist to accommodate already-written code".
+这个规则看起来激进，但它防止了"测试只是为了配合已写代码"的腐烂。
 
-**Exception (brownfield legacy code):** This rule only applies to **newly written code in the current change**. Legacy code that already existed when taking over a project inherently has no tests; mandatory deletion would destroy the system—legacy code follows the `profile-brownfield` path: first add characterization tests to lock in existing behavior, then refactor.
+**例外（brownfield 老代码）：** 本规则只适用于**当前 change 新写的代码**。接手项目时已存在的老代码本来就没测试，强制删除会摧毁系统——老代码走 `profile-brownfield` 的路径：先加 characterization test 锁定现有行为，再重构。
 
-**Exception 2 (conflict with already-archived spec contract):** When TDD's "delete code" enforcement would break the main spec contract that an already-archived change synced to `openspec/specs/`, **don't delete directly**—first trigger `human-in-loop` to let the user decide: (a) change the spec contract (re-propose to modify the main spec), or (b) keep the code (abandon this TDD's deletion enforcement, record as "known contract deviation"). This is the execution rule for "system-wide-level contract takes precedence over subsystem-level TDD enforcement".
+**例外 2（已 archive 的 spec 契约冲突）：** 当 TDD 的"删除代码"强制会破坏已 archive 的 change sync 到 `openspec/specs/` 的主 spec 契约时，**不直接删除**——先触发 `human-in-loop` 让用户决定：(a) 改 spec 契约（重新 propose 修改主 spec），还是 (b) 保留代码（放弃本次 TDD 的删除强制，记录为"已知契约偏离"）。这是"系统整体层次契约优先于分系统层次 TDD 强制"的执行规则。
 
-### Don't accept "this can't be tested"
+### 不接受"这个没法测"
 
-If the agent says "this can't be tested":
+如果 agent 说"这个没法测"：
 
-- UI rendering? Test snapshots
-- Side effects? Mock the boundaries
-- Randomness? Inject a seed
-- Time/space dependent? Inject a clock
+- UI 渲染？测 snapshot
+- 副作用？mock 边界
+- 随机性？注入种子
+- 时空相关？注入时钟
 
-"Can't be tested" almost always means "the contract wasn't thought through".
+"没法测"几乎总是"没想清楚契约"。
 
-## Relationship with Other Skills
+## 与其他 skill 的关系
 
-- Works with `systematic-debugging`: when RED fails, if the failure reason is unclear, trigger systematic-debugging
-- Works with `td-archive`: TDD's RED-GREEN-REFACTOR is the subsystem-level contract; archive's "actual vs expected" retrospective is the system-wide-level contract validation. The two are complementary applications of "model carrier" at the subsystem level and the system-wide level (see the "Model Carrier" section under systems-engineering keynote principle 3 in `system-engineering`).
+- 与 `systematic-debugging` 配合：RED 失败时，如果失败原因不明确，触发 systematic-debugging
+- 与 `td-archive` 配合：TDD 的 RED-GREEN-REFACTOR 是分系统层次的契约；archive 的"实际 vs 预期"复盘是系统整体层次的契约验证。两者是"模型载体"在分系统层次和系统整体层次的互补（见 `system-engineering` 的「主基调四条」第 3 条「模型载体」节）。
 
-## What Not to Do
+## 不做的事
 
-- Don't "write a stub test as a placeholder, fill it in later"—this is an abuse of deferred decisions
-- Don't add new features during the REFACTOR phase—REFACTOR only changes shape, not behavior
+- 不"先写 stub 测试占位，以后补"——这是延迟决策的滥用
+- 不在 REFACTOR 阶段加新功能——REFACTOR 只改形状不改行为

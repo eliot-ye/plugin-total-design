@@ -1,10 +1,10 @@
 ---
 name: td-reverse-spec
-description: For taking over a project mid-flight: first reverse-spec the existing code, then propose changes.
+description: 中途接手项目专用：先 reverse-spec 已有代码，再 propose 改动。
 argument-hint: <existing-codebase-path or empty for cwd>
 args: optional
 ---
 
 # td-reverse-spec
 
-**Immediately invoke `td-reverse-spec` skill, arguments `$ARGUMENTS`.**
+**立刻调用 `td-reverse-spec` skill，参数 `$ARGUMENTS`。**

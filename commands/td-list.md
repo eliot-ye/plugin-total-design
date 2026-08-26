@@ -1,39 +1,39 @@
 ---
 name: td-list
-description: List all unarchived changes. Trigger scenarios: user says "list changes", "what's in flight", "unarchived", "what's currently being worked on".
+description: 列出所有未归档的变更。触发场景：用户说"列一下 change"、"有哪些 in flight"、"未归档"、"现在在做什么"。
 argument-hint: (no arguments)
 args: none
 ---
 
 # td-list
 
-List all currently unarchived (active) changes.
+列出当前所有未归档（活跃）的 change。
 
-## Steps
+## 步骤
 
-### 1. List unarchived changes
+### 1. 列出未归档变更
 
 ```bash
 openspec list
 ```
 
-`openspec list` only lists active changes under `openspec/changes/`; archived ones (moved to `openspec/changes/archive/`) do not appear—this is the semantic boundary of "unarchived".
+`openspec list` 只列 `openspec/changes/` 下的活跃 change，已 archive（移到 `openspec/changes/archive/`）的不会出现——这就是"未归档"的语义边界。
 
-### 2. Output the status overview
+### 2. 输出态势
 
-Present the list results to the user in roughly this structure:
+把 list 结果呈现给用户，大致结构：
 
 ```markdown
-## Unarchived changes (active changes)
+## 未归档变更（活跃 change）
 
-| change | tasks status | last updated |
+| change | tasks 状态 | 最近更新 |
 |---|---|---|
-| <name> | <done>/<total> or "No tasks" | <relative time> |
+| <name> | <done>/<total> 或 "No tasks" | <relative time> |
 ```
 
-If the `openspec list` output is empty (no active changes), note "there are currently no unarchived changes" and suggest the next step: `/td-propose` to open a new change, or `/td-system-audit project` to run a project-wide self-check.
+如果 `openspec list` 输出为空（无活跃 change），提示"当前没有未归档变更"，建议下一步：`/td-propose` 开新 change，或 `/td-system-audit project` 做一次全局自检。
 
 ## Guardrails
 
-- This command is read-only—it does not create, modify, or archive any change
-- It does not assess change quality (that is `/td-system-audit`'s job); it only lists the status overview
+- 本命令只读——不创建、不修改、不 archive 任何 change
+- 不评估 change 质量（那是 `/td-system-audit` 的活），只列态势

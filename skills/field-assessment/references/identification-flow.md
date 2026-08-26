@@ -1,109 +1,109 @@
-# Identification Flow + Persistence Layer
+# 识别流程 + 持久化层
 
-This file defines the field assessment flow for profile/tier and the `.td-state/` persistence conventions. Step 1 of every td-* skill invokes this flow.
+本文件定义 profile/tier 的现场判读流程与 `.td-state/` 持久化约定。每个 td-* skill 的"步骤 1"调用本流程。
 
-## Identification Flow
+## 识别流程
 
-The agent assesses in the following order, writes the result into the working context (variable names recommended: `$_TD_PROFILE` / `$_TD_TIER`), and subsequent steps consult Table 1 / Table 2 / Table 3 for strength values (see `strength-matrix.md`).
+agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `$_TD_PROFILE` / `$_TD_TIER`），后续步骤据此查表 1 / 表 2 / 表 3 的强度（见 `strength-matrix.md`）。
 
-### 1. Read persistence cache
+### 1. 读持久化缓存
 
-Read `openspec/.td-state/profile-tier.yaml`. If the file exists and no re-assessment trigger is active (see "### 4. Cache Assessment Result"), use the cached values directly and skip to "### 5. Inject Strength." If the file does not exist, perform a fresh assessment per "### 2" + "### 3"—**this step only reads, never writes**; the write responsibility is in "### 4. Cache Assessment Result." For the file format, see the "### profile-tier.yaml template" section below.
+读 `openspec/.td-state/profile-tier.yaml`。若文件存在且无重判触发（见"### 4. 缓存判读结果"），直接用缓存值，跳到"### 5. 注入强度"。若文件不存在，按"### 2"+"### 3"现判——**本步骤只读不写**，写入职责在"### 4. 缓存判读结果"。文件格式见本文件下方「### profile-tier.yaml 模板」节。
 
-### 2. Assess profile (three options, by priority)
+### 2. 判读 profile（三选一，按优先级）
 
-| priority | profile | criteria (all must hold) |
+| 优先级 | profile | 判据（全部成立） |
 |---|---|---|
-| 1 | `profile-maintenance` | repo is live **AND** has real user traffic **AND** has CI/CD configured |
-| 2 | `profile-brownfield` | repo already has runnable code (not scaffolding) **AND** does not meet maintenance criteria |
-| 3 | `profile-greenfield` | repo just init'd / only scaffolding / file count < 10 and no business logic |
+| 1 | `profile-maintenance` | 仓库已上线 **且** 有真实用户流量 **且** 有 CI/CD 配置 |
+| 2 | `profile-brownfield` | 仓库已有可运行代码（非脚手架）**且** 不满足 maintenance 判据 |
+| 3 | `profile-greenfield` | 仓库刚 init / 只有脚手架 / 文件数 < 10 且无业务逻辑 |
 
-When criteria conflict, take the higher priority. When criteria are ambiguous → trigger `human-in-loop` and ask the user "Is this a new project, an inherited project, or a live maintenance project?"
+判据冲突时按优先级取高的。判据不明确 → 触发 `human-in-loop`，问用户"这是新项目、接手项目、还是上线维护？"。
 
-### 3. Assess tier (three options)
+### 3. 判读 tier（三选一）
 
-| tier | criteria (any one holds → take this tier, take the highest) |
+| tier | 判据（任一成立即取该 tier，取最高） |
 |---|---|
-| `tier-large` | file count 100+ **OR** multi-team **OR** multi-repo **OR** multiple deployment units |
-| `tier-medium` | file count 10–100 **OR** single-team multi-person **OR** 1–3 deployment units |
-| `tier-small` | file count 3–10 **OR** single-person/single-team **OR** 1 deployment unit |
+| `tier-large` | 文件数 100+ **或** 多团队 **或** 多仓库 **或** 多部署单元 |
+| `tier-medium` | 文件数 10–100 **或** 单团队多人 **或** 1–3 个部署单元 |
+| `tier-small` | 文件数 3–10 **或** 单人/单团队 **或** 1 个部署单元 |
 
-If the system has "obvious subsystem boundaries," upgrade to `tier-medium` even if the file count is small. If the system is split into multiple independent subsystems → each subsystem is tiered independently (see `subsystem-tiering.md`).
+系统有"明显分系统边界"即使文件少，也升级到 `tier-medium`。系统拆成多个独立子系统 → 每个子系统独立定 tier（见 `subsystem-tiering.md`）。
 
-**Trigger for subsystem independent tiering**: When "### 2. Assess profile" identifies `profile-brownfield` or `profile-maintenance`, and `td-reverse-spec` step 3 has already identified "obvious subsystem boundaries," subsystem independent tiering is triggered. Each subsystem is tiered independently per the criteria in this section, and the result is written to the `subsystem-<name>` entry in `openspec/.td-state/profile-tier.yaml`.
+**子系统独立定 tier 的触发**：当「### 2. 判读 profile」识别出 `profile-brownfield` 或 `profile-maintenance`，且 `td-reverse-spec` 步骤 3 已识别出"有明显分系统边界"时，触发子系统独立定 tier。每个子系统按本节判据独立定 tier，结果写入 `openspec/.td-state/profile-tier.yaml` 的 `subsystem-<name>` 条目。
 
-**Hierarchical view positioning**: The tier criteria in this section are planar dimensions (file count, team size, deployment units). The subsystem independent tiering mechanism extends these planar dimensions into a hierarchical dimension—acknowledging that a complex giant system is a multi-level nested structure (keynote principle 4, "hierarchical view"), and that subsystems at different levels need to be treated in layers. This is not "tier criteria failing," but rather "tier criteria taking effect separately at each subsystem level."
+**层次观归位**：本节的 tier 判据是平面维度（文件数、团队规模、部署单元）。子系统独立定 tier 机制把这个平面维度扩展为层次维度——承认复杂巨系统是多层级嵌套结构（主基调第 4 条「层次观」），不同层次的子系统需要分层对待。这不是"tier 判据失效"，而是"tier 判据在每个子系统层次上分别生效"。
 
-### 4. Cache Assessment Result
+### 4. 缓存判读结果
 
-The assessment result is written to `openspec/.td-state/profile-tier.yaml` for persistence, retained across sessions. Triggers for re-assessment (executing the "re-assessment strategy" below when hit):
+判读结果写入 `openspec/.td-state/profile-tier.yaml` 持久化，跨会话保留。触发重新判读的时机（命中即执行下述"重判策略"）：
 
-- After `/td-archive` completes (project state may have changed)—archive step 5.1 is responsible for triggering re-assessment
-- `/td-system-audit` finds profile/tier inconsistent with reality
-- User explicitly says "project phase has changed"
+- `/td-archive` 完成后（项目状态可能变化）—— archive 步骤 5.1 已负责触发重判
+- `/td-system-audit` 发现 profile/tier 与实际不符
+- 用户显式说"项目阶段变了"
 
-**Re-assessment strategy** (applies to td-archive 5.1 / td-system-audit / user-explicit trigger):
+**重判策略**（td-archive 5.1 / td-system-audit / 用户显式触发都适用）：
 
-1. Read `profile-tier.yaml` cached values (file does not exist → treat as empty cache, skip to step 2 for fresh assessment).
-2. Re-run "### 2. Assess profile" + "### 3. Assess tier" to obtain new assessment results.
-3. Compare new assessment with cache:
-   - **Consistent** → update `judged_at` timestamp (keep profile/tier unchanged), do not prompt the user.
-   - **Inconsistent** → overwrite `profile-tier.yaml` with the new result, and synchronize the `judge_reason` field to reflect the new criteria (e.g., "greenfield moved to maintenance because it went live + has CI/CD"). The caller (e.g., td-archive 5.1) prompts the user "project state has changed from `<old>` to `<new>`."
+1. 读 `profile-tier.yaml` 缓存值（文件不存在 → 视为空缓存，跳到步骤 2 现判）。
+2. 重跑「### 2. 判读 profile」+「### 3. 判读 tier」得到新判读结果。
+3. 新判读与缓存对比：
+   - **一致** → 更新 `judged_at` 时间戳（保持 profile/tier 不变），不提示用户。
+   - **不一致** → 覆盖写 `profile-tier.yaml` 为新结果，同步更新 `judge_reason` 字段为新判据（如"greenfield 走到 maintenance,因为已上线 + 有 CI/CD"），由调用方（如 td-archive 5.1）提示用户"项目状态已从 `<old>` 变为 `<new>`"。
 
-Re-assessment **does not "delete the cache file"**—it "reads cache → re-assesses → compares → writes back per comparison result."
+重判**不"删缓存文件"**——是"读缓存 → 重判 → 比对 → 按比对结果写回"。
 
-### 5. Inject Strength
+### 5. 注入强度
 
-After assessment is complete, the agent reads Table 1 (strength of the 5 constraints under the current tier) + Table 2 (profile-specific human-in-loop additions) + Table 3 (system-audit frequency) into context. Subsequent steps reference these strength values and do not re-consult this skill.
+判读完成后，agent 把表 1（5 个 constraint 在当前 tier 下的强度）+ 表 2（当前 profile 的 human-in-loop 加成）+ 表 3（system-audit 频率）读入上下文。后续步骤引用这些强度值，不再回查本 skill。
 
-**Strength injection under subsystem independent tiering**: When `profile-tier.yaml` contains `subsystems` entries, strength injection should be **per-subsystem**—each subsystem has its own Table 1 / Table 2 strength. Dependencies spanning subsystems are treated using the "highest-tier subsystem" strength (conservative principle). When subsequent steps reference strengths, they must distinguish "which subsystem the current operation acts on."
+**子系统独立定 tier 时的强度注入**：当 `profile-tier.yaml` 含 `subsystems` 条目时，注入强度应**按子系统分别注入**——每个子系统有自己的表 1 / 表 2 强度。跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则）。后续步骤引用强度时，需区分"当前操作作用于哪个子系统"。
 
-### Convention for Downstream Strength References
+### 下游引用强度的约定
 
-When downstream skills reference the strength values from Table 1 / Table 2 / Table 3, they follow the same convention:
+下游 skill 引用表 1 / 表 2 / 表 3 的强度值时，遵循同一约定：
 
-- **Strength values are injected into the session context by the td-* skill's "Step 1"**—injection is completed through the `field-assessment` identification flow.
-- **If strength is not injected** (e.g., td-* skill skipped Step 1, or session context was cleared), the downstream skill invokes `field-assessment` to inject before reading, and does not redefine the values.
-- **Single source of truth**: Strength values are defined only in `strength-matrix.md` (Table 1 + Table 2) and `audit-frequency.md` (Table 3); downstream skills do not copy values when referencing them, but rather reference "look up row Y in Table X for the current tier."
+- **强度值由 td-* skill 的"步骤 1"注入会话上下文**——通过 `field-assessment` 的识别流程完成注入。
+- **若强度未注入**（如 td-* skill 跳过步骤 1、或会话上下文被清理），下游 skill 调 `field-assessment` 注入后再读，不重复定义数值。
+- **单一事实源**：强度数值只在 `strength-matrix.md`（表 1 + 表 2）和 `audit-frequency.md`（表 3）定义，下游 skill 引用时不复制数值，只引用"按当前 tier 查表 X 的 Y 行"。
 
-This convention applies to all constraint skills, tier skills, and td-* skills. Downstream skills do not need to repeat this convention in their body—this section is the single anchor for the convention.
+这条约定对所有 constraint skill、tier skill、td-* skill 生效。下游 skill 不必在正文重复这条约定——本节是约定的单一锚点。
 
-## Persistence Layer (.td-state/)
+## 持久化层（.td-state/）
 
-profile/tier assessment results are persisted to `openspec/.td-state/profile-tier.yaml`. The file is created on demand by the agent when the identification flow is first run; it is not pre-provisioned.
+profile/tier 判读结果持久化到 `openspec/.td-state/profile-tier.yaml`。文件由 agent 首次运行识别流程时按需创建，不预置。
 
-### Conventional Paths
+### 约定路径
 
 ```
 openspec/.td-state/
-├── profile-tier.yaml        ← maintained by field-assessment: profile/tier assessment cache + timestamps triggering re-assessment
-├── archive-counter.yaml     ← maintained by td-archive: cumulative archive count (used for system-audit frequency triggering)
-├── audit-history.yaml       ← maintained by td-system-audit: sequence of audit timestamps
-└── audits/                  ← maintained by td-system-audit: each complete audit report
+├── profile-tier.yaml        ← field-assessment 维护：profile/tier 判读缓存 + 触发重判的时间戳
+├── archive-counter.yaml     ← td-archive 维护：累计归档计数（system-audit 频率触发用）
+├── audit-history.yaml       ← td-system-audit 维护：audit 时间戳序列
+└── audits/                  ← td-system-audit 维护：每次完整 audit 报告
 ```
 
-### File Templates
+### 文件模板
 
-The `profile-tier.yaml` template is in the "### profile-tier.yaml template" section below (the identification flow reads and writes it directly, tightly bound). The other persistence files (archive-counter / audit-history) have templates maintained by their respective owners:
+`profile-tier.yaml` 模板见下方「### profile-tier.yaml 模板」节（识别流程直接读写它，强绑定）。其余持久化文件（archive-counter / audit-history）的模板各自归维护方：
 
-- `archive-counter.yaml` template → `td-archive`'s `references/archive-counter-template.md`
-- `audit-history.yaml` template → `td-system-audit`'s `references/audit-history-template.md`
+- `archive-counter.yaml` 模板 → `td-archive` 的 `references/archive-counter-template.md`
+- `audit-history.yaml` 模板 → `td-system-audit` 的 `references/audit-history-template.md`
 
-### profile-tier.yaml template
+### profile-tier.yaml 模板
 
 ```yaml
 profile: <profile-greenfield | profile-brownfield | profile-maintenance>
 tier: <tier-small | tier-medium | tier-large>
-judged_at: <ISO8601 timestamp>
-judge_reason: <one-sentence rationale, e.g., "live + has CI/CD → maintenance; 120 files → large">
-# Subsystem independent tiering (optional, only when the system has obvious subsystem boundaries)
+judged_at: <ISO8601 时间戳>
+judge_reason: <一句话判据，如"已上线 + 有 CI/CD → maintenance；文件 120 个 → large">
+# 子系统独立定 tier（可选，仅当系统内部有明显分系统边界时）
 subsystems:
   - name: <subsystem-A>
     tier: <tier-small | tier-medium | tier-large>
-    judge_reason: <one-sentence rationale>
+    judge_reason: <一句话判据>
   - name: <subsystem-B>
     tier: <tier-small | tier-medium | tier-large>
-    judge_reason: <one-sentence rationale>
+    judge_reason: <一句话判据>
 ```
 
-**Behavior when file does not exist**: When the agent invokes the identification flow and `openspec/.td-state/profile-tier.yaml` does not exist, it performs a fresh assessment per "### 2. Assess profile" + "### 3. Assess tier" below, then creates the file and writes the result. If the file already exists, it reads the file first and does not re-assess—unless a "trigger re-assessment" condition is hit.
+**文件不存在时的行为**：agent 调用识别流程时，若 `openspec/.td-state/profile-tier.yaml` 不存在，按下方"### 2. 判读 profile"+"### 3. 判读 tier"现判，判完后创建文件并写入结果。若文件已存在，优先读文件，不重判——除非命中"触发重新判读"的时机。
