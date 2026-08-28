@@ -9,6 +9,12 @@
 - **删除英文副本，中文版移入根目录成为唯一版本**：1.4.0 的双语结构（英文根目录 + `zh-CN/` 中文副本）简化为单一中文版。根目录 `skills/` / `commands/` 的内容由中文版替换，`zh-CN/` 目录删除。`plugin.json` 的 `skills` / `commands` 路径不变（仍为 `["./skills"]` / `["./commands"]`），加载器加载的从英文版变为中文版。
 - **AGENTS.md 双语同步节精简**：「双语对应与同步修改」节从 6 条硬约束 + 双语开发流程缩减为单语说明 + 历史备注。目录结构节删除 `zh-CN/` 子目录。
 - **CONTRIBUTING.md 双语指南保留**：「中文 vs 英文」节原本就规定 skill 正文以中文为主，此节内容仍然适用（code / command / filename 保持英文），不动。
+- **user-invocable 收紧（行为层 7 skill）**：`brainstorming` / `executing-plans` / `requesting-code-review` / `systematic-debugging` / `test-driven-development` / `verification-before-completion` / `writing-plans` 的 `user-invocable` 由 `true` 改为 `false`。这些 skill 由流程编排触发（`td-explore` / `td-apply` 内部调用），不再作为独立 slash 入口，消除使用态 LLM 的触发歧义。
+- **task 编程性约束**：`writing-plans` 新增「task 只写 agent 能编程性执行的步骤」——task 主体必须是 agent 能编程性执行的动作（写代码、跑测试、执行 CLI 命令、改配置等）；非编程性动作（人工目测、用户验收、第三方审批等）不得作为独立 task，降级为该 task 的 `验证` 字段补充说明。约束收敛到 `references/task-template.md` 的「任务主体约束」节为单一权威。
+- **多章节回复编号规则**：`human-in-loop` 新增「需用户回复的条目标号规则」——呈现内容同时含多个需用户回复的章节时（如报告里的"未解决的问题"与"建议的下一步"），各章节内条目标号不得共用同一套编号，改为带章节前缀的编号（`a1 / b1`）。`td-explore` 的探索总结模板与 `td-system-audit` 的 `references/audit-report-template.md` 同步应用（编号前缀示例 `a` = 发现的问题，`b` = 建议的下一步动作）。
+- **profile 强度口径收紧**：3 个 profile（`profile-greenfield` / `profile-brownfield` / `profile-maintenance`）的「在各 tier 下的 constraint 强度」改为"约束强度由 tier 单一决定，本 profile 不叠加、不修改强度数值（`human-in-loop` 的表 2 profile 加成除外）"，强度取值引用 `field-assessment` 的「下游引用强度的约定」节，不再逐字重复——消除各 profile 与 `field-assessment` 表 1 的强度口径模糊。
+- **层次观归位收敛**：`tier-medium` 的层次观归位段改为引用 `field-assessment` 的 `references/subsystem-tiering.md`，不再逐字重复子系统分层机制说明。
+- **删除跨平台同步打回项**：`CONTRIBUTING.md` 删除"引入跨平台同步（`.claude/` / `.codex/` 等）——本 plugin 只针对 atomcode"审查打回项。
 
 ### Removed
 
@@ -18,7 +24,8 @@
 ### Docs
 
 - AGENTS.md 目录结构节、skills/commands 内容编排节更新为单语中文。
-- RELEASE_NOTES.md 更新为 1.5.0 版本发布说明。
+- AGENTS.md 补充「`## 依赖技能` 节的语义定义」——预加载 vs 按需触发分界（预加载应列入依赖节，运行时按需触发不列入），判定依据参考 `td-* 标准步骤 1`。
+- RELEASE_NOTES.md 更新为 1.5.0 版本发布说明（单语化结构 + 行为层收紧两个阶段）。
 - 历史条目（1.4.0 及更早）保留不动，其中对双语结构的描述属于历史记录。
 
 ## [1.4.0] - 2026-08-26
@@ -84,7 +91,7 @@
 
 ### Docs
 
-- 依赖图谱与分析门（改动前置流程）、dev 态与使用态分叉说明、SKILL 编写视角以使用态 LLM 为主、SKILL 不可引用 AGENTS 文件规则。
+- 依赖图谱与分析门（改动前置流程）、SKILL 编写视角以使用态 LLM 为主、SKILL 不可引用 AGENTS 文件规则。
 - 各 skill 按使用态视角精简语义重复与模糊表述。
 
 ## [1.2.0] - 2026-08-15
