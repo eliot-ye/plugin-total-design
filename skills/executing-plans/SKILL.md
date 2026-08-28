@@ -1,7 +1,7 @@
 ---
 name: executing-plans
 description: 批量执行任务，带 human checkpoint。服务主基调第 2 条。触发场景：`td-apply` 流程内按 tasks.md 序列实施时（执行入口是 `/td-apply`，本 skill 由 apply 内部调用；用户直接说"开始执行"/"go" 应走 `/td-apply`）——关键链任务后停下来 checkpoint。
-user-invocable: true
+user-invocable: false
 ---
 
 # Executing Plans

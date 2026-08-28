@@ -1,7 +1,7 @@
 ---
 name: systematic-debugging
 description: 4-phase root cause，bug 修复前必须找根因。服务主基调第 3 条。触发场景：测试失败且原因不明；用户报告 bug；修复尝试失败 2 次以上时——先复现再隔离，别猜。
-user-invocable: true
+user-invocable: false
 ---
 
 # Systematic Debugging

@@ -22,7 +22,7 @@ user-invocable: false
 
 medium 系统的常见问题是"分系统边界模糊"。在 reverse-spec 时，把分系统边界画出来，作为后续改动的影响评估依据。
 
-**层次观归位**：分系统边界显式化是主基调第 4 条「层次观」在 tier-medium 的工程化——承认 medium 系统是多层级嵌套结构（顶层架构 → 模块设计 → 实现细节），不同层次需要分层对待。当 `field-assessment` 识别流程允许子系统独立定 tier 时，medium 系统的每个分系统也可能有自己的子系统层次。
+**层次观归位**：分系统边界显式化是主基调第 4 条「层次观」在 tier-medium 的工程化——medium 系统已出现模块/分系统边界，不同层次需要分层对待。系统内分系统也可能各自存在子系统层次，该机制的完整语义见 `field-assessment` 的 `references/subsystem-tiering.md`，此处不重复。
 
 ### 2. 公共契约变更属 human-in-loop 基线第 1 类
 

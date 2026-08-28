@@ -2,6 +2,59 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.5.0] - 2026-08-27
+
+### Changed（行为变更）
+
+- **删除英文副本，中文版移入根目录成为唯一版本**：1.4.0 的双语结构（英文根目录 + `zh-CN/` 中文副本）简化为单一中文版。根目录 `skills/` / `commands/` 的内容由中文版替换，`zh-CN/` 目录删除。`plugin.json` 的 `skills` / `commands` 路径不变（仍为 `["./skills"]` / `["./commands"]`），加载器加载的从英文版变为中文版。
+- **AGENTS.md 双语同步节精简**：「双语对应与同步修改」节从 6 条硬约束 + 双语开发流程缩减为单语说明 + 历史备注。目录结构节删除 `zh-CN/` 子目录。
+- **CONTRIBUTING.md 双语指南保留**：「中文 vs 英文」节原本就规定 skill 正文以中文为主，此节内容仍然适用（code / command / filename 保持英文），不动。
+- **user-invocable 收紧（行为层 7 skill）**：`brainstorming` / `executing-plans` / `requesting-code-review` / `systematic-debugging` / `test-driven-development` / `verification-before-completion` / `writing-plans` 的 `user-invocable` 由 `true` 改为 `false`。这些 skill 由流程编排触发（`td-explore` / `td-apply` 内部调用），不再作为独立 slash 入口，消除使用态 LLM 的触发歧义。
+- **task 编程性约束**：`writing-plans` 新增「task 只写 agent 能编程性执行的步骤」——task 主体必须是 agent 能编程性执行的动作（写代码、跑测试、执行 CLI 命令、改配置等）；非编程性动作（人工目测、用户验收、第三方审批等）不得作为独立 task，降级为该 task 的 `验证` 字段补充说明。约束收敛到 `references/task-template.md` 的「任务主体约束」节为单一权威。
+- **多章节回复编号规则**：`human-in-loop` 新增「需用户回复的条目标号规则」——呈现内容同时含多个需用户回复的章节时（如报告里的"未解决的问题"与"建议的下一步"），各章节内条目标号不得共用同一套编号，改为带章节前缀的编号（`a1 / b1`）。`td-explore` 的探索总结模板与 `td-system-audit` 的 `references/audit-report-template.md` 同步应用（编号前缀示例 `a` = 发现的问题，`b` = 建议的下一步动作）。
+- **profile 强度口径收紧**：3 个 profile（`profile-greenfield` / `profile-brownfield` / `profile-maintenance`）的「在各 tier 下的 constraint 强度」改为"约束强度由 tier 单一决定，本 profile 不叠加、不修改强度数值（`human-in-loop` 的表 2 profile 加成除外）"，强度取值引用 `field-assessment` 的「下游引用强度的约定」节，不再逐字重复——消除各 profile 与 `field-assessment` 表 1 的强度口径模糊。
+- **层次观归位收敛**：`tier-medium` 的层次观归位段改为引用 `field-assessment` 的 `references/subsystem-tiering.md`，不再逐字重复子系统分层机制说明。
+- **删除跨平台同步打回项**：`CONTRIBUTING.md` 删除"引入跨平台同步（`.claude/` / `.codex/` 等）——本 plugin 只针对 atomcode"审查打回项。
+
+### Removed
+
+- 删除 `zh-CN/` 目录（`zh-CN/skills/` 39 文件 + `zh-CN/commands/` 8 文件）。中文版内容已移入根目录 `skills/` + `commands/`。
+- 删除根目录 `skills/` + `commands/` 下的英文版内容（39 + 8 文件），由中文版替换。
+
+### Docs
+
+- AGENTS.md 目录结构节、skills/commands 内容编排节更新为单语中文。
+- AGENTS.md 补充「`## 依赖技能` 节的语义定义」——预加载 vs 按需触发分界（预加载应列入依赖节，运行时按需触发不列入），判定依据参考 `td-* 标准步骤 1`。
+- RELEASE_NOTES.md 更新为 1.5.0 版本发布说明（单语化结构 + 行为层收紧两个阶段）。
+- 历史条目（1.4.0 及更早）保留不动，其中对双语结构的描述属于历史记录。
+
+## [1.4.0] - 2026-08-26
+
+### Changed（行为变更）
+
+- **双语化结构**：本 plugin 从单一中文版重构为**英文（默认加载）+ 中文（zh-CN 对应副本）**的双语结构。根目录 `skills/` / `commands/` 为英文版（`plugin.json` 默认指向），`zh-CN/skills/` / `zh-CN/commands/` 为中文版，两套结构 1:1 镜像。
+- **默认加载语言切换为英文**：`plugin.json` 的 `skills: ["./skills"]` / `commands: ["./commands"]` 现指向英文版。国际化友好，非中文环境 agent 直接读英文 frontmatter description 触发。
+- **AGENTS.md 新增「双语对应与同步修改」节**：作为编辑规则的硬约束子节，规定文件清单 1:1 对应、frontmatter 逻辑字段逐字符一致、正文结构对应、逻辑名/命令名/路径/CLI 命令/环境变量跨语言不变、修改任一语言必须立即同步另一种语言、翻译漂移校验命令。
+- **AGENTS.md 目录结构节更新**：反映 `zh-CN/` 子目录的新结构，补充 skills/commands 内容编排说明（英文默认 + 中文对应）。
+- **依赖节定义澄清（B1）**：`## 依赖技能` = 会话级**预加载清单**，运行时按需触发的技能不应列入。5 个 td-* 依赖节恢复为仅 `system-engineering` + `field-assessment`（`td-explore` 原有的 `brainstorming` 同属运行时激活，一并移除）。依据 `td-* 标准步骤 1` 的"预加载 vs 按需触发"分界。
+
+### Fixed
+
+- **锚点引用修正（A1）**：统一 en 侧 3 处对 `tier-large` 文档节标题的引用写法（`delay-decision` / `td-apply` / `td-propose`），文档名 overall → general，命中实际标题 "General design document is mandatory"。
+- **td-system-audit 反向触发注释（A2）**：en+zh 两处 :99 注释修正，`human-in-loop` 位置描述从错误的"触发时机"节改为"正文已反向声明（见其场景 7）"。
+- **依赖节头统一（A3）**：en 侧 14 个 SKILL.md 的依赖节标题统一为 `## Dependent Skills`（消除 `## Dependencies` / `## Dependency Skills` / `## Dependent Skills` 三种变体；zh 侧 `## 依赖技能` 已统一，不动）。
+- **argument-hint 双语逐字符一致（B2）**：4 对 argument-hint 统一为 en 写法（`td-init` 的 `(无参数)`→`(no arguments)`，`td-system-audit` 的 `(可选, 默认 current-change)`→`(optional, default current-change)`；含对应命令文件）。
+- **field-assessment 格式补全（C1）**：en `field-assessment:16` 补 `## How It Is Referenced` 前缺空行（与 zh 侧对齐）。
+- **命令术语一致性（C3）**：`commands/td-system-audit.md` description 修正 `baseline`→`keynote principles`、`total design department`→`general design department`，对齐 project 术语；同时修复命令文件 argument-hint 破坏（去引号+冒号改等号，破坏 YAML frontmatter）。
+
+### Docs
+
+- **双语同步硬约束**：违反文件清单 1:1 对应、frontmatter 逻辑字段不一致、正文结构不对应、跨语言不变量漂移、只改一种语言不同步另一种 = bug。校验命令：`diff <(cd skills && find . | sort) <(cd zh-CN/skills && find . | sort)` 应无输出。
+- **翻译漂移校验**：`grep -c '\`<logical-name>\`' skills/` vs `zh-CN/skills/`，每个逻辑名计数应一致。计数不一致 = 某一方漏改/多改 = bug。
+- **commit 风格补充**：双语同步提交时 commit message 应体现 en + zh-CN（如 `fix: correct wip-limit override flow (en + zh-CN)`）。
+- **新增 `docs/audit-fix-gate-2026-08-26.md`**：记录使用态 LLM 视角审核修复的依赖图谱与分析前置门（步骤 1–6，含 16 个被改 skill 的出边、全 27 节点的依赖图谱邻接表、blast radius 与风险评估）。
+- **B1 回退说明**：docs 文件头部与步骤 1 表格、步骤 5/6 风险段均标注 B1 已回退。
+
 ## [1.3.1] - 2026-08-23
 
 ### Fixed
@@ -38,7 +91,7 @@
 
 ### Docs
 
-- 依赖图谱与分析门（改动前置流程）、dev 态与使用态分叉说明、SKILL 编写视角以使用态 LLM 为主、SKILL 不可引用 AGENTS 文件规则。
+- 依赖图谱与分析门（改动前置流程）、SKILL 编写视角以使用态 LLM 为主、SKILL 不可引用 AGENTS 文件规则。
 - 各 skill 按使用态视角精简语义重复与模糊表述。
 
 ## [1.2.0] - 2026-08-15

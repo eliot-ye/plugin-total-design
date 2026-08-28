@@ -13,7 +13,7 @@
 
 ## 依赖图谱与分析
 
-**任何对本仓库的更改——无论改 SKILL.md、命令文件、plugin.json，还是 AGENTS.md 本身——动笔前必须先完成下列分析步骤，全部执行完才能开始用户要求的改动。跳过这一步直接改 = 把局部失调注入系统。**
+**任何对本仓库LLM文件的更改——无论改 SKILL.md、命令文件、还是 AGENTS.md 本身——动笔前必须先完成下列分析步骤，全部执行完才能开始用户要求的改动。跳过这一步直接改 = 把局部失调注入系统。**
 
 理由：本 plugin 的 27 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
 
@@ -83,71 +83,19 @@ total-design/
 ├── LICENSE
 ├── .gitignore
 │
-├── skills/                  ← 27 个 skill，全部目录式（每个目录下是 SKILL.md）
-│   │
-│   ├── 约束层（6 个）
-│   │   ├── system-engineering/ ← 钱学森主基调；user-invocable: false
-│   │   ├── wip-limit/          ← 5 条局部规律，每个都服务主基调某一条
-│   │   ├── critical-buffer/   （各目录下均有 SKILL.md，下同）
-│   │   ├── brooks-law/
-│   │   ├── delay-decision/
-│   │   └── human-in-loop/
-│   │
-│   ├── 行为层（7 个，Superpowers 转译）
-│   │   ├── brainstorming/
-│   │   ├── writing-plans/
-│   │   ├── executing-plans/
-│   │   ├── test-driven-development/
-│   │   ├── requesting-code-review/
-│   │   ├── systematic-debugging/
-│   │   └── verification-before-completion/
-│   │
-│   ├── 配置层（7 个）
-│   │   ├── field-assessment/  ← profile × tier × constraint 强度矩阵的单一事实源；user-invocable: false
-│   │   ├── profile-greenfield/ ← 3 个现场 profile，user-invocable: false
-│   │   ├── profile-brownfield/
-│   │   ├── profile-maintenance/
-│   │   ├── tier-small/         ← 3 个系统复杂度 tier，user-invocable: false
-│   │   ├── tier-medium/
-│   │   └── tier-large/
-│   │
-│   └── 契约层 skill（7 个，与下方 command 一一对应）
-│       ├── td-propose/
-│       ├── td-explore/
-│       ├── td-apply/
-│       ├── td-reverse-spec/
-│       ├── td-archive/
-│       ├── td-system-audit/
-│       └── td-init/
+├── skills/                  ← 27 个 skill
+├── commands/                ← 8 个 command
 │
-└── commands/                ← 8 个 slash 命令入口（7 个极薄，逻辑在同名 skill 里；td-list 例外，见下）
-    ├── td-propose.md
-    ├── td-explore.md
-    ├── td-apply.md
-    ├── td-reverse-spec.md
-    ├── td-archive.md
-    ├── td-system-audit.md
-    ├── td-init.md
-    └── td-list.md            ← 只读命令，无同名 skill，逻辑直接写在命令文件里
-
-hooks/                      ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
-├── hooks.json              ← hook 声明（plugin.json 的 "hooks" 字段指向本文件）
-└── td_state_sync.py        ← 会话结束时从文件系统事实校正 .td-state/ 状态文件
+└── hooks/                   ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
+    ├── hooks.json           ← hook 声明（plugin.json 的 "hooks" 字段指向本文件）
+    └── td_state_sync.py     ← 会话结束时从文件系统事实校正 .td-state/ 状态文件
 ```
 
 ## 编辑规则
 
-**SKILL 的编写视角应该以使用态的LLM为主。首先完成 `## 依赖图谱与分析`，探索给出修改方案给用户确认，用户确认后才能进行编辑**
+**SKILL 的编写视角应该以使用态的LLM为主。**
 
-### dev 态与使用态分叉（安装副本）是常态
-
-使用态安装副本（本机示例路径 `~/.atomcode/plugins/marketplaces/total-design-marketplace/`，实际路径随环境）与本工作仓库**分叉是常态**：dev 态（仓库）领先使用态（安装副本），两边 `plugin.json` 版本号可能相同。这是 plugin 开发—分发周期的正常现象，**不是缺陷**，不要把分叉本身报成待修问题。
-
-开发 agent 规则：
-
-1. **使用态加载的是安装副本，不是仓库**：会话的 skill 列表与使用态 LLM 实际调用的 skill 都来自安装副本。做"使用态 LLM 视角"的审核/验证前，先 `diff -rq <仓库>/skills <安装副本>/skills` 确认结论适用哪个版本，并在结论里注明"审的是 dev 态源（工作仓库）"还是"审的是使用态安装副本"。
-2. **仓库改动不自动生效到使用态**：内容演进后须 bump `plugin.json` version + 重新发布/安装 + `atomcode plugin trust`，使用态 LLM 才会加载新内容。"内容已演进但版本未 bump"属于发布动作的欠账，发布时处理，开发过程中不反复当作仓库内缺陷上报。
-3. **分叉期症状判断**：分叉期间若发现"使用态缺某个 skill / 多出旧 skill（仓库 `skills/` 里不存在的，如旧配置层 skill）"，先对照安装副本确认属于常态分叉，再排查是否真问题。
+**首先完成 `## 依赖图谱与分析`，探索给出修改方案给用户确认，用户确认后才能进行编辑**
 
 ### SKILL.md 编辑
 
@@ -172,6 +120,17 @@ disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 
 
 <正文>
 ```
+
+**`## 依赖技能` 节的语义定义：**
+
+此节列出的是 skill 在会话级**必须提前加载到上下文**的依赖技能（即使用态 LLM 触发本 skill 时，需要已在上下文中的技能）。运行时按需触发/调用的技能**不列入此节**——它们在正文流程的特定步骤里按条件触发，不属于预加载。
+
+判定依据（参考 `td-* 标准步骤 1` 的"预加载 vs 按需触发"分界）：
+
+- **预加载（应列入）**：skill 触发时立即需要其内容在上下文中作为前提（如 `system-engineering` 主基调四条、`field-assessment` 的 profile×tier 识别 + 表 1/2/3 强度值）。
+- **按需触发（不列入）**：在正文流程的特定步骤按条件触发（如 `human-in-loop` 的强制停机场景、`wip-limit` 的 WIP 超限检查、`requesting-code-review` 的架构 review、`executing-plans` 的任务执行）。这些技能的触发时机由正文流程逻辑决定，不是会话级预加载。
+
+违反此定义 = 把运行时调用关系误当预加载关系列入依赖节，会造成使用态 LLM 在触发本 skill 时误以为必须预加载这些技能，混淆"预加载 vs 按需触发"的分界。
 
 **必须有 `## 服务的主基调原则` 一节的 skill：**
 
@@ -233,7 +192,6 @@ manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
 
 - **CHANGELOG.md**：按 Keep a Changelog 格式在文件顶部新增当前版本条目（最新在上），按 Fixed / Changed / Docs 等类别记录；历史条目只读，不修改（过时的"发布提示"类临时标注可更新为已结清状态，但不改动已发布的变更记录）。
 - **RELEASE_NOTES.md**：更新为当前版本发布说明——本版本定位（新增/修复/重构版）、行为变更表（升级用户感知的差异）、升级步骤（bump 版本号同步）、完整变更列表指向 CHANGELOG 对应条目。
-- **发布欠账**：内容演进但版本未 bump = 发布欠账（见「dev 态与使用态分叉」节），发布时在同一个逻辑变更内结清 version + CHANGELOG + RELEASE_NOTES 三项。
 
 ## 使用态 LLM 视角审核标准
 
@@ -243,9 +201,8 @@ manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
 
 ### 审核前置
 
-1. 先 `diff -rq <仓库>/skills <安装副本>/skills` 确认结论适用哪个版本，报告注明"审的是 dev 态源（工作仓库）"还是"审的是使用态安装副本"。
-2. 审核对象 = 使用态 LLM 实际会读到的文本：frontmatter + 正文 + references/ + 命令文件。
-3. **使用态 LLM 视角的具体检查面**（四维度之前先跑，发现即修）：
+1. 审核对象 = 使用态 LLM 实际会读到的文本：frontmatter + 正文 + references/ + 命令文件。
+2. **使用态 LLM 视角的具体检查面**（四维度之前先跑，发现即修）：
    - **触发语义**：description 触发词是否清晰、无歧义、不与其他 skill 重叠冲突？重叠场景下使用态 LLM 会触发哪个 skill（如 brainstorming 与 td-explore 都管"需求不清"）？`user-invocable` / `disable-model-invocation` 语义是否正确（决定自动触发 vs 显式调用）？
    - **正文自包含性**：正文孤立加载能否执行？"见 X 的「Y」节"类引用的锚点是否真实存在（grep 验证）？依赖技能节与正文实际引用一致（不漏列/多列）？
    - **入口链**：slash 命令 → 同名 skill 转发是否无缝（命令文件"立刻调用"目标存在）？只读命令例外（td-list）是否清晰？

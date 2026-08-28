@@ -1,6 +1,6 @@
 ---
 name: td-explore
-description: 不带 stakes 的思考伙伴，写代码前先探索。OpenSpec 契约层入口。触发场景：用户说"想探索"、"explore"、"先想想"、"不确定要建什么"、"帮我想清楚 X"。
+description: 不带 stakes 的思考伙伴，写代码前先探索。OpenSpec 契约层入口，需求不清时的主入口。触发场景：用户说"想探索"、"explore"、"先想想"、"不确定要建什么"、"帮我想清楚 X"。用户想 build/fix/重构但需求不清时，优先路由到这里；brainstorming 在本流程内被激活。
 user-invocable: true
 argument-hint: <topic or question>
 ---
@@ -13,7 +13,6 @@ argument-hint: <topic or question>
 
 - `system-engineering`
 - `field-assessment`
-- `brainstorming`
 
 ## 服务的主基调原则
 
@@ -87,6 +86,8 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 - **候选方向**：每个方向标注系统影响
 - **未解决的矛盾**：对话中暴露的冲突点
 - **建议的下一步**：通向 propose 或继续探索
+
+**条目标号规则**：以上小节中，凡**需要用户回复**的章节（通常是"候选方向"与"建议的下一步"），各章节内条目标号按 `human-in-loop` 的「需用户回复的条目标号规则」执行——带章节前缀编号（如 `a1 / b1`），避免用户回复时无法对应条目。
 
 ### 7. 探索成果落池（可选）
 

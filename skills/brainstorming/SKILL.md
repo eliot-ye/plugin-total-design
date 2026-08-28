@@ -1,7 +1,7 @@
 ---
 name: brainstorming
-description: "总体设计部"工作方式，苏格拉底式提问提炼 spec，站在系统全局立场。服务主基调第 2、3 条。触发场景：用户要 build 功能 / fix bug / 重构模块但需求不清时——先问"想达到什么"，别急着给方案。需求方向未定时，优先引导走 /td-explore（本 skill 在 explore 流程内被激活）。
-user-invocable: true
+description: "总体设计部"工作方式，苏格拉底式提问提炼 spec，站在系统全局立场。服务主基调第 2、3 条。在 td-explore 流程内被激活（需求不清时不独立触发——td-explore 路由到这里）。先问"想达到什么"，别急着给方案。
+user-invocable: false
 ---
 
 # Brainstorming — 总体设计部工作方式

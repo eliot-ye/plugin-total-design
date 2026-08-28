@@ -1,6 +1,6 @@
 ---
 name: td-archive
-description: 完成后归档。OpenSpec 契约层入口。触发场景：用户说"archive"、"归档"、"收工"、"这个 change 完成了"、"结项"。
+description: 完成后归档。OpenSpec 契约层入口。触发场景：用户说"archive"、"wrap up"、"close out"、"这个 change 完成了"。
 user-invocable: true
 argument-hint: <change-name>
 ---

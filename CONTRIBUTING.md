@@ -202,7 +202,6 @@ Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读�
 - [ ] 加新的 hook 但没论证为什么触发式不够
 - [ ] 加新的 constraint skill 但没 `## 服务的主基调原则` 一节
 - [ ] 改主基调 skill 但没充分讨论
-- [ ] 引入跨平台同步（`.claude/` / `.codex/` 等）——本 plugin 只针对 atomcode
 
 ## 风格
 

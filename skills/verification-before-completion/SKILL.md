@@ -1,7 +1,7 @@
 ---
 name: verification-before-completion
-description: 声明完成前必须跑验证命令，evidence before assertions。服务主基调第 3 条。触发场景：agent 即将声称"任务完成" / "bug 修复" / "可以 commit 了"时——先验证再下结论。
-user-invocable: true
+description: 声明完成前必须跑验证命令。服务主基调第 3 条。触发场景：agent 即将声称"任务完成" / "bug 修复" / "可以 commit 了"时——先验证再下结论。
+user-invocable: false
 ---
 
 # Verification Before Completion
