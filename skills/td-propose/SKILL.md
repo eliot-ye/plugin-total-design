@@ -64,7 +64,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 - `wip-limit`（硬阻塞 + override）：当前活跃 change 数已达上限？已达 → **阻塞本步骤，不执行步骤 4**，执行 `wip-limit` 的「硬约束 + override 机制」节（权威描述在该 skill；override 通过后继续步骤 4）。
 - `human-in-loop`：用户描述是否清晰到可以 propose？不清楚 → 用询问用户机制问"想做什么 change"。
-- **TODO 池检查**：读 `openspec/todo.md`（不存在 → 跳过本子项，视为空池，不主动创建文件）。todo.md 的主条目/change 子项/优先级/分节规则见 `references/todo-format.md`。
+- **TODO 池检查**：读 `openspec/todo.md`（不存在 → 跳过本子项，视为空池，不主动创建文件）。todo.md 的主条目/change 子项/优先级/分节规则见 `todo-pool` 的「格式约定」节。
   - 列出全部**未勾选**（`- [ ]`）主条目作为候选池，**按优先级排序呈现**（P0 → P1 → P2，未标注视为 P2）。
   - 若输入内容为空或用户没有明确 change 描述 → 询问用户让用户从候选池挑一个条目（或"不挑了，直接描述新 change"）。用户挑中某条目 → change 名从条目语义推导。
   - 用户已给明确描述 → 检查候选池里是否有语义重合的主条目，有则提示用户"TODO 池里已有近似条目，要不要基于它 propose？"——同一条主条目可以承接多个 change（每个 change 一个子项追加），不算重复建 change。
@@ -78,7 +78,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 openspec new change "<name>"
 ```
 
-**若本 change 来自 TODO 池条目**（步骤 3 挑中的）：创建后回写 `openspec/todo.md`，在该主条目下**新增一个 change 子项** `  - [ ] change: <name>`（缩进两空格；同一条主条目承接多个 change 时追加多个子项，一个 change 一个子项）。**不勾选主条目**——勾选是 `td-archive` 的职责，且要等主条目下全部 change 子项归档后才勾。change 子项是 archive 时定位对应条目的锚点。
+**若本 change 来自 TODO 池条目**（步骤 3 挑中的）：创建后回写 `openspec/todo.md`，在该主条目下**新增一个 change 子项**（格式见 `todo-pool` 的「格式约定」节「条目格式」条）。**不勾选主条目**——勾选是 `td-archive` 的职责（走 `todo-pool` 的「勾选子项」子流程），且要等主条目下全部 change 子项归档后才勾。change 子项是 archive 时定位对应条目的锚点。
 
 **关联方向是 todo.md → change 子项**（todo.md 侧标记"这个 change 来自我"）——change 资产（proposal/design/tasks）仍不得出现对 `openspec/todo.md` 的任何引用（见 Guardrails「提案不引用 TODO 池」）。
 

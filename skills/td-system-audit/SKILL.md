@@ -81,7 +81,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 审计报告输出后，对报告里"建议的下一步动作"（尤其是非严重问题、暂不立即修复的后续事项），询问用户："要不要把这些记进 `openspec/todo.md` 待办池？"——落池 = 记为 backlog 候选，等 `/td-propose` 时从池里挑，不占 WIP。
 
-- 用户同意 → 按 `td-propose` 的 `references/todo-format.md` 格式，把条目写入 `openspec/todo.md` 待办节（`- [ ] 一句话描述`；文件不存在 → 创建）。
+- 用户同意 → 触发 `todo-pool` 的「落池条目」子流程。
 - 用户拒绝 → 跳过，不强制。
 
 ### 6. 触发修复

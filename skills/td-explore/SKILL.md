@@ -91,7 +91,9 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 ### 7. 探索成果落池（可选）
 
-探索产生了用户认可、但暂不立即 propose 的新方向时，建议写入 `openspec/todo.md` 的待办节（条目为 `- [ ] 一句话描述`，格式见 `td-propose` 的 `references/todo-format.md`）。文件不存在 → 问用户是否创建（探索产出是新池的第一个候选）。这是"想到了先记下来，别急着建 change"——记入池不占 WIP，等 `td-propose` 时从池里挑。用户拒绝落池 → 跳过，不强制。
+探索产生了用户认可、但暂不立即 propose 的新方向时，询问用户："要不要把探索出的候选方向记进 `openspec/todo.md` 待办池？"——落池 = 记为 backlog 候选，等 `/td-propose` 时从池里挑，不占 WIP。这是"想到了先记下来，别急着建 change"。
+
+用户同意 → 触发 `todo-pool` 的「落池条目」子流程；用户拒绝 → 跳过，不强制。
 
 ## Guardrails
 

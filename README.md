@@ -92,10 +92,10 @@ total-design/
 ├── CODE_OF_CONDUCT.md
 ├── LICENSE
 │
-├── skills/                 ← 27 个 skill，全部目录式 SKILL.md
+├── skills/                 ← 28 个 skill，全部目录式 SKILL.md
 │   ├── 约束层（6 个）
 │   ├── 行为层（7 个，Superpowers 转译）
-│   ├── 配置层（7 个，field-assessment + 3 profile + 3 tier）
+│   ├── 配置层（8 个，field-assessment + 3 profile + 3 tier + todo-pool 待办池格式）
 │   └── 契约层（7 个 td-*，与下方 command 一一对应）
 │
 ├── commands/               ← 8 个 slash 命令入口（7 个极薄，逻辑在同名 skill；td-list 只读无 skill）
@@ -183,14 +183,14 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 ## Skill 清单
 
-27 个 skill，按调用方式分两组：
+28 个 skill，按调用方式分两组：
 
 - **`user-invocable: true`**（14 个）：用户可在 `/` 菜单主动调；其中 `td-init` 还带 `disable-model-invocation: true`（仅用户可触发，agent 不能自动调用），其余 13 个也可被 agent 自动触发
   - 行为层 7 个（Superpowers 转译）
   - 契约层 7 个 td-*（与 7 个 td-* command 一一对应；`td-list` 只读命令无同名 skill）
-- **`user-invocable: false`**（13 个）：agent 自动触发，不暴露在 `/` 菜单
+- **`user-invocable: false`**（14 个）：agent 自动触发，不暴露在 `/` 菜单
   - 约束层 6 个（钱学森主基调 + 5 条局部规律）
-  - 配置层 7 个（field-assessment + 3 profile + 3 tier）
+  - 配置层 8 个（field-assessment + 3 profile + 3 tier + todo-pool 待办池格式）
 
 ### 约束层（钱学森系统工程主基调 + 局部规律）
 
@@ -217,7 +217,7 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 | `systematic-debugging` | 测试失败 / 用户报 bug / 修复尝试失败 | true |
 | `verification-before-completion` | 声明"完成"之前；evidence before assertions | true |
 
-### 配置层（profile × tier 二维）
+### 配置层（profile × tier 二维 + 待办池格式）
 
 **矩阵单一事实源（`user-invocable: false`）：**
 
@@ -234,6 +234,10 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 - `tier-small` — 3–10 文件，单团队，constraints 弱强制
 - `tier-medium` — 10–100 文件，多模块，constraints 中等强制
 - `tier-large` — 100+ 文件 / 多团队 / 多仓库，constraints 强制，要求总体设计文档
+
+**待办池格式（`user-invocable: false`）：**
+
+- `todo-pool` — `openspec/todo.md` 待办池格式约定（主条目 + change 子项两级结构、优先级、勾选时机、git 策略）；`td-propose` / `td-explore` / `td-archive` / `td-system-audit` 读写该文件的格式单一事实源（见下方「TODO 待办池机制」一节）
 
 两个维度都以 skill 形态存在，agent 根据现场判读激活哪一组。
 
@@ -260,11 +264,11 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 | skill | 与 TODO 池的关系 |
 |---|---|
 | `td-propose` | 优先从池里挑未勾选主条目建 change（按优先级排序呈现），在主条目下新增 `  - [ ] change: <name>` 子项，可多 change 承接同一条主条目 |
-| `td-archive` | 归档成功后把该 change 对应的子项勾选 `[x]`；主条目下全部子项都勾选后主条目才勾选 `[x]`——子项永久保留，作为追溯档案 |
-| `td-explore` | 读未勾选主条目作候选输入；探索出用户认可的新方向可落池（写主条目） |
-| `td-system-audit` | 审计发现问题时询问用户是否把"建议的下一步动作"落池（写主条目） |
+| `td-archive` | 归档成功后触发 `todo-pool`「勾选子项」——勾选 `change: <name>` 子项；主条目下全部子项都勾选后主条目才勾选，子项永久保留（追溯档案） |
+| `td-explore` | 读未勾选主条目作候选输入；探索出用户认可的新方向可落池（触发 `todo-pool`「落池条目」） |
+| `td-system-audit` | 审计发现问题时询问用户是否把"建议的下一步动作"落池（触发 `todo-pool`「落池条目」） |
 
-条目格式约定见 `td-propose` 的 `references/todo-format.md`（单一事实源）。
+读写操作入口与条目格式见 `todo-pool`——格式在「格式约定」节，写操作在「落池条目」/「勾选子项」子流程节，单一事实源。
 
 ---
 
