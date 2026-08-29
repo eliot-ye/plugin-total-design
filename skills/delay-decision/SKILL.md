@@ -8,7 +8,6 @@ user-invocable: false
 
 ## 依赖技能
 
-- `td-explore`
 - `tier-large`
 
 ## 服务的主基调原则

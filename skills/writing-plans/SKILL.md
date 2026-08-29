@@ -75,7 +75,7 @@ task 是 `executing-plans` 直接消费的条目，主体必须是 agent 能**�
 ## 与其他 skill 的关系
 
 - 与 `delay-decision` 配合：plan 里如果遇到可逆决策，标 `[延迟决策]` 而不是强行拍
-- 与 `field-assessment` 配合：当 `field-assessment` 识别流程允许子系统独立定 tier 时，本 skill 的任务切分应**按子系统层次分别拆任务**——每个子系统有自己的任务序列，子系统之间的依赖任务是跨子系统的关键链。
+- 与 `field-assessment` 配合：子系统独立定 tier 时的切分规则见上方「工作方式」节 1 的子系统段（权威在 `field-assessment` 的 `references/subsystem-tiering.md`）。
 
 ## 不做的事
 

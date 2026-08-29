@@ -86,7 +86,7 @@ openspec archive "<name>"
 
 如果只想归档不同步 specs（infra / doc-only change），加 `--skip-specs`。
 
-**归档成功后 TODO 子项勾选**：按 `td-propose` 的 `references/todo-format.md`「勾选时机」规则操作——读 `openspec/todo.md`，查找含 `change: <name>` 子项的主条目，勾选对应子项；主条目下**全部子项都已勾选** → 主条目勾选 `[x]`；**仍有子项未勾选** → 主条目保持 `- [ ]`。找不到对应子项或文件不存在 → 跳过，不主动创建文件。
+**归档成功后 TODO 子项勾选**：按 `td-propose` 的 `references/todo-format.md`「规则」节「勾选时机」条操作——读 `openspec/todo.md`，查找含 `change: <name>` 子项的主条目，勾选对应子项；主条目下**全部子项都已勾选** → 主条目勾选 `[x]`；**仍有子项未勾选** → 主条目保持 `- [ ]`。找不到对应子项或文件不存在 → 跳过，不主动创建文件。
 
 **Purpose TBD housekeeping 检查**：`openspec archive` sync 主 spec 时，新生成的主 spec `## Purpose` 节会保留 td-archive 模板默认值 `TBD - created by archiving change <name>. Update Purpose after archive.`——这是已知的 sync 副作用，不能让 TBD 残留到下一次 audit。sync 完成后立即按 `references/purpose-tbd-housekeeping.md` 执行子流程（读涉及主 spec → grep `^TBD - created by archiving` → 命中则本步骤内补写一句话 Purpose → 再次 grep 确认无残留）。
 
@@ -96,7 +96,7 @@ archive 是契约层的"闭合点"，必须触发三个后续接力（顺序执�
 
 #### 5.1 profile/tier 重新判读
 
-archive 完一个 change 后，项目的 profile 可能变化（greenfield 走到 maintenance，或 brownfield 进入大重构）。**强制重新调用 `field-assessment` 的「识别流程」节**，重新判读 `$_TD_PROFILE` / `$_TD_TIER`。重判策略见 `field-assessment` 的 `references/identification-flow.md`「### 4. 缓存判读结果」节的"重判策略"段——读到该段执行，本节不重复。
+archive 完一个 change 后，项目的 profile 可能变化（greenfield 走到 maintenance，或 brownfield 进入大重构）。**强制重新调用 `field-assessment` 的 `references/identification-flow.md`「识别流程」节**，重新判读 `$_TD_PROFILE` / `$_TD_TIER`。重判策略见 `field-assessment` 的 `references/identification-flow.md`「### 4. 缓存判读结果」节的"重判策略"段——读到该段执行，本节不重复。
 
 如果新判读结果与步骤 1 缓存的不同：
 

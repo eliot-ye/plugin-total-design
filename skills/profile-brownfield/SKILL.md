@@ -22,7 +22,7 @@ user-invocable: false
 
 ## 在各 tier 下的 constraint 强度
 
-约束强度由 tier 单一决定，本 profile 不叠加、不修改强度数值（`human-in-loop` 的表 2 profile 加成除外）。强度取值见 `field-assessment` 的「下游引用强度的约定」节，本文件不重复数值。
+约束强度由 tier 单一决定，本 profile 不叠加、不修改强度数值（`human-in-loop` 的表 2 profile 加成除外）。强度取值见 `field-assessment` 的 `references/identification-flow.md`「下游引用强度的约定」节，本文件不重复数值。
 
 ## 特殊规则
 

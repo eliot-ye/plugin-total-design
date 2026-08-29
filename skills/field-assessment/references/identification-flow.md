@@ -45,7 +45,7 @@ agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `
 **重判策略**（td-archive 5.1 / td-system-audit / 用户显式触发都适用）：
 
 1. 读 `profile-tier.yaml` 缓存值（文件不存在 → 视为空缓存，跳到步骤 2 现判）。
-2. 重跑「### 2. 判读 profile」+「### 3. 判读 tier」得到新判读结果。
+2. 重跑「### 2. 判读 profile（三选一，按优先级）」+「### 3. 判读 tier（三选一）」得到新判读结果。
 3. 新判读与缓存对比：
    - **一致** → 更新 `judged_at` 时间戳（保持 profile/tier 不变），不提示用户。
    - **不一致** → 覆盖写 `profile-tier.yaml` 为新结果，同步更新 `judge_reason` 字段为新判据（如"greenfield 走到 maintenance,因为已上线 + 有 CI/CD"），由调用方（如 td-archive 5.1）提示用户"项目状态已从 `<old>` 变为 `<new>`"。

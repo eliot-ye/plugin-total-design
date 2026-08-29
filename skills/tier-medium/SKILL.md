@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 判断依据
 
-判据见 `field-assessment` 的识别流程「### 3. 判读 tier」节（任一成立取最高）。
+判据见 `field-assessment` 的 `references/identification-flow.md`「### 3. 判读 tier（三选一）」节（任一成立取最高）。
 
 - 系统层次：有明显的模块/分系统边界
 
