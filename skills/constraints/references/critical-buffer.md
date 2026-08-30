@@ -1,15 +1,6 @@
----
-name: critical-buffer
-description: 关键链缓冲保护。服务系统工程主基调第 1 条"系统工程"和第 2 条"总体设计部"。
-user-invocable: false
----
-
 # 关键链缓冲保护
 
-## 依赖技能
-
-- `wip-limit`
-- `field-assessment`
+> 本文件与同目录的 `brooks-law.md` / `delay-decision.md` / `human-in-loop.md` / `wip-limit.md` 是平级兄弟文件，正文中出现的裸逻辑名均指同目录对应变体文件。
 
 ## 服务的主基调原则
 
@@ -36,15 +27,15 @@ user-invocable: false
 
 ### 隐性 buffer 压缩（WIP 超限时）
 
-显性 buffer 压缩（用户直接要求"压缩估时"）由本 skill 的「保护缓冲」规则防御。但还有一种隐性 buffer 压缩：
+显性 buffer 压缩（用户直接要求"压缩估时"）由本文件的「保护缓冲」规则防御。但还有一种隐性 buffer 压缩：
 
 **WIP 超限时的隐性 buffer 压缩**：当活跃 change 数超过 `wip-limit` 上限时，agent 的注意力是有限资源，N 个并行 change 分摊下来，每个 change 得到的关注度只有 1/N，相当于每个 change 的关键链 buffer 被"注意力分散"隐性压缩了。
 
 这种隐性压缩不会在单个 change 的 `critical-buffer` 检测中被发现——每个 change 内部看起来关键链标注完整、buffer 比例合规。但跨 change 整合时，注意力分散导致的隐性 buffer 压缩会爆发为跨 change 全局失调。
 
 **防御机制**：
-- `wip-limit` 的硬阻塞 + override 机制是第一道防线（见 `wip-limit` 的「硬约束 + override 机制」节）。
-- override 发生时，本 skill 应在 override 流程里被触发，评估"并行 N+1 个 change 对每个 change 关键链 buffer 的隐性压缩程度"。
+- `wip-limit` 的硬阻塞 + override 机制是第一道防线（见同目录 `wip-limit.md` 的「硬约束 + override 机制」节）。
+- override 发生时，本文件应在 override 流程里被触发，评估"并行 N+1 个 change 对每个 change 关键链 buffer 的隐性压缩程度"。
 - 评估输出到 override 确认记录里，作为后续 `/td-system-audit` project scope 的输入。
 
 ## 触发时机
@@ -52,7 +43,7 @@ user-invocable: false
 - 用户在 `/td-propose` 或 `/td-apply` 时要求"加快进度"或"压缩估时"
 - agent 自己生成 tasks.md 时
 - 多个 change 在排队，用户想插队
-- **被 `/td-system-audit` 触发修复时**：audit 发现"关键链缓冲被压缩"问题时，触发本 skill 重新规划 tasks。
+- **被 `/td-system-audit` 触发修复时**：audit 发现"关键链缓冲被压缩"问题时，触发本文件重新规划 tasks。
 
 ## 触发时 agent 应做的事
 
@@ -63,8 +54,8 @@ user-invocable: false
 
 ## 按 tier 调整
 
-tier 越大，系统越复杂，不确定性越高，缓冲越厚。project buffer 比例按表 1 的 critical-buffer 行取值（取值规则见上文「触发时 agent 应做的事」第 2 条，此处不重复）。
+tier 越大，系统越复杂，不确定性越高，缓冲越厚。project buffer 比例按表 1 的 critical-buffer 行取值（取值规则见上文「触发时 agent 应做的事」第 2 条）。
 
 ### 层次观归位
 
-当系统内部有明显的子系统边界时（`field-assessment` 识别流程允许子系统独立定 tier），本 skill 的关键链标注应**按子系统层次分别标注**——每个子系统有自己的关键链和 project buffer，子系统之间的依赖链是跨子系统的关键链。子系统独立定 tier 的执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
+当系统内部有明显的子系统边界时（`field-assessment` 识别流程允许子系统独立定 tier），本文件的关键链标注应**按子系统层次分别标注**——每个子系统有自己的关键链和 project buffer，子系统之间的依赖链是跨子系统的关键链。子系统独立定 tier 的执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。

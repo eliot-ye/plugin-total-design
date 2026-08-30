@@ -18,15 +18,15 @@ agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `
 | 2 | `profile-brownfield` | 仓库已有可运行代码（非脚手架）**且** 不满足 maintenance 判据 |
 | 3 | `profile-greenfield` | 仓库刚 init / 只有脚手架 / 文件数 < 10 且无业务逻辑 |
 
-判据冲突时按优先级取高的。判据不明确 → 触发 `human-in-loop`，问用户"这是新项目、接手项目、还是上线维护？"。
+判据冲突时按优先级取高的。判据不明确 → 触发 `constraints` 的 `references/human-in-loop.md`，问用户"这是新项目、接手项目、还是上线维护？"。
 
 ### 3. 判读 tier（三选一）
 
-| tier | 判据（任一成立即取该 tier，取最高） |
-|---|---|
-| `tier-large` | 文件数 100+ **或** 多团队 **或** 多仓库 **或** 多部署单元 |
-| `tier-medium` | 文件数 10–100 **或** 单团队多人 **或** 1–3 个部署单元 |
-| `tier-small` | 文件数 3–10 **或** 单人/单团队 **或** 1 个部署单元 |
+| tier | 判据（任一成立即取该 tier，取最高） | 系统层次 |
+|---|---|---|
+| `tier-large` | 文件数 100+ **或** 多团队 **或** 多仓库 **或** 多部署单元 | 多层嵌套的分系统，可能有跨仓库依赖 |
+| `tier-medium` | 文件数 10–100 **或** 单团队多人 **或** 1–3 个部署单元 | 有明显的模块/分系统边界 |
+| `tier-small` | 文件数 3–10 **或** 单人/单团队 **或** 1 个部署单元 | 扁平，无明显分系统边界 |
 
 系统有"明显分系统边界"即使文件少，也升级到 `tier-medium`。系统拆成多个独立子系统 → 每个子系统独立定 tier（见 `subsystem-tiering.md`）。
 
@@ -45,7 +45,7 @@ agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `
 **重判策略**（td-archive 5.1 / td-system-audit / 用户显式触发都适用）：
 
 1. 读 `profile-tier.yaml` 缓存值（文件不存在 → 视为空缓存，跳到步骤 2 现判）。
-2. 重跑「### 2. 判读 profile」+「### 3. 判读 tier」得到新判读结果。
+2. 重跑「### 2. 判读 profile（三选一，按优先级）」+「### 3. 判读 tier（三选一）」得到新判读结果。
 3. 新判读与缓存对比：
    - **一致** → 更新 `judged_at` 时间戳（保持 profile/tier 不变），不提示用户。
    - **不一致** → 覆盖写 `profile-tier.yaml` 为新结果，同步更新 `judge_reason` 字段为新判据（如"greenfield 走到 maintenance,因为已上线 + 有 CI/CD"），由调用方（如 td-archive 5.1）提示用户"项目状态已从 `<old>` 变为 `<new>`"。
@@ -54,19 +54,29 @@ agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `
 
 ### 5. 注入强度
 
-判读完成后，agent 把表 1（5 个 constraint 在当前 tier 下的强度）+ 表 2（当前 profile 的 human-in-loop 加成）+ 表 3（system-audit 频率）读入上下文。后续步骤引用这些强度值，不再回查本 skill。
+判读完成后，agent 把表 1（5 个 constraint 在当前 tier 下的强度）+ 表 2（当前 profile 的 human-in-loop 加成）+ 表 3（system-audit 频率）读入上下文，同时按命中的 profile 与 tier 各读一份本目录下的变体文件（共 2 份，见下方「### 变体文件」节）。后续步骤引用这些强度值与变体规则，不再回查本 skill。
 
 **子系统独立定 tier 时的强度注入**：当 `profile-tier.yaml` 含 `subsystems` 条目时，注入强度应**按子系统分别注入**——每个子系统有自己的表 1 / 表 2 强度。跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则）。后续步骤引用强度时，需区分"当前操作作用于哪个子系统"。
+
+### 变体文件（profile / tier 的流程侧重与特殊规则）
+
+判读完成后，按命中的 profile 与 tier 各读一份本目录下的变体文件（共 2 份）：
+
+| 维度 | 变体文件 |
+|---|---|
+| profile | `profile-greenfield.md` / `profile-brownfield.md` / `profile-maintenance.md` |
+| tier | `tier-small.md` / `tier-medium.md` / `tier-large.md` |
+
+变体文件承载**流程侧重与特殊规则**——profile 决定入口动作 / TDD 边界 / proposal 重量，tier 决定松绑或加码类特殊规则。constraint 强度数值不在变体文件定义：profile 只决定流程侧重、不叠加表 1 强度，唯一例外是表 2 的 human-in-loop 加成（见 `strength-matrix.md`）；强度单一事实源始终在表 1 / 表 2 / 表 3。
 
 ### 下游引用强度的约定
 
 下游 skill 引用表 1 / 表 2 / 表 3 的强度值时，遵循同一约定：
 
 - **强度值由 td-* skill 的"步骤 1"注入会话上下文**——通过 `field-assessment` 的识别流程完成注入。
-- **若强度未注入**（如 td-* skill 跳过步骤 1、或会话上下文被清理），下游 skill 调 `field-assessment` 注入后再读，不重复定义数值。
-- **单一事实源**：强度数值只在 `strength-matrix.md`（表 1 + 表 2）和 `audit-frequency.md`（表 3）定义，下游 skill 引用时不复制数值，只引用"按当前 tier 查表 X 的 Y 行"。
-
-这条约定对所有 constraint skill、tier skill、td-* skill 生效。下游 skill 不必在正文重复这条约定——本节是约定的单一锚点。
+- **若强度未注入**（如跳过步骤 1、或会话上下文被清理），调 `field-assessment` 识别流程注入后再读。
+- **变体文件规则由步骤 1 一并注入**——按命中的 profile 与 tier 各读一份（共 2 份）。若变体文件规则未注入，按步骤 1 判读的 `$_TD_PROFILE` / `$_TD_TIER` 直接读本目录下对应变体文件。
+- **单一事实源**：强度数值只在 `strength-matrix.md`（表 1 + 表 2）和 `audit-frequency.md`（表 3）定义；与其他位置的强度表述冲突时，以这两处为准。
 
 ## 持久化层（.td-state/）
 

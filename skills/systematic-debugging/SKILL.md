@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 依赖技能
 
-- `human-in-loop`
+- `constraints` 的 `references/human-in-loop.md`
 
 ## 服务的主基调原则
 
@@ -16,7 +16,7 @@ user-invocable: false
 
 **主基调第 1 条：系统工程。** bug 不是"代码错了"，是"系统行为偏离契约"。修 bug 之前必须理解系统在哪一层偏离了。
 
-**《工程控制论》反馈控制回路归位**：4-phase 流程是反馈控制回路的具体形态（Reproduce 检测、Isolate 定位、Root Cause 归因、Fix & Verify 校正 + 再检测）。
+**《工程控制论》反馈控制回路归位**：4-phase 流程是反馈控制回路的具体形态（完整回路见 `system-engineering` 的「反馈控制回路」节）。
 
 ## 触发时机
 
@@ -64,4 +64,4 @@ user-invocable: false
 
 ## 与其他 skill 的关系
 
-- 与 `human-in-loop` 配合：如果 Phase 3 找不到 root cause，停下来问用户
+- 与 `constraints` 的 `references/human-in-loop.md` 配合：如果 Phase 3 找不到 root cause，停下来问用户

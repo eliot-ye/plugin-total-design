@@ -1,6 +1,6 @@
 ---
 name: td-explore
-description: 不带 stakes 的思考伙伴，写代码前先探索。OpenSpec 契约层入口，需求不清时的主入口。触发场景：用户说"想探索"、"explore"、"先想想"、"不确定要建什么"、"帮我想清楚 X"。用户想 build/fix/重构但需求不清时，优先路由到这里；brainstorming 在本流程内被激活。
+description: 不带 stakes 的思考伙伴，写代码前先探索。OpenSpec 契约层入口，需求不清时的主入口。触发场景：用户说"想探索"、"explore"、"先想想"、"不确定要建什么"、"帮我想清楚 X"。用户想 build/fix/重构但需求不清时，优先路由到这里。
 user-invocable: true
 argument-hint: <topic or question>
 ---
@@ -24,7 +24,7 @@ explore 是总体设计部在"想"的阶段的工作——不是分系统工程�
 
 explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的尊重。
 
-**《工程控制论》反馈控制回路归位**：explore 是前馈控制准备环节（为 propose 的控制目标收集先验信息、降低预测误差）。
+**《工程控制论》反馈控制回路归位**：explore 是前馈控制准备环节（完整回路见 `system-engineering` 的「反馈控制回路」节）。
 
 ## 输入 - 用户想探索的话题、问题、想法
 
@@ -46,7 +46,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 ### 2. 读现场背景（config.yaml context）
 
-与 `td-propose` 步骤 2 同一引导流程：读 `openspec/config.yaml` 的 `context` 字段作为探索现场背景；若为空或模板默认值，一次问完 tech stack / conventions / domain 三个问题，答案写入 `context` 字段。一次性投入，后续 td-propose / td-explore 都能读到。用户跳过 → 保持空，继续步骤 3（不阻塞）。
+执行 `field-assessment` 的 `references/config-context-guidance.md` 的引导流程，读 `openspec/config.yaml` 的 `context` 字段作为探索现场背景（空则引导填写，用户跳过不阻塞，完整流程见该文件）。
 
 ### 3. 读现有 context
 
@@ -61,7 +61,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 **产物要求**：explore 阶段必须产出**至少 2 个候选方向**，每个标注系统工程影响（影响哪些分系统 / 整体性能预期变化 / 可逆性）。产物留在会话上下文里（explore 不落盘 spec，见步骤 6 的 Guardrails）。`/td-propose` 步骤 3 的"greenfield explore 检查"会读会话历史判定是否已有 ≥2 个候选方向——少于 2 个时 propose 阶段会拦下来要求先 explore。
 
-**与 `delay-decision` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策——不闭合 spec，等更多信息再 propose。当用户想"赶紧 propose 闭合 spec"时，触发 `delay-decision` 提醒："explore 不落盘 spec 是延迟决策的体现，信息不足时强行闭合会损失信息（主基调第 3 条综合集成）。"这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
+**与 `constraints` 的 `references/delay-decision.md` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策——不闭合 spec，等更多信息再 propose。当用户想"赶紧 propose 闭合 spec"时，触发 `constraints` 的 `references/delay-decision.md` 提醒："explore 不落盘 spec 是延迟决策的体现，信息不足时强行闭合会损失信息（主基调第 3 条综合集成）。"这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
 
 ### 5. 系统工程视角评估
 
@@ -72,10 +72,10 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 - 是局部优化还是全局协调
 - 局部优化对全局失调的风险
 
-评估侧重按步骤 1 判读的 `$_TD_PROFILE` 调整：
+评估侧重按步骤 1 判读的 `$_TD_PROFILE` 调整（各 profile 的特殊规则与流程侧重见 `field-assessment` 的对应变体文件：`profile-greenfield` → `references/profile-greenfield.md`、`profile-brownfield` → `references/profile-brownfield.md`、`profile-maintenance` → `references/profile-maintenance.md`）：
 
-- `profile-greenfield`：重候选方向的**取舍与可逆性**——没有存量约束，方向选错成本低，但要用 `delay-decision` 避免"想到了就建"和"先把架构设计完美"两个陷阱
-- `profile-brownfield`：重**动老代码的影响**——候选方向会触碰哪些存量分系统、改动范围能否最小化、是否触发公共契约变更（对照 `human-in-loop` 的必停场景）
+- `profile-greenfield`：重候选方向的**取舍与可逆性**——没有存量约束，方向选错成本低，但要用 `constraints` 的 `references/delay-decision.md` 避免"想到了就建"和"先把架构设计完美"两个陷阱
+- `profile-brownfield`：重**动老代码的影响**——候选方向会触碰哪些存量分系统、改动范围能否最小化、是否触发公共契约变更（对照 `constraints` 的 `references/human-in-loop.md` 的必停场景）
 - `profile-maintenance`：重**生产稳定性**——候选方向对线上契约、部署 pipeline、回归测试的影响，是否需要在生产环境改动前停下问用户
 
 ### 6. 总结给用户看
@@ -87,11 +87,13 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 - **未解决的矛盾**：对话中暴露的冲突点
 - **建议的下一步**：通向 propose 或继续探索
 
-**条目标号规则**：以上小节中，凡**需要用户回复**的章节（通常是"候选方向"与"建议的下一步"），各章节内条目标号按 `human-in-loop` 的「需用户回复的条目标号规则」执行——带章节前缀编号（如 `a1 / b1`），避免用户回复时无法对应条目。
+**条目标号规则**：以上小节中，凡**需要用户回复**的章节（通常是"候选方向"与"建议的下一步"），各章节内条目标号按 `constraints` 的 `references/human-in-loop.md` 的「需用户回复的条目标号规则」执行——带章节前缀编号（如 `a1 / b1`），避免用户回复时无法对应条目。
 
 ### 7. 探索成果落池（可选）
 
-探索产生了用户认可、但暂不立即 propose 的新方向时，建议写入 `openspec/todo.md` 的待办节（条目为 `- [ ] 一句话描述`，格式见 `td-propose` 的 `references/todo-format.md`）。文件不存在 → 问用户是否创建（探索产出是新池的第一个候选）。这是"想到了先记下来，别急着建 change"——记入池不占 WIP，等 `td-propose` 时从池里挑。用户拒绝落池 → 跳过，不强制。
+探索产生了用户认可、但暂不立即 propose 的新方向时，询问用户："要不要把探索出的候选方向记进 `openspec/todo.md` 待办池？"——落池 = 记为 backlog 候选，等 `/td-propose` 时从池里挑，不占 WIP。这是"想到了先记下来，别急着建 change"。
+
+用户同意 → 触发 `todo-pool` 的「落池条目」子流程；用户拒绝 → 跳过，不强制。
 
 ## Guardrails
 

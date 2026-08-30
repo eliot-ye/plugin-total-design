@@ -1,8 +1,10 @@
-# 强度矩阵（单一事实源）
+# 强度矩阵（表 1 + 表 2）
 
-本文件是表 1 + 表 2 的单一事实源，下游 skill 通过 `field-assessment` 识别流程读入（见 `identification-flow.md` 的「### 5. 注入强度」节）。改强度只改本文件。
+表 1（constraint × tier 强度）与表 2（profile × tier 的 human-in-loop 场景加成）。由 `field-assessment` 的识别流程（`references/identification-flow.md`「### 5. 注入强度」节）读入；与其他位置的强度表述冲突时，以本文件为准。
 
 ## 表 1：5 个 constraint 在 3 个 tier 下的强度
+
+constraint 列为子约束逻辑名，路径为 `constraints` 的 `references/<name>.md`：
 
 | constraint | tier-small | tier-medium | tier-large |
 |---|---|---|---|
@@ -14,7 +16,7 @@
 
 ### 表 1 第 5 行（human-in-loop）语义说明
 
-**表 1 第 5 行是叠加在 `human-in-loop` skill 的第 1–5 类通用基线之上的 tier 额外触发条件，不是绝对强度值。** 第 1–5 类通用基线在所有 profile × tier 下都生效——这是"必须停"的下限。
+**表 1 第 5 行是叠加在 `constraints` 的 `references/human-in-loop.md` 的第 1–5 类通用基线之上的 tier 额外触发条件，不是绝对强度值。** 第 1–5 类通用基线在所有 profile × tier 下都生效——这是"必须停"的下限。
 
 - tier-small"—"：无额外 tier 触发条件，仅用第 1–5 类通用基线。
 - tier-medium"—"：无额外 tier 触发条件，仅用第 1–5 类通用基线（"公共契约变更"属基线第 1 类，所有 tier 生效，不在此重复列为 tier 加成）。
@@ -30,7 +32,7 @@ tier-small 20% project buffer 偏低于 CCPM 标准（通常 30%）。tier-small
 
 ### 表 1 注解（3 tier × 5 constraint）
 
-本表是三个 tier skill 的「constraint 强度」注解合并而来，避免三处重复。
+constraint 列为子约束逻辑名，路径同表 1：
 
 | constraint | tier-small 注解 | tier-medium 注解 | tier-large 注解 |
 |---|---|---|---|
@@ -38,7 +40,7 @@ tier-small 20% project buffer 偏低于 CCPM 标准（通常 30%）。tier-small
 | `critical-buffer` | 不确定性较低 | 不确定性中等 | 不确定性最高 |
 | `brooks-law` | 小团队加人手影响有限，不强制 | 中团队加人手要考虑 onboarding，提醒 | 大系统加人手几乎必然拖慢，强制 |
 | `delay-decision` | 表 1 说"强"（三个 tier 都强）。小系统回滚成本低，更该延迟——这是"强"在小系统的具体含义 | 强 | 强（仅模块层以下延迟；顶层架构进 tier-large 总体设计文档，不靠延迟决策处理） |
-| `human-in-loop` | —（无额外 tier 触发条件，仅用 human-in-loop skill 的第 1–5 类通用基线） | —（同 tier-small；公共契约变更属基线第 1 类，不重复列为 tier 加成） | + 总体设计文档审阅 |
+| `human-in-loop` | —（无额外 tier 触发条件，仅用 `constraints` 的 `references/human-in-loop.md` 的第 1–5 类通用基线） | —（同 tier-small；公共契约变更属基线第 1 类，不重复列为 tier 加成） | + 总体设计文档审阅 |
 
 ## 表 2：profile 在 human-in-loop 上的场景加成
 
@@ -53,7 +55,7 @@ tier-small 20% project buffer 偏低于 CCPM 标准（通常 30%）。tier-small
 
 "—" 表示该格无 profile 场景加成，仅用表 1 第 5 行的 tier 基线。2 个有加成的 profile 在 tier-small 下都没有超出 tier 基线的加成。
 
-最终 human-in-loop 强度 = `human-in-loop` skill 的第 1–5 类通用基线 ∪ 表 1 第 5 行 tier 加成 ∪ 表 2 profile 场景加成。三者叠加，不替换。
+最终 human-in-loop 强度 = `constraints` 的 `references/human-in-loop.md` 的第 1–5 类通用基线 ∪ 表 1 第 5 行 tier 加成 ∪ 表 2 profile 场景加成。三者叠加，不替换。
 
 ### 表 2 profile-maintenance × tier-large 说明
 

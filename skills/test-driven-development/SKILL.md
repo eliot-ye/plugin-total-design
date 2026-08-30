@@ -8,7 +8,8 @@ user-invocable: false
 
 ## 依赖技能
 
-- `human-in-loop`
+- `field-assessment`
+- `constraints` 的 `references/human-in-loop.md`
 - `system-engineering`
 - `systematic-debugging`
 - `writing-plans`
@@ -17,11 +18,11 @@ user-invocable: false
 
 **主基调第 1 条：系统工程。** 测试不是"代码质量的副产物"，是系统行为的契约。没有契约，agent 写的代码就是"自说自话"。
 
-**契约的层次性**：TDD 的 RED-GREEN-REFACTOR 是**分系统层次**的契约（单个任务的行为契约）。但本工作流里还有**系统整体层次**的契约——已 archive 的 change sync 到 `openspec/specs/` 的主 spec 契约。当 TDD 的"删除代码"强制与已 archive 的 spec 契约冲突时，**系统整体层次契约优先**：先触发 `human-in-loop` 让用户决定是改 spec 契约还是保留代码，而不是直接删除代码破坏已 archive 的 spec 契约。
+**契约的层次性**：TDD 的 RED-GREEN-REFACTOR 是**分系统层次**的契约（单个任务的行为契约）。但本工作流里还有**系统整体层次**的契约——已 archive 的 change sync 到 `openspec/specs/` 的主 spec 契约。当 TDD 的"删除代码"强制与已 archive 的 spec 契约冲突时，**系统整体层次契约优先**：先触发 `constraints` 的 `references/human-in-loop.md` 让用户决定是改 spec 契约还是保留代码，而不是直接删除代码破坏已 archive 的 spec 契约。
 
 ## 触发时机
 
-- 在 `executing-plans` 流程中，每个任务实施时
+- 在 `executing-plans` 流程中，每个任务实施时（执行入口是 `/td-apply`，本 skill 由 executing-plans 内部按任务粒度调用，不独立触发）
 - 用户写代码（任何代码）之前
 - 用户说"我先把代码写了，再加测试"——立即触发本 skill 阻止
 
@@ -59,9 +60,9 @@ user-invocable: false
 
 这个规则看起来激进，但它防止了"测试只是为了配合已写代码"的腐烂。
 
-**例外（brownfield 老代码）：** 本规则只适用于**当前 change 新写的代码**。接手项目时已存在的老代码本来就没测试，强制删除会摧毁系统——老代码走 `profile-brownfield` 的路径：先加 characterization test 锁定现有行为，再重构。
+**例外（brownfield 老代码）：** 本规则只适用于**当前 change 新写的代码**。接手项目时已存在的老代码本来就没测试，强制删除会摧毁系统——老代码走 brownfield 的路径（见 `field-assessment` 的 `references/profile-brownfield.md`「TDD 边界」节）：先加 characterization test 锁定现有行为，再重构。
 
-**例外 2（已 archive 的 spec 契约冲突）：** 当 TDD 的"删除代码"强制会破坏已 archive 的 change sync 到 `openspec/specs/` 的主 spec 契约时，**不直接删除**——先触发 `human-in-loop` 让用户决定：(a) 改 spec 契约（重新 propose 修改主 spec），还是 (b) 保留代码（放弃本次 TDD 的删除强制，记录为"已知契约偏离"）。这是"系统整体层次契约优先于分系统层次 TDD 强制"的执行规则。
+**例外 2（已 archive 的 spec 契约冲突）：** 当 TDD 的"删除代码"强制会破坏已 archive 的 change sync 到 `openspec/specs/` 的主 spec 契约时，**不直接删除**——先触发 `constraints` 的 `references/human-in-loop.md` 让用户决定：(a) 改 spec 契约（重新 propose 修改主 spec），还是 (b) 保留代码（放弃本次 TDD 的删除强制，记录为"已知契约偏离"）。这是"系统整体层次契约优先于分系统层次 TDD 强制"的执行规则。
 
 ### 不接受"这个没法测"
 

@@ -1,6 +1,6 @@
-# audit 频率（表 3，单一事实源）
+# audit 频率（表 3）
 
-本文件是 system-audit 频率的唯一事实源。`td-system-audit` / `executing-plans` / 3 个 tier skill 引用本文件。
+各 tier 的 system-audit 触发频率（表 3）。`td-archive` 步骤 5.2 判定 project audit 阈值、`executing-plans` 步骤 3 与 `td-apply` 步骤 7.3 判定 current-change audit 触发时读本表；与其他位置出现的频率表述冲突时，以本表为准。
 
 ## 表 3：system-audit 频率
 

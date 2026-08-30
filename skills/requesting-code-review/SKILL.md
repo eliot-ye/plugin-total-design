@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 依赖技能
 
-- `human-in-loop`
+- `constraints` 的 `references/human-in-loop.md`
 
 ## 服务的主基调原则
 
@@ -92,9 +92,9 @@ warning 不阻塞，但要记录在 tasks.md 的"已知问题"里。
 
 review 对象不是代码，是 proposal 的分系统切分与设计决策。此时改架构成本最低。
 
-检查清单（高内聚 / 低耦合）见 `references/architecture-review-checklist.md`。分级与阻塞语义如下（与 code review 共用）：
+检查清单（高内聚 / 低耦合）见 `references/architecture-review-checklist.md`。分级与阻塞语义如下（与 code review 共用；其他位置的分级表述以本节为准）：
 
-- **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖——**阻塞 apply**，先回 propose 改 proposal 再继续
+- **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖 / 触发了 caller impact 分析但 proposal 缺「caller impact 分析」节或缺变更点类别标注与高危标记（仅 tier-small 降为 warning）——**阻塞 apply**，先回 propose 改 proposal 再继续
 - **warning**：接口偏大、职责偏散——记录到 proposal，可延后
 - **nit**：命名等——可忽略
 
@@ -102,4 +102,4 @@ review 对象不是代码，是 proposal 的分系统切分与设计决策。此
 
 ## 与其他 skill 的关系
 
-- 与 `human-in-loop` 配合：critical issue 是 agent 自己能修就修，修不了触发 human-in-loop
+- 与 `constraints` 的 `references/human-in-loop.md` 配合：critical issue 是 agent 自己能修就修，修不了触发 human-in-loop

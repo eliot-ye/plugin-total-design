@@ -1,6 +1,6 @@
 ---
 name: system-engineering
-description: 钱学森系统工程主基调。所有局部 constraint skill 的前提。
+description: 钱学森系统工程主基调。所有局部 constraint（`constraints` skill 承载的 5 份局部规律变体）的前提。
 user-invocable: false
 ---
 
@@ -39,7 +39,7 @@ user-invocable: false
 整体观：系统的总体性能不等于各部分性能之和，局部动作必须从整体性能反推。
 层次观：复杂巨系统是多层级嵌套结构，不同层次的子系统有不同的复杂度和约束强度，必须按层次对待——不能把一个 tier-large 的多仓库系统当成"一个 tier"硬解，每个子系统应独立定 tier。
 
-**对工作流的含义：** profile × tier 二维配置是这个原则的工程化体现——按系统规模分层对待。一个 3 文件的脚本和一个 10 万行的单体系统，不能套同一套 constraint 强度。当系统内部有明显的子系统边界时，`field-assessment` 的识别流程允许子系统独立定 tier（见 `field-assessment` 的「识别流程」节）。
+**对工作流的含义：** profile × tier 二维配置是这个原则的工程化体现——按系统规模分层对待。一个 3 文件的脚本和一个 10 万行的单体系统，不能套同一套 constraint 强度。当系统内部有明显的子系统边界时，`field-assessment` 的识别流程允许子系统独立定 tier（见 `field-assessment` 的 `references/identification-flow.md`「识别流程」节）。
 
 ## 反馈控制回路（贯穿四条主基调）
 
@@ -53,7 +53,7 @@ user-invocable: false
 
 ## 如何使用本 skill
 
-本 skill 是**所有 constraint skill 的前提**，不是单独触发的。当 agent 激活任意一个 constraint skill 时，应该同时意识到本 skill 的四条主基调，把局部规则放在系统工程框架下执行。
+本 skill 是**所有局部 constraint（`constraints` skill 承载的 5 份局部规律变体文件）的前提**，不是单独触发的。当 agent 执行任一局部规律规则时，应该同时意识到本 skill 的四条主基调，把局部规则放在系统工程框架下执行。
 
 当 agent 调用 `/td-system-audit` 时，本 skill 是审计的对照标准。
 

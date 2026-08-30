@@ -92,10 +92,10 @@ total-design/
 ├── CODE_OF_CONDUCT.md
 ├── LICENSE
 │
-├── skills/                 ← 27 个 skill，全部目录式 SKILL.md
-│   ├── 约束层（6 个）
+├── skills/                 ← 18 个 skill，全部目录式 SKILL.md
+│   ├── 约束层（2 个：system-engineering 主基调 + constraints 承载 5 份局部规律 references）
 │   ├── 行为层（7 个，Superpowers 转译）
-│   ├── 配置层（7 个，field-assessment + 3 profile + 3 tier）
+│   ├── 配置层（2 个：field-assessment 配置入口 + todo-pool 待办池格式；profile/tier 变体在 field-assessment/references/ 下）
 │   └── 契约层（7 个 td-*，与下方 command 一一对应）
 │
 ├── commands/               ← 8 个 slash 命令入口（7 个极薄，逻辑在同名 skill；td-list 只读无 skill）
@@ -183,59 +183,59 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 ## Skill 清单
 
-27 个 skill，按调用方式分两组：
+18 个 skill，按调用方式分两组：
 
-- **`user-invocable: true`**（14 个）：用户可在 `/` 菜单主动调；其中 `td-init` 还带 `disable-model-invocation: true`（仅用户可触发，agent 不能自动调用），其余 13 个也可被 agent 自动触发
-  - 行为层 7 个（Superpowers 转译）
+- **`user-invocable: true`**（7 个）：用户可在 `/` 菜单主动调；其中 `td-init` 还带 `disable-model-invocation: true`（仅用户可触发，agent 不能自动调用），其余 6 个也可被 agent 自动触发
   - 契约层 7 个 td-*（与 7 个 td-* command 一一对应；`td-list` 只读命令无同名 skill）
-- **`user-invocable: false`**（13 个）：agent 自动触发，不暴露在 `/` 菜单
-  - 约束层 6 个（钱学森主基调 + 5 条局部规律）
-  - 配置层 7 个（field-assessment + 3 profile + 3 tier）
+- **`user-invocable: false`**（11 个）：agent 自动触发，不暴露在 `/` 菜单
+  - 约束层 2 个（钱学森主基调 `system-engineering` + 局部规律入口 `constraints`）
+  - 行为层 7 个（Superpowers 转译，由 td-explore / td-apply 流程内部调用）
+  - 配置层 2 个（field-assessment 配置入口 + todo-pool 待办池格式；profile/tier 各 3 个变体以 `field-assessment/references/` 变体文件形态存在，判读命中后按需读取）
 
-### 约束层（钱学森系统工程主基调 + 局部规律）
+### 约束层（钱学森系统工程主基调 + 局部规律入口）
 
 | Skill | 作用 | 服务主基调 | user-invocable |
 |---|---|---|---|
 | `system-engineering` | 钱学森四条主基调，所有局部约束的前提 | — | false |
-| `wip-limit` | 限制同时活跃的 change 数量 | 第 4 条：开放的复杂巨系统 | false |
-| `critical-buffer` | 关键链缓冲保护 | 第 1 条：系统工程 + 第 2 条：总体设计部 | false |
-| `brooks-law` | 加人手前的强制提醒 | 第 1 条：系统工程 | false |
-| `delay-decision` | 可逆决策延迟闭合 | 第 3 条：从定性到定量的综合集成 | false |
-| `human-in-loop` | 何时必须停下来等用户拍板 | 第 2 条 + 第 3 条 | false |
+| `constraints` | 5 个局部规律的单一入口；承载 `references/` 下 5 份变体文件（`brooks-law` / `critical-buffer` / `delay-decision` / `human-in-loop` / `wip-limit`），命中触发场景后读对应变体执行 | 第 1、2、3、4 条 | false |
 
-`system-engineering` 是主基调 skill，其他 5 个是局部规律 skill——每个局部规律 skill 都必须在正文开头有 `## 服务的主基调原则` 一节，显式 link 到 `system-engineering` 的某一条。
+`system-engineering` 是主基调 skill；`constraints` 是局部规律的单一入口——5 份 `references/<name>.md` 各自都必须在正文开头有 `## 服务的主基调原则` 一节，显式 link 到 `system-engineering` 的某一条。子约束之间互相引用的路径为 `references/<name>.md`；override 回路编排（`wip-limit` → `brooks-law` → `critical-buffer` → `human-in-loop` → 记录）由 `constraints/references/wip-limit.md` 单一持有。
 
 ### 行为层（Superpowers 转译）
 
 | Skill | 触发时机 | user-invocable |
 |---|---|---|
-| `brainstorming` | 在写代码之前；升级为"总体设计部"工作方式 | true |
-| `writing-plans` | spec 收敛后，拆成 bite-sized 任务 | true |
-| `executing-plans` | plan 就绪，开始批量执行 + human checkpoint | true |
-| `test-driven-development` | 每个任务实施时；RED-GREEN-REFACTOR | true |
-| `requesting-code-review` | 任务之间；critical issue 阻塞进度 | true |
-| `systematic-debugging` | 测试失败 / 用户报 bug / 修复尝试失败 | true |
-| `verification-before-completion` | 声明"完成"之前；evidence before assertions | true |
+| `brainstorming` | 在写代码之前；升级为"总体设计部"工作方式 | false |
+| `writing-plans` | spec 收敛后，拆成 bite-sized 任务 | false |
+| `executing-plans` | plan 就绪，开始批量执行 + human checkpoint | false |
+| `test-driven-development` | 每个任务实施时；RED-GREEN-REFACTOR | false |
+| `requesting-code-review` | 任务之间；critical issue 阻塞进度 | false |
+| `systematic-debugging` | 测试失败 / 用户报 bug / 修复尝试失败 | false |
+| `verification-before-completion` | 声明"完成"之前；evidence before assertions | false |
 
-### 配置层（profile × tier 二维）
+### 配置层（field-assessment 配置入口 + 待办池格式）
 
-**矩阵单一事实源（`user-invocable: false`）：**
+**配置入口（`user-invocable: false`）：**
 
-- `field-assessment` — profile × tier × constraint 强度矩阵的单一事实源；3 个 profile 和 3 个 tier skill 都引用本 skill，强度只在这里改
+- `field-assessment` — profile × tier 判读 + constraint 强度矩阵（表 1/2/3）的单一事实源。机制内容在 `references/` 下四个机制文件（识别流程 / 强度矩阵 / audit 频率 / 子系统独立定 tier）；profile 与 tier 的流程侧重与特殊规则在**变体文件**里，判读命中后按需读取（6 份只读命中的 1 份）。
 
-**profile 维度（仓库状态，全部 `user-invocable: false`）：**
+**profile 维度变体文件（仓库状态）：**
 
-- `profile-greenfield` — 零起步项目，full SDD
-- `profile-brownfield` — 中途接手，reverse-spec 优先
-- `profile-maintenance` — 上线维护，轻量 proposal，bug 走 systematic-debugging
+- `references/profile-greenfield.md` — 零起步项目，full SDD
+- `references/profile-brownfield.md` — 中途接手，reverse-spec 优先
+- `references/profile-maintenance.md` — 上线维护，轻量 proposal，bug 走 systematic-debugging
 
-**tier 维度（系统复杂度，全部 `user-invocable: false`）：**
+**tier 维度变体文件（系统复杂度）：**
 
-- `tier-small` — 3–10 文件，单团队，constraints 弱强制
-- `tier-medium` — 10–100 文件，多模块，constraints 中等强制
-- `tier-large` — 100+ 文件 / 多团队 / 多仓库，constraints 强制，要求总体设计文档
+- `references/tier-small.md` — 3–10 文件，单团队，constraints 弱强制
+- `references/tier-medium.md` — 10–100 文件，多模块，constraints 中等强制
+- `references/tier-large.md` — 100+ 文件 / 多团队 / 多仓库，constraints 强制，要求总体设计文档
 
-两个维度都以 skill 形态存在，agent 根据现场判读激活哪一组。
+**待办池格式（`user-invocable: false`）：**
+
+- `todo-pool` — `openspec/todo.md` 待办池格式约定（主条目 + change 子项两级结构、优先级、勾选时机、git 策略）；`td-propose` / `td-explore` / `td-archive` / `td-system-audit` 读写该文件的格式单一事实源（见下方「TODO 待办池机制」一节）
+
+两个维度都以 `field-assessment` 的变体文件形态存在，agent 根据现场判读按需读取命中的那一份。
 
 ### 契约层（7 个 td-* skill，与 7 个 td-* command 一一对应；`td-list` 是只读查询命令，无同名 skill）
 
@@ -260,11 +260,11 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 | skill | 与 TODO 池的关系 |
 |---|---|
 | `td-propose` | 优先从池里挑未勾选主条目建 change（按优先级排序呈现），在主条目下新增 `  - [ ] change: <name>` 子项，可多 change 承接同一条主条目 |
-| `td-archive` | 归档成功后把该 change 对应的子项勾选 `[x]`；主条目下全部子项都勾选后主条目才勾选 `[x]`——子项永久保留，作为追溯档案 |
-| `td-explore` | 读未勾选主条目作候选输入；探索出用户认可的新方向可落池（写主条目） |
-| `td-system-audit` | 审计发现问题时询问用户是否把"建议的下一步动作"落池（写主条目） |
+| `td-archive` | 归档成功后触发 `todo-pool`「勾选子项」——勾选 `change: <name>` 子项；主条目下全部子项都勾选后主条目才勾选，子项永久保留（追溯档案） |
+| `td-explore` | 读未勾选主条目作候选输入；探索出用户认可的新方向可落池（触发 `todo-pool`「落池条目」） |
+| `td-system-audit` | 审计发现问题时询问用户是否把"建议的下一步动作"落池（触发 `todo-pool`「落池条目」） |
 
-条目格式约定见 `td-propose` 的 `references/todo-format.md`（单一事实源）。
+读写操作入口与条目格式见 `todo-pool`——格式在「格式约定」节，写操作在「落池条目」/「勾选子项」子流程节，单一事实源。
 
 ---
 
@@ -340,7 +340,7 @@ openspec/.td-state/
 
 | 钱学森主基调 | 在本 plugin 里的工程化体现 |
 |---|---|
-| **系统工程**（总体性能 ≠ 各部分之和） | 每个 constraint skill 显式声明服务这条主基调；proposal 必填"系统工程影响评估"节 |
+| **系统工程**（总体性能 ≠ 各部分之和） | `constraints` 承载的 5 份局部规律 references 显式声明服务这条主基调；proposal 必填"系统工程影响评估"节 |
 | **总体设计部**（系统全局立场的群体） | `brainstorming` skill 升级为"总体设计部"工作方式；`/td-system-audit` 命令是周期性自检机制 |
 | **从定性到定量的综合集成**（专家 + 数据 + 模型迭代） | proposal 里必须回答"这改动会影响哪些分系统、整体性能会怎么变"——这是综合集成在 artifact 层的体现 |
 | **开放的复杂巨系统**（不简化还原，整体观 + 层次观） | profile × tier 二维配置——按系统规模分层对待 |

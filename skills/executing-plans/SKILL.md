@@ -1,6 +1,6 @@
 ---
 name: executing-plans
-description: 批量执行任务，带 human checkpoint。服务主基调第 2 条。触发场景：`td-apply` 流程内按 tasks.md 序列实施时（执行入口是 `/td-apply`，本 skill 由 apply 内部调用；用户直接说"开始执行"/"go" 应走 `/td-apply`）——关键链任务后停下来 checkpoint。
+description: 批量执行任务，带 human checkpoint。服务主基调第 2 条。触发场景：`td-apply` 流程内按 tasks.md 序列实施时——关键链任务后停下来 checkpoint。
 user-invocable: false
 ---
 
@@ -8,24 +8,20 @@ user-invocable: false
 
 ## 依赖技能
 
-- `field-assessment`
-- `human-in-loop`
-- `requesting-code-review`
-- `systematic-debugging`
-- `test-driven-development`
-- `verification-before-completion`
+- `field-assessment`（判读 profile × tier 与表 3 current-change 触发归属）
+- `constraints` 的 `references/human-in-loop.md`（checkpoint 必停判据）
 
 ## 服务的主基调原则
 
 **主基调第 2 条：总体设计部。** 执行不是"闷头干"，是"分系统工程师（agent）干一段，总体设计部（用户）checkpoint 一次"。
 
-**《工程控制论》反馈控制回路归位**：任务执行流程是契约级误差检测 + 校正回路，Human checkpoint 是总体设计部级误差检测 + 校正。
+**《工程控制论》反馈控制回路归位**：任务执行流程是契约级误差检测 + 校正回路（完整回路见 `system-engineering` 的「反馈控制回路」节）。
 
 ## 触发时机
 
 - plan 已经写好（`writing-plans` 完成）
 - 用户说"开始执行" / "go"
-- **current-change audit 触发**（随本 skill 的 Human checkpoint 触发）：tier 分层与触发归属见 `field-assessment/references/audit-frequency.md` 的「current-change scope 的触发 skill 归属」表（表 3）——本 skill 只负责 `tier-medium`（每个关键链任务完成时触发），`tier-small` 不要求，`tier-large` 由 `td-apply` 步骤 7.3 负责，本处不重复。
+- **current-change audit 触发**（随本 skill 的 Human checkpoint 触发）：tier 分层与触发归属见 `field-assessment/references/audit-frequency.md` 的「current-change scope 的触发 skill 归属」表（表 3）——本 skill 只负责 `tier-medium`（每个关键链任务完成时触发），`tier-small` 不要求，`tier-large` 由 `td-apply` 步骤 7.3 负责。
 
 ## 工作方式
 
@@ -46,7 +42,7 @@ user-invocable: false
 在以下时机停下来问用户：
 
 - 完成一个关键链任务
-- 遇到 `human-in-loop` skill 的必停场景（第 1–5 类通用基线 + tier/profile 加成）
+- 遇到 `constraints` 的 `references/human-in-loop.md` 的必停场景（第 1–5 类通用基线 + tier/profile 加成）
 - 任务实际耗时显著超过估时（>2x）
 
 **current-change audit**：随本 checkpoint 触发，频率与 tier 分层见上方「触发时机」节的 current-change audit 条目。

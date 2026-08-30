@@ -1,17 +1,6 @@
----
-name: wip-limit
-description: 限制同时活跃的 change 数量。服务系统工程主基调第 4 条"开放的复杂巨系统不能并行硬解"。
-user-invocable: false
----
-
 # WIP 限制
 
-## 依赖技能
-
-- `brooks-law`
-- `critical-buffer`
-- `human-in-loop`
-- `field-assessment`
+> 本文件与同目录的 `brooks-law.md` / `critical-buffer.md` / `delay-decision.md` / `human-in-loop.md` 是平级兄弟文件，正文中出现的裸逻辑名均指同目录对应变体文件。
 
 ## 服务的主基调原则
 
@@ -36,10 +25,10 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
    - 告诉用户："tier-XXX 下 WIP 上限是 N，当前活跃 N 个。并行硬解复杂巨系统会制造全局失调（主基调第 4 条）。"
    - 给出两个选项：(a) 先 `/td-archive` 一个再 propose/apply；(b) 显式 override。
    - 等待用户决策。
-4. **override 流程（用户选 override 时）**——本 skill 是 override 回路的单一编排点，子步序列如下：
+4. **override 流程（用户选 override 时）**——本文件是 override 回路的单一编排点，子步序列如下：
 
    a. 触发 `brooks-law` 强制提醒（加人手前的协调成本反思）。
-   b. 触发 `critical-buffer` 评估（并行 change 对关键链 buffer 的影响，见 `critical-buffer` 的「隐性 buffer 压缩」节）。
+   b. 触发 `critical-buffer` 评估（并行 change 对关键链 buffer 的影响，见同目录 `critical-buffer.md` 的「隐性 buffer 压缩」节）。
    c. 调 `human-in-loop` 第 6 类执行"显式确认风险"回路（`human-in-loop` 在本回路里只做"描述风险 + 列选项 + 等用户确认"，序列由本节编排）。
    d. 用户确认后，在 change 的 `proposal.md` 里记录"override WIP 上限，用户已确认风险"——作为后续 `/td-system-audit` 的输入。
    e. 才继续执行后续步骤。
@@ -48,12 +37,12 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
 
 - 用户想 `/td-propose` 一个新 change，但活跃 change 数已达上限
 - 用户想同时推进多个 change
-- **override 后的二次检测**：用户对某次 WIP 超限显式 override 后，下一次 `/td-propose` 或 `/td-apply` 再次检测到 WIP 超限时，本 skill 应在 override 流程里额外提示"上次已 override 一次，连续 override 会让 WIP 硬约束彻底失效"——防止 override 滥用。
-- **被 `/td-system-audit` 触发修复时**：audit 发现"同时开太多 change（WIP 超限）"问题时，触发本 skill 的「硬约束 + override 机制」节，阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override。
+- **override 后的二次检测**：用户对某次 WIP 超限显式 override 后，下一次 `/td-propose` 或 `/td-apply` 再次检测到 WIP 超限时，本文件应在 override 流程里额外提示"上次已 override 一次，连续 override 会让 WIP 硬约束彻底失效"——防止 override 滥用。
+- **被 `/td-system-audit` 触发修复时**：audit 发现"同时开太多 change（WIP 超限）"问题时，触发本文件的「硬约束 + override 机制」节（触发方：`td-system-audit` 步骤 6），阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override。
 
 ## 触发时 agent 应做的事
 
-执行 `## 规则` 节的「硬约束 + override 机制」（权威流程在该节，本处不重复）。
+执行 `## 规则` 节的「硬约束 + override 机制」（权威流程在该节）。
 
 ## 不做的事
 

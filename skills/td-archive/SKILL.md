@@ -24,7 +24,7 @@ archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集
 
 archive 后触发 profile 重新评估——这是总体设计部的职责：项目状态变化了，工作方式要跟着调整。
 
-**《工程控制论》反馈控制回路归位**：archive 是事后误差检测 + 校正环节（"实际 vs 预期"复盘是事后误差检测，"模型验证"字段修正下一个 propose 的预测模型）。
+**《工程控制论》反馈控制回路归位**：archive 是事后误差检测 + 校正环节（完整回路见 `system-engineering` 的「反馈控制回路」节）。
 
 ## 输入 - 要 archive 的 change 名。空则推导或问用户。
 
@@ -36,7 +36,7 @@ archive 后触发 profile 重新评估——这是总体设计部的职责：项
 
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-1. **`system-engineering`** — 主基调四条进入上下文。archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集成循环"。
+1. **`system-engineering`** — 主基调四条进入上下文。
 2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（archive 需要表 3 判定 system-audit 频率触发）。会话内缓存，后续步骤直接引用。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断是否触发 / tasks 是否合规。
 
@@ -86,7 +86,7 @@ openspec archive "<name>"
 
 如果只想归档不同步 specs（infra / doc-only change），加 `--skip-specs`。
 
-**归档成功后 TODO 子项勾选**：按 `td-propose` 的 `references/todo-format.md`「勾选时机」规则操作——读 `openspec/todo.md`，查找含 `change: <name>` 子项的主条目，勾选对应子项；主条目下**全部子项都已勾选** → 主条目勾选 `[x]`；**仍有子项未勾选** → 主条目保持 `- [ ]`。找不到对应子项或文件不存在 → 跳过，不主动创建文件。
+**归档成功后 TODO 子项勾选**：触发 `todo-pool` 的「勾选子项」子流程（传入本次归档的 change 名）。
 
 **Purpose TBD housekeeping 检查**：`openspec archive` sync 主 spec 时，新生成的主 spec `## Purpose` 节会保留 td-archive 模板默认值 `TBD - created by archiving change <name>. Update Purpose after archive.`——这是已知的 sync 副作用，不能让 TBD 残留到下一次 audit。sync 完成后立即按 `references/purpose-tbd-housekeeping.md` 执行子流程（读涉及主 spec → grep `^TBD - created by archiving` → 命中则本步骤内补写一句话 Purpose → 再次 grep 确认无残留）。
 
@@ -96,7 +96,7 @@ archive 是契约层的"闭合点"，必须触发三个后续接力（顺序执�
 
 #### 5.1 profile/tier 重新判读
 
-archive 完一个 change 后，项目的 profile 可能变化（greenfield 走到 maintenance，或 brownfield 进入大重构）。**强制重新调用 `field-assessment` 的「识别流程」节**，重新判读 `$_TD_PROFILE` / `$_TD_TIER`。重判策略见 `field-assessment` 的 `references/identification-flow.md`「### 4. 缓存判读结果」节的"重判策略"段——读到该段执行，本节不重复。
+archive 完一个 change 后，项目的 profile 可能变化（greenfield 走到 maintenance，或 brownfield 进入大重构）。**强制重新调用 `field-assessment` 的 `references/identification-flow.md`「识别流程」节**，重新判读 `$_TD_PROFILE` / `$_TD_TIER`。重判策略见 `field-assessment` 的 `references/identification-flow.md`「### 4. 缓存判读结果」节的"重判策略"段——读到该段执行，本节不重复。
 
 如果新判读结果与步骤 1 缓存的不同：
 
@@ -116,7 +116,7 @@ archive 是"完成一个 change"的事件，正好对照表 3（system-audit 频
 | tier | 驱动源 | 判定方式 | 文件不存在时 |
 |---|---|---|---|
 | `tier-small` / `tier-medium` | count 驱动 | `archive-counter.yaml` 的 `count` ≥ 表 3 阈值 | 视为 `count: 0`，本事件 +1 后再判 |
-| `tier-large` | 时间驱动 | `audit-history.yaml` 最近一条 `scope: project` 的 `timestamp` 距今 ≥ 表 3 阈值（一周） | 视为从未跑过 project audit，直接判达阈值 |
+| `tier-large` | 时间驱动 | `audit-history.yaml` 最近一条 `scope: project` 的 `timestamp` 距今 ≥ 表 3 阈值（数值见 `field-assessment` 的 `references/audit-frequency.md` 的 project scope 列） | 视为从未跑过 project audit，直接判达阈值 |
 
 达阈值 → **主动建议**用户跑 `/td-system-audit project`，不是强制，是"按主基调第 2 条总体设计部职责，该周期性自检了"。两个文件均由本步骤首次运行时按需创建。
 
