@@ -6,7 +6,7 @@ user-invocable: false
 
 # Todo Pool（openspec/todo.md 待办池）
 
-`openspec/todo.md` 是项目级待办池（backlog）的单一文件。本 skill 是读写此文件的**单一事实源与操作入口**——条目格式、状态语义、落池动作、归档勾选动作都以本 skill 为准，各 td-* skill 不重复定义。
+`openspec/todo.md` 是项目级待办池（backlog）的单一文件。本 skill 是读写此文件的**单一事实源与操作入口**——条目格式、状态语义、落池动作、归档勾选动作都以本 skill 为准。
 
 ## 服务的主基调原则
 

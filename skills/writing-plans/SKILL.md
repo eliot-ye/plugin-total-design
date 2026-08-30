@@ -1,6 +1,6 @@
 ---
 name: writing-plans
-description: 把工作拆成 bite-sized 任务，每个任务标注对分系统的影响。服务主基调第 1 条。触发场景：td-propose 建 tasks.md 骨架粒度不够细 / td-apply 细化任务时（执行入口走 /td-propose 或 /td-apply，本 skill 由它们内部调用）。
+description: 把工作拆成 bite-sized 任务，每个任务标注对分系统的影响。服务主基调第 1 条。触发场景：td-propose 建 tasks.md 骨架粒度不够细 / td-apply 细化任务时（执行入口走 /td-propose 或 /td-apply）。
 user-invocable: false
 ---
 
@@ -30,8 +30,8 @@ tasks.md 分两个阶段完成：
 
 ## 触发时机
 
-- `/td-propose` 阶段：已有 spec，需要拆成 tasks.md 骨架
-- `/td-apply` 阶段：tasks.md 已存在但粒度不够细
+- `/td-propose` 阶段：已有 spec，需要拆成 tasks.md 骨架（执行入口是 `/td-propose`，本 skill 由 propose 内部调用）
+- `/td-apply` 阶段：tasks.md 已存在但粒度不够细（执行入口是 `/td-apply`，本 skill 由 apply 内部调用）
 
 ## 工作方式
 

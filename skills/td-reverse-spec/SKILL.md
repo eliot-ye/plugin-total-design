@@ -34,7 +34,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-1. **`system-engineering`** — 主基调四条进入上下文。reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统全局视图，再决定动哪里。
+1. **`system-engineering`** — 主基调四条进入上下文。
 2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2。会话内缓存，后续步骤直接引用。reverse-spec 本身是 profile-brownfield 的入口动作，但 tier 决定 reverse-spec 的粒度（small 粗粒度即可，large 要画分系统接口图）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
@@ -88,9 +88,3 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 - 不要 reverse-spec 全部分系统到完美——目标是建立 baseline，不是写教科书
 - 优先 reverse-spec 你**接下来要改**的那个分系统，其他分系统粗粒度即可
 
-## 与其他命令的关系
-
-- reverse-spec 的产物（`openspec/specs/<subsystem>/spec.md` baseline + 步骤 6 的 reverse-spec 报告）被 `/td-propose` 引用：步骤 3 的 brownfield reverse-spec 检查消费 `openspec/specs/` 下的 baseline spec 作为"已建立认识"的判据，proposal 的"系统工程影响评估"节才有依据。
-- reverse-spec 不直接被 `/td-apply` 引用——apply 读 change 内 artifact（proposal/design/specs/tasks），不读主 spec baseline。若 baseline 在 archive sync 后被合并进主 spec，apply 也不显式对照主 spec（这是 td-apply 自己的设计选择）。
-- `/td-archive` 步骤 3 的"实际 vs 预期"复盘会把 baseline spec 作为"改之前真实状态"的对照源之一（见该 skill）。
-- `/td-system-audit` 在 project scope 下会把 `openspec/specs/` 下的主 spec baseline 纳入审计对象（见该 skill）。

@@ -31,7 +31,7 @@ init 是"把系统的工作方式先立起来"——先有 specs 基线、change
 
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-1. **`system-engineering`** — 主基调四条进入上下文。init 是"把系统的工作方式先立起来"。
+1. **`system-engineering`** — 主基调四条进入上下文。
 2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`。greenfield 项目（仓库空或只有脚手架）通常判为 `profile-greenfield`；init 阶段 profile/tier 可能还没建立 `.td-state/` 缓存，按"文件不存在现判"处理。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
@@ -87,7 +87,7 @@ git rm -r --cached openspec/.td-state/
 
 ### 5. 首次引导填 config.yaml context
 
-与 `td-propose` 步骤 2 同一引导流程：读 `openspec/config.yaml` 的 `context` 字段；若为空或模板默认值，一次问完 tech stack / conventions / domain 三个问题，答案写入 `context` 字段。用户跳过 → 保持空，不阻塞。init 阶段问一次，后续 td-propose / td-explore 都能读到，避免重复打扰。
+执行 `field-assessment` 的 `references/config-context-guidance.md` 的引导流程，读 `openspec/config.yaml` 的 `context` 字段（空则引导填写，用户跳过不阻塞，完整流程见该文件）。init 阶段问一次，后续 td-propose / td-explore 都能读到，避免重复打扰。
 
 ### 6. 完成输出
 

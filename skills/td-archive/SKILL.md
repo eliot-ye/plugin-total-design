@@ -24,7 +24,7 @@ archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集
 
 archive 后触发 profile 重新评估——这是总体设计部的职责：项目状态变化了，工作方式要跟着调整。
 
-**《工程控制论》反馈控制回路归位**：archive 是事后误差检测 + 校正环节（"实际 vs 预期"复盘是事后误差检测，"模型验证"字段修正下一个 propose 的预测模型）。
+**《工程控制论》反馈控制回路归位**：archive 是事后误差检测 + 校正环节（完整回路见 `system-engineering` 的「反馈控制回路」节）。
 
 ## 输入 - 要 archive 的 change 名。空则推导或问用户。
 
@@ -36,7 +36,7 @@ archive 后触发 profile 重新评估——这是总体设计部的职责：项
 
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-1. **`system-engineering`** — 主基调四条进入上下文。archive 不是"打完勾收工"，是"完成一次从预期到实际的综合集成循环"。
+1. **`system-engineering`** — 主基调四条进入上下文。
 2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（archive 需要表 3 判定 system-audit 频率触发）。会话内缓存，后续步骤直接引用。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断是否触发 / tasks 是否合规。
 
@@ -116,7 +116,7 @@ archive 是"完成一个 change"的事件，正好对照表 3（system-audit 频
 | tier | 驱动源 | 判定方式 | 文件不存在时 |
 |---|---|---|---|
 | `tier-small` / `tier-medium` | count 驱动 | `archive-counter.yaml` 的 `count` ≥ 表 3 阈值 | 视为 `count: 0`，本事件 +1 后再判 |
-| `tier-large` | 时间驱动 | `audit-history.yaml` 最近一条 `scope: project` 的 `timestamp` 距今 ≥ 表 3 阈值（一周） | 视为从未跑过 project audit，直接判达阈值 |
+| `tier-large` | 时间驱动 | `audit-history.yaml` 最近一条 `scope: project` 的 `timestamp` 距今 ≥ 表 3 阈值（数值见 `field-assessment` 的 `references/audit-frequency.md` 的 project scope 列） | 视为从未跑过 project audit，直接判达阈值 |
 
 达阈值 → **主动建议**用户跑 `/td-system-audit project`，不是强制，是"按主基调第 2 条总体设计部职责，该周期性自检了"。两个文件均由本步骤首次运行时按需创建。
 

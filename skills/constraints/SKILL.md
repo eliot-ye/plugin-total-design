@@ -32,6 +32,6 @@ user-invocable: false
 ## 如何被引用
 
 - 使用态 LLM 在会话中命中任一子约束的触发场景 → 读本 skill → 按子约束映射读对应 references 文件执行
-- 约束强度（表 1 第 1–5 行）+ human-in-loop 场景加成（表 2）+ system-audit 频率（表 3）由 `field-assessment` 识别流程注入——不重复定义在 references 子约束里
+- 约束强度（表 1 第 1–5 行）+ human-in-loop 场景加成（表 2）+ system-audit 频率（表 3）由 `field-assessment` 识别流程注入
 - 子约束之间互相引用的路径为 `references/<name>.md`（相对本 SKILL.md 所在目录）
-- override 回路编排（`wip-limit` → `brooks-law` → `critical-buffer` → `human-in-loop` → 记录）由 `references/wip-limit.md` 单一持有，其他子约束不重复简化版
+- override 回路编排（`wip-limit` → `brooks-law` → `critical-buffer` → `human-in-loop` → 记录）由 `references/wip-limit.md` 单一持有

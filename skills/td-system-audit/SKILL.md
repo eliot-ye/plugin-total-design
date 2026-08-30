@@ -24,7 +24,7 @@ argument-hint: "<scope: current-change | project>  (optional, default current-ch
 
 audit 的对照标准是主基调四条，不是"代码质量"或"进度"——这是系统工程视角的审计，不是项目管理视角的审计。
 
-**《工程控制论》反馈控制回路归位**：步骤 7"修复后重跑 audit 闭环"是反馈控制回路的具体形态（重跑上限 3 次是控制器饱和限，超限触发 `constraints` 的 `references/human-in-loop.md`）。
+**《工程控制论》反馈控制回路归位**：步骤 7"修复后重跑 audit 闭环"是反馈控制回路的具体形态（完整回路见 `system-engineering` 的「反馈控制回路」节）。
 
 ## 输入 - audit 的范围。空则默认 `current-change`
 
@@ -50,7 +50,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-1. **`system-engineering`** — 主基调四条进入上下文。audit 的对照标准就是主基调四条，没有主基调框架，audit 会退化成"代码质量审查"。
+1. **`system-engineering`** — 主基调四条进入上下文。
 2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。读表 3 是为了 audit 报告里能引用"本次 audit 距上次 project scope audit 间隔 X 个 change"，频率达阈值的判定由 `td-archive` 步骤 5.2 负责（那里维护 `archive-counter.yaml` 并达阈值判定）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
 
@@ -96,7 +96,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 | 同时开太多 change（WIP 超限） | `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」（阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override） |
 | 局部最优但全局失调 | `constraints` 的 `references/human-in-loop.md`（让总体设计部判断）。本工作流没有专门的"全局失调"constraint——这个判断必须由总体设计部做，不能由 agent 自己拍板（主基调第 2 条） |
 
-注：本表为问题→修复映射，各 constraint 变体文件正文已反向声明"被 `/td-system-audit` 触发修复时"（`constraints` 的 `references/human-in-loop.md` 见其场景 7）。
+注：本表为问题→修复映射；上表列出的 constraint 变体在正文已声明"被 `/td-system-audit` 触发修复时"的处理路径（如 `constraints` 的 `references/human-in-loop.md` 场景 7）。
 
 ### 7. 修复后重跑 audit 闭环
 

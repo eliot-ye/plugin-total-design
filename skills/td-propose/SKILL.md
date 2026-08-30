@@ -20,7 +20,7 @@ OpenSpec 契约层入口。在写代码之前，让人和 AI 对"建什么、为
 
 proposal 里的"系统工程影响评估"节是这个原则的工程化体现——agent 不只写"what"和"how"，必须写"这会对系统整体产生什么影响"，完成从定性到定量的综合集成。其中"预期行为模型"字段是综合集成的"模型"载体（见 `system-engineering` 的「主基调四条」第 3 条「模型载体」节）。
 
-**《工程控制论》反馈控制回路归位**：propose 是前馈控制环节（建立控制目标"预期行为模型"，在 apply 步骤 7.2 被实时检测、在 archive 步骤 3 被事后校正）。
+**《工程控制论》反馈控制回路归位**：propose 是前馈控制环节（建立控制目标，完整回路见 `system-engineering` 的「反馈控制回路」节）。
 
 ## 输入
 
@@ -46,17 +46,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 ### 2. 读现场背景（config.yaml context）
 
-读 `openspec/config.yaml` 的 `context` 字段（tech stack、conventions、domain knowledge 等），作为后续 proposal/design 的现场背景。这部分背景信息会直接进入 proposal 的"系统工程影响评估"节的判断依据。
-
-**首次运行引导填**：若 `context` 字段为空、被注释、或仍是模板默认值，自动探索需要的信息，必要时询问用户关键问题，拿到答案后写入 `openspec/config.yaml` 的 `context` 字段。这是一次性投入——后续所有 td-propose / td-explore 都能读到。
-
-引导问题示例：
-
-- "项目的主要 tech stack 是？"（如 TypeScript / Rust / Python / 混合）
-- "团队遵守的 conventions 有？"（如 conventional commits / 代码风格指南 / PR 模板）
-- "项目所在的 domain 是？"（如 e-commerce / infra / 内部工具）
-
-用户答完 → 写入 config.yaml → 继续步骤 3。用户跳过 → 保持空，继续步骤 3（不阻塞）。
+执行 `field-assessment` 的 `references/config-context-guidance.md` 的引导流程，读 `openspec/config.yaml` 的 `context` 字段（tech stack、conventions、domain knowledge 等），作为后续 proposal/design 的现场背景（空则引导填写，用户跳过不阻塞，完整流程见该文件）。这部分背景信息会直接进入 proposal 的"系统工程影响评估"节的判断依据。
 
 ### 3. 触发前置检查
 
@@ -69,8 +59,8 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
   - 若输入内容为空或用户没有明确 change 描述 → 询问用户让用户从候选池挑一个条目（或"不挑了，直接描述新 change"）。用户挑中某条目 → change 名从条目语义推导。
   - 用户已给明确描述 → 检查候选池里是否有语义重合的主条目，有则提示用户"TODO 池里已有近似条目，要不要基于它 propose？"——同一条主条目可以承接多个 change（每个 change 一个子项追加），不算重复建 change。
   - 候选池是 backlog（可以无限多），活跃 change 才是 WIP——池里有候选不构成阻塞，只有活跃 change 数触发 `constraints` 的 `references/wip-limit.md`。
-- **brownfield reverse-spec 检查**：若 `$_TD_PROFILE == profile-brownfield`，检查 `openspec/specs/` 下是否已有相关分系统的 baseline spec。没有 → 触发 `constraints` 的 `references/human-in-loop.md`，提示用户"你对现有系统还没建立认识，propose 大改动风险高。先 `/td-reverse-spec` 吗？"——用户同意后执行 `/td-reverse-spec` 建立 baseline，完成后回到本步骤继续 propose。
-- **greenfield explore 检查**：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空（还没建立初始 spec），检查会话内是否已做过探索。判据：会话历史里是否出现过 `/td-explore` 调用或 `brainstorming` 触发，且产物里含**至少 2 个候选方向**（每个候选方向标注系统工程影响，见 `td-explore` 步骤 4 的产物要求）。没有 → 触发 `constraints` 的 `references/human-in-loop.md`，提示用户"greenfield 最容易犯的错是'想到了就建'。先 `/td-explore` 至少探索 2 个候选方向再 propose 吗？"——用户同意后执行 `/td-explore`，完成后回到本步骤继续 propose。
+- **brownfield reverse-spec 检查**（`$_TD_PROFILE` 为单值，与下方 greenfield 检查互斥，仅命中其一）：若 `$_TD_PROFILE == profile-brownfield`，检查 `openspec/specs/` 下是否已有相关分系统的 baseline spec。没有 → 触发 `constraints` 的 `references/human-in-loop.md`，提示用户"你对现有系统还没建立认识，propose 大改动风险高。先 `/td-reverse-spec` 吗？"——用户同意后执行 `/td-reverse-spec` 建立 baseline，完成后回到本步骤继续 propose。
+- **greenfield explore 检查**（同上互斥，仅命中其一）：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空（还没建立初始 spec），检查会话内是否已做过探索。判据：会话历史里是否出现过 `/td-explore` 调用或 `brainstorming` 触发，且产物里含**至少 2 个候选方向**（每个候选方向标注系统工程影响，见 `td-explore` 步骤 4 的产物要求）。没有 → 触发 `constraints` 的 `references/human-in-loop.md`，提示用户"greenfield 最容易犯的错是'想到了就建'。先 `/td-explore` 至少探索 2 个候选方向再 propose 吗？"——用户同意后执行 `/td-explore`，完成后回到本步骤继续 propose。
 
 ### 4. 创建 change 目录
 

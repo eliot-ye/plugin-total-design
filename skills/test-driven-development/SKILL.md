@@ -22,7 +22,7 @@ user-invocable: false
 
 ## 触发时机
 
-- 在 `executing-plans` 流程中，每个任务实施时
+- 在 `executing-plans` 流程中，每个任务实施时（执行入口是 `/td-apply`，本 skill 由 executing-plans 内部按任务粒度调用，不独立触发）
 - 用户写代码（任何代码）之前
 - 用户说"我先把代码写了，再加测试"——立即触发本 skill 阻止
 

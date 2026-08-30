@@ -20,13 +20,13 @@ argument-hint: <change-name>
 
 apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。每个任务对系统整体的影响，必须由 agent 持续持有。
 
-**核心论点归位——"总体性能不等于各部分性能之和"**：步骤 7.2 的"系统级验证（跨分系统边界，硬步骤）"是核心论点最直接的体现（论点与工程化解释的完整展开见 `verification-before-completion` 的「服务的主基调原则」节「核心论点归位」段，此处不重复）。本步骤只定义触发条件与 tier 分层强度，执行语义在 `verification-before-completion` 第 6 节。
+**核心论点归位——"总体性能不等于各部分性能之和"**：步骤 7.2 的"系统级验证（跨分系统边界，硬步骤）"是核心论点最直接的体现（论点与工程化解释的完整展开见 `verification-before-completion` 的「服务的主基调原则」节「核心论点归位」段）。本步骤只定义触发条件与 tier 分层强度，执行语义在 `verification-before-completion` 第 6 节。
 
 **系统工程主基调第 2 条：总体设计部。**
 
 apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constraints` 的 `references/human-in-loop.md` 让用户（总体设计部）拍。
 
-**《工程控制论》反馈控制回路归位**：apply 是控制执行 + 实时误差检测环节（TDD 契约级、verification 系统级）。
+**《工程控制论》反馈控制回路归位**：apply 是控制执行 + 实时误差检测环节（完整回路见 `system-engineering` 的「反馈控制回路」节）。
 
 ## 输入 - change 名。空则推导或问用户"想 apply 哪个 change"
 
@@ -38,7 +38,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
-1. **`system-engineering`** — 主基调四条进入上下文。apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。
+1. **`system-engineering`** — 主基调四条进入上下文。
 2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 7.3）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断是否触发 / tasks 是否合规。
 
@@ -68,7 +68,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 #### Caller Impact 实测（任务实施前的闸门）
 
-**触发**：触发条件、四类变更点定义、边界裁定与已知盲区见 `references/change-point-classes.md`（单一事实源，同时被 `td-propose` 步骤 6.c「caller impact 分析」节与 `requesting-code-review` 架构 review checklist 引用）；触发条件未命中 → 跳过本子节（不给小改动加流程开销）。
+**触发**：触发条件、四类变更点定义、边界裁定与已知盲区见 `references/change-point-classes.md`（单一事实源）；触发条件未命中 → 跳过本子节（不给小改动加流程开销）。
 
 **执行（实测为主——caller 清单由引用搜索实测产出，不由人工预判清单充当）**：
 
@@ -88,11 +88,11 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
    - **`requesting-code-review`**：checkpoint 时做 review
    - **`verification-before-completion`**：每个任务完成前必须跑验证命令
 
-`executing-plans` 是行为层执行的核心入口，TDD / review / verify 在 `executing-plans` 内部按任务粒度嵌套触发。executing-plans 内部触发的 `constraints` 的 `references/human-in-loop.md` / `systematic-debugging` 是**任务粒度**的（如 checkpoint 必停、RED 失败），与本步骤 5 的 apply 全局粒度触发不重复。
+`executing-plans` 是行为层执行的核心入口，TDD / review / verify 在 `executing-plans` 内部按任务粒度嵌套触发。
 
 ### 5. 触发 apply 全局粒度的工程管理约束
 
-步骤 4 的 executing-plans 内部已触发任务粒度的 `constraints` 的 `references/human-in-loop.md` / `systematic-debugging`（如 checkpoint 必停、RED 失败）。本步骤触发的是 **apply 全局粒度**的约束，不与任务粒度重复：
+本步骤触发 **apply 全局粒度**的工程管理约束：
 
 - `constraints` 的 `references/brooks-law.md`：用户在 apply 期间想加人手 / 并行 subagent 加速时
 - `constraints` 的 `references/delay-decision.md`：apply 期间遇到顶层架构层次的可逆决策时（与任务粒度的"实现细节可逆决策"不重叠）
@@ -134,7 +134,7 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 两层验证通过后，对照表 3 的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`（表 3 见 `field-assessment/references/audit-frequency.md`）：
 
 - `tier-small`：不要求
-- `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 3），此处不再重复
+- `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 3）
 - `tier-large`：每完成 1 个 change 触发——本步骤即触发点
 
 触发即调用 `/td-system-audit current-change`，把本次 change 的"实际 vs 预期"对照主基调过一遍。audit 报告落盘 `openspec/.td-state/audits/`，更新 `audit-history.yaml`。

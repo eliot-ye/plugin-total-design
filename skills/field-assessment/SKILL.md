@@ -14,7 +14,7 @@ user-invocable: false
 
 ## 内容编排
 
-本 skill 是配置入口，实际内容在 `references/` 下十个文件：四个机制文件（识别流程 / 强度矩阵 / audit 频率 / 子系统独立定 tier）+ 六个变体文件（3 profile + 3 tier，承载流程侧重与特殊规则）。下游 skill 通过 `field-assessment` 的识别流程读机制文件，判读命中后只读对应的那一份变体文件。
+本 skill 是配置入口，实际内容在 `references/` 下十一个文件：四个机制文件（识别流程 / 强度矩阵 / audit 频率 / 子系统独立定 tier）+ 七个流程/变体文件（config context 引导 + 3 profile + 3 tier，承载流程侧重与特殊规则）。下游 skill 通过 `field-assessment` 的识别流程读机制文件，判读命中后只读对应的那一份变体文件。
 
 ## 如何被引用
 

@@ -1,6 +1,6 @@
 ---
 name: td-explore
-description: 不带 stakes 的思考伙伴，写代码前先探索。OpenSpec 契约层入口，需求不清时的主入口。触发场景：用户说"想探索"、"explore"、"先想想"、"不确定要建什么"、"帮我想清楚 X"。用户想 build/fix/重构但需求不清时，优先路由到这里；brainstorming 在本流程内被激活。
+description: 不带 stakes 的思考伙伴，写代码前先探索。OpenSpec 契约层入口，需求不清时的主入口。触发场景：用户说"想探索"、"explore"、"先想想"、"不确定要建什么"、"帮我想清楚 X"。用户想 build/fix/重构但需求不清时，优先路由到这里。
 user-invocable: true
 argument-hint: <topic or question>
 ---
@@ -24,7 +24,7 @@ explore 是总体设计部在"想"的阶段的工作——不是分系统工程�
 
 explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的尊重。
 
-**《工程控制论》反馈控制回路归位**：explore 是前馈控制准备环节（为 propose 的控制目标收集先验信息、降低预测误差）。
+**《工程控制论》反馈控制回路归位**：explore 是前馈控制准备环节（完整回路见 `system-engineering` 的「反馈控制回路」节）。
 
 ## 输入 - 用户想探索的话题、问题、想法
 
@@ -46,7 +46,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 ### 2. 读现场背景（config.yaml context）
 
-与 `td-propose` 步骤 2 同一引导流程：读 `openspec/config.yaml` 的 `context` 字段作为探索现场背景；若为空或模板默认值，一次问完 tech stack / conventions / domain 三个问题，答案写入 `context` 字段。一次性投入，后续 td-propose / td-explore 都能读到。用户跳过 → 保持空，继续步骤 3（不阻塞）。
+执行 `field-assessment` 的 `references/config-context-guidance.md` 的引导流程，读 `openspec/config.yaml` 的 `context` 字段作为探索现场背景（空则引导填写，用户跳过不阻塞，完整流程见该文件）。
 
 ### 3. 读现有 context
 
@@ -72,7 +72,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 - 是局部优化还是全局协调
 - 局部优化对全局失调的风险
 
-评估侧重按步骤 1 判读的 `$_TD_PROFILE` 调整（各 profile 的特殊规则与流程侧重见 `field-assessment` 的 `references/profile-<对应>.md`）：
+评估侧重按步骤 1 判读的 `$_TD_PROFILE` 调整（各 profile 的特殊规则与流程侧重见 `field-assessment` 的对应变体文件：`profile-greenfield` → `references/profile-greenfield.md`、`profile-brownfield` → `references/profile-brownfield.md`、`profile-maintenance` → `references/profile-maintenance.md`）：
 
 - `profile-greenfield`：重候选方向的**取舍与可逆性**——没有存量约束，方向选错成本低，但要用 `constraints` 的 `references/delay-decision.md` 避免"想到了就建"和"先把架构设计完美"两个陷阱
 - `profile-brownfield`：重**动老代码的影响**——候选方向会触碰哪些存量分系统、改动范围能否最小化、是否触发公共契约变更（对照 `constraints` 的 `references/human-in-loop.md` 的必停场景）

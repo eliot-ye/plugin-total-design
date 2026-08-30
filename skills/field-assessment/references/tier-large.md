@@ -19,16 +19,11 @@ large 系统的每个 change，proposal 里必须附"总体设计文档"：
 
 没这份文档，不允许 `/td-apply`。
 
-**执行层校验由 `td-propose` 步骤 6.c 和 `td-apply` 步骤 2 负责**：
-
-- `td-propose` 步骤 6.c 的"必填项检查"应包含"tier-large 时总体设计文档必填"——缺文档 → 回 6.b 补写，不能进入 6.d。
-- `td-apply` 步骤 2 的"前置检查"应包含"tier-large 时总体设计文档必填"——缺文档 → 阻塞 apply，提示用户回 `/td-propose` 补文档。
-
 ### 2. WIP 限制
 
 大系统并行硬解几乎必然制造失调。同一时刻至多允许的活跃 change 数按表 1 的 wip-limit 行取值（表 1 见 `strength-matrix.md`）。
 
-如果用户坚持要并行，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」——override 回路编排由该文件单一持有（brooks-law 提醒 → critical-buffer 评估 → human-in-loop 第 6 类确认 → 记录），本处不重复简化版。
+如果用户坚持要并行，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」——override 回路编排由该文件单一持有（brooks-law 提醒 → critical-buffer 评估 → human-in-loop 第 6 类确认 → 记录）。
 
 ### 3. 关键链 buffer
 
@@ -44,7 +39,7 @@ audit 报告里特别关注：
 - 关键链 buffer 是否被压缩
 - 是否有"应该触发 human-in-loop 但没触发"的决策
 
-**层次观归位**：当识别流程允许子系统独立定 tier 时，project scope audit 按子系统层次分别审计（分层审计的完整语义见 `td-system-audit` 步骤 2，此处不重复）——执行规则见 `subsystem-tiering.md`。
+**层次观归位**：当识别流程允许子系统独立定 tier 时，project scope audit 按子系统层次分别审计（分层审计的完整语义见 `td-system-audit` 步骤 2）——执行规则见 `subsystem-tiering.md`。
 
 ## 与其他 tier 的切换
 
