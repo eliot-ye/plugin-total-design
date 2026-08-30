@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 依赖技能
 
-- `human-in-loop`
+- `constraints` 的 `references/human-in-loop.md`
 
 ## 服务的主基调原则
 
@@ -64,4 +64,4 @@ user-invocable: false
 
 ## 与其他 skill 的关系
 
-- 与 `human-in-loop` 配合：如果 Phase 3 找不到 root cause，停下来问用户
+- 与 `constraints` 的 `references/human-in-loop.md` 配合：如果 Phase 3 找不到 root cause，停下来问用户

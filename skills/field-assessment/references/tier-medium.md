@@ -16,7 +16,7 @@ medium 系统的常见问题是"分系统边界模糊"。在 reverse-spec 时，
 
 ### 2. 公共契约变更属 human-in-loop 基线第 1 类
 
-medium 系统里，API 形状、数据库 schema、配置格式这些"公共契约"开始有跨分系统影响。改这些前必触发 `human-in-loop`——这属该 skill 的通用基线第 1 类（公共契约变更），所有 profile × tier 生效（表 1 注解明确"不重复列为 tier 加成"），本处不再视为 medium 独有加成。
+medium 系统里，API 形状、数据库 schema、配置格式这些"公共契约"开始有跨分系统影响。改这些前必触发 `constraints` 的 `references/human-in-loop.md`——这属该文件的通用基线第 1 类（公共契约变更），所有 profile × tier 生效（表 1 注解明确"不重复列为 tier 加成"），本处不再视为 medium 独有加成。
 
 ### 3. 关键链诊断
 

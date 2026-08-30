@@ -15,7 +15,7 @@
 
 **任何对本仓库LLM文件的更改——无论改 SKILL.md、命令文件、还是 AGENTS.md 本身——动笔前必须先完成下列分析步骤，全部执行完才能开始用户要求的改动。跳过这一步直接改 = 把局部失调注入系统。**
 
-理由：本 plugin 的 22 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
+理由：本 plugin 的 18 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
 
 ### 分析步骤（必须按序执行，每步产出可见证据）
 
@@ -67,7 +67,7 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-约束层是第零层——是另外两层立起来的前提。每个 constraint skill 必须显式声明它服务钱学森系统工程主基调的哪一条。
+约束层是第零层——是另外两层立起来的前提。`constraints` skill 承载 5 份局部规律 references，每份 references 必须显式声明它服务钱学森系统工程主基调的哪一条。
 
 ## 目录结构
 
@@ -83,7 +83,7 @@ total-design/
 ├── LICENSE
 ├── .gitignore
 │
-├── skills/                  ← 22 个 skill（profile/tier 变体在 field-assessment/references/ 下）
+├── skills/                  ← 18 个 skill（profile/tier 变体在 field-assessment/references/ 下；5 个局部规律变体在 constraints/references/ 下）
 ├── commands/                ← 8 个 command
 │
 └── hooks/                   ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
@@ -128,13 +128,15 @@ disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 
 判定依据（参考 `td-* 标准步骤 1` 的"预加载 vs 按需触发"分界）：
 
 - **预加载（应列入）**：skill 触发时立即需要其内容在上下文中作为前提（如 `system-engineering` 主基调四条、`field-assessment` 的 profile×tier 识别 + 表 1/2/3 强度值）。
-- **按需触发（不列入）**：在正文流程的特定步骤按条件触发（如 `human-in-loop` 的强制停机场景、`wip-limit` 的 WIP 超限检查、`requesting-code-review` 的架构 review、`executing-plans` 的任务执行）。这些技能的触发时机由正文流程逻辑决定，不是会话级预加载。
+- **按需触发（不列入）**：在正文流程的特定步骤触发（如 td-apply / td-propose 前置检查流程的 `wip-limit` 硬阻塞检查、td-apply 步骤 5 流程的 `brooks-law` 提醒、`requesting-code-review` 的架构 review、`executing-plans` 的任务执行）。这些的触发时机由正文流程逻辑决定，正文引用处给出路径，依赖节不必列入。
+
+**constraint references 变体文件的列入判据**：constraint references 变体（如 `constraints` 的 `references/human-in-loop.md`）本身不是 skill、不独立触发，随 `constraints` 入口读取；列入 `## 依赖技能` 节时按此判据——本 skill 的正文执行逻辑在触发时需要以该变体的规则作为判定前提（如 TDD 正文需用 `human-in-loop` 的必停场景判定 spec 契约冲突、`writing-plans` 需用 `critical-buffer` 的标注规范）→ 列入；约束检查只是正文流程固定步骤的检查点（如 td-apply 步骤 2 前置检查的 WIP 硬阻塞）→ 不必列入，正文引用处给出变体路径即可。
 
 违反此定义 = 把运行时调用关系误当预加载关系列入依赖节，会造成使用态 LLM 在触发本 skill 时误以为必须预加载这些技能，混淆"预加载 vs 按需触发"的分界。
 
 **必须有 `## 服务的主基调原则` 一节的 skill：**
 
-- 约束层 5 个局部规律（`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop`）—— 显式 link 到 `system-engineering` 主基调的某一条
+- 约束层 1 个 `constraints` skill（承载 5 个局部规律 references：`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop`）—— `constraints` skill 必须显式声明它承载的每个局部规律服务 `system-engineering` 主基调的哪一条；5 份 references 各自也必须有 `## 服务的主基调原则` 一节
 - 契约层 7 个 td-* skill —— 同上
 
 `system-engineering` 自己是主基调本身，不需要这一节。行为层 / 配置层 skill 可选这一节，但写了更清晰。
@@ -226,7 +228,7 @@ manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
 ### 维度 1：逻辑冲突
 
 - **强度单一事实源一致性**：constraint / tier / profile skill 正文的强度表述（"必须强制""上限 N""X% buffer""显式确认才继续"）是否与 `field-assessment` 表 1 / 表 2 / 表 3 一致？正文写死数值或无条件强度断言而表 1 是另一套 = 冲突；修正方向：正文改引用式（"按表 1 的 X 行取值"）或补 tier 分支。
-- **权威流程单一编排**：同一流程（如 WIP override 回路）是否只由一个 skill 持有编排（`wip-limit`）？其他 skill 描述时必须"指向权威"，复述简化版漏环节 = 冲突。
+- **权威流程单一编排**：同一流程（如 WIP override 回路）是否只由一个 references 持有编排（`constraints/references/wip-limit.md`）？其他 skill 描述时必须"指向权威"，复述简化版漏环节 = 冲突。
 - **跨 skill 触发/引用一致性**：skill 的「触发时机」与权威触发方（如 `td-system-audit` 步骤 6 映射表）互相匹配？依赖技能节与正文实际引用一致（不漏列/多列）？
 - **数字一致性**：跨 skill 同一概念的数字（"失败 2 次 vs 3 次""每完成 N 个 change"）口径统一或显式说明关系？
 
@@ -234,13 +236,13 @@ manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
 
 - **同一事实多处定义**：强度、频率、流程、概念（"模型载体""核心论点归位"）多处重复定义时，一处为权威，其余应为引用/强调，不能各自展开到无法判断谁为准。
 - **无条件 vs 分层限定**：profile / tier 的"特殊规则"带分层限定；正文无条件断言 vs 表 2 的 tier 列限定 = 模糊。
-- **示例与表格不一致**：正文举例（如 human-in-loop 的 profile 加成举例）与表 2 实际单元格一致（含 tier 限定）。
+- **示例与表格不一致**：正文举例（如 `constraints/references/human-in-loop.md` 的 profile 加成举例）与表 2 实际单元格一致（含 tier 限定）。
 - **重复段落**：多文件逐字重复的段落（如 3 profile 的「在各 tier 下的 constraint 强度」节、3 tier 的「判断依据」节）收敛为单一权威 + 引用。
 
 ### 维度 3：可精简
 
 - 同一概念在两个以上 skill 各写完整解释（《工程控制论》归位段、config.yaml 引导流程）→ 收敛为"权威在 X，此处引用"。
-- 同一文件内重复节（如 `critical-buffer` 的「按 tier 调整」与「规则」节）→ 合并。
+- 同一文件内重复节（如 `constraints/references/critical-buffer.md` 的「按 tier 调整」与「规则」节）→ 合并。
 - 每段文本应服务使用态 LLM 的执行决策；纯概念/背景重复可删或移往一处。
 
 ### 维度 4：开发态描述内容
@@ -294,9 +296,9 @@ atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.
 
 - **skill 名**：kebab-case，无冒号（atomcode `validate_skill_name` 规则）
 - **命令名**：`td-<verb>` 或 `td-<noun>`，扁平 kebab-case
-- **文件名**：`SKILL.md`（目录式；本 plugin 22 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
+- **文件名**：`SKILL.md`（目录式；本 plugin 18 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
 - **主基调 skill**：`system-engineering`，是所有局部约束的前提，不单独触发（`user-invocable: false`）
-- **skill body 内引用其他 skill 用逻辑名**（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀（atomcode 下为 `total-design:<name>`）——这是预留多平台扩展的关键设计。skill frontmatter 不写 `aliases`，调用名一律由平台加载器按 plugin 名拼接
+- **skill body 内引用其他 skill 用逻辑名**（如 `constraints`、`field-assessment`），由当前平台的加载器负责拼前缀（atomcode 下为 `total-design:<name>`）——这是预留多平台扩展的关键设计。skill frontmatter 不写 `aliases`，调用名一律由平台加载器按 plugin 名拼接。子约束（如 `wip-limit` / `human-in-loop` / `critical-buffer` / `brooks-law` / `delay-decision`）作为 `constraints` 的 `references/<name>.md` 变体文件存在，body 内引用时写 `constraints` 的 `references/<name>.md`（逻辑名 + 变体路径）
 
 ### td-* skill 共享片段
 
@@ -308,7 +310,7 @@ atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.
 
 1. **`system-engineering`** — 主基调四条进入上下文。各 td-* skill 在这一条后补自己的注解（如"reverse-spec 是总体设计部在接手阶段的工作"）。
 2. **profile × tier 识别** — 调用 `field-assessment` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）+ 表 3（system-audit 频率，仅 archive/apply 需要）读入上下文。会话内缓存，后续步骤直接引用。
-3. **其余 constraint**（`wip-limit` / `human-in-loop` / `critical-buffer` 等）— 只把 `field-assessment` 的强度值读入上下文，**不在步骤 1 判断是否触发**。"是否触发"是步骤 2 的事。
+3. **其余 constraint**（通过 `constraints` skill 承载的 5 个局部规律 references：`wip-limit` / `human-in-loop` / `critical-buffer` / `brooks-law` / `delay-decision`）— 只把 `field-assessment` 的强度值读入上下文，**不在步骤 1 判断是否触发**。"是否触发"是步骤 2 的事。
 
 ## commit 风格
 

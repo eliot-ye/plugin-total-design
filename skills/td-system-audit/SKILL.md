@@ -24,7 +24,7 @@ argument-hint: "<scope: current-change | project>  (optional, default current-ch
 
 audit 的对照标准是主基调四条，不是"代码质量"或"进度"——这是系统工程视角的审计，不是项目管理视角的审计。
 
-**《工程控制论》反馈控制回路归位**：步骤 7"修复后重跑 audit 闭环"是反馈控制回路的具体形态（重跑上限 3 次是控制器饱和限，超限触发 `human-in-loop`）。
+**《工程控制论》反馈控制回路归位**：步骤 7"修复后重跑 audit 闭环"是反馈控制回路的具体形态（重跑上限 3 次是控制器饱和限，超限触发 `constraints` 的 `references/human-in-loop.md`）。
 
 ## 输入 - audit 的范围。空则默认 `current-change`
 
@@ -65,7 +65,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 ### 3. 对照主基调四条审计
 
-对审计对象，逐条审计。逐条检查清单见 `references/audit-report-template.md` 的「主基调对照清单」节——按四条主基调逐条打勾，违反项标注并触发对应 constraint skill（见步骤 6）。
+对审计对象，逐条审计。逐条检查清单见 `references/audit-report-template.md` 的「主基调对照清单」节——按四条主基调逐条打勾，违反项标注并触发对应 constraint 修复（`constraints` 的 references 变体文件，见步骤 6）。
 
 ### 4. 输出审计报告
 
@@ -86,17 +86,17 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 ### 6. 触发修复
 
-对每个严重问题，触发对应的 constraint skill 修复：
+对每个严重问题，触发对应的 constraint 修复（`constraints` 的 references 变体文件）：
 
-| 严重问题类型 | 触发的 constraint skill |
+| 严重问题类型 | 触发的 constraint（`constraints` 的 references 变体） |
 |---|---|
-| 关键链缓冲被压缩 | `critical-buffer`（重新规划 tasks） |
-| agent 自己拍板了 | `human-in-loop`（回去问用户） |
-| 可逆决策被过早闭合 | `delay-decision`（重新打开决策） |
-| 同时开太多 change（WIP 超限） | `wip-limit` 的「硬约束 + override 机制」（阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override） |
-| 局部最优但全局失调 | `human-in-loop`（让总体设计部判断）。本工作流没有专门的"全局失调"constraint skill——这个判断必须由总体设计部做，不能由 agent 自己拍板（主基调第 2 条） |
+| 关键链缓冲被压缩 | `constraints` 的 `references/critical-buffer.md`（重新规划 tasks） |
+| agent 自己拍板了 | `constraints` 的 `references/human-in-loop.md`（回去问用户） |
+| 可逆决策被过早闭合 | `constraints` 的 `references/delay-decision.md`（重新打开决策） |
+| 同时开太多 change（WIP 超限） | `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」（阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override） |
+| 局部最优但全局失调 | `constraints` 的 `references/human-in-loop.md`（让总体设计部判断）。本工作流没有专门的"全局失调"constraint——这个判断必须由总体设计部做，不能由 agent 自己拍板（主基调第 2 条） |
 
-注：本表为问题→修复映射，各 constraint skill 正文已反向声明"被 `/td-system-audit` 触发修复时"（`human-in-loop` 见其场景 7）。
+注：本表为问题→修复映射，各 constraint 变体文件正文已反向声明"被 `/td-system-audit` 触发修复时"（`constraints` 的 `references/human-in-loop.md` 见其场景 7）。
 
 ### 7. 修复后重跑 audit 闭环
 
@@ -105,7 +105,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 - 之前的严重问题已消除
 - 修复动作没引入新的"局部优化制造全局失调"
 
-重跑最多 3 次。3 次后仍有严重问题 → 触发 `human-in-loop`，让用户介入决定如何处理（继续修复、调整 scope、或接受残留风险）。
+重跑最多 3 次。3 次后仍有严重问题 → 触发 `constraints` 的 `references/human-in-loop.md`，让用户介入决定如何处理（继续修复、调整 scope、或接受残留风险）。
 
 不重跑 = 闭环没合，问题可能换形式回来。
 

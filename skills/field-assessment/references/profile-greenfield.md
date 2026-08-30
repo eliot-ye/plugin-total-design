@@ -22,7 +22,7 @@ greenfield 最容易犯的错是"我想到了就建"。explore 至少探索 2 �
 
 ### 3. 避免"完美架构"陷阱
 
-greenfield 容易陷入"先把架构设计完美"。用 delay-decision skill——可逆决策先往简单走，等信息足够再回头。
+greenfield 容易陷入"先把架构设计完美"。用 `constraints` 的 `references/delay-decision.md`——可逆决策先往简单走，等信息足够再回头。
 
 ### 4. tier 松绑优先
 

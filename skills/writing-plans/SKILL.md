@@ -8,8 +8,8 @@ user-invocable: false
 
 ## 依赖技能
 
-- `critical-buffer`
-- `delay-decision`
+- `constraints` 的 `references/critical-buffer.md`
+- `constraints` 的 `references/delay-decision.md`
 - `field-assessment`
 - `requesting-code-review`
 
@@ -23,7 +23,7 @@ user-invocable: false
 
 tasks.md 分两个阶段完成：
 
-1. **`/td-propose` 阶段**：创建 tasks.md 骨架——任务序列 + 关键链标注 + project buffer（按 `critical-buffer` skill 的规则）。这是 proposal 的"实施计划"部分。
+1. **`/td-propose` 阶段**：创建 tasks.md 骨架——任务序列 + 关键链标注 + project buffer（按 `constraints` 的 `references/critical-buffer.md` 的规则）。这是 proposal 的"实施计划"部分。
 2. **`/td-apply` 阶段**：若 tasks.md 粒度还不够细，本 skill 再次触发细化。
 
 关键链标注在 propose 阶段完成，apply 阶段只做校验和细化。
@@ -60,7 +60,7 @@ tasks.md 分两个阶段完成：
 
 ### 3. 标注关键链
 
-用 `critical-buffer` skill 的规则，在 tasks.md 里标注关键链路径 + project buffer。
+用 `constraints` 的 `references/critical-buffer.md` 的规则，在 tasks.md 里标注关键链路径 + project buffer。
 
 ### 4. 不写"以后再说"
 
@@ -74,7 +74,7 @@ task 是 `executing-plans` 直接消费的条目，主体必须是 agent 能**�
 
 ## 与其他 skill 的关系
 
-- 与 `delay-decision` 配合：plan 里如果遇到可逆决策，标 `[延迟决策]` 而不是强行拍
+- 与 `constraints` 的 `references/delay-decision.md` 配合：plan 里如果遇到可逆决策，标 `[延迟决策]` 而不是强行拍
 - 与 `field-assessment` 配合：子系统独立定 tier 时的切分规则见上方「工作方式」节 1 的子系统段（权威在 `field-assessment` 的 `references/subsystem-tiering.md`）。
 
 ## 不做的事

@@ -1,17 +1,6 @@
----
-name: human-in-loop
-description: 何时必须停下来等用户拍板。服务系统工程主基调第 2 条"总体设计部"和第 3 条"综合集成"。
-user-invocable: false
----
-
 # 人在回路
 
-## 依赖技能
-
-- `delay-decision`
-- `wip-limit`
-- `brooks-law`
-- `field-assessment`
+> 本文件与同目录的 `brooks-law.md` / `critical-buffer.md` / `delay-decision.md` / `wip-limit.md` 是平级兄弟文件，正文中出现的裸逻辑名均指同目录对应变体文件。
 
 ## 服务的主基调原则
 
@@ -24,12 +13,12 @@ user-invocable: false
 ### 必须停下来等用户拍板的场景
 
 1. **公共契约变更**：API 形状、数据库 schema、配置文件格式、对外承诺的行为
-2. **不可逆决策**（见 `delay-decision` skill）
+2. **不可逆决策**（见同目录 `delay-decision.md`）
 3. **生产环境影响**：部署、迁移、权限变更、数据修改
 4. **超出当前 change scope 的影响**：改动会波及 change 之外的代码或系统
 5. **agent 自己的置信度低**：agent 不确定方案是否对齐用户意图时
-6. **WIP 硬约束 override**：由 `wip-limit` 的 override 流程触发（见 `wip-limit` 的「硬约束 + override 机制」节第 4 步）。本 skill 在 override 回路里负责"描述风险 + 列选项 + 等用户确认"，回路编排由 `wip-limit` 单一持有。
-7. **被 `/td-system-audit` 触发修复时**：audit 发现"局部最优但全局失调"或"agent 自己拍板了本应问用户的事"问题时，触发本 skill 让用户（总体设计部）判断这是真全局失调还是可接受的局部优化（对应 `td-system-audit` 步骤 6 的问题→修复映射表）。
+6. **WIP 硬约束 override**：由 `wip-limit` 的 override 流程触发（见同目录 `wip-limit.md` 的「硬约束 + override 机制」节第 4 步）。本文件在 override 回路里负责"描述风险 + 列选项 + 等用户确认"，回路编排由 `wip-limit` 单一持有。
+7. **被 `/td-system-audit` 触发修复时**：audit 发现"局部最优但全局失调"或"agent 自己拍板了本应问用户的事"问题时，触发本文件让用户（总体设计部）判断这是真全局失调还是可接受的局部优化（对应 `td-system-audit` 步骤 6 的问题→修复映射表）。
 
 ### 强度叠加规则
 
@@ -49,7 +38,7 @@ user-invocable: false
 
 ## 触发机制
 
-本 skill 不靠 hook 强制，靠 agent 自觉识别上述场景。当 agent 识别到上述第 1–5 类场景时，**必须暂停**，停下来询问用户，**不得自行推进**。
+本文件不靠 hook 强制，靠 agent 自觉识别上述场景。当 agent 识别到上述第 1–5 类场景时，**必须暂停**，停下来询问用户，**不得自行推进**。
 
 ## 触发时 agent 应做的事
 
@@ -69,6 +58,6 @@ user-invocable: false
 
 ## 与其他 skill 的关系
 
-- 与 `delay-decision` 配合：可逆决策延迟，但延迟期内触及不可逆点时，本 skill 触发
-- 与 `brooks-law` 配合：用户考虑"加人手"时，brooks-law 提醒，本 skill 要求用户显式确认
-- 与 `wip-limit` 配合：用户想并行硬解超过 wip-limit 上限的 change 时，wip-limit 硬阻塞，本 skill 在 override 流程里要求用户显式确认风险（第 6 类）。
+- 与 `delay-decision` 配合：可逆决策延迟，但延迟期内触及不可逆点时，本文件触发
+- 与 `brooks-law` 配合：用户考虑"加人手"时，brooks-law 提醒，本文件要求用户显式确认
+- 与 `wip-limit` 配合：用户想并行硬解超过 wip-limit 上限的 change 时，wip-limit 硬阻塞，本文件在 override 流程里要求用户显式确认风险（第 6 类）。

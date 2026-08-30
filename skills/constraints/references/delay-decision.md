@@ -1,14 +1,6 @@
----
-name: delay-decision
-description: 可逆决策的过早闭合会损失信息。服务系统工程主基调第 3 条"从定性到定量的综合集成"。
-user-invocable: false
----
-
 # 延迟决策
 
-## 依赖技能
-
-- `field-assessment`
+> 本文件与同目录的 `brooks-law.md` / `critical-buffer.md` / `human-in-loop.md` / `wip-limit.md` 是平级兄弟文件，正文中出现的裸逻辑名均指同目录对应变体文件。
 
 ## 服务的主基调原则
 
@@ -41,7 +33,7 @@ user-invocable: false
 - **tier-medium**：系统有明显的模块/分系统边界，顶层架构决策和模块设计决策需要分层对待。
 - **tier-large**：系统多层嵌套，顶层架构决策应被"总体设计文档"捕获（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节），而不是仅靠延迟决策处理。
 
-**执行规则**：当 `$_TD_TIER == tier-large` 且当前决策属于顶层架构层次时，本 skill 应提示用户"顶层架构决策应进入 `tier-large` 要求的总体设计文档，而不是仅靠延迟决策处理"。
+**执行规则**：当 `$_TD_TIER == tier-large` 且当前决策属于顶层架构层次时，本文件应提示用户"顶层架构决策应进入 `tier-large` 要求的总体设计文档，而不是仅靠延迟决策处理"。
 
 ### 延迟不等于拖延
 
@@ -56,8 +48,8 @@ user-invocable: false
 - 用户在 `/td-propose` 时对某个设计点犹豫不决
 - agent 自己在 design.md 里写"先选 A 方案，以后再改"——这种写法需要检查：A 是可逆的吗？
 - 多个候选方案都还在桌上，用户想"赶紧定一个"
-- **被 `/td-system-audit` 触发修复时**：audit 发现"可逆决策被过早闭合"问题时触发本 skill 重新打开决策。
-- **与 `td-explore` 的连接**：`td-explore` 阶段"不落盘 spec"本质上是延迟决策（不闭合 spec，等更多信息再 propose，详见 `td-explore` 步骤 4 的「与 `delay-decision` 的连接」段）。当用户想"赶紧 propose 闭合 spec"时，本 skill 触发提醒"信息不足时强行闭合会损失信息"（主基调第 3 条综合集成）。
+- **被 `/td-system-audit` 触发修复时**：audit 发现"可逆决策被过早闭合"问题时触发本文件重新打开决策。
+- **与 `td-explore` 的连接**：`td-explore` 阶段"不落盘 spec"本质上是延迟决策（不闭合 spec，等更多信息再 propose，详见 `td-explore` 的「与 `constraints` 的 `references/delay-decision.md` 的连接」段）。当用户想"赶紧 propose 闭合 spec"时，本文件触发提醒"信息不足时强行闭合会损失信息"（主基调第 3 条综合集成）。
 
 ## 触发时 agent 应做的事
 

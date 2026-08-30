@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 依赖技能
 
-- `human-in-loop`
+- `constraints` 的 `references/human-in-loop.md`
 - `systematic-debugging`
 
 ## 服务的主基调原则
@@ -63,7 +63,7 @@ user-invocable: false
 
 **要**：
 - 触发 `systematic-debugging` 走 4-phase 流程
-- 如果修不了，触发 `human-in-loop` 停下来问用户
+- 如果修不了，触发 `constraints` 的 `references/human-in-loop.md` 停下来问用户
 
 ### 6. 系统级验证（跨分系统边界）
 

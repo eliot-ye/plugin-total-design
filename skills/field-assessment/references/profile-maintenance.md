@@ -14,7 +14,7 @@
 
 ### 1. 生产环境改动前必触发 human-in-loop
 
-涉及生产环境的改动（部署、迁移、权限、数据修改），agent **必须**停下来问用户。不得自行推进。这属 `human-in-loop` 通用基线第 3 类（生产环境影响），所有 profile × tier 生效（表 2 的 maintenance "+ 生产环境改动前"加成与基线重叠，只是强调，不改变强度）。
+涉及生产环境的改动（部署、迁移、权限、数据修改），agent **必须**停下来问用户。不得自行推进。这属 `constraints` 的 `references/human-in-loop.md` 通用基线第 3 类（生产环境影响），所有 profile × tier 生效（表 2 的 maintenance "+ 生产环境改动前"加成与基线重叠，只是强调，不改变强度）。
 
 ### 2. bug 走 systematic-debugging
 

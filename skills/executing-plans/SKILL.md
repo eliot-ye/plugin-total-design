@@ -9,7 +9,7 @@ user-invocable: false
 ## 依赖技能
 
 - `field-assessment`
-- `human-in-loop`
+- `constraints` 的 `references/human-in-loop.md`
 - `requesting-code-review`
 - `systematic-debugging`
 - `test-driven-development`
@@ -46,7 +46,7 @@ user-invocable: false
 在以下时机停下来问用户：
 
 - 完成一个关键链任务
-- 遇到 `human-in-loop` skill 的必停场景（第 1–5 类通用基线 + tier/profile 加成）
+- 遇到 `constraints` 的 `references/human-in-loop.md` 的必停场景（第 1–5 类通用基线 + tier/profile 加成）
 - 任务实际耗时显著超过估时（>2x）
 
 **current-change audit**：随本 checkpoint 触发，频率与 tier 分层见上方「触发时机」节的 current-change audit 条目。

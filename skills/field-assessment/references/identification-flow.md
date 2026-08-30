@@ -18,7 +18,7 @@ agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `
 | 2 | `profile-brownfield` | 仓库已有可运行代码（非脚手架）**且** 不满足 maintenance 判据 |
 | 3 | `profile-greenfield` | 仓库刚 init / 只有脚手架 / 文件数 < 10 且无业务逻辑 |
 
-判据冲突时按优先级取高的。判据不明确 → 触发 `human-in-loop`，问用户"这是新项目、接手项目、还是上线维护？"。
+判据冲突时按优先级取高的。判据不明确 → 触发 `constraints` 的 `references/human-in-loop.md`，问用户"这是新项目、接手项目、还是上线维护？"。
 
 ### 3. 判读 tier（三选一）
 

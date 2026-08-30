@@ -61,7 +61,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 **产物要求**：explore 阶段必须产出**至少 2 个候选方向**，每个标注系统工程影响（影响哪些分系统 / 整体性能预期变化 / 可逆性）。产物留在会话上下文里（explore 不落盘 spec，见步骤 6 的 Guardrails）。`/td-propose` 步骤 3 的"greenfield explore 检查"会读会话历史判定是否已有 ≥2 个候选方向——少于 2 个时 propose 阶段会拦下来要求先 explore。
 
-**与 `delay-decision` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策——不闭合 spec，等更多信息再 propose。当用户想"赶紧 propose 闭合 spec"时，触发 `delay-decision` 提醒："explore 不落盘 spec 是延迟决策的体现，信息不足时强行闭合会损失信息（主基调第 3 条综合集成）。"这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
+**与 `constraints` 的 `references/delay-decision.md` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策——不闭合 spec，等更多信息再 propose。当用户想"赶紧 propose 闭合 spec"时，触发 `constraints` 的 `references/delay-decision.md` 提醒："explore 不落盘 spec 是延迟决策的体现，信息不足时强行闭合会损失信息（主基调第 3 条综合集成）。"这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
 
 ### 5. 系统工程视角评估
 
@@ -74,8 +74,8 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 评估侧重按步骤 1 判读的 `$_TD_PROFILE` 调整（各 profile 的特殊规则与流程侧重见 `field-assessment` 的 `references/profile-<对应>.md`）：
 
-- `profile-greenfield`：重候选方向的**取舍与可逆性**——没有存量约束，方向选错成本低，但要用 `delay-decision` 避免"想到了就建"和"先把架构设计完美"两个陷阱
-- `profile-brownfield`：重**动老代码的影响**——候选方向会触碰哪些存量分系统、改动范围能否最小化、是否触发公共契约变更（对照 `human-in-loop` 的必停场景）
+- `profile-greenfield`：重候选方向的**取舍与可逆性**——没有存量约束，方向选错成本低，但要用 `constraints` 的 `references/delay-decision.md` 避免"想到了就建"和"先把架构设计完美"两个陷阱
+- `profile-brownfield`：重**动老代码的影响**——候选方向会触碰哪些存量分系统、改动范围能否最小化、是否触发公共契约变更（对照 `constraints` 的 `references/human-in-loop.md` 的必停场景）
 - `profile-maintenance`：重**生产稳定性**——候选方向对线上契约、部署 pipeline、回归测试的影响，是否需要在生产环境改动前停下问用户
 
 ### 6. 总结给用户看
@@ -87,7 +87,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 - **未解决的矛盾**：对话中暴露的冲突点
 - **建议的下一步**：通向 propose 或继续探索
 
-**条目标号规则**：以上小节中，凡**需要用户回复**的章节（通常是"候选方向"与"建议的下一步"），各章节内条目标号按 `human-in-loop` 的「需用户回复的条目标号规则」执行——带章节前缀编号（如 `a1 / b1`），避免用户回复时无法对应条目。
+**条目标号规则**：以上小节中，凡**需要用户回复**的章节（通常是"候选方向"与"建议的下一步"），各章节内条目标号按 `constraints` 的 `references/human-in-loop.md` 的「需用户回复的条目标号规则」执行——带章节前缀编号（如 `a1 / b1`），避免用户回复时无法对应条目。
 
 ### 7. 探索成果落池（可选）
 

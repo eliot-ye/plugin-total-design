@@ -1,6 +1,6 @@
 ---
 name: system-engineering
-description: 钱学森系统工程主基调。所有局部 constraint skill 的前提。
+description: 钱学森系统工程主基调。所有局部 constraint（`constraints` skill 承载的 5 份局部规律变体）的前提。
 user-invocable: false
 ---
 
@@ -53,7 +53,7 @@ user-invocable: false
 
 ## 如何使用本 skill
 
-本 skill 是**所有 constraint skill 的前提**，不是单独触发的。当 agent 激活任意一个 constraint skill 时，应该同时意识到本 skill 的四条主基调，把局部规则放在系统工程框架下执行。
+本 skill 是**所有局部 constraint（`constraints` skill 承载的 5 份局部规律变体文件）的前提**，不是单独触发的。当 agent 执行任一局部规律规则时，应该同时意识到本 skill 的四条主基调，把局部规则放在系统工程框架下执行。
 
 当 agent 调用 `/td-system-audit` 时，本 skill 是审计的对照标准。
 

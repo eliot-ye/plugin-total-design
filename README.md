@@ -92,8 +92,8 @@ total-design/
 ├── CODE_OF_CONDUCT.md
 ├── LICENSE
 │
-├── skills/                 ← 22 个 skill，全部目录式 SKILL.md
-│   ├── 约束层（6 个）
+├── skills/                 ← 18 个 skill，全部目录式 SKILL.md
+│   ├── 约束层（2 个：system-engineering 主基调 + constraints 承载 5 份局部规律 references）
 │   ├── 行为层（7 个，Superpowers 转译）
 │   ├── 配置层（2 个：field-assessment 配置入口 + todo-pool 待办池格式；profile/tier 变体在 field-assessment/references/ 下）
 │   └── 契约层（7 个 td-*，与下方 command 一一对应）
@@ -183,27 +183,23 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 ## Skill 清单
 
-22 个 skill，按调用方式分两组：
+18 个 skill，按调用方式分两组：
 
 - **`user-invocable: true`**（7 个）：用户可在 `/` 菜单主动调；其中 `td-init` 还带 `disable-model-invocation: true`（仅用户可触发，agent 不能自动调用），其余 6 个也可被 agent 自动触发
   - 契约层 7 个 td-*（与 7 个 td-* command 一一对应；`td-list` 只读命令无同名 skill）
-- **`user-invocable: false`**（15 个）：agent 自动触发，不暴露在 `/` 菜单
-  - 约束层 6 个（钱学森主基调 + 5 条局部规律）
+- **`user-invocable: false`**（11 个）：agent 自动触发，不暴露在 `/` 菜单
+  - 约束层 2 个（钱学森主基调 `system-engineering` + 局部规律入口 `constraints`）
   - 行为层 7 个（Superpowers 转译，由 td-explore / td-apply 流程内部调用）
   - 配置层 2 个（field-assessment 配置入口 + todo-pool 待办池格式；profile/tier 各 3 个变体以 `field-assessment/references/` 变体文件形态存在，判读命中后按需读取）
 
-### 约束层（钱学森系统工程主基调 + 局部规律）
+### 约束层（钱学森系统工程主基调 + 局部规律入口）
 
 | Skill | 作用 | 服务主基调 | user-invocable |
 |---|---|---|---|
 | `system-engineering` | 钱学森四条主基调，所有局部约束的前提 | — | false |
-| `wip-limit` | 限制同时活跃的 change 数量 | 第 4 条：开放的复杂巨系统 | false |
-| `critical-buffer` | 关键链缓冲保护 | 第 1 条：系统工程 + 第 2 条：总体设计部 | false |
-| `brooks-law` | 加人手前的强制提醒 | 第 1 条：系统工程 | false |
-| `delay-decision` | 可逆决策延迟闭合 | 第 3 条：从定性到定量的综合集成 | false |
-| `human-in-loop` | 何时必须停下来等用户拍板 | 第 2 条 + 第 3 条 | false |
+| `constraints` | 5 个局部规律的单一入口；承载 `references/` 下 5 份变体文件（`brooks-law` / `critical-buffer` / `delay-decision` / `human-in-loop` / `wip-limit`），命中触发场景后读对应变体执行 | 第 1、2、3、4 条 | false |
 
-`system-engineering` 是主基调 skill，其他 5 个是局部规律 skill——每个局部规律 skill 都必须在正文开头有 `## 服务的主基调原则` 一节，显式 link 到 `system-engineering` 的某一条。
+`system-engineering` 是主基调 skill；`constraints` 是局部规律的单一入口——5 份 `references/<name>.md` 各自都必须在正文开头有 `## 服务的主基调原则` 一节，显式 link 到 `system-engineering` 的某一条。子约束之间互相引用的路径为 `references/<name>.md`；override 回路编排（`wip-limit` → `brooks-law` → `critical-buffer` → `human-in-loop` → 记录）由 `constraints/references/wip-limit.md` 单一持有。
 
 ### 行为层（Superpowers 转译）
 
@@ -344,7 +340,7 @@ openspec/.td-state/
 
 | 钱学森主基调 | 在本 plugin 里的工程化体现 |
 |---|---|
-| **系统工程**（总体性能 ≠ 各部分之和） | 每个 constraint skill 显式声明服务这条主基调；proposal 必填"系统工程影响评估"节 |
+| **系统工程**（总体性能 ≠ 各部分之和） | `constraints` 承载的 5 份局部规律 references 显式声明服务这条主基调；proposal 必填"系统工程影响评估"节 |
 | **总体设计部**（系统全局立场的群体） | `brainstorming` skill 升级为"总体设计部"工作方式；`/td-system-audit` 命令是周期性自检机制 |
 | **从定性到定量的综合集成**（专家 + 数据 + 模型迭代） | proposal 里必须回答"这改动会影响哪些分系统、整体性能会怎么变"——这是综合集成在 artifact 层的体现 |
 | **开放的复杂巨系统**（不简化还原，整体观 + 层次观） | profile × tier 二维配置——按系统规模分层对待 |

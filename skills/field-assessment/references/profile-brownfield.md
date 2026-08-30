@@ -26,7 +26,7 @@
 
 ### 3. 避免改坏老代码
 
-改老代码前，触发 `human-in-loop`（tier-medium / tier-large 生效——表 2 的 brownfield 加成；tier-small 下表 2 为"—"，仅走 human-in-loop 基线第 1–5 类）：这块老代码你确定要动吗？有没有更小范围的改法？
+改老代码前，触发 `constraints` 的 `references/human-in-loop.md`（tier-medium / tier-large 生效——表 2 的 brownfield 加成；tier-small 下表 2 为"—"，仅走 human-in-loop 基线第 1–5 类）：这块老代码你确定要动吗？有没有更小范围的改法？
 
 ## 与其他 profile 的切换
 

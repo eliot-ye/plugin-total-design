@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 依赖技能
 
-- `human-in-loop`
+- `constraints` 的 `references/human-in-loop.md`
 
 ## 服务的主基调原则
 
@@ -102,4 +102,4 @@ review 对象不是代码，是 proposal 的分系统切分与设计决策。此
 
 ## 与其他 skill 的关系
 
-- 与 `human-in-loop` 配合：critical issue 是 agent 自己能修就修，修不了触发 human-in-loop
+- 与 `constraints` 的 `references/human-in-loop.md` 配合：critical issue 是 agent 自己能修就修，修不了触发 human-in-loop

@@ -1,12 +1,12 @@
 ---
 name: field-assessment
-description: 现场判读 profile × tier 并注入 constraint 强度。激活任意 constraint skill 时，应同时查本 skill 确认当前 profile × tier 下的强度
+description: 现场判读 profile × tier 并注入 constraint 强度。执行任意局部 constraint（`constraints` skill 的 references 变体）时，应同时查本 skill 确认当前 profile × tier 下的强度
 user-invocable: false
 ---
 
 # 现场评估（profile × tier 判读 + 强度注入）
 
-本 skill 是所有 profile / tier / constraint skill 引用的**配置入口**：判读现场 profile × tier，把三张强度表的值注入会话上下文。
+本 skill 是所有 profile / tier / 局部 constraint（`constraints` skill 的 references 变体文件）引用的**配置入口**：判读现场 profile × tier，把三张强度表的值注入会话上下文。
 
 ## 服务的主基调原则
 
