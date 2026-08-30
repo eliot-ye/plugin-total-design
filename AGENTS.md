@@ -15,7 +15,7 @@
 
 **任何对本仓库LLM文件的更改——无论改 SKILL.md、命令文件、还是 AGENTS.md 本身——动笔前必须先完成下列分析步骤，全部执行完才能开始用户要求的改动。跳过这一步直接改 = 把局部失调注入系统。**
 
-理由：本 plugin 的 28 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
+理由：本 plugin 的 22 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
 
 ### 分析步骤（必须按序执行，每步产出可见证据）
 
@@ -83,7 +83,7 @@ total-design/
 ├── LICENSE
 ├── .gitignore
 │
-├── skills/                  ← 28 个 skill
+├── skills/                  ← 22 个 skill（profile/tier 变体在 field-assessment/references/ 下）
 ├── commands/                ← 8 个 command
 │
 └── hooks/                   ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
@@ -154,6 +154,22 @@ disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 
 1. SKILL.md 正文需要说明编辑规则时，改用一句话自包含描述，不写"见 AGENTS.md"。
 2. 约束层 / 契约层 skill 的 `## 服务的主基调原则` 一节，直接陈述它服务钱学森系统工程主基调的哪一条，不指向 AGENTS.md。
 3. 若发现现有 SKILL.md 里有对 AGENTS.md 的引用，视为 bug，转译时删掉。
+
+### SKILL 与 references 禁止开发态语句
+
+**运行时资产（`SKILL.md` 正文/frontmatter + `references/`）不得包含面向仓库编辑者而非使用态 LLM 的语句。** 判据：这段文本是否服务使用态 LLM 的执行决策——不服务即为开发态泄漏，出现即删。三类典型形态：
+
+- **编辑指令**："只改本文件""不重复定义数值""由三处合并而来""避免重复校验逻辑"——约束的是改仓库的人怎么写文件。
+- **调用方清单**："被三层防护的三处引用""`td-system-audit` / `executing-plans` 引用本文件"——依赖图文档。使用态 LLM 是被某个调用方指引来的，知道还有谁引用不改变其执行决策；且清单必然随结构演化腐烂（实例：`audit-frequency.md` 的"3 个 tier skill"在 1.6.0 收拢后即失实）。
+- **写作规范**："下游引用只指'表 X 的 Y 行'""不必在正文重复这条约定""本节是约定的单一锚点"——写作约定归 AGENTS.md / docs 门记录，不进运行时资产。
+
+**允许保留的相近形态**（勿误删）：
+
+- **冲突仲裁句**："与其他位置的强度表述冲突时，以本表为准"——服务运行时判定谁说了算。
+- **运行时指针**："完整语义见 X 步骤，此处不重复"——告诉 LLM 这里没有展开、去哪读。
+- **入口契约**："触发方：`td-explore` 步骤 7（调用方已征得用户同意 → 执行）"——子流程的执行条件输入。
+
+执行细则：改写时保留仲裁语义，只删编辑指令与调用方清单；"谁引用本文件"类信息写进 docs 门记录或本文件的依赖图谱节。
 
 ### 命令文件编辑
 
@@ -232,6 +248,7 @@ manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
 出现即视为泄漏：
 
 - **AGENTS 文件引用**：SKILL.md 出现 `AGENTS.md` / `CLAUDE.md` / `.atomcode.md`（见「SKILL 不可引用 AGENTS 文件」）。
+- **开发态语句**：正文/references 出现编辑指令（"只改本文件"类）、调用方清单（"被 X 引用"类）、写作规范（"下游引用只指…"类）——判据、允许形态与执行细则见「SKILL 与 references 禁止开发态语句」节。
 - **Superpowers 残留**：Superpowers 技能名（如 `dispatching-parallel-agents`）、"Superpowers" 字样、其 plugin/marketplace 引用。
 - **Claude Code 工具名**：正文写死 `AskUserQuestion` / `TodoWrite` 等平台工具名 → 改平台无关表述（"询问用户"/"任务跟踪工具"）。
 - **平台命名表 / plugin 前缀**：body 残留平台命名表、`total-design:<name>` 调用名、marketplace 路径。
@@ -253,7 +270,7 @@ manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
 - **profile**（仓库状态）：greenfield / brownfield / maintenance
 - **tier**（系统复杂度）：small / medium / large
 
-两个维度都以 skill 形态存在，agent 根据现场判读激活哪一组。
+两个维度以 `field-assessment` 的 `references/` 变体文件形态存在（3 profile + 3 tier），agent 现场判读后按需读取命中的 profile 一份 + tier 一份（共 2 份）。
 
 **冲突优先级**：profile 与 tier 强度冲突时，**以 tier 为准**——tier 决定约束强度与流程重量（"不强求重流程"这类松绑优先），profile 只决定流程侧重（入口动作、TDD 边界、special rules），不改变强度。profile 的"默认激活的层"强度描述是默认值，最终强度以 `field-assessment` 表 1/表 2/表 3 为单一事实源。
 
@@ -277,7 +294,7 @@ atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.
 
 - **skill 名**：kebab-case，无冒号（atomcode `validate_skill_name` 规则）
 - **命令名**：`td-<verb>` 或 `td-<noun>`，扁平 kebab-case
-- **文件名**：`SKILL.md`（目录式；本 plugin 28 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
+- **文件名**：`SKILL.md`（目录式；本 plugin 22 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
 - **主基调 skill**：`system-engineering`，是所有局部约束的前提，不单独触发（`user-invocable: false`）
 - **skill body 内引用其他 skill 用逻辑名**（如 `wip-limit`、`human-in-loop`），由当前平台的加载器负责拼前缀（atomcode 下为 `total-design:<name>`）——这是预留多平台扩展的关键设计。skill frontmatter 不写 `aliases`，调用名一律由平台加载器按 plugin 名拼接
 
@@ -305,7 +322,7 @@ atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.
 ## 不做的事
 
 - **不做 plugin 内的 spec 系统**：OpenSpec 本身是独立 CLI，本 plugin 转译方法论不重新实现 CLI
-- **不做静态配置文件**：profile × tier 不用 yaml 配置，全做成 skill
+- **不做静态配置文件**：profile × tier 不用 yaml 配置，判读流程与变体规则全部以 `field-assessment` skill（SKILL.md + references/ 机制与变体文件）形态存在
 - **不原样照搬 Superpowers 的 SKILL.md**：转译时去掉 Superpowers 自己的 plugin 引用、marketplace 引用
 
 ## 参考

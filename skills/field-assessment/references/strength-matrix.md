@@ -1,6 +1,6 @@
-# 强度矩阵（单一事实源）
+# 强度矩阵（表 1 + 表 2）
 
-本文件是表 1 + 表 2 的单一事实源，下游 skill 通过 `field-assessment` 识别流程读入（见 `identification-flow.md` 的「### 5. 注入强度」节）。改强度只改本文件。
+表 1（constraint × tier 强度）与表 2（profile × tier 的 human-in-loop 场景加成）。由 `field-assessment` 的识别流程（`references/identification-flow.md`「### 5. 注入强度」节）读入；与其他位置的强度表述冲突时，以本文件为准。
 
 ## 表 1：5 个 constraint 在 3 个 tier 下的强度
 
@@ -29,8 +29,6 @@
 tier-small 20% project buffer 偏低于 CCPM 标准（通常 30%）。tier-small 保留 20% 是基于小系统低不确定性的假设；如果 tier-small 项目实际有高不确定性（如新技术栈、不熟悉的 domain），agent 应主动建议提升 buffer 比例到 30%。
 
 ### 表 1 注解（3 tier × 5 constraint）
-
-本表是三个 tier skill 的「constraint 强度」注解合并而来，避免三处重复。
 
 | constraint | tier-small 注解 | tier-medium 注解 | tier-large 注解 |
 |---|---|---|---|

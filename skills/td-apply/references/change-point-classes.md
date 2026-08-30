@@ -1,12 +1,10 @@
-# 四类变更点（caller impact 定义单一事实源）
+# 四类变更点（caller impact）
 
-本文件是四类变更点与 caller impact 触发条件的单一事实源，被三层防护的三处引用：
+四类变更点与 caller impact 触发条件的定义。命中触发条件即进入 caller impact 三层防护（定义的其他表述与本文件冲突时，以本文件为准）：
 
 - `td-propose` 步骤 6.c「proposal.md 必填节：caller impact 分析」（前馈层）
 - `td-apply` 步骤 4「Caller Impact 实测」子节（实时层）
-- `requesting-code-review/references/architecture-review-checklist.md`（校验层）
-
-改四类定义 / 触发条件 / 边界裁定时只改本文件，三处引用方不复述定义。
+- `requesting-code-review` 的 `references/architecture-review-checklist.md`（校验层）
 
 ## 触发条件
 

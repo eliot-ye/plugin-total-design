@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 依赖技能
 
-- `tier-large`
+- `field-assessment`
 
 ## 服务的主基调原则
 
@@ -39,7 +39,7 @@ user-invocable: false
 
 - **tier-small**：系统扁平，三层层次性合一，可逆/不可逆二分法够用。
 - **tier-medium**：系统有明显的模块/分系统边界，顶层架构决策和模块设计决策需要分层对待。
-- **tier-large**：系统多层嵌套，顶层架构决策应被"总体设计文档"捕获（见 `tier-large` 的「总体设计文档必填」节），而不是仅靠延迟决策处理。
+- **tier-large**：系统多层嵌套，顶层架构决策应被"总体设计文档"捕获（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节），而不是仅靠延迟决策处理。
 
 **执行规则**：当 `$_TD_TIER == tier-large` 且当前决策属于顶层架构层次时，本 skill 应提示用户"顶层架构决策应进入 `tier-large` 要求的总体设计文档，而不是仅靠延迟决策处理"。
 

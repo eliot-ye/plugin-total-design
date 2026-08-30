@@ -42,7 +42,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 扫描目标代码库（文件数、代码行数、目录结构、`tests/`/CI/`package.json` 有无、git 提交频率），但**不重新判读 profile**——步骤 1 已通过 `field-assessment` 判读并缓存 `$_TD_PROFILE` / `$_TD_TIER`，本步骤直接消费，不与缓存打架：
 
-中途接手通常判读为 `profile-brownfield`。若步骤 1 判出其他 profile：`profile-greenfield`（代码库其实是脚手架）→ reverse-spec 可以粗粒度甚至跳过，见 `profile-greenfield` 的切换规则；`profile-maintenance`（已上线项目）→ reverse-spec 粒度按 tier 走，见该 profile 的切换规则。
+中途接手通常判读为 `profile-brownfield`。若步骤 1 判出其他 profile：`profile-greenfield`（代码库其实是脚手架）→ reverse-spec 可以粗粒度甚至跳过，见 `field-assessment` 的 `references/profile-greenfield.md`「与其他 profile 的切换」节；`profile-maintenance`（已上线项目）→ reverse-spec 粒度按 tier 走，见 `field-assessment` 的 `references/profile-maintenance.md`「与其他 profile 的切换」节。
 
 ### 3. 分系统切分
 

@@ -1,16 +1,6 @@
----
-name: profile-maintenance
-description: 上线维护项目 profile。仓库已上线，有真实用户。轻量 proposal，bug 走 systematic-debugging。
-user-invocable: false
----
-
 # Profile: Maintenance（上线维护）
 
-## 触发条件
-
-- 仓库已上线，有真实用户流量
-- 有 CI/CD 配置
-- 最近 git log 有"hotfix" / "rollback" / "prod" 等字样
+本文件是 `field-assessment` profile 维度三变体之一。识别流程判读命中 `profile-maintenance` 后读本文件（判据见 `identification-flow.md`「### 2. 判读 profile（三选一，按优先级）」节）。
 
 ## 默认激活的层
 
@@ -19,10 +9,6 @@ user-invocable: false
 | OpenSpec 契约层 | **中**：proposal 轻量化，spec delta 小步走 |
 | 行为层（skills） | **中**：新功能走 TDD，bug 走 systematic-debugging |
 | 工程管理约束层 | **强**：瓶颈=部署/审查，缓冲留给回归测试 |
-
-## 在各 tier 下的 constraint 强度
-
-约束强度由 tier 单一决定，本 profile 不叠加、不修改强度数值（`human-in-loop` 的表 2 profile 加成除外）。强度取值见 `field-assessment` 的 `references/identification-flow.md`「下游引用强度的约定」节，本文件不重复数值。
 
 ## 特殊规则
 
@@ -72,5 +58,5 @@ maintenance 不需要 greenfield 那么重的 proposal。proposal 可以短到�
 
 ## 与其他 profile 的切换
 
-- 系统进入"大重构"阶段 → 临时切 `profile-brownfield`（因为相当于重新接手）
-- 刚上线还没用户 → 实际是 `profile-brownfield`，不要急着切 maintenance
+- 系统进入"大重构"阶段 → 临时切 `profile-brownfield`（变体文件 `profile-brownfield.md`；因为相当于重新接手）
+- 刚上线还没用户 → 实际是 `profile-brownfield`（变体文件 `profile-brownfield.md`），不要急着切 maintenance

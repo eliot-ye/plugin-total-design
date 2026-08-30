@@ -1,16 +1,6 @@
----
-name: profile-brownfield
-description: 中途接手项目 profile。仓库已有可运行代码。reverse-spec 优先，TDD 只在新代码。
-user-invocable: false
----
-
 # Profile: Brownfield（中途接手）
 
-## 触发条件
-
-- 仓库已有可运行代码（不是脚手架）
-- 没有线上用户或刚上线不久
-- agent 第一次进仓库，且上述条件成立
+本文件是 `field-assessment` profile 维度三变体之一。识别流程判读命中 `profile-brownfield` 后读本文件（判据见 `identification-flow.md`「### 2. 判读 profile（三选一，按优先级）」节）。
 
 ## 默认激活的层
 
@@ -19,10 +9,6 @@ user-invocable: false
 | OpenSpec 契约层 | **极强**：先 reverse-spec，再 propose。没 reverse-spec 不准 propose 大改动。 |
 | 行为层（skills） | **中**：TDD 只在新代码强制，避免"加测试就改坏老代码" |
 | 工程管理约束层 | **强**：关键链诊断，找最薄弱环节 |
-
-## 在各 tier 下的 constraint 强度
-
-约束强度由 tier 单一决定，本 profile 不叠加、不修改强度数值（`human-in-loop` 的表 2 profile 加成除外）。强度取值见 `field-assessment` 的 `references/identification-flow.md`「下游引用强度的约定」节，本文件不重复数值。
 
 ## 特殊规则
 
@@ -44,5 +30,5 @@ user-invocable: false
 
 ## 与其他 profile 的切换
 
-- 代码库上线 + 有真实用户流量 → 切 `profile-maintenance`
-- reverse-spec 后发现代码库其实是"刚 init 的脚手架" → 切 `profile-greenfield`
+- 代码库上线 + 有真实用户流量 → 切 `profile-maintenance`（变体文件 `profile-maintenance.md`）
+- reverse-spec 后发现代码库其实是"刚 init 的脚手架" → 切 `profile-greenfield`（变体文件 `profile-greenfield.md`）

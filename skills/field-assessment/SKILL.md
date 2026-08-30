@@ -14,8 +14,8 @@ user-invocable: false
 
 ## 内容编排
 
-本 skill 是配置入口，实际内容在 `references/` 下四个文件（强度矩阵 / audit 频率 / 识别流程 / 子系统独立定 tier）。下游 skill 通过 `field-assessment` 的识别流程读这四个文件。
+本 skill 是配置入口，实际内容在 `references/` 下十个文件：四个机制文件（识别流程 / 强度矩阵 / audit 频率 / 子系统独立定 tier）+ 六个变体文件（3 profile + 3 tier，承载流程侧重与特殊规则）。下游 skill 通过 `field-assessment` 的识别流程读机制文件，判读命中后只读对应的那一份变体文件。
 
 ## 如何被引用
 
-每个 td-* skill 的"步骤 1"调用本 skill 的识别流程（`references/identification-flow.md`），判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1 + 表 2（+ 表 3，archive / apply / system-audit 需要）读入上下文。
+每个 td-* skill 的"步骤 1"调用本 skill 的识别流程（`references/identification-flow.md`），判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1 + 表 2（+ 表 3，archive / apply / system-audit 需要）读入上下文。判读命中后，同时读入对应变体文件的特殊规则（见 `references/identification-flow.md` 的「### 变体文件」节）。

@@ -92,10 +92,10 @@ total-design/
 ├── CODE_OF_CONDUCT.md
 ├── LICENSE
 │
-├── skills/                 ← 28 个 skill，全部目录式 SKILL.md
+├── skills/                 ← 22 个 skill，全部目录式 SKILL.md
 │   ├── 约束层（6 个）
 │   ├── 行为层（7 个，Superpowers 转译）
-│   ├── 配置层（8 个，field-assessment + 3 profile + 3 tier + todo-pool 待办池格式）
+│   ├── 配置层（2 个：field-assessment 配置入口 + todo-pool 待办池格式；profile/tier 变体在 field-assessment/references/ 下）
 │   └── 契约层（7 个 td-*，与下方 command 一一对应）
 │
 ├── commands/               ← 8 个 slash 命令入口（7 个极薄，逻辑在同名 skill；td-list 只读无 skill）
@@ -183,14 +183,14 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 ## Skill 清单
 
-28 个 skill，按调用方式分两组：
+22 个 skill，按调用方式分两组：
 
-- **`user-invocable: true`**（14 个）：用户可在 `/` 菜单主动调；其中 `td-init` 还带 `disable-model-invocation: true`（仅用户可触发，agent 不能自动调用），其余 13 个也可被 agent 自动触发
-  - 行为层 7 个（Superpowers 转译）
+- **`user-invocable: true`**（7 个）：用户可在 `/` 菜单主动调；其中 `td-init` 还带 `disable-model-invocation: true`（仅用户可触发，agent 不能自动调用），其余 6 个也可被 agent 自动触发
   - 契约层 7 个 td-*（与 7 个 td-* command 一一对应；`td-list` 只读命令无同名 skill）
-- **`user-invocable: false`**（14 个）：agent 自动触发，不暴露在 `/` 菜单
+- **`user-invocable: false`**（15 个）：agent 自动触发，不暴露在 `/` 菜单
   - 约束层 6 个（钱学森主基调 + 5 条局部规律）
-  - 配置层 8 个（field-assessment + 3 profile + 3 tier + todo-pool 待办池格式）
+  - 行为层 7 个（Superpowers 转译，由 td-explore / td-apply 流程内部调用）
+  - 配置层 2 个（field-assessment 配置入口 + todo-pool 待办池格式；profile/tier 各 3 个变体以 `field-assessment/references/` 变体文件形态存在，判读命中后按需读取）
 
 ### 约束层（钱学森系统工程主基调 + 局部规律）
 
@@ -209,37 +209,37 @@ atomcode 解析 frontmatter 用**连字符**键名（不是下划线）。本 pl
 
 | Skill | 触发时机 | user-invocable |
 |---|---|---|
-| `brainstorming` | 在写代码之前；升级为"总体设计部"工作方式 | true |
-| `writing-plans` | spec 收敛后，拆成 bite-sized 任务 | true |
-| `executing-plans` | plan 就绪，开始批量执行 + human checkpoint | true |
-| `test-driven-development` | 每个任务实施时；RED-GREEN-REFACTOR | true |
-| `requesting-code-review` | 任务之间；critical issue 阻塞进度 | true |
-| `systematic-debugging` | 测试失败 / 用户报 bug / 修复尝试失败 | true |
-| `verification-before-completion` | 声明"完成"之前；evidence before assertions | true |
+| `brainstorming` | 在写代码之前；升级为"总体设计部"工作方式 | false |
+| `writing-plans` | spec 收敛后，拆成 bite-sized 任务 | false |
+| `executing-plans` | plan 就绪，开始批量执行 + human checkpoint | false |
+| `test-driven-development` | 每个任务实施时；RED-GREEN-REFACTOR | false |
+| `requesting-code-review` | 任务之间；critical issue 阻塞进度 | false |
+| `systematic-debugging` | 测试失败 / 用户报 bug / 修复尝试失败 | false |
+| `verification-before-completion` | 声明"完成"之前；evidence before assertions | false |
 
-### 配置层（profile × tier 二维 + 待办池格式）
+### 配置层（field-assessment 配置入口 + 待办池格式）
 
-**矩阵单一事实源（`user-invocable: false`）：**
+**配置入口（`user-invocable: false`）：**
 
-- `field-assessment` — profile × tier × constraint 强度矩阵的单一事实源；3 个 profile 和 3 个 tier skill 都引用本 skill，强度只在这里改
+- `field-assessment` — profile × tier 判读 + constraint 强度矩阵（表 1/2/3）的单一事实源。机制内容在 `references/` 下四个机制文件（识别流程 / 强度矩阵 / audit 频率 / 子系统独立定 tier）；profile 与 tier 的流程侧重与特殊规则在**变体文件**里，判读命中后按需读取（6 份只读命中的 1 份）。
 
-**profile 维度（仓库状态，全部 `user-invocable: false`）：**
+**profile 维度变体文件（仓库状态）：**
 
-- `profile-greenfield` — 零起步项目，full SDD
-- `profile-brownfield` — 中途接手，reverse-spec 优先
-- `profile-maintenance` — 上线维护，轻量 proposal，bug 走 systematic-debugging
+- `references/profile-greenfield.md` — 零起步项目，full SDD
+- `references/profile-brownfield.md` — 中途接手，reverse-spec 优先
+- `references/profile-maintenance.md` — 上线维护，轻量 proposal，bug 走 systematic-debugging
 
-**tier 维度（系统复杂度，全部 `user-invocable: false`）：**
+**tier 维度变体文件（系统复杂度）：**
 
-- `tier-small` — 3–10 文件，单团队，constraints 弱强制
-- `tier-medium` — 10–100 文件，多模块，constraints 中等强制
-- `tier-large` — 100+ 文件 / 多团队 / 多仓库，constraints 强制，要求总体设计文档
+- `references/tier-small.md` — 3–10 文件，单团队，constraints 弱强制
+- `references/tier-medium.md` — 10–100 文件，多模块，constraints 中等强制
+- `references/tier-large.md` — 100+ 文件 / 多团队 / 多仓库，constraints 强制，要求总体设计文档
 
 **待办池格式（`user-invocable: false`）：**
 
 - `todo-pool` — `openspec/todo.md` 待办池格式约定（主条目 + change 子项两级结构、优先级、勾选时机、git 策略）；`td-propose` / `td-explore` / `td-archive` / `td-system-audit` 读写该文件的格式单一事实源（见下方「TODO 待办池机制」一节）
 
-两个维度都以 skill 形态存在，agent 根据现场判读激活哪一组。
+两个维度都以 `field-assessment` 的变体文件形态存在，agent 根据现场判读按需读取命中的那一份。
 
 ### 契约层（7 个 td-* skill，与 7 个 td-* command 一一对应；`td-list` 是只读查询命令，无同名 skill）
 

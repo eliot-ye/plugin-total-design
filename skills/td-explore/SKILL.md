@@ -72,7 +72,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 - 是局部优化还是全局协调
 - 局部优化对全局失调的风险
 
-评估侧重按步骤 1 判读的 `$_TD_PROFILE` 调整：
+评估侧重按步骤 1 判读的 `$_TD_PROFILE` 调整（各 profile 的特殊规则与流程侧重见 `field-assessment` 的 `references/profile-<对应>.md`）：
 
 - `profile-greenfield`：重候选方向的**取舍与可逆性**——没有存量约束，方向选错成本低，但要用 `delay-decision` 避免"想到了就建"和"先把架构设计完美"两个陷阱
 - `profile-brownfield`：重**动老代码的影响**——候选方向会触碰哪些存量分系统、改动范围能否最小化、是否触发公共契约变更（对照 `human-in-loop` 的必停场景）

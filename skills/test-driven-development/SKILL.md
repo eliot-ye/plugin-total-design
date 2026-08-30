@@ -8,6 +8,7 @@ user-invocable: false
 
 ## 依赖技能
 
+- `field-assessment`
 - `human-in-loop`
 - `system-engineering`
 - `systematic-debugging`
@@ -59,7 +60,7 @@ user-invocable: false
 
 这个规则看起来激进，但它防止了"测试只是为了配合已写代码"的腐烂。
 
-**例外（brownfield 老代码）：** 本规则只适用于**当前 change 新写的代码**。接手项目时已存在的老代码本来就没测试，强制删除会摧毁系统——老代码走 `profile-brownfield` 的路径：先加 characterization test 锁定现有行为，再重构。
+**例外（brownfield 老代码）：** 本规则只适用于**当前 change 新写的代码**。接手项目时已存在的老代码本来就没测试，强制删除会摧毁系统——老代码走 brownfield 的路径（见 `field-assessment` 的 `references/profile-brownfield.md`「TDD 边界」节）：先加 characterization test 锁定现有行为，再重构。
 
 **例外 2（已 archive 的 spec 契约冲突）：** 当 TDD 的"删除代码"强制会破坏已 archive 的 change sync 到 `openspec/specs/` 的主 spec 契约时，**不直接删除**——先触发 `human-in-loop` 让用户决定：(a) 改 spec 契约（重新 propose 修改主 spec），还是 (b) 保留代码（放弃本次 TDD 的删除强制，记录为"已知契约偏离"）。这是"系统整体层次契约优先于分系统层次 TDD 强制"的执行规则。
 

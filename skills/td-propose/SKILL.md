@@ -141,7 +141,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 3. 与最近 archive 的 change 的关系
 4. 是否触发跨分系统协调
 
-（字段定义的单一事实源见 `tier-large` 的「总体设计文档必填」节）
+（字段定义的单一事实源见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）
 
 没这份文档，proposal 不算 apply-ready。本检查与 `td-apply` 步骤 2 的前置检查对称——tier-large 的总体设计文档必填在 propose 和 apply 两处都校验，避免漏检。
 
@@ -184,7 +184,7 @@ openspec status --change "<name>" --json
 
 调 `requesting-code-review` 的架构 review（见该 skill 第 5 节），review 对象是 proposal 的分系统切分与设计决策，检查清单见该 skill 的 `references/architecture-review-checklist.md`。
 
-分级定义见 `requesting-code-review` 第 5 节（critical / warning / nit，单一事实源，critical 枚举不在此复述）。本步骤只持有阻塞后回路：架构 review 判为 critical → 阻塞，回步骤 6 改 proposal 再重新 review；warning → 记录到 proposal，可延后；nit → 可忽略。
+分级定义见 `requesting-code-review` 第 5 节（critical / warning / nit）。本步骤只持有阻塞后回路：架构 review 判为 critical → 阻塞，回步骤 6 改 proposal 再重新 review；warning → 记录到 proposal，可延后；nit → 可忽略。
 
 架构 review 通过（无 critical）才进入步骤 8。
 
