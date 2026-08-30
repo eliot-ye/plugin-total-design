@@ -145,6 +145,22 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 
 没这份文档，proposal 不算 apply-ready。本检查与 `td-apply` 步骤 2 的前置检查对称——tier-large 的总体设计文档必填在 propose 和 apply 两处都校验，避免漏检。
 
+- **proposal.md 必填节：caller impact 分析**（触发命中时必填）
+
+四类变更点定义、触发条件与边界裁定见 `td-apply/references/change-point-classes.md`（单一事实源）。触发条件命中时 proposal 须附此节：
+
+```markdown
+## caller impact 分析
+
+- 变更点清单：逐条列出，标注属于四类中的哪类（无 → 写"无四类变更点"并说明判断依据）
+- 高危标记：涉及 ①③ 类（公共符号 / 装配点）的变更点标"高危"——这是 propose 阶段的 go/no-go 决策点，由用户确认是否值得动公共契约
+- 已知 caller：只列确定已知的高危 caller（file:line + 预判结论：兼容 / 需适配 / caller 不消费返回值）——完整 caller 清单不由本节承担，由 `td-apply` 步骤 4 的引用搜索实测产出
+```
+
+本节是前馈定位（类别标注 + 高危 go/no-go），不追求完整 caller 清单——人工预判清单不可靠，完整清单由 `td-apply` 步骤 4 实测产出并兜底；实测发现本节未标注的 caller，或与预判结论冲突 → 补做兼容确认，或按 apply 全局必停通道上报。
+
+tier 分层：tier-small 可跳过（提醒性质，跳过时在 proposal 注明）；tier-medium / tier-large 必填（必填的是变更点类别标注 + 高危标记，负担轻）——缺项的 proposal 不算 apply-ready。
+
 - **tasks.md 必填：关键链标注与 project buffer**
 
 tasks.md 必须：
@@ -168,7 +184,7 @@ openspec status --change "<name>" --json
 
 调 `requesting-code-review` 的架构 review（见该 skill 第 5 节），review 对象是 proposal 的分系统切分与设计决策，检查清单见该 skill 的 `references/architecture-review-checklist.md`。
 
-分级定义见 `requesting-code-review` 第 5 节（critical / warning / nit，单一事实源）。本步骤只持有阻塞后回路：critical（坏的分系统切分 / 循环依赖 / 隐式依赖）→ 阻塞，回步骤 6 改 proposal 再重新 review；warning → 记录到 proposal，可延后；nit → 可忽略。
+分级定义见 `requesting-code-review` 第 5 节（critical / warning / nit，单一事实源，critical 枚举不在此复述）。本步骤只持有阻塞后回路：架构 review 判为 critical → 阻塞，回步骤 6 改 proposal 再重新 review；warning → 记录到 proposal，可延后；nit → 可忽略。
 
 架构 review 通过（无 critical）才进入步骤 8。
 

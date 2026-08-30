@@ -48,6 +48,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 7.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"——与 `td-archive` 步骤 3 的旧 change 兜底对称（propose 6.c 对新 change 仍强制必填，本处只放行存量旧 change，不削弱 propose 侧约束）。
 - **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `tier-large` 的「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检。
+- **caller impact 分析节必填**：若 `$_TD_TIER` 为 `tier-medium` / `tier-large` 且 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检——propose 6.c 漏执行时由本条兜底，后续步骤 4 实测子节不再重复此检查。
 - **`wip-limit`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。**阻塞本步骤，不执行步骤 3**，执行 `wip-limit` 的「硬约束 + override 机制」节（权威描述在该 skill；override 通过后继续步骤 3）。propose 与 apply 两处都必须执行硬阻塞 + override 机制。
 - **`critical-buffer`**：tasks.md 里是否标注关键链？是否留了 project buffer（按当前 tier 比例，查表 1 的 critical-buffer 行；表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - 其余 constraint（brooks-law / delay-decision / human-in-loop）在实施过程中按需触发，不在本步预判。
@@ -61,11 +62,25 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `human-in-
 3. `specs/` 下的 spec 文件
 4. `tasks.md`（实施步骤）
 
-### 4. 架构 review 复核 + 触发行为层
+### 4. 架构 review 复核 + caller impact 实测 + 触发行为层
 
-**进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 7 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，直接进入任务实施**；**有改动 → 重新触发 `requesting-code-review` 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合，检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
+**进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 7 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 实测」子节**；**有改动 → 重新触发 `requesting-code-review` 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合，检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
 
-架构 review 通过后，按 `tasks.md` 的任务序列实施。行为层触发序列：
+#### Caller Impact 实测（任务实施前的闸门）
+
+**触发**：触发条件、四类变更点定义、边界裁定与已知盲区见 `references/change-point-classes.md`（单一事实源，同时被 `td-propose` 步骤 6.c「caller impact 分析」节与 `requesting-code-review` 架构 review checklist 引用）；触发条件未命中 → 跳过本子节（不给小改动加流程开销）。
+
+**执行（实测为主——caller 清单由引用搜索实测产出，不由人工预判清单充当）**：
+
+1. 对 proposal 标注的每个变更点，用符号引用搜索 / 调用方追踪 / 文本 grep 类工具实测 caller，产出 caller 清单（file:line + 调用形式）。
+2. 逐 caller 确认兼容（签名匹配 / 返回值未被消费 / 装配点已接 / 语义不变），记录确认结论。
+3. 实测发现 proposal 未标注的 caller，或与已知 caller 的预判结论冲突 → 补做兼容确认，或经步骤 5 的 apply 全局必停通道上报「超出当前 change scope」——不得静默跳过。
+
+**tier 分层**：tier-large = 硬闸门（无条件实测；caller 清单 + 逐 caller 结论未产出，不进入任务实施）；tier-medium = 信号触发（满足任一信号则强制实测：变更点属 ①③ 高危类 / proposal 对某已知 caller 标注"需适配" / 架构 review 对 caller 影响提出疑问；纯内部实现细节且无信号 → 可跳过并在 tasks.md 记录理由）；tier-small = 提醒（默认跳过）。caller 清单与结论记录到 tasks.md（对应任务的验证证据或单独附注）。
+
+本子节是**事前**误差检测（不破坏既有 caller），实测确认过的 caller 清单同时是步骤 7.2 边界验证的边界输入；步骤 7.2 是**事后**误差检测（新行为是否正确）。分工不同，不重复。
+
+架构 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。行为层触发序列：
 
 1. **`writing-plans`**（若 tasks.md 粒度不够细）：细化任务序列
 2. **`executing-plans`**（按任务序列执行，内部按任务粒度嵌套触发以下 skill）：

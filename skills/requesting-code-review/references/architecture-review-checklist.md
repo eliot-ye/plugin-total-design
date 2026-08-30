@@ -14,13 +14,10 @@ review 对象是 proposal 的分系统切分与设计决策，不是代码。此
 - 有无循环依赖（A ↔ B）
 - 有无隐式依赖（共享数据库、共享配置、时序耦合）
 - 一个改动是否牵动过多分系统（过度耦合信号）
+- 命中 caller impact 触发条件时（触发条件与四类变更点定义见 `td-apply/references/change-point-classes.md`，单一事实源），proposal 是否附「caller impact 分析」节（变更点类别标注 + 高危标记 + 已知高危 caller，见 `td-propose` 步骤 6.c）
 
 ## 分级与阻塞
 
-与 code review 共用分级（定义见 `requesting-code-review` skill 第 2 节）：
-
-- **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖——**阻塞 apply**，先回 propose 改 proposal 再继续
-- **warning**：接口偏大、职责偏散——记录到 proposal，可延后
-- **nit**：命名等——可忽略
+分级与阻塞语义由 `requesting-code-review` skill 第 5 节持有（单一事实源，本清单不复述枚举）：架构 review 按该节的 critical / warning / nit 判定，critical **阻塞 apply**，先回 propose 改 proposal 再继续。
 
 架构 review 的 critical 与 code review 的 critical 同样适用"不继续"规则——只是这里"不继续"意味着不进入任务实施。
