@@ -82,6 +82,7 @@ total-design/
 ├── CODE_OF_CONDUCT.md
 ├── LICENSE
 ├── .gitignore
+├── plugin.json             ← 根目录 Agent Plugins 1.0.0 清单（跨平台元数据：$schema/name/version/description/author）
 │
 ├── skills/                  ← 18 个 skill（profile/tier 变体在 field-assessment/references/ 下；5 个局部规律变体在 constraints/references/ 下）
 ├── commands/                ← 8 个 command
@@ -204,9 +205,11 @@ manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
 - **`skills` / `commands` 字段是路径数组**，本 plugin 用 `["./skills"]` / `["./commands"]`，加载器会自动递归发现所有 `SKILL.md` 和命令文件
 - **没有 `constraints` / `profiles` / `tiers` 字段**——这些必须以 skill 形态存在
 
+**根目录 `plugin.json`（Agent Plugins 1.0.0 清单）**：根目录另有遵循 [Agent Plugins 1.0.0 规范](https://agent-plugins.org/schemas/1.0.0/plugin.schema.json) 的 `plugin.json`（`$schema` 字段指向该 schema），声明跨平台元数据（`$schema` / `name` / `version` / `description` / `author`），与 `.atomcode-plugin/plugin.json` 的 atomcode 加载清单（skills / commands / hooks 资产字段）角色不同、字段集不同——atomcode 加载器认 `.atomcode-plugin/plugin.json`，根目录清单服务 Agent Plugins 规范生态的互认。两份清单的 `name` / `version` / `description` 必须保持一致，version bump 时同步（见下方版本发布流程）。
+
 ### 版本发布流程（version bump 与发布文档同步）
 
-**任何 `version` 变更（`plugin.json` + `marketplace.json` 同步 bump）必须与 CHANGELOG.md、RELEASE_NOTES.md 的更新在同一个逻辑变更内完成**——不允许只 bump 版本不更新发布文档。三者版本号必须一致（版本号只在 `plugin.json` + `marketplace.json` 两处定义，description 保持纯 ASCII）。
+**任何 `version` 变更（根目录 `plugin.json` + `.atomcode-plugin/plugin.json` + `marketplace.json` 同步 bump）必须与 CHANGELOG.md、RELEASE_NOTES.md 的更新在同一个逻辑变更内完成**——不允许只 bump 版本不更新发布文档。版本号在三处必须一致（根目录 `plugin.json` / `.atomcode-plugin/plugin.json` / `marketplace.json`，description 保持纯 ASCII）。
 
 - **CHANGELOG.md**：按 Keep a Changelog 格式在文件顶部新增当前版本条目（最新在上），按 Fixed / Changed / Docs 等类别记录；历史条目只读，不修改（过时的"发布提示"类临时标注可更新为已结清状态，但不改动已发布的变更记录）。
 - **RELEASE_NOTES.md**：更新为当前版本发布说明——本版本定位（新增/修复/重构版）、行为变更表（升级用户感知的差异）、升级步骤（bump 版本号同步）、完整变更列表指向 CHANGELOG 对应条目。

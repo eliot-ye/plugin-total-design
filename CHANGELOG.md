@@ -2,6 +2,34 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.6.0] - 2026-08-31
+
+### Added
+
+- **caller impact 三层防护**：防止"改公共零件前未查 caller"导致既有调用方破坏（来源：pt-ai 2026-08-24 P0/P1 事故复盘）。三层分工——前馈层 `td-propose` 步骤 6.c 新增「caller impact 分析」必填节（触发条件命中时：变更点类别标注 + 高危 go/no-go 标记 + 已知高危 caller）；实时层 `td-apply` 步骤 4 新增「Caller Impact 实测」子节（tier-large 硬闸门 / tier-medium 信号触发 / tier-small 提醒，caller 清单由引用搜索实测产出）；校验层 `requesting-code-review` 架构 review checklist 补 caller 判据（proposal 缺节或缺标注 → critical 阻塞，仅 tier-small 降 warning）。步骤 2 前置检查补对称校验（tier-medium/large 命中触发条件但缺节 → 不算 apply-ready）。
+- **`td-apply/references/change-point-classes.md`**：四类变更点（公共符号签名 / Protocol 接口方法 / 装配点 / 数据流与返回值语义）与 caller impact 触发条件的单一事实源，含边界裁定与已知盲区（动态 dispatch 不全覆盖，由 apply 7.2 集成验证补）。
+- **`todo-pool` skill**：`openspec/todo.md` 待办池的单一事实源与读写操作入口（条目格式、状态语义、落池动作、归档勾选动作），`td-explore` / `td-system-audit` 落池、`td-archive` 归档勾选、`td-propose` 读池挑候选均按本 skill 的子流程操作。
+- **`field-assessment/references/config-context-guidance.md`**：`openspec/config.yaml` `context` 字段引导填写流程的单一权威（空 / 注释 / 模板默认值时三问引导，用户跳过不阻塞），`td-explore` / `td-propose` / `td-init` 三处引用。
+- **根目录 `plugin.json`**：Agent Plugins 1.0.0 规范清单（`$schema` / `name` / `version` / `description` / `author`），与 `.atomcode-plugin/plugin.json` 的 atomcode 加载清单并存、字段集不同，`name` / `version` / `description` 保持一致。
+
+### Changed（行为变更）
+
+- **局部规律收拢为 `constraints` 单一入口**：`brooks-law` / `critical-buffer` / `delay-decision` / `human-in-loop` / `wip-limit` 5 个独立 skill 收拢为 `constraints` 的 `references/<name>.md` 变体文件。触发路径统一为"命中触发场景 → 读 `constraints` 入口判读子约束 → 读对应 references 执行"；12 个 skill 的引用路径统一改写（逻辑名 → `constraints` 的 `references/<name>.md`）。skill 总数 27 → 18。
+- **profile/tier 变体收拢为 `field-assessment` references**：3 profile（`profile-greenfield` / `profile-brownfield` / `profile-maintenance`）+ 3 tier（`tier-small` / `tier-medium` / `tier-large`）独立 skill 移入 `field-assessment/references/`，内容按使用态视角精简（删除与识别流程重复的判据段与开发态语句）；14 个 skill 的引用路径同步改写。
+- **引用路径全量规范化**：跨 skill 引用一律逻辑名 + 变体路径（`constraints/references/<name>.md`、`field-assessment/references/<name>.md`），消除裸逻辑名引用变体内容的歧义；skill 间交叉引用的文件路径与章节锚点修正。
+- **config context 引导收敛**：`td-explore` / `td-propose` / `td-init` 三处逐字重复的 config.yaml context 引导流程收敛为引用 `field-assessment/references/config-context-guidance.md`，三处展开段删除。
+- **开发态语句清理**：各 skill 正文与 references 的跨 skill 重复段落（《工程控制论》归位段、子系统切分规则等）与面向编辑者的开发态语句（编辑指令、调用方清单、写作规范类旁白）清理；冲突仲裁语义与运行时指针保留。
+
+### Removed
+
+- 删除 10 个独立 skill 目录：`brooks-law` / `critical-buffer` / `delay-decision` / `human-in-loop` / `wip-limit`（并入 `constraints/references/`）+ `profile-brownfield` / `profile-greenfield` / `profile-maintenance` / `tier-large` / `tier-medium` / `tier-small`（并入 `field-assessment/references/`）。内容保留为变体文件，仅失去独立 skill 身份（不再进 system prompt 的 description 列表，改由 `constraints` / `field-assessment` 入口按需引用）。
+- 删除 `td-propose/references/todo-format.md`（格式约定并入 `todo-pool`）。
+
+### Docs
+
+- AGENTS.md：目录结构节补根目录 `plugin.json`；「plugin.json 编辑」节补 Agent Plugins 1.0.0 清单说明；版本发布流程改为三处版本号同步。
+- 新增 `docs/audit-fix-gate-2026-08-30.md`：profile/tier 收拢的使用态 LLM 视角审核修复门记录（依赖图谱与风险评估）。
+
 ## [1.5.0] - 2026-08-27
 
 ### Changed（行为变更）
