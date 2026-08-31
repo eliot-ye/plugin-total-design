@@ -59,14 +59,18 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 
 ### 4. 对每个分系统 reverse-spec
 
-读分系统的代码，反推 spec：
+读分系统的代码，反推 spec。先回答四个问题（分析输入，不直接决定文件结构）：
 
 - 这个分系统对外提供的契约是什么？（API、数据格式、事件）
 - 这个分系统依赖哪些其他分系统？
 - 这个分系统的关键不变量是什么？
 - 这个分系统的已知缺陷 / 技术债？
 
-输出到 `openspec/specs/<subsystem-name>/spec.md`。
+输出到 `openspec/specs/<subsystem-name>/spec.md`，**结构必须能过 `openspec validate --specs`**：
+
+- `## Purpose`：一句话职责（这个分系统是什么、解决什么问题）
+- `## Requirements`：对外契约与关键不变量逐条写成 `### Requirement: <标题>`，标题下先写一行含 SHALL/MUST 关键字的规范陈述（如"本分系统 SHALL 对外提供 ……"——校验器要求 Requirement 正文必须含 SHALL 或 MUST，缺失时 validate 报 ERROR），再配 `#### Scenario: <场景名>`（`- **WHEN**` / `- **THEN**` 各一行）
+- 依赖关系与技术债**不写入 spec**（spec 是该分系统的行为契约，不是依赖图）——依赖归报告的"分系统间接口图"节，技术债归报告的"已知风险 / 技术债"节
 
 ### 5. 识别分系统间接口
 

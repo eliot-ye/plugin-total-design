@@ -60,6 +60,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 - **current-change**：当前活跃 change 的 proposal/design/tasks/specs
 - **project**：所有活跃 change + 最近 archive 的 3 个 change 的"实际 vs 预期"复盘，**并纳入 `openspec/specs/` 下的主 spec baseline**——这是 reverse-spec / archive sync 沉淀下来的分系统契约与不变量，作为 audit 对照"局部改动是否破坏既有分系统契约"的锚点。`openspec/specs/` 为空（项目从未 reverse-spec、也未 archive 过任何 change）→ 跳过 baseline 锚点，仅审计活跃 change 与最近 archive 复盘。
+  - **不完整报告兜底**：读 `openspec/.td-state/audits/.incomplete.log`（SessionEnd hook 为"内容不完整、未进 audit-history"的报告写的清单，文件由 hook 按需创建）。存在且有内容 → 把这些报告列入审计报告的"发现的问题"，询问用户是补写完整报告还是删除——不完整报告不进 audit-history，属审计数据缺口。
 
 **层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，project scope audit 应**按子系统层次分别审计**，audit 报告里区分"子系统内部失调"和"跨子系统边界失调"——后者按"最高 tier 子系统"的强度处理（保守原则）。执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
 
@@ -111,4 +112,4 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 - audit 不是"挑刺找骂"，是"总体设计部的周期性自检"——语气要建设性
 - audit 报告必须包含"建议的下一步动作"，不只是"你这里错了"
-- 不要 audit 太频繁——每个 change 一次足够，过多会变成形式主义
+- 频率触发的 audit 不要超出表 3 频率（表 3 见 `field-assessment/references/audit-frequency.md`，tier-medium 的 current-change 按关键链任务粒度触发是合法频率）；「触发时机」的信号触发与步骤 7 的修复闭环重跑不受此限——过频会变成形式主义

@@ -50,10 +50,10 @@ init 是"把系统的工作方式先立起来"——先有 specs 基线、change
 
 ### 3. 配置 .gitignore（核心步骤）
 
-检查项目根 `.gitignore` 是否已包含 `openspec/.td-state/`：
+检查 `.td-state/` 是否已被任何一层 `.gitignore` 覆盖（根 `.gitignore` 写 `openspec/.td-state/`，或 `openspec/.gitignore` 写 `.td-state/`；可用 `git check-ignore -v openspec/.td-state/` 实测）：
 
-- **已包含** → 跳过，提示"已配置"。
-- **未包含** → 在 `openspec/.gitignore` 创建/追加以下片段（不碰根 `.gitignore`；嵌套 gitignore 的路径相对 `openspec/` 目录，规则只作用于 openspec 子树，不会误伤根目录其他内容）：
+- **已覆盖** → 跳过，提示"已配置"。
+- **未覆盖** → 在 `openspec/.gitignore` 创建/追加以下片段（不碰根 `.gitignore`；嵌套 gitignore 的路径相对 `openspec/` 目录，规则只作用于 openspec 子树，不会误伤根目录其他内容）：
 
 ```gitignore
 # total-design 本地状态：全部可从文件系统事实推导，不进版本库

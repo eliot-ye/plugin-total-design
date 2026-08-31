@@ -130,7 +130,7 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 - `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 3）
 - `tier-large`：每完成 1 个 change 触发——本步骤即触发点
 
-触发即调用 `/td-system-audit current-change`，把本次 change 的"实际 vs 预期"对照主基调过一遍。audit 报告落盘 `openspec/.td-state/audits/`，更新 `audit-history.yaml`。
+触发即调用 `/td-system-audit current-change`，把本次 change 的"实际 vs 预期"对照主基调过一遍。
 
 ## Guardrails
 

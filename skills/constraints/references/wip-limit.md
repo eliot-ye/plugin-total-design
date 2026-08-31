@@ -18,7 +18,7 @@
 
 WIP 上限是硬约束，违反必须有控制流后果。执行规则：
 
-1. **检测**：`/td-propose` 或 `/td-apply` 在前置检查时，读当前活跃 change 数与 wip-limit 上限对比。
+1. **检测**：`/td-propose` 或 `/td-apply` 在前置检查时，读当前活跃 change 数与 wip-limit 上限对比。计数用 `openspec list`（只列活跃 change，`archive/` 目录下的不计入——与上文的"活跃"定义一致）。
 2. **未达上限**：继续执行。
 3. **已达上限（默认硬阻塞）**：
    - 阻塞当前 `/td-propose` 或 `/td-apply`，不执行后续步骤。

@@ -115,7 +115,7 @@ archive 是"完成一个 change"的事件，正好对照表 3（system-audit 频
 
 | tier | 驱动源 | 判定方式 | 文件不存在时 |
 |---|---|---|---|
-| `tier-small` / `tier-medium` | count 驱动 | `archive-counter.yaml` 的 `count` ≥ 表 3 阈值 | 视为 `count: 0`，本事件 +1 后再判 |
+| `tier-small` / `tier-medium` | count 驱动 | `archive-counter.yaml` 的 `count` 为表 3 阈值的**整数倍**（count 是累计值不重置，恰好每第 N 次 archive 触发一次建议） | 视为 `count: 0`，本事件 +1 后再判 |
 | `tier-large` | 时间驱动 | `audit-history.yaml` 最近一条 `scope: project` 的 `timestamp` 距今 ≥ 表 3 阈值（数值见 `field-assessment` 的 `references/audit-frequency.md` 的 project scope 列） | 视为从未跑过 project audit，直接判达阈值 |
 
 达阈值 → **主动建议**用户跑 `/td-system-audit project`，不是强制，是"按主基调第 2 条总体设计部职责，该周期性自检了"。两个文件均由本步骤首次运行时按需创建。

@@ -158,7 +158,7 @@ tasks.md 必须：
 - 标注关键链（critical chain）：哪条任务序列是项目的关键路径
 - 留 project buffer：按当前 tier 比例（查表 1 的 critical-buffer 行，会话内已缓存；表 1 见 `field-assessment/references/strength-matrix.md`）
 
-粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `constraints` 的 `references/critical-buffer.md` 的标注规范。
+粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `constraints` 的 `references/critical-buffer.md` 的「识别关键链」节。
 
 **6.d 循环判定**：
 
