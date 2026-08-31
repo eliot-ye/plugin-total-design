@@ -57,7 +57,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 ### 4. 头脑风暴
 
-调用 `brainstorming` skill 的 1–4 步工作方式——**不执行** brainstorming 的第 5–6 步（分段确认、保存 spec 文档）：explore 阶段不落盘 spec，成果以对话形式交付（见步骤 6）。若用户要求把探索结果落盘为 spec 草稿，提示走 `/td-propose`（brainstorming 的保存步骤在那里执行）。
+调用 `brainstorming` skill 的 1–4 步工作方式：explore 阶段不落盘 spec，成果以对话形式交付（见步骤 6）。若用户要求把探索结果落盘为 spec 草稿，提示走 `/td-propose`。
 
 **产物要求**：explore 阶段必须产出**至少 2 个候选方向**，每个标注系统工程影响（影响哪些分系统 / 整体性能预期变化 / 可逆性）。产物留在会话上下文里（explore 不落盘 spec，见步骤 6 的 Guardrails）。`/td-propose` 步骤 3 的"greenfield explore 检查"会读会话历史判定是否已有 ≥2 个候选方向——少于 2 个时 propose 阶段会拦下来要求先 explore。
 

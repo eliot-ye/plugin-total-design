@@ -51,6 +51,12 @@
 - **被 `/td-system-audit` 触发修复时**：audit 发现"可逆决策被过早闭合"问题时触发本文件重新打开决策。
 - **与 `td-explore` 的连接**：`td-explore` 阶段"不落盘 spec"本质上是延迟决策（不闭合 spec，等更多信息再 propose，详见 `td-explore` 的「与 `constraints` 的 `references/delay-decision.md` 的连接」段）。当用户想"赶紧 propose 闭合 spec"时，本文件触发提醒"信息不足时强行闭合会损失信息"（主基调第 3 条综合集成）。
 
+#### 示例：brainstorming 场景
+
+- 使用 `brainstorming` 产生 2–3 个候选方向后，agent 调用本约束进行 **延迟决策检查**。
+- 若当前决策被标记为 **可逆**（如暂未选定的实现方案），本约束返回 **"待决"**，agent 将 **暂停进入 `/td-propose`**，并提示用户继续探索或确认延迟。
+- 若决策被标记为 **不可逆**（如确定的分系统边界或公共 API），本约束建议 **立即执行 `/td-explore`**，收集足够信息后再进入 `/td-propose`。
+
 ## 触发时 agent 应做的事
 
 1. 判断当前决策是可逆还是不可逆
