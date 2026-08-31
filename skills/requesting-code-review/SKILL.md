@@ -6,10 +6,6 @@ user-invocable: false
 
 # Requesting Code Review
 
-## 依赖技能
-
-- `constraints` 的 `references/human-in-loop.md`
-
 ## 服务的主基调原则
 
 **主基调第 2 条：总体设计部。** review 不是"找 bug"，是"总体设计部对分系统工程师的工作做系统全局检查"——这个改动符合系统总体设计吗？它制造了新的失调吗？
@@ -77,6 +73,8 @@ user-invocable: false
 ### Verdict
 <可以继续 / 必须先修 critical>
 ```
+
+**Verdict 前置验证**：给出“可以继续”的 Verdict 之前，先触发 `verification-before-completion` 跑验证命令拿到证据——Verdict 是完成声明，没有验证证据的“可以继续”不成立。
 
 ### 4. Critical 阻塞
 

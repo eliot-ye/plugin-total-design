@@ -120,7 +120,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 **"预期行为模型"字段的执行语义**：
 
 - 这个字段是 `/td-archive` 步骤 3"实际 vs 预期"复盘的对照锚点之一——archive 时要回答"预期行为模型是否被实际行为验证？如果没有，模型需要怎么修正？"
-- 这个字段也是 `/td-apply` 步骤 7.2 系统级验证的输入——系统级验证要验证"预期行为模型"是否在跨分系统整合后仍然成立。
+- 这个字段也是 `/td-apply` 步骤 6.2 系统级验证的输入——系统级验证要验证"预期行为模型"是否在跨分系统整合后仍然成立。
 
 - **proposal.md 必填：tier-large 总体设计文档**
 
@@ -179,6 +179,14 @@ openspec status --change "<name>" --json
 架构 review 通过（无 critical）才进入步骤 8。
 
 ### 8. 显示最终状态
+
+先跑一次官方校验，确认 artifact 集合无结构性问题：
+
+```bash
+openspec validate --all --json
+```
+
+解析 JSON 输出：**本 change** 的校验问题 → 回步骤 6 修复对应 artifact 后重跑；其他既有 change 的问题 → 提示用户，不阻塞本流程。通过后显示最终状态：
 
 ```bash
 openspec status --change "<name>"

@@ -90,14 +90,3 @@ user-invocable: false
 6. 子项**不移除**——保留为追溯档案（见「格式约定」的「追溯档案」条）。
 
 **不触发「落池条目」、不新建条目**——勾选只更新既有条目的状态。
-
-## 如何被引用
-
-| skill | 读写动作 | 走本 skill 的哪个节 |
-|---|---|---|
-| `td-propose` | 步骤 3 读池挑候选（决策内联）；步骤 4 回写 change 子项（格式均查「格式约定」） | 格式约定 |
-| `td-explore` | 步骤 7 探索成果落池（用户同意后） | 落池条目 |
-| `td-system-audit` | 步骤 5 问题落池（用户同意后） | 落池条目 |
-| `td-archive` | 步骤 4 归档成功后勾选对应 change 子项 | 勾选子项 |
-
-单向关联：change 资产（proposal/design/tasks）**不得**出现对 `openspec/todo.md` 的引用——backlog 是候选层，change 资产是契约层，两层分层隔离（见 `td-propose` 的 Guardrails「提案不引用 TODO 池」）。

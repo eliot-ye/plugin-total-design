@@ -6,11 +6,6 @@ user-invocable: false
 
 # Verification Before Completion
 
-## 依赖技能
-
-- `constraints` 的 `references/human-in-loop.md`
-- `systematic-debugging`
-
 ## 服务的主基调原则
 
 **主基调第 3 条：从定性到定量的综合集成。** 声明"完成"是从定量（验证证据）回到定性（"它好了"）的综合。没有定量证据的定性声明，是幻觉。
@@ -67,7 +62,7 @@ user-invocable: false
 
 ### 6. 系统级验证（跨分系统边界）
 
-本节与 `td-apply` 步骤 7.2 的分工：步骤 7.2 定义触发条件与 tier 分层强度，本节定义执行语义。在 `td-apply` 流程里，本节在步骤 7.1 change-level 验证通过之后触发；单独触发本 skill 时，若上游已有 change-level 验证产物，可直接进入本节。
+本节与 `td-apply` 步骤 6.2 的分工：步骤 6.2 定义触发条件与 tier 分层强度，本节定义执行语义。在 `td-apply` 流程里，本节在步骤 6.1 change-level 验证通过之后触发；单独触发本 skill 时，若上游已有 change-level 验证产物，可直接进入本节。
 
 change-level 验证通过 ≠ 系统整合正确。"总体性能不等于各部分性能之和"（论点归位与展开见本文档「服务的主基调原则」节）。跨分系统边界验证是它的执行层：
 
@@ -77,7 +72,7 @@ change-level 验证通过 ≠ 系统整合正确。"总体性能不等于各部�
 - 数据流跨分系统传递的正确性
 - 边界 mock：一个分系统的行为变更是否破坏相邻分系统的契约
 
-边界验证的触发与 tier 分层强度由 `td-apply` 步骤 7.2 定义，本 skill 负责执行层语义：边界验证也走本 skill 的 1–5 节流程——列出验证命令、实跑、检查输出、evidence-based 声明、失败触发 `systematic-debugging`。
+边界验证的触发与 tier 分层强度由 `td-apply` 步骤 6.2 定义，本 skill 负责执行层语义：边界验证也走本 skill 的 1–5 节流程——列出验证命令、实跑、检查输出、evidence-based 声明、失败触发 `systematic-debugging`。
 
 ## 硬约束
 

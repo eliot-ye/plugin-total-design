@@ -77,14 +77,14 @@ archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预�
 ### 4. archive（含 sync）
 
 ```bash
-openspec archive "<name>"
+openspec archive "<name>" --yes
 ```
 
-`openspec archive` 会做两件事：
-1. 把 change 从 `openspec/changes/` 移到 `openspec/changes/archive/`
-2. 自动把 change 产生的 spec delta sync 到主 spec
+`--yes` 跳过 CLI 确认提示——agent 运行环境通常非交互（stdin 关闭），无法应答确认，不加此 flag 命令会在改动任何东西前 exit 1。CLI 侧的确认语义（任务完成、spec 更新）已由本 skill 步骤 2/3 的门禁承担。
 
-如果只想归档不同步 specs（infra / doc-only change），加 `--skip-specs`。
+`openspec archive` 会做两件事：
+1. 把 change 从 `openspec/changes/<name>` 移到 `openspec/changes/archive/YYYY-MM-DD-<name>/`（按归档日期落子目录）
+2. 自动把 change 产生的 spec delta sync 到主 spec
 
 **归档成功后 TODO 子项勾选**：触发 `todo-pool` 的「勾选子项」子流程（传入本次归档的 change 名）。
 

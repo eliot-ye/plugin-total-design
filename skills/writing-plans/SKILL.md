@@ -13,8 +13,6 @@ user-invocable: false
 - `field-assessment`
 - `requesting-code-review`
 
-（`test-driven-development` 消费本 skill 标注的风险字段，但本 skill 不依赖它——它不列入依赖技能，避免与 `test-driven-development` 的依赖技能节构成循环依赖。）
-
 ## 服务的主基调原则
 
 **主基调第 1 条：系统工程。** 每个任务不能只看自己，必须标注"这个局部动作影响哪些分系统"。

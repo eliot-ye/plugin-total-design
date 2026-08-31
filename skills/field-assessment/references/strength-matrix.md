@@ -59,7 +59,7 @@ constraint 列为子约束逻辑名，路径同表 1：
 
 ### 表 2 profile-maintenance × tier-large 说明
 
-maintenance × large 下的强度由 tier-large 表 1 行决定（wip-limit 上限 3 / critical-buffer 50% / brooks-law 强制 / delay-decision 强 / human-in-loop + 总体设计文档审阅）。profile-maintenance 只决定流程侧重（轻量 proposal + 生产稳定性），不改变这些强度。
+maintenance × large 下的强度由 tier-large 表 1 行决定（wip-limit 上限 3 / critical-buffer 50% / brooks-law 强制 / delay-decision 强 / human-in-loop + 总体设计文档审阅）。profile-maintenance 只决定流程侧重（轻量 proposal + 生产稳定性），不改变这些强度。该格为「—」不表示生产改动保护在 tier-large 减弱——生产环境改动已属通用基线第 3 类（所有 tier 生效），tier-large 的审阅重心由「总体设计文档审阅」tier 加成覆盖，无 profile 独有加成可列；medium 格的「+ 生产环境改动前」仅是强调，不改变基线已生效的事实。
 
 system-audit 周期性由表 3（`audit-frequency.md`）决定，不在表 2 范围内。
 

@@ -96,8 +96,6 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 | 同时开太多 change（WIP 超限） | `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」（阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override） |
 | 局部最优但全局失调 | `constraints` 的 `references/human-in-loop.md`（让总体设计部判断）。本工作流没有专门的"全局失调"constraint——这个判断必须由总体设计部做，不能由 agent 自己拍板（主基调第 2 条） |
 
-注：本表为问题→修复映射；上表列出的 constraint 变体在正文已声明"被 `/td-system-audit` 触发修复时"的处理路径（如 `constraints` 的 `references/human-in-loop.md` 场景 7）。
-
 ### 7. 修复后重跑 audit 闭环
 
 严重问题修复完成后，**重跑同一 scope 的 audit**，确认：
