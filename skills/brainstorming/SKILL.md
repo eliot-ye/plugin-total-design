@@ -10,7 +10,6 @@ user-invocable: false
 
 - `system-engineering`
 - `constraints` 的 `references/delay-decision.md`
-- `constraints` 的 `references/human-in-loop.md`
 
 ## 服务的主基调原则
 
@@ -54,7 +53,7 @@ user-invocable: false
 
 "不急着自洽"不等于"永远不自洽"——前者是"信息不足时不要强行闭合"，后者是放弃综合集成。
 
-这与 `constraints` 的 `references/delay-decision.md` 的"可逆决策延迟"是同一原则的两个侧面（权威在 delay-decision）：本 skill 在总体设计部立场允许矛盾并存、不强行闭合 spec。两者在 brainstorming 阶段同时生效——遇到可逆决策时调 `constraints` 的 `references/delay-decision.md`，遇到矛盾时按本节处理。**在完成候选方向评估后，立即执行 `constraints` 的 `delay-decision` 检查**，若返回“待决”，则 **暂停进入 `/td-propose`，提示用户继续探索或确认延迟决策**，确保遵守 `delay-decision` 的约束。
+这与 `constraints` 的 `references/delay-decision.md` 的"可逆决策延迟"是同一原则的两个侧面（权威在 delay-decision）：本 skill 在总体设计部立场允许矛盾并存、不强行闭合 spec。两者在 brainstorming 阶段同时生效——遇到可逆决策时调 `constraints` 的 `references/delay-decision.md`，遇到矛盾时按本节处理。**在完成候选方向评估后，立即执行 `constraints` 的 `delay-decision` 检查**：不可逆决策在信息不足时不仓促闭合——提示用户继续探索或延迟决策，不要跳步直接 `/td-propose` 强行闭合 spec；可逆决策按该文件「延迟不等于拖延」处理。
 
 
 
