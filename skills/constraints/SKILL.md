@@ -1,6 +1,6 @@
 ---
 name: constraints
-description: 局部约束层入口——防局部优化制造全局失调。承载 5 个局部规律（wip-limit / brooks-law / critical-buffer / delay-decision / human-in-loop），命中触发场景后读对应 references/<name>.md 执行规则。服务系统工程主基调第 1、2、3、4 条。
+description: 局部约束层入口——防局部优化制造全局失调。
 user-invocable: false
 ---
 

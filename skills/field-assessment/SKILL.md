@@ -1,6 +1,6 @@
 ---
 name: field-assessment
-description: 现场判读 profile × tier 并注入 constraint 强度。执行任意局部 constraint（`constraints` skill 的 references 变体）时，应同时查本 skill 确认当前 profile × tier 下的强度
+description: 现场判读 profile × tier 并注入 constraint 强度。
 user-invocable: false
 ---
 

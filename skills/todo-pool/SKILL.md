@@ -1,6 +1,6 @@
 ---
 name: todo-pool
-description: 读写 openspec/todo.md 待办池的操作入口——落池条目、归档勾选子项、格式约定。td-explore / td-system-audit 要落池、td-archive 归档后要勾选、td-propose 要读池挑候选时，按本 skill 的对应子流程操作
+description: 读写 openspec/todo.md 待办池的操作入口。
 user-invocable: false
 ---
 

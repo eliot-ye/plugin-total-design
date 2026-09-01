@@ -4,7 +4,7 @@
 
 ## 识别流程
 
-agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `$_TD_PROFILE` / `$_TD_TIER`），后续步骤据此查表 1 / 表 2 / 表 3 的强度（见 `strength-matrix.md`）。
+agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `$_TD_PROFILE` / `$_TD_TIER`），后续步骤据此查表 1 / 表 2 的强度（见 `strength-matrix.md`）与表 3 的 system-audit 频率（见 `audit-frequency.md`）。
 
 ### 1. 读持久化缓存
 
@@ -35,7 +35,7 @@ agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `
 
 系统有"明显分系统边界"即使文件少，也升级到 `tier-medium`。系统拆成多个独立子系统 → 每个子系统独立定 tier（见 `subsystem-tiering.md`）。
 
-**子系统独立定 tier 的触发**：当「### 2. 判读 profile」识别出 `profile-brownfield` 或 `profile-maintenance`，且 `td-reverse-spec` 步骤 3 已识别出"有明显分系统边界"时，触发子系统独立定 tier。每个子系统按本节判据独立定 tier，结果写入 `openspec/.td-state/profile-tier.yaml` 的 `subsystem-<name>` 条目。
+**子系统独立定 tier 的触发**：当识别出"有明显分系统边界"时，触发子系统独立定 tier。触发条件判据、执行规则与持久化格式以 `subsystem-tiering.md`「子系统独立定 tier 机制」节为权威（该节定义触发来源：`td-reverse-spec` 步骤 3 / `td-init` / `/td-system-audit` project scope）。本步骤 3 只提供 tier 判据（「### 3. 判读 tier」表）供各子系统套用——判据本身在每一层子系统独立生效，本步骤不做触发判读。
 
 **层次观归位**：本节的 tier 判据是平面维度（文件数、团队规模、部署单元）。子系统独立定 tier 机制把这个平面维度扩展为层次维度——承认复杂巨系统是多层级嵌套结构（主基调第 4 条「层次观」），不同层次的子系统需要分层对待。这不是"tier 判据失效"，而是"tier 判据在每个子系统层次上分别生效"。
 

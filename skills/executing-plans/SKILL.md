@@ -1,6 +1,6 @@
 ---
 name: executing-plans
-description: 批量执行任务，带 human checkpoint。服务主基调第 2 条。触发场景：`td-apply` 流程内按 tasks.md 序列实施时——关键链任务后停下来 checkpoint。
+description: 批量执行任务，带 human checkpoint。
 user-invocable: false
 ---
 
