@@ -2,6 +2,31 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.7.0] - 2026-09-01
+
+### Changed（行为变更）
+
+- **brainstorming 取消落盘 spec（explore 阶段不落盘）**：删除 brainstorming 第 5/6 步（分段呈现 spec、保存 spec 文档）。explore 阶段成果以对话形式交付，不再落盘 spec 草稿；用户要求落盘时提示走 `/td-propose`。`td-propose` 步骤 6.a 的输入源由"brainstorming spec 草稿"收敛为"`td-explore` 候选方向评估"；greenfield explore 检查判据同步去掉对 brainstorming 落盘的引用。
+- **brainstorming 流程内强制 delay-decision 检查**：完成候选方向评估后立即执行 `constraints` 的 `references/delay-decision.md` 检查——不可逆决策（分系统边界 / 公共 API）信息不足时不仓促闭合，提示继续 `/td-explore` 收集信号后由用户拍板再 `/td-propose`；可逆决策（实现方案）按「延迟不等于拖延」处理，不构成进入 propose 的阻塞。
+- **`field-assessment` 快车道读取策略**：`constraints` 入口与 `field-assessment` 识别流程补"快车道"读取路径（命中单一 profile/tier 变体时直接读命中份，跳过其余判读），3 profile + 3 tier 变体引用同步对齐。
+- **td-archive project audit 阈值改整数倍口径**：`tier-small` / `tier-medium` 的判定由"`count` ≥ 表 3 阈值"改为"`count` 为表 3 阈值的**整数倍**"（count 是累计值不重置，恰好每第 N 次 archive 触发一次建议），与累计计数器兼容。
+
+### Fixed
+
+- **td-reverse-spec spec 产出格式对齐 openspec validate**：Requirement 从句含 SHALL 规范陈述、Purpose / Scenario 结构对齐官方校验器，消除 spec 校验兼容问题。
+- **td-system-audit Guardrails 作用域限定**：频率触发（表 3）限定范围，豁免信号触发与修复闭环重跑；步骤 2 补 `audits/.incomplete.log` 消费入口。
+- **hook `td_state_sync` .incomplete.log 改整文件重写**：按当前不完整报告集合重写（现状快照而非增量追加），自动去重 / 已解决项退出 / 已删除报告消失；修复无待补条时的短路门控。
+- **断链锚点修正**：`td-explore` Guardrails 锚点、`td-propose` critical-buffer「标注规范」指向「识别关键链」节、`td-apply` 6.3 audit 落盘句去重。
+- **`td-init` gitignore 检查统一**：`openspec/.td-state/` 是否被覆盖的判定改为"任一层 .gitignore 覆盖"（用 `git check-ignore -v` 实测）。
+- **wip-limit 检测计数口径**：活跃 change 计数明确用 `openspec list`（只列活跃 change，`archive/` 不计入）。
+- **config-context-guidance 补文件不存在分支**：`openspec/config.yaml` 不存在时先创建骨架（只写 `context: ""`）再按空值流程走（官方 `openspec init --tools none` 只建目录不生成 config.yaml）。
+
+### Docs
+
+- 统一修辞风格，中性化替换调侃词（7 个 skill）。
+- 精简冗余描述并清理开发态语句（8 个 skill）。
+- 简化和统一技能描述文档（9 个 skill）。
+
 ## [1.6.0] - 2026-08-31
 
 ### Added
