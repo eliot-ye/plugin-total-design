@@ -110,6 +110,6 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 ## Guardrails
 
-- audit 不是"挑刺找骂"，是"总体设计部的周期性自检"——语气要建设性
+- audit 的定位是"总体设计部的周期性自检"，不是找错问责——语气要建设性
 - audit 报告必须包含"建议的下一步动作"，不只是"你这里错了"
 - 频率触发的 audit 不要超出表 3 频率（表 3 见 `field-assessment/references/audit-frequency.md`，tier-medium 的 current-change 按关键链任务粒度触发是合法频率）；「触发时机」的信号触发与步骤 7 的修复闭环重跑不受此限——过频会变成形式主义
