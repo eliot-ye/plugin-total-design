@@ -11,8 +11,6 @@ user-invocable: false
 - `field-assessment`
 - `constraints` 的 `references/human-in-loop.md`
 - `system-engineering`
-- `systematic-debugging`
-- `writing-plans`
 
 ## 服务的主基调原则
 
@@ -30,7 +28,7 @@ user-invocable: false
 
 ### RED：先写失败测试
 
-1. 看任务的"验证"字段与**风险等级**（high / medium / low，由 `writing-plans` 标注）
+1. 看任务的"验证"字段与**风险等级**（high / medium / low，由 `writing-plans` 标注；任务无风险标注时——独立触发、无 tasks.md 上下文——按 medium 处理）
 2. 按风险等级决定测试强度：
    - **high**（核心路径 / 跨多个分系统 / 数据一致性 / 安全 / 不可逆）：完整边界用例集（正常路径 + 边界 + 异常）
    - **medium**（常规功能）：正常路径 + 关键边界

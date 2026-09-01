@@ -1,6 +1,6 @@
 ---
 name: constraints
-description: 局部约束层入口——防局部优化制造全局失调。承载 5 个局部规律（wip-limit / brooks-law / critical-buffer / delay-decision / human-in-loop），命中触发场景后读对应 references/<name>.md 执行规则。服务系统工程主基调第 1、2、3、4 条。
+description: 局部约束层入口——防局部优化制造全局失调。
 user-invocable: false
 ---
 
@@ -32,6 +32,6 @@ user-invocable: false
 ## 如何被引用
 
 - 使用态 LLM 在会话中命中任一子约束的触发场景 → 读本 skill → 按子约束映射读对应 references 文件执行
-- 约束强度（表 1 第 1–5 行）+ human-in-loop 场景加成（表 2）+ system-audit 频率（表 3）由 `field-assessment` 识别流程注入
+- 约束强度（表 1 第 1–5 行）+ human-in-loop 场景加成（表 2）+ system-audit 频率（表 3）由 `field-assessment` 的「如何被引用」节读取策略注入（快车道或现判路径）
 - 子约束之间互相引用的路径为 `references/<name>.md`（相对本 SKILL.md 所在目录）
 - override 回路编排（`wip-limit` → `brooks-law` → `critical-buffer` → `human-in-loop` → 记录）由 `references/wip-limit.md` 单一持有

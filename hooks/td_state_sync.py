@@ -6,6 +6,9 @@
    last_archive_name = 按 mtime 最新的归档 change 名。与文件不一致时以文件系统事实为准。
 2. audit-history.yaml：为 openspec/.td-state/audits/*.md 中缺失的记录补条，
    保留已有记录的 next_due / severe_count。
+3. audits/.incomplete.log：按当前不完整报告集合整文件重写（"w" 模式）——
+   它是 hook 自身派生的现状快照而非用户数据，重写即校正：自动去重、
+   已解决项退出、已删除报告消失。
 
 会话结束时由 atomcode 以 SessionEnd 事件调用。任何失败静默退出，不影响会话。
 """
@@ -157,44 +160,47 @@ def sync_audit_history(state_dir):
         r for r in reports
         if r not in known and is_complete_report(os.path.join(audits_dir, r))
     ]
-    if not missing:
-        return
-
-    os.makedirs(state_dir, exist_ok=True)
-    with open(history_path, "a", encoding="utf-8") as f:
-        if os.path.exists(history_path) and os.path.getsize(history_path) > 0:
-            # 已有内容：确保文件以换行结尾再追加列表项
-            with open(history_path, "r", encoding="utf-8") as rf:
-                content = rf.read()
-            if not content.endswith("\n"):
-                f.write("\n")
-            if "audits:" not in content:
-                f.write("audits:\n")
-        else:
-            f.write("audits:\n")
-        for report in missing:
-            ts, scope = None, "current-change"
-            m = REPORT_NAME_RE.match(report)
-            if m:
-                scope = m.group(2)
-                try:
-                    ts = datetime.strptime(m.group(1), "%Y%m%d-%H%M%S").isoformat()
-                except ValueError:
-                    ts = None
-            f.write("  - timestamp: %s\n" % (ts or "unknown"))
-            f.write("    scope: %s\n" % scope)
-            f.write("    report: %s\n" % report)
-            f.write("    severe_count: %d\n" % count_severe(os.path.join(audits_dir, report)))
-
-    # 不完整报告的兜底：把它们的名字写到 audits/.incomplete.log，
-    # 下次 /td-system-audit project scope 时由 agent 主动检查并决定是补写还是删除。
     incomplete = [
         r for r in reports
         if r not in known and not is_complete_report(os.path.join(audits_dir, r))
     ]
-    if incomplete:
-        incomplete_log = os.path.join(audits_dir, ".incomplete.log")
-        with open(incomplete_log, "a", encoding="utf-8") as f:
+    incomplete_log = os.path.join(audits_dir, ".incomplete.log")
+    if not missing and not incomplete and not os.path.exists(incomplete_log):
+        return  # 无待补条、清单为空且无需清空——无工作可做
+
+    if missing:
+        os.makedirs(state_dir, exist_ok=True)
+        with open(history_path, "a", encoding="utf-8") as f:
+            if os.path.exists(history_path) and os.path.getsize(history_path) > 0:
+                # 已有内容：确保文件以换行结尾再追加列表项
+                with open(history_path, "r", encoding="utf-8") as rf:
+                    content = rf.read()
+                if not content.endswith("\n"):
+                    f.write("\n")
+                if "audits:" not in content:
+                    f.write("audits:\n")
+            else:
+                f.write("audits:\n")
+            for report in missing:
+                ts, scope = None, "current-change"
+                m = REPORT_NAME_RE.match(report)
+                if m:
+                    scope = m.group(2)
+                    try:
+                        ts = datetime.strptime(m.group(1), "%Y%m%d-%H%M%S").isoformat()
+                    except ValueError:
+                        ts = None
+                f.write("  - timestamp: %s\n" % (ts or "unknown"))
+                f.write("    scope: %s\n" % scope)
+                f.write("    report: %s\n" % report)
+                f.write("    severe_count: %d\n" % count_severe(os.path.join(audits_dir, report)))
+
+    # 不完整报告的兜底：以当前计算的 incomplete 集合整文件重写 audits/.incomplete.log，
+    # 清单是"现状快照"——去重（每次重算）、已进 audit-history 的自动退出、
+    # 磁盘上已删除的报告自动消失。消费方是 td-system-audit 步骤 2 的
+    # "不完整报告兜底"（project scope），由 agent 读取清单后请用户决定补写还是删除。
+    if incomplete or os.path.exists(incomplete_log):
+        with open(incomplete_log, "w", encoding="utf-8") as f:
             for r in incomplete:
                 f.write("%s\n" % r)
 

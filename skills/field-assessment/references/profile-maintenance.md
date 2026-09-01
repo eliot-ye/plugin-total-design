@@ -1,6 +1,6 @@
 # Profile: Maintenance（上线维护）
 
-本文件是 `field-assessment` profile 维度三变体之一。识别流程判读命中 `profile-maintenance` 后读本文件（判据见 `identification-flow.md`「### 2. 判读 profile（三选一，按优先级）」节）。
+本文件是 `field-assessment` profile 维度三变体之一。判读命中 `profile-maintenance` 后读本文件（判据见 `identification-flow.md`「### 2. 判读 profile（三选一，按优先级）」节）。
 
 ## 默认激活的层
 

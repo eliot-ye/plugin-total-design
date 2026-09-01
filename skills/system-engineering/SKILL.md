@@ -1,6 +1,6 @@
 ---
 name: system-engineering
-description: 钱学森系统工程主基调。所有局部 constraint（`constraints` skill 承载的 5 份局部规律变体）的前提。
+description: 钱学森系统工程主基调。
 user-invocable: false
 ---
 

@@ -20,7 +20,7 @@ argument-hint: <change-name>
 
 apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。每个任务对系统整体的影响，必须由 agent 持续持有。
 
-**核心论点归位——"总体性能不等于各部分性能之和"**：步骤 7.2 的"系统级验证（跨分系统边界，硬步骤）"是核心论点最直接的体现（论点与工程化解释的完整展开见 `verification-before-completion` 的「服务的主基调原则」节「核心论点归位」段）。本步骤只定义触发条件与 tier 分层强度，执行语义在 `verification-before-completion` 第 6 节。
+**核心论点归位——"总体性能不等于各部分性能之和"**：步骤 6.2 的"系统级验证（跨分系统边界，硬步骤）"是核心论点最直接的体现（论点与工程化解释的完整展开见 `verification-before-completion` 的「服务的主基调原则」节「核心论点归位」段）。本步骤只定义触发条件与 tier 分层强度，执行语义在 `verification-before-completion` 第 6 节。
 
 **系统工程主基调第 2 条：总体设计部。**
 
@@ -39,14 +39,14 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。
-2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 7.3）。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 6.3）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断是否触发 / tasks 是否合规。
 
 ### 2. 前置检查
 
 对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
 
-- **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 7.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"——与 `td-archive` 步骤 3 的旧 change 兜底对称（propose 6.c 对新 change 仍强制必填，本处只放行存量旧 change，不削弱 propose 侧约束）。
+- **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 6.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"——与 `td-archive` 步骤 3 的旧 change 兜底对称（propose 6.c 对新 change 仍强制必填，本处只放行存量旧 change，不削弱 propose 侧约束）。
 - **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检。
 - **caller impact 分析节必填**：若 `$_TD_TIER` 为 `tier-medium` / `tier-large` 且 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检——propose 6.c 漏执行时由本条兜底，后续步骤 4 实测子节不再重复此检查。
 - **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。**阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威描述在该 skill；override 通过后继续步骤 3）。propose 与 apply 两处都必须执行硬阻塞 + override 机制。
@@ -78,7 +78,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 **tier 分层**：tier-large = 硬闸门（无条件实测；caller 清单 + 逐 caller 结论未产出，不进入任务实施）；tier-medium = 信号触发（满足任一信号则强制实测：变更点属 ①③ 高危类 / proposal 对某已知 caller 标注"需适配" / 架构 review 对 caller 影响提出疑问；纯内部实现细节且无信号 → 可跳过并在 tasks.md 记录理由）；tier-small = 提醒（默认跳过）。caller 清单与结论记录到 tasks.md（对应任务的验证证据或单独附注）。
 
-本子节是**事前**误差检测（不破坏既有 caller），实测确认过的 caller 清单同时是步骤 7.2 边界验证的边界输入；步骤 7.2 是**事后**误差检测（新行为是否正确）。分工不同，不重复。
+本子节是**事前**误差检测（不破坏既有 caller），实测确认过的 caller 清单同时是步骤 6.2 边界验证的边界输入；步骤 6.2 是**事后**误差检测（新行为是否正确）。分工不同，不重复。
 
 架构 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。行为层触发序列：
 
@@ -88,34 +88,23 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
    - **`requesting-code-review`**：checkpoint 时做 review
    - **`verification-before-completion`**：每个任务完成前必须跑验证命令
 
-`executing-plans` 是行为层执行的核心入口，TDD / review / verify 在 `executing-plans` 内部按任务粒度嵌套触发。
-
 ### 5. 触发 apply 全局粒度的工程管理约束
 
 本步骤触发 **apply 全局粒度**的工程管理约束：
 
 - `constraints` 的 `references/brooks-law.md`：用户在 apply 期间想加人手 / 并行 subagent 加速时
 - `constraints` 的 `references/delay-decision.md`：apply 期间遇到顶层架构层次的可逆决策时（与任务粒度的"实现细节可逆决策"不重叠）
-- `constraints` 的 `references/human-in-loop.md`：apply 期间遇到"超出当前 change scope 的影响"等 apply 全局必停场景时（任务粒度的 checkpoint 必停由 executing-plans 负责）。步骤 7.2 边界验证失败时的"root cause 在 plan 之外 → 停下来问用户"也走本类 apply 全局必停通道。
+- `constraints` 的 `references/human-in-loop.md`：apply 期间遇到"超出当前 change scope 的影响"等 apply 全局必停场景时（任务粒度的 checkpoint 必停由 executing-plans 负责）。步骤 6.2 边界验证失败时的"root cause 在 plan 之外 → 停下来问用户"也走本类 apply 全局必停通道。
 
-### 6. 更新 tasks.md
-
-每完成一个任务：
-
-- 把 `- [ ]` 改成 `- [x]`
-- 在任务后面加验证证据链接（测试输出、命令结果）
-
-### 7. 完成判定
+### 6. 完成判定
 
 所有任务 `[x]` 后，做**两层最终验证**，两层都通过才算 done：
 
-#### 7.1 change-level 验证
+#### 6.1 change-level 验证
 
 触发 `verification-before-completion` 做 change-level 最终验证（全量测试 / lint / build / type check）。
 
-#### 7.2 系统级验证（跨分系统边界，硬步骤）
-
-**执行序列**：读 proposal 的"系统工程影响评估"节列出受影响分系统 → 按 tier 强度逐条跑跨分系统边界验证 → 发现问题触发 `systematic-debugging` 找根因 → root cause 在 plan 之外则停下来问用户。
+#### 6.2 系统级验证（跨分系统边界，硬步骤）
 
 change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估"节列出的**受影响分系统**，逐条跑**跨分系统边界验证**——验证各分系统整合后的整体行为符合契约，而不只是每个任务局部绿。
 
@@ -129,7 +118,7 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 
 **层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，本步骤的跨分系统边界验证应**按子系统层次分别验证**——每个子系统按自己的 tier 强度验证，跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则）。子系统独立定 tier 的执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
 
-#### 7.3 current-change audit（按表 3 频率）
+#### 6.3 current-change audit（按表 3 频率）
 
 两层验证通过后，对照表 3 的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`（表 3 见 `field-assessment/references/audit-frequency.md`）：
 
@@ -137,7 +126,7 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 - `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 3）
 - `tier-large`：每完成 1 个 change 触发——本步骤即触发点
 
-触发即调用 `/td-system-audit current-change`，把本次 change 的"实际 vs 预期"对照主基调过一遍。audit 报告落盘 `openspec/.td-state/audits/`，更新 `audit-history.yaml`。
+触发即调用 `/td-system-audit current-change`，把本次 change 的"实际 vs 预期"对照主基调过一遍。
 
 ## Guardrails
 

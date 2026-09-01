@@ -1,62 +1,66 @@
-# total-design v1.6.0 发布说明
+# total-design v1.7.0 发布说明
 
 > 面向使用态用户：升级前请先读「⚠️ 行为变更」与「升级步骤」。
 
 ## 本版本是什么
 
-1.6.0 是**新防护机制 + 配置层收拢版**：分两个阶段。
+1.7.0 是**探索阶段不落盘 + 工作流健壮性修复版**：
 
-**阶段 1（新防护机制）**：新增 caller impact 三层防护（前馈 / 实测闸门 / 校验），防止"改公共零件前未查 caller"破坏既有调用方（来源：pt-ai 2026-08-24 P0/P1 事故复盘）；新增 `todo-pool` skill（todo 待办池单一事实源）与 `config-context-guidance`（config.yaml context 引导单一权威）。
+**核心变更**：`brainstorming` 取消落盘 spec——explore 阶段成果改为对话形式交付，不再写 spec 草稿；且流程内强制 `delay-decision` 检查，防止"未确认需求就跳入 `/td-propose`"。
 
-**阶段 2（配置层收拢）**：skill 总数 27 → 18。5 个局部规律 skill（`brooks-law` / `critical-buffer` / `delay-decision` / `human-in-loop` / `wip-limit`）收拢为 `constraints` 的 references 变体；3 profile + 3 tier 独立 skill 移入 `field-assessment/references/` 变体文件。触发路径收敛为"入口 skill 判读 → 按需读变体"，使用态 LLM 的触发面收窄，强度单一事实源不变（仍在 `field-assessment` 表 1/2/3）。
+**健壮性修复**：修复 td 工作流审核发现的一批问题——断链锚点、audit 频率口径、hook 清单语义、spec 校验兼容、gitignore 覆盖判定、config.yaml 引导分支。
+
+**文档清理**：统一修辞风格、精简冗余描述、清理开发态语句、简化技能描述。
 
 ## 本次变更
 
-### 阶段 1：新防护机制
+### 核心变更：explore 不落盘 spec
 
-- **caller impact 三层防护**：
-  - **前馈层**（`td-propose` 步骤 6.c）：触发条件命中时 proposal 必填「caller impact 分析」节——变更点类别标注（四类：公共符号签名 / Protocol 接口方法 / 装配点 / 数据流与返回值语义）+ 高危 go/no-go 标记 + 已知高危 caller。
-  - **实时层**（`td-apply` 步骤 4）：任务实施前的「Caller Impact 实测」闸门——caller 清单由引用搜索实测产出（file:line + 调用形式），逐 caller 确认兼容；tier-large 硬闸门（清单 + 结论未产出不进入任务实施）、tier-medium 信号触发（高危变更点 / 已知 caller 需适配 / 架构 review 存疑）、tier-small 提醒（默认跳过）。
-  - **校验层**（`requesting-code-review` 架构 review）：proposal 缺「caller impact 分析」节或缺变更点类别标注与高危标记 → critical 阻塞 apply（仅 tier-small 降 warning）。
-  - **触发条件**：change 跨分系统（受影响分系统 ≥ 2）或涉及四类变更点任一类；单分系统 + 无四类变更点 → 三层均不触发（不给小改动加流程开销）。
-  - **单一事实源**：`td-apply/references/change-point-classes.md`（四类定义 / 触发条件 / 边界裁定 / 已知盲区），三层只引用不复述。已知盲区：静态引用搜索抓不到动态 dispatch（反射 / DI 容器 / 字符串调用），由 apply 7.2 契约 / 集成验证补。
-- **`todo-pool` skill 新增**：`openspec/todo.md` 待办池的单一事实源与读写操作入口（格式约定、落池、归档勾选）。`td-explore` / `td-system-audit` 落池、`td-archive` 归档勾选、`td-propose` 读池挑候选均按本 skill 的子流程操作；原 `td-propose/references/todo-format.md` 删除并入。
-- **`config-context-guidance` 单一权威**：`openspec/config.yaml` 的 `context` 字段引导流程（空 / 注释 / 模板默认值时三问引导，用户跳过不阻塞）收敛到 `field-assessment/references/config-context-guidance.md`，`td-explore` / `td-propose` / `td-init` 三处引用。
+- **`brainstorming` 删除第 5/6 步**（分段呈现 spec、保存 spec 文档）：explore 阶段成果以对话形式交付（保留在会话上下文），不再落盘 spec 草稿。用户要求落盘时提示走 `/td-propose`。
+- **`td-propose` 步骤 6.a 输入源收敛**：由"brainstorming spec 草稿"改为"`td-explore` 候选方向评估"；greenfield explore 检查判据去掉对 brainstorming 落盘的引用。
+- **流程内强制 delay-decision 检查**：`brainstorming` 完成候选方向评估后立即执行 `constraints` 的 `references/delay-decision.md` 检查——
+  - **不可逆决策**（分系统边界 / 公共 API）：信息不足时不仓促闭合，在 `td-explore` 内继续收集信号，信息足够后由用户拍板再进 `/td-propose`。
+  - **可逆决策**（实现方案）：按「延迟不等于拖延」处理，不构成进入 propose 的阻塞。
 
-### 阶段 2：配置层收拢
+### 工作流健壮性修复
 
-- **局部规律收拢**：`brooks-law` / `critical-buffer` / `delay-decision` / `human-in-loop` / `wip-limit` 由独立 skill 收拢为 `constraints` 的 `references/<name>.md` 变体文件，触发路径统一为"命中触发场景 → 读 `constraints` 入口判读子约束 → 读对应 references 执行"。
-- **profile/tier 变体收拢**：3 profile + 3 tier 独立 skill 移入 `field-assessment/references/` 变体文件（识别流程判读后按命中的 profile 与 tier 各读一份，共 2 份），内容按使用态视角精简。
-- **引用路径全量规范化**：跨 skill 引用一律逻辑名 + 变体路径（`constraints/references/<name>.md` / `field-assessment/references/<name>.md`）。
-- **开发态语句清理**：各 skill 正文与 references 的跨 skill 重复段落与开发态语句（编辑指令 / 调用方清单 / 写作规范类旁白）清理；冲突仲裁语义与运行时指针保留。
-- **根目录 `plugin.json` 新增**：Agent Plugins 1.0.0 规范清单（`$schema` / `name` / `version` / `description` / `author`），与 `.atomcode-plugin/plugin.json` 的 atomcode 加载清单并存，`name` / `version` / `description` 保持一致。
+- **td-reverse-spec spec 产出格式对齐 openspec validate**：Requirement 含 SHALL 规范陈述，Purpose / Scenario 结构对齐官方校验器（消除 spec 校验兼容问题）。
+- **td-archive project audit 阈值改整数倍口径**：`tier-small` / `tier-medium` 判定由"`count` ≥ 阈值"改为"`count` 为阈值的整数倍"（count 是累计值不重置，恰好每第 N 次 archive 触发一次建议），与累计计数器兼容。
+- **td-system-audit**：频率触发（表 3）作用域限定，豁免信号触发与修复闭环重跑；步骤 2 补 `audits/.incomplete.log` 消费入口。
+- **hook `td_state_sync`**：`audits/.incomplete.log` 改整文件重写（现状快照，自动去重 / 已解决项退出 / 已删除报告消失）；修复无待补条时的短路门控。
+- **td-init gitignore 检查统一**：`openspec/.td-state/` 是否被覆盖改为"任一层 .gitignore 覆盖"（`git check-ignore -v` 实测）。
+- **wip-limit 检测计数口径**：活跃 change 计数用 `openspec list`（`archive/` 不计入）。
+- **config-context-guidance 补文件不存在分支**：`openspec/config.yaml` 不存在时先创建骨架再按空值流程走。
+- **断链锚点修正**：`td-explore` Guardrails、`td-propose` critical-buffer「标注规范」、`td-apply` 6.3 audit 落盘句。
+
+### 配置层快车道
+
+- **`field-assessment` 快车道读取策略**：命中单一 profile/tier 变体时直接读命中份，跳过其余判读，减少读取开销。
 
 ## ⚠️ 行为变更
 
-| 变更 | 1.5.0 旧行为 | 1.6.0 新行为 |
+| 变更 | 1.6.0 旧行为 | 1.7.0 新行为 |
 |---|---|---|
-| skill 总数 | 27 个 | **18 个**（10 个独立 skill 并入 `constraints` / `field-assessment` 变体） |
-| 子约束触发 | 直接触发 `wip-limit` / `human-in-loop` 等独立 skill | **统一经 `constraints` 入口判读**后读对应 references 执行 |
-| profile/tier 读取 | 触发 `profile-greenfield` / `tier-large` 等独立 skill | **由 `field-assessment` 识别流程判读后读对应变体文件**（各一份，共 2 份） |
-| proposal 必填节 | 无 caller impact 要求 | **tier-medium/large 命中触发条件时必填「caller impact 分析」节**（变更点类别标注 + 高危标记），缺节阻塞 apply |
-| apply 步骤 4 | 架构 review 复核后直接实施 | **架构 review 复核 + Caller Impact 实测闸门**（tier-large 硬闸门 / tier-medium 信号触发 / tier-small 提醒）后再实施 |
-| todo 池读写 | `td-propose` 的 `references/todo-format.md` 持有格式 | **`todo-pool` skill 单一事实源**（格式 / 落池 / 勾选子流程） |
-| config context 引导 | `td-explore` / `td-propose` / `td-init` 三处各自展开 | **引用 `field-assessment/references/config-context-guidance.md` 单一权威** |
+| explore 产物形态 | `brainstorming` 分段呈现并保存 spec 文档 | **对话形式交付，不落盘 spec**（需要落盘走 `/td-propose`） |
+| propose 输入源 | 步骤 6.a 读 brainstorming spec 草稿 / td-explore 候选方向 | **仅读 td-explore 候选方向评估** |
+| explore→propose 衔接 | brainstorming 收敛后直接可 propose | **流程内强制 delay-decision 检查**（不可逆决策信息不足不仓促闭合） |
+| archive project audit 触发 | `count` ≥ 表 3 阈值 | **`count` 为阈值的整数倍**（每第 N 次 archive 触发一次建议） |
+| reverse-spec spec 产出 | 结构未对齐校验器 | **Requirement 含 SHALL、Purpose/Scenario 结构对齐 openspec validate** |
+| .incomplete.log 维护 | hook 增量追加 | **整文件重写（现状快照）**，自动去重与退出 |
 
-**不改变的**：表 1/2/3 强度数值（`field-assessment` 单一事实源）、td-* artifact 流（propose → apply → archive）、WIP 硬约束 + override 机制、`wip-limit` 等 5 个子约束的执行规则本身、`.td-state/` 持久化约定——零变更。
+**不改变的**：表 1/2/3 强度数值（`field-assessment` 单一事实源）、td-* artifact 流（propose → apply → archive）、WIP 硬约束 + override 机制、5 个子约束执行规则、`.td-state/` 持久化约定——零变更。
 
 ## 升级步骤
 
-1. **bump 版本**：根目录 `plugin.json` + `.atomcode-plugin/plugin.json` + `marketplace.json` 的 `version` 同步改为 `1.6.0`（description 保持纯 ASCII）。
+1. **bump 版本**：根目录 `plugin.json` + `.atomcode-plugin/plugin.json` + `marketplace.json` 的 `version` 同步改为 `1.7.0`（description 保持纯 ASCII）。
 2. **重新发布/安装**：把仓库内容同步到 marketplace 安装副本（`~/.atomcode/plugins/marketplaces/total-design-marketplace/`）。
 3. **重新 trust**：`atomcode plugin trust total-design` —— plugin 内容有变更，需重新 trust 确保新内容加载。
 4. **验证**：
-   - 安装副本 skills/ 与仓库 `diff -rq` 一致；三份清单（根目录 `plugin.json` / `.atomcode-plugin/plugin.json` / `marketplace.json`）版本号同为 1.6.0。
-   - skill 总数 18：`ls skills/ | wc -l` → 18；旧独立 skill 目录不存在：`test ! -d skills/wip-limit && test ! -d skills/tier-large && test ! -d skills/profile-greenfield && echo "OK"`。
-   - 变体文件就位：`ls skills/constraints/references/`（5 份）与 `ls skills/field-assessment/references/`（11 份，含 profile/tier 变体 + `config-context-guidance.md`）。
-   - caller impact 三层就位：`grep -l 'Caller Impact 实测' skills/td-apply/SKILL.md` 有输出；`test -f skills/td-apply/references/change-point-classes.md`。
+   - 安装副本 skills/ 与仓库 `diff -rq` 一致；三份清单（根目录 `plugin.json` / `.atomcode-plugin/plugin.json` / `marketplace.json`）版本号同为 1.7.0。
+   - brainstorming 已无落盘步骤：`grep -c '保存 spec' skills/brainstorming/SKILL.md` → 0；且 `grep -l 'delay-decision' skills/brainstorming/SKILL.md` 有输出。
+   - reverse-spec 产出格式对齐：`grep -l 'SHALL' skills/td-reverse-spec/SKILL.md` 有输出。
    - 逻辑名/命令名/路径/CLI 命令/环境变量不变：`constraints` / `field-assessment` / `/td-propose` / `openspec list` / `$_TD_TIER` 等。
 
 ## 完整变更列表
 
-见 [CHANGELOG.md](./CHANGELOG.md) 的 [1.6.0] 条目。
+见 [CHANGELOG.md](./CHANGELOG.md) 的 [1.7.0] 条目。

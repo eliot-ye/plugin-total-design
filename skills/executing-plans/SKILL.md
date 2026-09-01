@@ -1,6 +1,6 @@
 ---
 name: executing-plans
-description: 批量执行任务，带 human checkpoint。服务主基调第 2 条。触发场景：`td-apply` 流程内按 tasks.md 序列实施时——关键链任务后停下来 checkpoint。
+description: 批量执行任务，带 human checkpoint。
 user-invocable: false
 ---
 
@@ -19,9 +19,8 @@ user-invocable: false
 
 ## 触发时机
 
-- plan 已经写好（`writing-plans` 完成）
-- 用户说"开始执行" / "go"
-- **current-change audit 触发**（随本 skill 的 Human checkpoint 触发）：tier 分层与触发归属见 `field-assessment/references/audit-frequency.md` 的「current-change scope 的触发 skill 归属」表（表 3）——本 skill 只负责 `tier-medium`（每个关键链任务完成时触发），`tier-small` 不要求，`tier-large` 由 `td-apply` 步骤 7.3 负责。
+- 由 `td-apply` 步骤 4 的行为层触发序列调用（tasks.md 已就绪；粒度不够细时先经 `writing-plans` 细化）——执行入口统一走 `/td-apply`，本 skill 不独立触发
+- **current-change audit 触发**（随本 skill 的 Human checkpoint 触发）：tier 分层与触发归属见 `field-assessment/references/audit-frequency.md` 的「current-change scope 的触发 skill 归属」表（表 3）——本 skill 只负责 `tier-medium`（每个关键链任务完成时触发），`tier-small` 不要求，`tier-large` 由 `td-apply` 步骤 6.3 负责。
 
 ## 工作方式
 

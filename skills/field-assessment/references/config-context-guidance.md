@@ -4,7 +4,7 @@
 
 ## 引导流程
 
-1. 读 `openspec/config.yaml` 的 `context` 字段（tech stack、conventions、domain knowledge 等）。
+1. 读 `openspec/config.yaml` 的 `context` 字段（tech stack、conventions、domain knowledge 等）。**文件不存在 → 先创建骨架（只写 `context: ""`），随后按空值流程走**（官方 `openspec init --tools none` 只建目录不生成 config.yaml，此路径真实可达）。
 2. **若为空、被注释、或仍是模板默认值**：自动探索需要的信息，必要时一次问完以下三个问题，拿到答案后写入 `context` 字段：
 
    - "项目的主要 tech stack 是？"（如 TypeScript / Rust / Python / 混合）

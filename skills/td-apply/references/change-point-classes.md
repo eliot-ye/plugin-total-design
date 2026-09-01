@@ -1,10 +1,6 @@
 # 四类变更点（caller impact）
 
-四类变更点与 caller impact 触发条件的定义。命中触发条件即进入 caller impact 三层防护（定义的其他表述与本文件冲突时，以本文件为准）：
-
-- `td-propose` 步骤 6.c「proposal.md 必填节：caller impact 分析」（前馈层）
-- `td-apply` 步骤 4「Caller Impact 实测」子节（实时层）
-- `requesting-code-review` 的 `references/architecture-review-checklist.md`（校验层）
+四类变更点与 caller impact 触发条件的单一事实源（其他位置的表述与本文件冲突时，以本文件为准）。命中触发条件即进入 caller impact 三层防护：propose 侧的变更点预判标注（前馈层）、apply 侧的 caller 实测（实时层）、架构 review 清单的校验（校验层）。
 
 ## 触发条件
 
@@ -29,4 +25,4 @@
 
 ## 已知盲区
 
-静态引用搜索抓不到动态 dispatch（反射 / DI 容器 / 字符串调用）——该盲区由 `td-apply` 步骤 7.2 的契约 / 集成测试与架构 review 清单的"隐式依赖"条目补，三层防护不对动态耦合宣称全覆盖。
+静态引用搜索抓不到动态 dispatch（反射 / DI 容器 / 字符串调用）——该盲区由 `td-apply` 步骤 6.2 的契约 / 集成测试与架构 review 清单的"隐式依赖"条目补，三层防护不对动态耦合宣称全覆盖。

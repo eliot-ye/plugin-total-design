@@ -1,6 +1,6 @@
 ---
 name: writing-plans
-description: 把工作拆成 bite-sized 任务，每个任务标注对分系统的影响。服务主基调第 1 条。触发场景：td-propose 建 tasks.md 骨架粒度不够细 / td-apply 细化任务时（执行入口走 /td-propose 或 /td-apply）。
+description: 把工作拆成 bite-sized 任务，每个任务标注对分系统的影响。
 user-invocable: false
 ---
 
@@ -11,9 +11,6 @@ user-invocable: false
 - `constraints` 的 `references/critical-buffer.md`
 - `constraints` 的 `references/delay-decision.md`
 - `field-assessment`
-- `requesting-code-review`
-
-（`test-driven-development` 消费本 skill 标注的风险字段，但本 skill 不依赖它——它不列入依赖技能，避免与 `test-driven-development` 的依赖技能节构成循环依赖。）
 
 ## 服务的主基调原则
 

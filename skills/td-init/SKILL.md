@@ -39,22 +39,21 @@ init 是"把系统的工作方式先立起来"——先有 specs 基线、change
 
 检查 `openspec/` 目录是否存在：
 
-- **不存在** → 初始化 OpenSpec 契约层：
-  1. 检查 `openspec` CLI 是否可用（`openspec --version`）。
-  2. **CLI 不可用 → 代劳创建基础结构**（不阻塞初始化，用文件工具创建目录）：
-     - `openspec/specs/` — 主 spec 目录
-     - `openspec/changes/` — 活跃 change 目录
-     - `openspec/changes/archive/` — 归档 change 目录
-     - 提示用户："`openspec` CLI 未安装，已代劳创建基础结构。后续 `/td-propose` / `/td-apply` / `/td-archive` 依赖 CLI，建议安装 `npm install -g @fission-ai/openspec@latest`。"
-  3. **CLI 可用 → 运行 `openspec init`** 建立基础结构（与代劳方案产物一致，CLI 就绪时用官方路径更稳）。
+- **不存在** → **代劳创建基础结构**（默认路径，不依赖 CLI、无交互）：
+  - `openspec/specs/` — 主 spec 目录
+  - `openspec/changes/` — 活跃 change 目录
+  - `openspec/changes/archive/` — 归档 change 目录
+  - `openspec/config.yaml` — 配置骨架，写入 `context: ""`（空 context 的引导填写走步骤 5）
+  - CLI 未安装时附带提示：后续 `/td-propose` / `/td-apply` / `/td-archive` 依赖 `openspec` CLI，建议安装 `npm install -g @fission-ai/openspec@latest`。
+- **CLI init 为可选项**：用户明确想要官方 CLI 的全套产物（含面向所选 agent 的 `.claude/skills/` 等工具文件）时才运行 `openspec init`——它是交互式命令（官方 CLI 文档将其列为 human-only），agent 环境下可能卡在 prompt；本 plugin 的运行时资产不依赖它生成的工具文件。
 - **已存在** → 跳过，继续步骤 3。
 
 ### 3. 配置 .gitignore（核心步骤）
 
-检查项目根 `.gitignore` 是否已包含 `openspec/.td-state/`：
+检查 `.td-state/` 是否已被任何一层 `.gitignore` 覆盖（根 `.gitignore` 写 `openspec/.td-state/`，或 `openspec/.gitignore` 写 `.td-state/`；可用 `git check-ignore -v openspec/.td-state/` 实测）：
 
-- **已包含** → 跳过，提示"已配置"。
-- **未包含** → 在 `openspec/.gitignore` 创建/追加以下片段（不碰根 `.gitignore`；嵌套 gitignore 的路径相对 `openspec/` 目录，规则只作用于 openspec 子树，不会误伤根目录其他内容）：
+- **已覆盖** → 跳过，提示"已配置"。
+- **未覆盖** → 在 `openspec/.gitignore` 创建/追加以下片段（不碰根 `.gitignore`；嵌套 gitignore 的路径相对 `openspec/` 目录，规则只作用于 openspec 子树，不会误伤根目录其他内容）：
 
 ```gitignore
 # total-design 本地状态：全部可从文件系统事实推导，不进版本库
@@ -103,5 +102,5 @@ git rm -r --cached openspec/.td-state/
 - **不覆盖**已有 `.gitignore` / `openspec/.gitignore` 内容，只追加
 - `git rm --cached` 是破坏性 git 操作，**必须用户确认后**才执行
 - 不修改 `openspec/specs/`、`openspec/changes/` 下的任何内容
-- CLI 不可用时代劳创建**目录结构**即可——不创建/不伪造 artifact、spec、change 内容（那是 td-propose / td-reverse-spec 的职责）；CLI 可用时优先用 `openspec init`
+- 代劳创建**目录结构 + config.yaml 骨架**即可——不创建/不伪造 artifact、spec、change 内容（那是 td-propose / td-reverse-spec 的职责）
 - 可重复执行：幂等，已配置的项跳过

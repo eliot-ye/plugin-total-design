@@ -77,14 +77,14 @@ archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预�
 ### 4. archive（含 sync）
 
 ```bash
-openspec archive "<name>"
+openspec archive "<name>" --yes
 ```
 
-`openspec archive` 会做两件事：
-1. 把 change 从 `openspec/changes/` 移到 `openspec/changes/archive/`
-2. 自动把 change 产生的 spec delta sync 到主 spec
+`--yes` 跳过 CLI 确认提示——agent 运行环境通常非交互（stdin 关闭），无法应答确认，不加此 flag 命令会在改动任何东西前 exit 1。CLI 侧的确认语义（任务完成、spec 更新）已由本 skill 步骤 2/3 的门禁承担。
 
-如果只想归档不同步 specs（infra / doc-only change），加 `--skip-specs`。
+`openspec archive` 会做两件事：
+1. 把 change 从 `openspec/changes/<name>` 移到 `openspec/changes/archive/YYYY-MM-DD-<name>/`（按归档日期落子目录）
+2. 自动把 change 产生的 spec delta sync 到主 spec
 
 **归档成功后 TODO 子项勾选**：触发 `todo-pool` 的「勾选子项」子流程（传入本次归档的 change 名）。
 
@@ -103,7 +103,7 @@ archive 完一个 change 后，项目的 profile 可能变化（greenfield 走�
 - 更新会话缓存为新 profile/tier
 - 提示用户："项目状态已从 `<old-profile>` × `<old-tier>` 变为 `<new-profile>` × `<new-tier>`。后续 constraint 强度按新配置走。"
 
-判读结果与缓存一致 → 跳过提示，不骚扰用户。
+判读结果与缓存一致 → 跳过提示，不打扰用户。
 
 #### 5.2 system-audit 频率触发检查
 
@@ -115,7 +115,7 @@ archive 是"完成一个 change"的事件，正好对照表 3（system-audit 频
 
 | tier | 驱动源 | 判定方式 | 文件不存在时 |
 |---|---|---|---|
-| `tier-small` / `tier-medium` | count 驱动 | `archive-counter.yaml` 的 `count` ≥ 表 3 阈值 | 视为 `count: 0`，本事件 +1 后再判 |
+| `tier-small` / `tier-medium` | count 驱动 | `archive-counter.yaml` 的 `count` 为表 3 阈值的**整数倍**（count 是累计值不重置，恰好每第 N 次 archive 触发一次建议） | 视为 `count: 0`，本事件 +1 后再判 |
 | `tier-large` | 时间驱动 | `audit-history.yaml` 最近一条 `scope: project` 的 `timestamp` 距今 ≥ 表 3 阈值（数值见 `field-assessment` 的 `references/audit-frequency.md` 的 project scope 列） | 视为从未跑过 project audit，直接判达阈值 |
 
 达阈值 → **主动建议**用户跑 `/td-system-audit project`，不是强制，是"按主基调第 2 条总体设计部职责，该周期性自检了"。两个文件均由本步骤首次运行时按需创建。

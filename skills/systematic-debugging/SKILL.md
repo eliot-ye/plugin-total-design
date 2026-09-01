@@ -6,10 +6,6 @@ user-invocable: false
 
 # Systematic Debugging
 
-## 依赖技能
-
-- `constraints` 的 `references/human-in-loop.md`
-
 ## 服务的主基调原则
 
 **主基调第 3 条：从定性到定量的综合集成。** debug 是这个原则的最纯粹体现——从"现象"（定性）到"根因"（定量）的反复迭代。
@@ -33,7 +29,7 @@ user-invocable: false
 - 如果不能稳定复现，先解决"如何复现"——这是前置条件
 - 记录复现步骤，后续每个 phase 都要用
 
-**失败模式：** "我跑了一次没出错，应该好了"——这不是 debug，是祈祷。
+**失败模式：** "我跑了一次没出错，应该好了"——单次未复现不构成验证，bug 可能随输入或时序变化再出现。
 
 ### Phase 2：Isolate（隔离）
 

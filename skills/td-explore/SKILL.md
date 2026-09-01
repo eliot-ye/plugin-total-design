@@ -50,27 +50,28 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 ### 3. 读现有 context
 
-- 读项目当前状态（git log、package.json、目录结构）
+- 读项目当前状态（git log、项目清单文件如 package.json / Cargo.toml、目录结构）
 - 读相关已有 spec（在 `openspec/specs/` 下）
 - 读相关已有 change（在 `openspec/changes/` 下）
 - 读 `openspec/todo.md` 的未勾选条目（`- [ ]`）——这是项目级候选池，作为探索的候选方向输入；文件不存在 → 跳过，视为空池
 
 ### 4. 头脑风暴
 
-调用 `brainstorming` skill 的 1–4 步工作方式——**不执行** brainstorming 的第 5–6 步（分段确认、保存 spec 文档）：explore 阶段不落盘 spec，成果以对话形式交付（见步骤 6）。若用户要求把探索结果落盘为 spec 草稿，提示走 `/td-propose`（brainstorming 的保存步骤在那里执行）。
+调用 `brainstorming` skill 的工作方式：explore 阶段不落盘 spec，成果以对话形式交付（见步骤 6）。若用户要求把探索结果落盘为 spec 草稿，提示走 `/td-propose`。
 
-**产物要求**：explore 阶段必须产出**至少 2 个候选方向**，每个标注系统工程影响（影响哪些分系统 / 整体性能预期变化 / 可逆性）。产物留在会话上下文里（explore 不落盘 spec，见步骤 6 的 Guardrails）。`/td-propose` 步骤 3 的"greenfield explore 检查"会读会话历史判定是否已有 ≥2 个候选方向——少于 2 个时 propose 阶段会拦下来要求先 explore。
+**产物要求**：explore 阶段必须产出**至少 2 个候选方向**，每个标注系统工程影响与可逆性（完整评估维度见步骤 5）。产物留在会话上下文里（explore 不落盘 spec，见文末 Guardrails）。`/td-propose` 步骤 3 的"greenfield explore 检查"会读会话历史判定是否已有 ≥2 个候选方向——少于 2 个时 propose 阶段会拦下来要求先 explore。
 
-**与 `constraints` 的 `references/delay-decision.md` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策——不闭合 spec，等更多信息再 propose。当用户想"赶紧 propose 闭合 spec"时，触发 `constraints` 的 `references/delay-decision.md` 提醒："explore 不落盘 spec 是延迟决策的体现，信息不足时强行闭合会损失信息（主基调第 3 条综合集成）。"这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
+**与 `constraints` 的 `references/delay-decision.md` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策（语义与触发提醒见该文件「触发时机」节的"与 `td-explore` 的连接"条）。这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
 
 ### 5. 系统工程视角评估
 
-对每个候选方向，评估：
+对每个候选方向，评估（步骤 4 标注的深化）：
 
 - 影响哪些分系统
 - 整体性能预期变化
 - 是局部优化还是全局协调
 - 局部优化对全局失调的风险
+- 可逆性（two-way door / one-way door）——`constraints` 的 `references/delay-decision.md` 检查的输入
 
 评估侧重按步骤 1 判读的 `$_TD_PROFILE` 调整（各 profile 的特殊规则与流程侧重见 `field-assessment` 的对应变体文件：`profile-greenfield` → `references/profile-greenfield.md`、`profile-brownfield` → `references/profile-brownfield.md`、`profile-maintenance` → `references/profile-maintenance.md`）：
 

@@ -1,6 +1,6 @@
 # 强度矩阵（表 1 + 表 2）
 
-表 1（constraint × tier 强度）与表 2（profile × tier 的 human-in-loop 场景加成）。由 `field-assessment` 的识别流程（`references/identification-flow.md`「### 5. 注入强度」节）读入；与其他位置的强度表述冲突时，以本文件为准。
+表 1（constraint × tier 强度）与表 2（profile × tier 的 human-in-loop 场景加成）。由 td-* skill 的"步骤 1"按入口 `field-assessment` 的「如何被引用」节读取策略注入——快车道直接读本文件全文；现判路径在 `references/identification-flow.md`「### 5. 注入强度」节读入。与其他位置的强度表述冲突时，以本文件为准。
 
 ## 表 1：5 个 constraint 在 3 个 tier 下的强度
 
@@ -59,7 +59,7 @@ constraint 列为子约束逻辑名，路径同表 1：
 
 ### 表 2 profile-maintenance × tier-large 说明
 
-maintenance × large 下的强度由 tier-large 表 1 行决定（wip-limit 上限 3 / critical-buffer 50% / brooks-law 强制 / delay-decision 强 / human-in-loop + 总体设计文档审阅）。profile-maintenance 只决定流程侧重（轻量 proposal + 生产稳定性），不改变这些强度。
+maintenance × large 下的强度由 tier-large 表 1 行决定（wip-limit 上限 3 / critical-buffer 50% / brooks-law 强制 / delay-decision 强 / human-in-loop + 总体设计文档审阅）。profile-maintenance 只决定流程侧重（轻量 proposal + 生产稳定性），不改变这些强度。该格为「—」不表示生产改动保护在 tier-large 减弱——生产环境改动已属通用基线第 3 类（所有 tier 生效），tier-large 的审阅重心由「总体设计文档审阅」tier 加成覆盖，无 profile 独有加成可列；medium 格的「+ 生产环境改动前」仅是强调，不改变基线已生效的事实。
 
 system-audit 周期性由表 3（`audit-frequency.md`）决定，不在表 2 范围内。
 

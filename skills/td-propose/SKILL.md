@@ -60,7 +60,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
   - 用户已给明确描述 → 检查候选池里是否有语义重合的主条目，有则提示用户"TODO 池里已有近似条目，要不要基于它 propose？"——同一条主条目可以承接多个 change（每个 change 一个子项追加），不算重复建 change。
   - 候选池是 backlog（可以无限多），活跃 change 才是 WIP——池里有候选不构成阻塞，只有活跃 change 数触发 `constraints` 的 `references/wip-limit.md`。
 - **brownfield reverse-spec 检查**（`$_TD_PROFILE` 为单值，与下方 greenfield 检查互斥，仅命中其一）：若 `$_TD_PROFILE == profile-brownfield`，检查 `openspec/specs/` 下是否已有相关分系统的 baseline spec。没有 → 触发 `constraints` 的 `references/human-in-loop.md`，提示用户"你对现有系统还没建立认识，propose 大改动风险高。先 `/td-reverse-spec` 吗？"——用户同意后执行 `/td-reverse-spec` 建立 baseline，完成后回到本步骤继续 propose。
-- **greenfield explore 检查**（同上互斥，仅命中其一）：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空（还没建立初始 spec），检查会话内是否已做过探索。判据：会话历史里是否出现过 `/td-explore` 调用或 `brainstorming` 触发，且产物里含**至少 2 个候选方向**（每个候选方向标注系统工程影响，见 `td-explore` 步骤 4 的产物要求）。没有 → 触发 `constraints` 的 `references/human-in-loop.md`，提示用户"greenfield 最容易犯的错是'想到了就建'。先 `/td-explore` 至少探索 2 个候选方向再 propose 吗？"——用户同意后执行 `/td-explore`，完成后回到本步骤继续 propose。
+- **greenfield explore 检查**（同上互斥，仅命中其一）：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空（还没建立初始 spec），检查会话内是否已做过探索。判据：会话历史里是否出现过 `/td-explore` 调用，且产物里含**至少 2 个候选方向**（每个候选方向标注系统工程影响，见 `td-explore` 步骤 4 的产物要求）。没有 → 触发 `constraints` 的 `references/human-in-loop.md`，提示用户"greenfield 最容易犯的错是'想到了就建'。先 `/td-explore` 至少探索 2 个候选方向再 propose 吗？"——用户同意后执行 `/td-explore`，完成后回到本步骤继续 propose。
 
 ### 4. 创建 change 目录
 
@@ -70,7 +70,7 @@ openspec new change "<name>"
 
 **若本 change 来自 TODO 池条目**（步骤 3 挑中的）：创建后回写 `openspec/todo.md`，在该主条目下**新增一个 change 子项**（格式见 `todo-pool` 的「格式约定」节「条目格式」条）。**不勾选主条目**——勾选是 `td-archive` 的职责（走 `todo-pool` 的「勾选子项」子流程），且要等主条目下全部 change 子项归档后才勾。change 子项是 archive 时定位对应条目的锚点。
 
-**关联方向是 todo.md → change 子项**（todo.md 侧标记"这个 change 来自我"）——change 资产（proposal/design/tasks）仍不得出现对 `openspec/todo.md` 的任何引用（见 Guardrails「提案不引用 TODO 池」）。
+**关联方向是 todo.md → change 子项**（todo.md 侧标记"这个 change 来自我"）——change 资产不得引用 TODO 池（规则见 Guardrails「提案不引用 TODO 池」）。
 
 ### 5. 获取 artifact 构建顺序
 
@@ -84,7 +84,7 @@ openspec status --change "<name>" --json
 
 用任务跟踪工具跟踪进度。循环体对每个 artifact 执行下述四子步，全部 `applyRequires` artifact 走完且必填项全过才进入步骤 7。
 
-**6.a 合并会话内已有探索产物**：若本次会话已产出 `brainstorming` 的 spec 草稿或 `td-explore` 的候选方向评估（对话形式或落盘草稿），把其中的候选方向取舍与"系统工程影响"评估合并进 proposal 骨架，作为 6.c 必填项的输入。没有产物则跳过，直接从 template 构建。
+**6.a 合并会话内已有探索产物**：若本次会话已产出 `td-explore` 的候选方向评估（对话形式交付），把其中的候选方向取舍与"系统工程影响"评估合并进 proposal 骨架，作为 6.c 必填项的输入。没有产物则跳过，直接从 template 构建。
 
 **6.b 创建 artifact**：
 
@@ -120,7 +120,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 **"预期行为模型"字段的执行语义**：
 
 - 这个字段是 `/td-archive` 步骤 3"实际 vs 预期"复盘的对照锚点之一——archive 时要回答"预期行为模型是否被实际行为验证？如果没有，模型需要怎么修正？"
-- 这个字段也是 `/td-apply` 步骤 7.2 系统级验证的输入——系统级验证要验证"预期行为模型"是否在跨分系统整合后仍然成立。
+- 这个字段也是 `/td-apply` 步骤 6.2 系统级验证的输入——系统级验证要验证"预期行为模型"是否在跨分系统整合后仍然成立。
 
 - **proposal.md 必填：tier-large 总体设计文档**
 
@@ -133,7 +133,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 
 （字段定义的单一事实源见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）
 
-没这份文档，proposal 不算 apply-ready。本检查与 `td-apply` 步骤 2 的前置检查对称——tier-large 的总体设计文档必填在 propose 和 apply 两处都校验，避免漏检。
+没这份文档，proposal 不算 apply-ready。
 
 - **proposal.md 必填节：caller impact 分析**（触发命中时必填）
 
@@ -158,7 +158,7 @@ tasks.md 必须：
 - 标注关键链（critical chain）：哪条任务序列是项目的关键路径
 - 留 project buffer：按当前 tier 比例（查表 1 的 critical-buffer 行，会话内已缓存；表 1 见 `field-assessment/references/strength-matrix.md`）
 
-粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `constraints` 的 `references/critical-buffer.md` 的标注规范。
+粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `constraints` 的 `references/critical-buffer.md` 的「识别关键链」节。
 
 **6.d 循环判定**：
 
@@ -179,6 +179,14 @@ openspec status --change "<name>" --json
 架构 review 通过（无 critical）才进入步骤 8。
 
 ### 8. 显示最终状态
+
+先跑一次官方校验，确认 artifact 集合无结构性问题：
+
+```bash
+openspec validate --all --json
+```
+
+解析 JSON 输出：**本 change** 的校验问题 → 回步骤 6 修复对应 artifact 后重跑；其他既有 change 的问题 → 提示用户，不阻塞本流程。通过后显示最终状态：
 
 ```bash
 openspec status --change "<name>"

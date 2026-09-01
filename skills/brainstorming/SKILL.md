@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: "总体设计部"工作方式，苏格拉底式提问提炼 spec，站在系统全局立场。服务主基调第 2、3 条。先问"想达到什么"，别急着给方案。
+description: "总体设计部"工作方式——站在系统全局立场，苏格拉底式提问提炼 spec。
 user-invocable: false
 ---
 
@@ -10,7 +10,6 @@ user-invocable: false
 
 - `system-engineering`
 - `constraints` 的 `references/delay-decision.md`
-- `constraints` 的 `references/human-in-loop.md`
 
 ## 服务的主基调原则
 
@@ -54,12 +53,4 @@ user-invocable: false
 
 "不急着自洽"不等于"永远不自洽"——前者是"信息不足时不要强行闭合"，后者是放弃综合集成。
 
-这与 `constraints` 的 `references/delay-decision.md` 的"可逆决策延迟"是同一原则的两个侧面（权威在 delay-decision）：本 skill 在总体设计部立场允许矛盾并存、不强行闭合 spec。两者在 brainstorming 阶段同时生效——遇到可逆决策时调 `constraints` 的 `references/delay-decision.md`，遇到矛盾时按本节处理。
-
-### 5. 分段呈现 spec，等用户确认
-
-不要一次性 dump 一大段 spec。一段一段给，每段问："这段对吗？要改吗？"
-
-### 6. 保存 spec 文档
-
-brainstorming 收敛到一定程度，把成果写成 spec 文档（给 `/td-propose` 用）。
+这与 `constraints` 的 `references/delay-decision.md` 的"可逆决策延迟"是同一原则的两个侧面（权威在 delay-decision）：本 skill 在总体设计部立场允许矛盾并存、不强行闭合 spec。两者在 brainstorming 阶段同时生效——遇到可逆决策时调 `constraints` 的 `references/delay-decision.md`，遇到矛盾时按本节处理。**在完成候选方向评估后，立即执行 `constraints` 的 `references/delay-decision.md` 检查**，判定与处理路径见该文件的「示例：brainstorming 场景」节。
