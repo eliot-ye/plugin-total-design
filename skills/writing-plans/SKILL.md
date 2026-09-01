@@ -11,7 +11,6 @@ user-invocable: false
 - `constraints` 的 `references/critical-buffer.md`
 - `constraints` 的 `references/delay-decision.md`
 - `field-assessment`
-- `requesting-code-review`
 
 ## 服务的主基调原则
 

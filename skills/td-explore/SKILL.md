@@ -61,7 +61,7 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 **产物要求**：explore 阶段必须产出**至少 2 个候选方向**，每个标注系统工程影响与可逆性（完整评估维度见步骤 5）。产物留在会话上下文里（explore 不落盘 spec，见文末 Guardrails）。`/td-propose` 步骤 3 的"greenfield explore 检查"会读会话历史判定是否已有 ≥2 个候选方向——少于 2 个时 propose 阶段会拦下来要求先 explore。
 
-**与 `constraints` 的 `references/delay-decision.md` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策——不闭合 spec，等更多信息再 propose。当用户想"赶紧 propose 闭合 spec"时，触发 `constraints` 的 `references/delay-decision.md` 提醒："explore 不落盘 spec 是延迟决策的体现，信息不足时强行闭合会损失信息（主基调第 3 条综合集成）。"这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
+**与 `constraints` 的 `references/delay-decision.md` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策（语义与触发提醒见该文件「触发时机」节的"与 `td-explore` 的连接"条）。这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
 
 ### 5. 系统工程视角评估
 

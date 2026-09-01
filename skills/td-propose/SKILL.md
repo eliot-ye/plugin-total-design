@@ -70,7 +70,7 @@ openspec new change "<name>"
 
 **若本 change 来自 TODO 池条目**（步骤 3 挑中的）：创建后回写 `openspec/todo.md`，在该主条目下**新增一个 change 子项**（格式见 `todo-pool` 的「格式约定」节「条目格式」条）。**不勾选主条目**——勾选是 `td-archive` 的职责（走 `todo-pool` 的「勾选子项」子流程），且要等主条目下全部 change 子项归档后才勾。change 子项是 archive 时定位对应条目的锚点。
 
-**关联方向是 todo.md → change 子项**（todo.md 侧标记"这个 change 来自我"）——change 资产（proposal/design/tasks）仍不得出现对 `openspec/todo.md` 的任何引用（见 Guardrails「提案不引用 TODO 池」）。
+**关联方向是 todo.md → change 子项**（todo.md 侧标记"这个 change 来自我"）——change 资产不得引用 TODO 池（规则见 Guardrails「提案不引用 TODO 池」）。
 
 ### 5. 获取 artifact 构建顺序
 
@@ -133,7 +133,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 
 （字段定义的单一事实源见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）
 
-没这份文档，proposal 不算 apply-ready。本检查与 `td-apply` 步骤 2 的前置检查对称——tier-large 的总体设计文档必填在 propose 和 apply 两处都校验，避免漏检。
+没这份文档，proposal 不算 apply-ready。
 
 - **proposal.md 必填节：caller impact 分析**（触发命中时必填）
 

@@ -88,8 +88,6 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
    - **`requesting-code-review`**：checkpoint 时做 review
    - **`verification-before-completion`**：每个任务完成前必须跑验证命令
 
-`executing-plans` 是行为层执行的核心入口，TDD / review / verify 在 `executing-plans` 内部按任务粒度嵌套触发。
-
 ### 5. 触发 apply 全局粒度的工程管理约束
 
 本步骤触发 **apply 全局粒度**的工程管理约束：
@@ -107,8 +105,6 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 触发 `verification-before-completion` 做 change-level 最终验证（全量测试 / lint / build / type check）。
 
 #### 6.2 系统级验证（跨分系统边界，硬步骤）
-
-**执行序列**：读 proposal 的"系统工程影响评估"节列出受影响分系统 → 按 tier 强度逐条跑跨分系统边界验证 → 发现问题触发 `systematic-debugging` 找根因 → root cause 在 plan 之外则停下来问用户。
 
 change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估"节列出的**受影响分系统**，逐条跑**跨分系统边界验证**——验证各分系统整合后的整体行为符合契约，而不只是每个任务局部绿。
 
