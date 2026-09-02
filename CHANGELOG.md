@@ -2,6 +2,16 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.7.1] - 2026-09-02
+
+### Fixed
+
+- **explore 流程伪决策点修复（apply 前机械性打断）**：删除 `td-explore` / `brainstorming` / `delay-decision` / `profile-greenfield` 的候选方向硬性数量要求（"至少 2 个" / "2–3 个"），改为按需产出；决策已闭合、无新信息时不凑方向，正确输出为"没有需要你的决策点，直接继续推进"。`td-propose` greenfield explore 检查判据由"候选方向 ≥2"改为"会话内充分探索"。`human-in-loop` 固化判定优先级：必停基线优先、直接推进是补集——放行需同时满足"未命中必停基线 + 用户已授权继续 + 在已闭合决策框架内"。
+
+### Docs
+
+- 清理候选方向相关的负向描述元注释（"数量不设硬性下限" / "不依赖候选方向数量"等仅声明"曾有下限、现已无"、对使用态 LLM 无执行决策价值的语句）。
+
 ## [1.7.0] - 2026-09-01
 
 ### Changed（行为变更）

@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "total-design",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "A system-engineering design department for your agent: OpenSpec contract layer + Superpowers behavior layer + Qian Xuesen systems-engineering keynote, packed as an atomcode plugin.",
   "author": {
     "name": "Eliot Ye",

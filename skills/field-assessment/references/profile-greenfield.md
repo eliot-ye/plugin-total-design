@@ -14,7 +14,7 @@
 
 ### 1. 先 `/td-explore` 再 `/td-propose`
 
-greenfield 最容易犯的错是"我想到了就建"。explore 至少探索 2 个候选方向，再 propose。
+greenfield 最容易犯的错是"我想到了就建"。先 `/td-explore` 探索充分，再 propose。
 
 ### 2. 初始 spec 建立
 

@@ -1,6 +1,6 @@
 {
   "name": "total-design",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "A system-engineering design department for your agent: OpenSpec contract layer + Superpowers behavior layer + Qian Xuesen systems-engineering keynote, packed as an atomcode plugin.",
   "skills": ["./skills"],
   "commands": ["./commands"],
