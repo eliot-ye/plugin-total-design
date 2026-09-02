@@ -84,8 +84,8 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 1. **`writing-plans`**（若 tasks.md 粒度不够细）：细化任务序列
 2. **`executing-plans`**（按任务序列执行，内部按任务粒度嵌套触发以下 skill）：
-   - **`test-driven-development`**：每个任务先写失败测试，再写实现
-   - **`requesting-code-review`**：checkpoint 时做 review
+   - **`test-driven-development`**：每个任务先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑
+   - **`requesting-code-review`**：checkpoint 时做 review（含与既有风格一致性检查）
    - **`verification-before-completion`**：每个任务完成前必须跑验证命令
 
 ### 5. 触发 apply 全局粒度的工程管理约束

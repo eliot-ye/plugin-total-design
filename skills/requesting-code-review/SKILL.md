@@ -37,6 +37,12 @@ user-invocable: false
 - 错误处理完整吗？
 - 测试覆盖了边界情况吗？
 
+#### Code consistency（与既有风格一致性）
+
+- 新代码与项目既有代码风格 / 命名 / 模块组织一致吗？
+- 沿用了既有实现模式，还是另起一套？
+- 偏离既有风格但 proposal 的"与既有架构/风格的遵循关系"未写明 → warning（字段定义见 `td-propose` 步骤 6.c）
+
 ### 2. Issue 分级
 
 | 严重度 | 含义 | 处理 |
@@ -60,6 +66,10 @@ user-invocable: false
 - DRY：<OK / 问题>
 - 错误处理：<OK / 问题>
 - 测试覆盖：<OK / 问题>
+
+### Code Consistency
+- 与既有风格一致性：<OK / 问题>
+- 实现模式沿用：<OK / 另起一套>
 
 ### Issues
 
