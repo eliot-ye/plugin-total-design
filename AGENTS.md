@@ -51,23 +51,13 @@
 
 ## 三层结构
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  约束层（constraints）                                      │
-│  钱学森系统工程主基调 + Brooks/Goldratt/精益局部规律        │
-│  ← 每个局部动作从整体性能反推；局部优化不能制造全局失调    │
-├─────────────────────────────────────────────────────────────┤
-│  行为层（skills）                                           │
-│  Superpowers 转译：brainstorming→plan→TDD→review→verify     │
-│  ← 强制流程，触发式不靠人盯                                 │
-├─────────────────────────────────────────────────────────────┤
-│  契约层（commands）                                         │
-│  OpenSpec 转译：propose→apply→archive 的 artifact 流        │
-│  ← agree before you build，人和 AI 先对齐建什么             │
-└─────────────────────────────────────────────────────────────┘
-```
+约束层 / 行为层 / 契约层自上而下：
 
-约束层是第零层——是另外两层立起来的前提。`constraints` skill 承载 5 份局部规律 references，每份 references 必须显式声明它服务钱学森系统工程主基调的哪一条。
+- **约束层（constraints）** — 钱学森系统工程主基调 + Brooks / Goldratt / 精益局部规律；每个局部动作从整体性能反推，局部优化不能制造全局失调。
+- **行为层（skills）** — Superpowers 转译的 brainstorming→plan→TDD→review→verify 强制流程；触发式，不靠人盯。
+- **契约层（commands）** — OpenSpec 转译的 propose→apply→archive artifact 流；agree before you build。
+
+约束层是第零层，是另外两层立起来的前提。`constraints` skill 承载 5 份局部规律 references，每份 references 必须显式声明它服务钱学森系统工程主基调的哪一条。
 
 ## 目录结构
 

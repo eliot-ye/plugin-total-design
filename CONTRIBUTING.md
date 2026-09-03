@@ -136,9 +136,9 @@ git push origin feat/<short-description>
 - **profile**（仓库状态）：greenfield / brownfield / maintenance
 - **tier**（系统复杂度）：small / medium / large
 
-两个维度都以 skill 形态存在，agent 根据现场判读激活哪一组。
+两个维度以 `field-assessment` 的 `references/` 变体文件形态存在（3 profile + 3 tier），agent 根据现场判读激活命中的 profile 一份 + tier 一份。强度以 `field-assessment` 表 1（5 个 constraint 强度）、表 2（human-in-loop 加成）、表 3（system-audit 频率）为单一事实源。
 
-**贡献约束**：如果你加新的 profile 或 tier，要同时更新所有相关的 constraint 强度矩阵。
+**贡献约束**：如果你加新的 profile 或 tier，要同时更新 `field-assessment` 表 1/2/3 及 `references/` 下的对应变体文件。
 
 ### 3. 触发式而非 hook 强制
 
@@ -173,7 +173,7 @@ Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读�
 | **无 `profiles` / `tiers` 字段** | 二维配置不能靠 manifest 实现，必须以 skill 形态存在 |
 | skill/command 命名规则 | 1–64 字符；合法字符 `a-zA-Z0-9-_/`；**禁 `:`**；禁首尾斜杠、`//` |
 | skill 形态 | 两种布局都支持：① 目录式 `<dir>/SKILL.md` ② 扁平 `<name>.md`（legacy） |
-| skill frontmatter 字段 | `name` / `description` / `disable_model_invocation` / `user_invocable` / `argument_hint` / `allowed_tools` |
+| skill frontmatter 字段 | `name` / `description` / `disable-model-invocation` / `user-invocable` / `argument-hint` / `allowed-tools`（原子字符，连字符分隔，与 README 与 AGENTS.md 模板一致；下划线变体会被 atomcode 静默忽略） |
 | 命令生态惯例 | 扁平 kebab-case，无冒号 |
 
 ## PR 审查标准
