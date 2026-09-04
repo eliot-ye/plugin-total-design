@@ -18,5 +18,5 @@
 
 ## 与其他 tier 的切换
 
-- 文件数增长到 10+ → 切 `tier-medium`（变体文件 `tier-medium.md`）
-- 系统开始有明显分系统 → 即使文件少，也考虑 `tier-medium`（变体文件 `tier-medium.md`）
+- 命中更高 tier 判据 → 切 `tier-medium`（变体文件 `tier-medium.md`）
+- 判据（文件数 / 团队 / 部署单元 / 分系统边界）见 `identification-flow.md`「### 3. 判读 tier（三选一）」节（单一事实源）

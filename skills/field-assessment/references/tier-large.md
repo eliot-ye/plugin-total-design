@@ -43,5 +43,6 @@ audit 报告里特别关注：
 
 ## 与其他 tier 的切换
 
-- 系统简化到 100 文件以下 → 切 `tier-medium`（变体文件 `tier-medium.md`）
+- 简化到更低 tier → 切 `tier-medium`（变体文件 `tier-medium.md`）
 - 系统拆分成多个独立子系统 → 每个子系统独立定 tier（见 `subsystem-tiering.md`）
+- 判据见 `identification-flow.md`「### 3. 判读 tier（三选一）」节（单一事实源）

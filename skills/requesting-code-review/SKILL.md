@@ -21,13 +21,25 @@ user-invocable: false
 
 ### 1. Review 维度
 
-对被 review 的代码，从两个维度看：
+review 深度由 tasks.md 对应任务的 `风险` 字段决定（风险判据见 `writing-plans` 任务模板）：
+
+- **high** → 全查下方四个维度（安全维度必查）
+- **medium** → 查 Spec compliance / Code quality / Code consistency 三维度；安全维度只查红线（硬编码凭证、关闭鉴权等）
+- **low** → 抽查 Spec compliance
+- 无 `风险` 字段（无 tasks.md 的独立 review 请求）→ 按 medium
 
 #### Spec compliance（契约符合度）
 
 - 代码实现了 tasks.md 里的任务吗？
 - 代码符合 design.md 里的设计决策吗？
 - 代码违反了 proposal 的"系统工程影响评估"里说的边界吗？
+
+#### Security（安全）
+
+- 注入面：命令 / 路径 / SQL / 反序列化？
+- 权限与凭证：硬编码凭证、凭证进日志、鉴权被绕过？
+- 外部输入有校验吗？
+- 敏感数据（个人信息 / 业务数据）暴露或泄漏？
 
 #### Code quality（代码质量）
 
@@ -60,6 +72,9 @@ user-invocable: false
 - [ ] 实现符合 tasks.md
 - [ ] 实现符合 design.md
 - [ ] 实现符合 proposal 系统工程影响评估边界
+
+### Security
+- <OK / 问题 / 不适用（low 风险）>
 
 ### Code Quality
 - 命名：<OK / 问题>
