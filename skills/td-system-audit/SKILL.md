@@ -42,7 +42,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 - **频率触发**：对照表 3（system-audit 频率，按当前 tier 的 project scope / current-change scope 阈值；表 3 见 `field-assessment/references/audit-frequency.md`）。频率事实源在表 3，本 skill 不重写——`td-archive` 步骤 5.2 已维护"累计 archive 计数器"，达阈值即建议。
 - **信号触发**：
   - 用户表达"感觉最近推进不顺利"时
-  - 关键链缓冲被多次压缩后
+  - 关键链缓冲被压缩 2 次以上
 
 ## 步骤
 
@@ -70,11 +70,11 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 ### 4. 输出审计报告
 
-报告同时输出到对话和落盘。落盘路径：`openspec/.td-state/audits/<YYYYMMDD-HHMMSS>-<scope>.md`。目录由本步骤首次运行时按需创建。
+报告同时输出到对话和落盘。落盘路径：`openspec/.td-state/audits/<YYYYMMDD-HHMMSS>-<scope>.md`。
 
 报告按 `references/audit-report-template.md` 的「报告模板」节输出（Scope + 主基调对照表 + 发现的问题 + 建议的下一步动作）。
 
-落盘后，同步更新 `openspec/.td-state/audit-history.yaml`：追加一条本次 audit 的记录。文件格式见 `references/audit-history-template.md`，文件由本步骤首次运行时按需创建。
+落盘后，同步更新 `openspec/.td-state/audit-history.yaml`：追加一条本次 audit 的记录。文件格式见 `references/audit-history-template.md`。
 
 **null 语义**：`audit-history.yaml` 不存在 → 本步骤创建文件并写入首条记录；`audits/` 目录不存在 → 同步创建。
 
