@@ -1,6 +1,6 @@
 ---
 name: requesting-code-review
-description: 任务间的 review，critical issue 阻塞进度。服务主基调第 2 条。触发场景：propose 后、apply 前架构 review；关键链任务 / checkpoint 时；用户要求 review 时。
+description: 架构 review 与任务间代码 review。critical issue 阻塞进度。触发场景：propose 完成后/apply 前；关键链任务 / checkpoint 时；用户要求 review 时。
 user-invocable: false
 ---
 

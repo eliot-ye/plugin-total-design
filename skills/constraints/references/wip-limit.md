@@ -30,7 +30,7 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
    a. 触发 `brooks-law` 强制提醒（加人手前的协调成本反思）。
    b. 触发 `critical-buffer` 评估（并行 change 对关键链 buffer 的影响，见同目录 `critical-buffer.md` 的「隐性 buffer 压缩」节）。
    c. 调 `human-in-loop` 第 6 类执行"显式确认风险"回路（`human-in-loop` 在本回路里只做"描述风险 + 列选项 + 等用户确认"，序列由本节编排）。
-   d. 用户确认后，在 change 的 `proposal.md` 里记录"override WIP 上限，用户已确认风险"——作为后续 `/td-system-audit` 的输入。
+   d. 用户确认后，在 change 的 `proposal.md` 里记录"override WIP 上限，用户已确认风险"——作为后续 `/td-system-audit` 的输入。同一步骤 a 中 `brooks-law` 的加人手确认由 `brooks-law` 自行落点（`design.md` 作为"已知风险"，非 override 场景的加人手确认）；override 场景的 WIP 确认由本文件落点（`proposal.md`）——两处落点不冲突。
    e. 才继续执行后续步骤。
 
 ## 触发时机
