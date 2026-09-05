@@ -1,6 +1,6 @@
 ---
 name: td-reverse-spec
-description: 中途接手项目专用：先 reverse-spec 已有代码，再 propose 改动。触发场景：用户说"接手项目"、"reverse spec"、"反推 spec"、"看现有代码"、"刚接手这个库"。
+description: 中途接手项目：承接 baseline 与代码漂移后的定向刷新。触发场景：用户说"接手项目"、"reverse spec"、"反推 spec"、"看现有代码"、"刚接手这个库"、"spec 和代码对不上"
 user-invocable: true
 argument-hint: <existing-codebase-path or empty for cwd>
 ---
@@ -8,6 +8,8 @@ argument-hint: <existing-codebase-path or empty for cwd>
 # td-reverse-spec
 
 中途接手已有代码库时，直接 `/td-propose` 改动很危险——你不知道现有代码在 spec 层是什么样子。reverse-spec 先从代码反推 spec，建立 baseline，再在 baseline 上 propose 改动。
+
+**入口契约（第二入口：漂移定向刷新）**：除"中途接手"首次建立 baseline 外，`td-system-audit` 步骤 6 在"baseline spec 与代码漂移"确认后调用本 skill 做定向刷新：只对检出的漂移分系统执行反推（步骤 4，分系统边界也已变化时先重走步骤 3），用新反推结果**覆盖更新**其 `openspec/specs/<subsystem>/spec.md`；该分系统有未归档 change 触及时，先完成 archive 再刷新（避免与 archive sync 双写冲突）。
 
 ## 依赖技能
 

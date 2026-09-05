@@ -1,6 +1,6 @@
 ---
 name: test-driven-development
-description: RED-GREEN-REFACTOR，删除先于测试写的代码——测试是系统行为的契约。触发场景：用户写任何代码之前；说"我先把代码写了，再加测试"时立即阻止。
+description: RED-GREEN-REFACTOR，删除先于测试写的代码——测试是系统行为的契约。
 user-invocable: false
 ---
 

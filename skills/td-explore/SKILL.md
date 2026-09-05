@@ -1,6 +1,6 @@
 ---
 name: td-explore
-description: 不带 stakes 的思考伙伴，写代码前先探索。OpenSpec 契约层入口，需求不清时的主入口。触发场景：用户说"想探索"、"explore"、"先想想"、"不确定要建什么"、"帮我想清楚 X"。用户想 build/fix/重构但需求不清时，优先路由到这里。
+description: 不带 stakes 的思考伙伴，需求不清时的主入口。触发场景：用户说"探索"、"explore"、"先想想"、"帮我想清楚 X"。用户想 build/fix/重构但需求不清时，优先路由到这里
 user-invocable: true
 argument-hint: <topic or question>
 ---

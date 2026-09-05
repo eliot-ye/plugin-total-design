@@ -1,6 +1,6 @@
 ---
 name: td-propose
-description: 创建 change，生成 proposal/design/tasks artifact。OpenSpec 契约层入口。触发场景：用户说"提一个 change"、"propose"、"开个新改动"、"建 proposal"、"想建 X 功能"。
+description: 创建 change，生成 proposal/design/tasks artifact。触发场景：用户说"提一个 change"、"propose"、"建 proposal"、"想建 X 功能"。
 user-invocable: true
 argument-hint: <change-name or description>
 ---

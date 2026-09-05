@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: "总体设计部"工作方式——站在系统全局立场，苏格拉底式提问提炼 spec。
+description: 总体设计部工作方式——站在系统全局立场，提问提炼 spec。
 user-invocable: false
 ---
 

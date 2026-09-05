@@ -1,6 +1,6 @@
 ---
 name: td-apply
-description: 实施任务，按 artifact 走。OpenSpec 契约层入口。触发场景：用户说"apply"、"实施"、"开始写代码"、"按 change 干"、"执行 tasks"、"开始执行"、"go"。执行入口统一走本 skill，行为层 executing-plans 由本流程内部调用。
+description: 实施任务，按 artifact 走。OpenSpec 契约层入口。触发场景：用户说"apply"、"实施"、"按 change 干"、"执行 tasks"、"开始执行"、"go"
 user-invocable: true
 argument-hint: <change-name>
 ---
