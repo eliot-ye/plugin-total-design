@@ -57,38 +57,56 @@ git checkout -b fix/<short-description>
 
 ```bash
 # 检查 plugin.json 是合法 JSON
-python3 -c "import json; json.load(open('plugin.json'))"
+node -e 'JSON.parse(require("fs").readFileSync("plugin.json", "utf8")); console.log("OK plugin.json")'
 
 # 检查所有 SKILL.md 有 frontmatter + 必填字段
-python3 -c "
-import os
-for root, dirs, files in os.walk('skills'):
-    for fn in files:
-        if fn == 'SKILL.md':
-            p = os.path.join(root, fn)
-            with open(p) as f: c = f.read()
-            assert c.startswith('---'), f'{p}: no frontmatter'
-            end = c.find('---', 3)
-            assert end != -1, f'{p}: unterminated frontmatter'
-            fm = c[3:end]
-            for k in ['name', 'description']:
-                assert k + ':' in fm, f'{p}: missing {k}'
-            print(f'OK {p}')
-"
+node - <<'EOF'
+const fs = require('fs');
+function* walk(dir) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = dir + '/' + e.name;
+    if (e.isDirectory()) yield* walk(p);
+    else if (e.name === 'SKILL.md') yield p;
+  }
+}
+for (const p of walk('skills')) {
+  const c = fs.readFileSync(p, 'utf8');
+  if (!c.startsWith('---')) throw new Error(`${p}: no frontmatter`);
+  const end = c.indexOf('---', 3);
+  if (end === -1) throw new Error(`${p}: unterminated frontmatter`);
+  const fm = c.slice(3, end);
+  for (const k of ['name', 'description']) {
+    if (!fm.includes(k + ':')) throw new Error(`${p}: missing ${k}`);
+  }
+  console.log(`OK ${p}`);
+}
+EOF
 
 # 检查所有命令文件名带 td- 前缀
 ls commands/ | grep -v ^td- && echo "FAIL: command without td- prefix" || echo "OK: all commands have td- prefix"
 
 # 检查无冒号在 skill / command 名
-python3 -c "
-import os
-for d in ['skills', 'commands']:
-    for root, dirs, files in os.walk(d):
-        for fn in files:
-            if ':' in fn:
-                print(f'FAIL {root}/{fn}: colon in filename')
-print('OK: no colons')
-"
+node - <<'EOF'
+const fs = require('fs');
+function* walk(dir) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = dir + '/' + e.name;
+    if (e.isDirectory()) yield* walk(p);
+    else yield p;
+  }
+}
+let bad = false;
+for (const d of ['skills', 'commands']) {
+  for (const p of walk(d)) {
+    if (p.includes(':')) {
+      console.log(`FAIL ${p}: colon in filename`);
+      bad = true;
+    }
+  }
+}
+if (bad) process.exit(1);
+console.log('OK: no colons');
+EOF
 ```
 
 ### 5. Commit
@@ -208,7 +226,7 @@ Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读�
 ### Markdown 风格
 
 - 标题用 `#` / `##` / `###`，不跳级
-- 代码块标语言（` ```bash ` / ` ```python ` / ` ```markdown `）
+- 代码块标语言（` ```bash ` / ` ```javascript ` / ` ```markdown `）
 - 表格用标准 markdown 表格语法（`|` 分隔）
 - 不用 HTML 标签
 

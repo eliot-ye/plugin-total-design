@@ -4,7 +4,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "python3 \"${ATOMCODE_PLUGIN_ROOT}/hooks/td_state_sync.py\"",
+          "command": "node \"${ATOMCODE_PLUGIN_ROOT}/hooks/td_state_sync.js\"",
           "timeout": 10
         }
       ]

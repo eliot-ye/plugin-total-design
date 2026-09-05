@@ -79,7 +79,7 @@ total-design/
 │
 └── hooks/                   ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
     ├── hooks.json           ← hook 声明（plugin.json 的 "hooks" 字段指向本文件）
-    └── td_state_sync.py     ← 会话结束时从文件系统事实校正 .td-state/ 状态文件
+    └── td_state_sync.js     ← 会话结束时从文件系统事实校正 .td-state/ 状态文件（Node ≥20.19.0，与 OpenSpec CLI 一致）
 ```
 
 ## 编辑规则
@@ -273,7 +273,9 @@ manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
 
 Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读触发，不靠 hook 强制。
 
-**例外——状态持久化 hook**：`hooks/td_state_sync.py` 是唯一允许的 hook（`SessionEnd` 事件）。它不做任何流程强制，只在会话结束时从文件系统事实校正 `.td-state/` 状态文件（`archive-counter.yaml` 按 `archive/` 目录重算、`audit-history.yaml` 补缺失报告记录）——这是"防 agent 漏写状态"的兜底，不是流程门禁，与触发式哲学不冲突。
+**例外——状态持久化 hook**：`hooks/td_state_sync.js` 是唯一允许的 hook（`SessionEnd` 事件）。它不做任何流程强制，只在会话结束时从文件系统事实校正 `.td-state/` 状态文件（`archive-counter.yaml` 按 `archive/` 目录重算、`audit-history.yaml` 补缺失报告记录）——这是"防 agent 漏写状态"的兜底，不是流程门禁，与触发式哲学不冲突。
+
+实现用 Node（CJS + `node:` 内置模块，零依赖、零构建、无 package.json），与 OpenSpec CLI 的 Node 运行时一致——用户装 OpenSpec 即已满足 hook 的运行时要求，不引入第二个解释器。hook 脚本新增或改写前，必须先在临时 fixture 上对照旧实现逐字节比对产出（状态文件是持久数据，等价性不能靠读代码判断）。
 
 atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.json 的 `hooks` 字段接受路径字符串（本 plugin 用 `"./hooks/hooks.json"`），文件内为 `{ "<Event>": [{ "hooks": [{ "type": "command", "command": "...", "timeout": <s> }] }] }`。事件名大小写不敏感（`SessionEnd` / `session_end` 等价）。hook 经 stdin 收 JSON、stdout 决定处理；命令串可用 `${ATOMCODE_PLUGIN_ROOT}` / `${CLAUDE_PLUGIN_ROOT}` 环境变量指向 plugin 安装目录。**Hook 需信任后才激活**：安装时告知不运行，`atomcode plugin trust <name>` 授权后下次 session 生效；插件更新后 hook 命令哈希变更会失效，需重新 trust。
 

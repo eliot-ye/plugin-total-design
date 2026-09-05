@@ -43,7 +43,7 @@ AI coding agent 的失控不是"模型不够强"，是**没有工程纪律**：
 
 ## 安装
 
-**前置：** [atomcode](https://github.com/atomcode) 已装并运行；OpenSpec CLI：`npm install -g @fission-ai/openspec@latest`
+**前置：** [atomcode](https://github.com/atomcode) 已装并运行；Node.js ≥20.19.0（OpenSpec CLI 与 SessionEnd hook 共用同一运行时）；OpenSpec CLI：`npm install -g @fission-ai/openspec@latest`
 
 **Marketplace 安装：**
 
