@@ -4,12 +4,26 @@
 
 ## 项目身份
 
-这是一个 **atomcode plugin**，不是一个应用项目，也不是一个代码项目。
+这是一个 **code agent skill plugin**，不是一个应用项目，也不是一个代码项目。
 
-- **产出形态**：一组 Markdown 文件（`SKILL.md` / 命令文件）+ 一个 `plugin.json` manifest（.atomcode-plugin/plugin.json）
-- **运行方式**：用户通过 atomcode marketplace 安装本 plugin，装上后 agent 自动加载 skills 和 commands
+- **产出形态**：一组 Markdown 文件（`SKILL.md` / 命令文件）+ 一个 `plugin.json` manifest（`.claude-plugin/plugin.json`）+ 一个跨平台元数据清单（根目录 `plugin.json`，Agent Plugins 1.0.0）+ 一个 Pi `package.json`
+- **运行方式**：用户通过 marketplace 安装本 plugin——atomcode / Claude Code 走 git marketplace；Pi 走 `pi install git:<repo-url>` 走 package.json；其他遵循 Agent Plugins 1.0.0 标准的客户端通过根 `plugin.json` 识别；装上后 agent 自动加载 skills 和 commands
 - **没有可执行代码**：所有"逻辑"都是 Markdown 指令，由 agent 读取并执行
 - **内容消费者**：这是 code agent skill plugin，需要考虑 SKILL 是否符合 LLM 的理解
+
+### 支持的 code agent
+
+本 plugin 通过多平台 manifest 并存策略同时覆盖下列 code agent——一份 `skills/` 资产在各平台各自被原生加载器识别，不依赖任何单一平台的扩展能力：
+
+| Code agent | 加载清单位置 | 分发方式 | 加载组件 |
+|---|---|---|---|
+| **atomcode** | `.claude-plugin/plugin.json`（走 CC 兼容路径） | git marketplace（`/plugin marketplace add`） | skills + commands + hooks |
+| **Claude Code** | `.claude-plugin/plugin.json` | git marketplace（`claude plugin marketplace add` 或 `--plugin-dir`） | skills + commands + hooks |
+| **Pi Agent** | `package.json` 的 `pi.skills` 字段 | `pi install git:<repo-url>` | skills（Pi 无命令系统，slash 调用格式为 `/skill:td-xxx`） |
+
+**开放标准支持**：本 plugin 符合 [Agent Plugins 1.0.0 规范](https://agent-plugins.org/specification)——根目录 `plugin.json` 的 `$schema` 字段声明 conformance。任何遵循该标准的客户端都能通过根 `plugin.json` 识别并加载 `skills/` 目录（v1 定义 skills + mcp.json 两种组件，`commands/` 目录不在 v1 规范内）。
+
+**分发路径与 skills 目录**：所有平台共享仓库根目录的 `skills/`（18 个 skill）——各平台各自扫描，不需要副本或 symlink。`commands/`（8 个命令文件）仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载（Agent Plugins 1.0.0 v1 未定义 commands 组件）。
 
 ## 依赖图谱与分析
 
@@ -63,7 +77,7 @@
 
 ```
 total-design/
-├── .atomcode-plugin/
+├── .claude-plugin/          ← Claude Code / atomcode 共用加载清单（atomcode 加载器搜索顺序：.atomcode-plugin → .claude-plugin，本 plugin 只保留后者）
 │   ├── marketplace.json
 │   └── plugin.json
 ├── README.md
@@ -73,6 +87,7 @@ total-design/
 ├── LICENSE
 ├── .gitignore
 ├── plugin.json             ← 根目录 Agent Plugins 1.0.0 清单（跨平台元数据：$schema/name/version/description/author）
+├── package.json            ← Pi Agent package（pi.skills 指向 ./skills）
 │
 ├── skills/                  ← 18 个 skill（profile/tier 变体在 field-assessment/references/ 下；5 个局部规律变体在 constraints/references/ 下）
 ├── commands/                ← 8 个 command
@@ -188,18 +203,26 @@ args: none|option|required
 
 ### plugin.json 编辑
 
-manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
+**多平台 plugin manifest 分布**（本 plugin 走「多 manifest 并存」策略，避免依赖任何单一平台的加载器扩展能力）：
+
+| 位置 | 服务对象 | 角色 |
+|---|---|---|
+| `.claude-plugin/plugin.json` | Claude Code + atomcode | 加载清单（skills / commands / hooks 资产字段）——atomcode 加载器搜索顺序 `.atomcode-plugin → .claude-plugin`，本 plugin 只保留后者，走 CC 兼容路径 |
+| `.claude-plugin/marketplace.json` | Claude Code + atomcode | git marketplace 声明 |
+| 根 `plugin.json` | Agent Plugins 1.0.0 生态（含所有遵循该标准的客户端） | Agent Plugins 1.0.0 跨平台元数据（`$schema` / `name` / `version` / `description` / `author`）——遵循该标准的客户端通过此清单识别并加载 `skills/` 目录 |
+| `package.json` | Pi Agent | `pi.skills` 字段指向 `./skills` |
 
 - 只接受 JSON（不接受 YAML）
-- 合法字段：`name` / `version` / `description` / `skills` / `commands` / `hooks`
-- **`skills` / `commands` 字段是路径数组**，本 plugin 用 `["./skills"]` / `["./commands"]`，加载器会自动递归发现所有 `SKILL.md` 和命令文件
+- `.claude-plugin/plugin.json` 合法字段（Claude Code + atomcode 兼容并集）：`name` / `version` / `description` / `skills` / `commands` / `hooks`
+- **`skills` / `commands` 字段接受字符串或路径数组**，本 plugin 用字符串 `"./skills"` / `"./commands"`（字符串形态是 atomcode 原生支持，Claude Code 也识别为"追加默认路径"）
 - **没有 `constraints` / `profiles` / `tiers` 字段**——这些必须以 skill 形态存在
+- **根 `plugin.json` schema 是 closed**（Agent Plugins 1.0.0 官方规范）：只允许 `$schema` / `name` / `version` / `description` / `author` / `homepage` / `repository` / `license` / `keywords` / `extensions`；v1 定义只有 `skills/` + `mcp.json` 两种组件——本 plugin 的 `commands/` 目录仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载
 
-**根目录 `plugin.json`（Agent Plugins 1.0.0 清单）**：根目录另有遵循 [Agent Plugins 1.0.0 规范](https://agent-plugins.org/schemas/1.0.0/plugin.schema.json) 的 `plugin.json`（`$schema` 字段指向该 schema），声明跨平台元数据（`$schema` / `name` / `version` / `description` / `author`），与 `.atomcode-plugin/plugin.json` 的 atomcode 加载清单（skills / commands / hooks 资产字段）角色不同、字段集不同——atomcode 加载器认 `.atomcode-plugin/plugin.json`，根目录清单服务 Agent Plugins 规范生态的互认。两份清单的 `name` / `version` / `description` 必须保持一致，version bump 时同步（见下方版本发布流程）。
+**多平台 manifest 一致性**：四处清单的 `name` / `version` / `description` 必须完全一致，version bump 时同步（见下方版本发布流程）。description 保持纯 ASCII（atomcode TUI plugin manager 按字节下标切截断，多字节字符会导致 panic）。
 
 ### 版本发布流程（version bump 与发布文档同步）
 
-**任何 `version` 变更（根目录 `plugin.json` + `.atomcode-plugin/plugin.json` + `marketplace.json` 同步 bump）必须与 CHANGELOG.md、RELEASE_NOTES.md 的更新在同一个逻辑变更内完成**——不允许只 bump 版本不更新发布文档。版本号在三处必须一致（根目录 `plugin.json` / `.atomcode-plugin/plugin.json` / `marketplace.json`，description 保持纯 ASCII）。
+**任何 `version` 变更（四处清单同步 bump：根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`）必须与 CHANGELOG.md、RELEASE_NOTES.md 的更新在同一个逻辑变更内完成**——不允许只 bump 版本不更新发布文档。版本号在四处必须一致，`description` 字段也必须完全一致（保持纯 ASCII，atomcode TUI plugin manager 按字节下标切截断，多字节字符会导致 panic）。
 
 - **CHANGELOG.md**：按 Keep a Changelog 格式在文件顶部新增当前版本条目（最新在上），按 Fixed / Changed / Docs 等类别记录；历史条目只读，不修改（过时的"发布提示"类临时标注可更新为已结清状态，但不改动已发布的变更记录）。
 - **RELEASE_NOTES.md**：更新为当前版本发布说明——本版本定位（新增/修复/重构版）、行为变更表（升级用户感知的差异）、升级步骤（bump 版本号同步）、完整变更列表指向 CHANGELOG 对应条目。
