@@ -1,10 +1,15 @@
 {
-  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "total-design",
-  "version": "1.8.0",
   "description": "A system-engineering design department for your coding agent. OpenSpec contract layer + Superpowers behavior layer + Qian Xuesen systems-engineering keynote.",
+  "version": "1.8.0",
   "author": {
     "name": "Eliot Ye",
     "email": "eliot_ye@163.com"
-  }
+  },
+  "homepage": "https://atomgit.com/eliot-ye/plugin-total-design",
+  "repository": "https://atomgit.com/eliot-ye/plugin-total-design",
+  "license": "MIT",
+  "skills": "./skills",
+  "commands": "./commands",
+  "hooks": "./hooks/hooks.json"
 }

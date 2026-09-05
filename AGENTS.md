@@ -4,12 +4,26 @@
 
 ## 项目身份
 
-这是一个 **atomcode plugin**，不是一个应用项目，也不是一个代码项目。
+这是一个 **code agent skill plugin**，不是一个应用项目，也不是一个代码项目。
 
-- **产出形态**：一组 Markdown 文件（`SKILL.md` / 命令文件）+ 一个 `plugin.json` manifest（.atomcode-plugin/plugin.json）
-- **运行方式**：用户通过 atomcode marketplace 安装本 plugin，装上后 agent 自动加载 skills 和 commands
+- **产出形态**：一组 Markdown 文件（`SKILL.md` / 命令文件）+ 一个 `plugin.json` manifest（`.claude-plugin/plugin.json`）+ 一个跨平台元数据清单（根目录 `plugin.json`，Agent Plugins 1.0.0）+ 一个 Pi `package.json`
+- **运行方式**：用户通过 marketplace 安装本 plugin——atomcode / Claude Code 走 git marketplace；Pi 走 `pi install git:<repo-url>` 走 package.json；其他遵循 Agent Plugins 1.0.0 标准的客户端通过根 `plugin.json` 识别；装上后 agent 自动加载 skills 和 commands
 - **没有可执行代码**：所有"逻辑"都是 Markdown 指令，由 agent 读取并执行
 - **内容消费者**：这是 code agent skill plugin，需要考虑 SKILL 是否符合 LLM 的理解
+
+### 支持的 code agent
+
+本 plugin 通过多平台 manifest 并存策略同时覆盖下列 code agent——一份 `skills/` 资产在各平台各自被原生加载器识别，不依赖任何单一平台的扩展能力：
+
+| Code agent | 加载清单位置 | 分发方式 | 加载组件 |
+|---|---|---|---|
+| **atomcode** | `.claude-plugin/plugin.json`（走 CC 兼容路径） | git marketplace（`/plugin marketplace add`） | skills + commands + hooks |
+| **Claude Code** | `.claude-plugin/plugin.json` | git marketplace（`claude plugin marketplace add` 或 `--plugin-dir`） | skills + commands + hooks |
+| **Pi Agent** | `package.json` 的 `pi.skills` 字段 | `pi install git:<repo-url>` | skills（Pi 无命令系统，slash 调用格式为 `/skill:td-xxx`） |
+
+**开放标准支持**：本 plugin 符合 [Agent Plugins 1.0.0 规范](https://agent-plugins.org/specification)——根目录 `plugin.json` 的 `$schema` 字段声明 conformance。任何遵循该标准的客户端都能通过根 `plugin.json` 识别并加载 `skills/` 目录（v1 定义 skills + mcp.json 两种组件，`commands/` 目录不在 v1 规范内）。
+
+**分发路径与 skills 目录**：所有平台共享仓库根目录的 `skills/`（18 个 skill）——各平台各自扫描，不需要副本或 symlink。`commands/`（8 个命令文件）仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载（Agent Plugins 1.0.0 v1 未定义 commands 组件）。
 
 ## 依赖图谱与分析
 
@@ -51,29 +65,19 @@
 
 ## 三层结构
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  约束层（constraints）                                      │
-│  钱学森系统工程主基调 + Brooks/Goldratt/精益局部规律        │
-│  ← 每个局部动作从整体性能反推；局部优化不能制造全局失调    │
-├─────────────────────────────────────────────────────────────┤
-│  行为层（skills）                                           │
-│  Superpowers 转译：brainstorming→plan→TDD→review→verify     │
-│  ← 强制流程，触发式不靠人盯                                 │
-├─────────────────────────────────────────────────────────────┤
-│  契约层（commands）                                         │
-│  OpenSpec 转译：propose→apply→archive 的 artifact 流        │
-│  ← agree before you build，人和 AI 先对齐建什么             │
-└─────────────────────────────────────────────────────────────┘
-```
+约束层 / 行为层 / 契约层自上而下：
 
-约束层是第零层——是另外两层立起来的前提。`constraints` skill 承载 5 份局部规律 references，每份 references 必须显式声明它服务钱学森系统工程主基调的哪一条。
+- **约束层（constraints）** — 钱学森系统工程主基调 + Brooks / Goldratt / 精益局部规律；每个局部动作从整体性能反推，局部优化不能制造全局失调。
+- **行为层（skills）** — Superpowers 转译的 brainstorming→plan→TDD→review→verify 强制流程；触发式，不靠人盯。
+- **契约层（commands）** — OpenSpec 转译的 propose→apply→archive artifact 流；agree before you build。
+
+约束层是第零层，是另外两层立起来的前提。`constraints` skill 承载 5 份局部规律 references，每份 references 必须显式声明它服务钱学森系统工程主基调的哪一条。
 
 ## 目录结构
 
 ```
 total-design/
-├── .atomcode-plugin/
+├── .claude-plugin/          ← Claude Code / atomcode 共用加载清单（atomcode 加载器搜索顺序：.atomcode-plugin → .claude-plugin，本 plugin 只保留后者）
 │   ├── marketplace.json
 │   └── plugin.json
 ├── README.md
@@ -83,13 +87,14 @@ total-design/
 ├── LICENSE
 ├── .gitignore
 ├── plugin.json             ← 根目录 Agent Plugins 1.0.0 清单（跨平台元数据：$schema/name/version/description/author）
+├── package.json            ← Pi Agent package（pi.skills 指向 ./skills）
 │
 ├── skills/                  ← 18 个 skill（profile/tier 变体在 field-assessment/references/ 下；5 个局部规律变体在 constraints/references/ 下）
 ├── commands/                ← 8 个 command
 │
 └── hooks/                   ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
     ├── hooks.json           ← hook 声明（plugin.json 的 "hooks" 字段指向本文件）
-    └── td_state_sync.py     ← 会话结束时从文件系统事实校正 .td-state/ 状态文件
+    └── td_state_sync.js     ← 会话结束时从文件系统事实校正 .td-state/ 状态文件（Node ≥20.19.0，与 OpenSpec CLI 一致）
 ```
 
 ## 编辑规则
@@ -198,18 +203,26 @@ args: none|option|required
 
 ### plugin.json 编辑
 
-manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
+**多平台 plugin manifest 分布**（本 plugin 走「多 manifest 并存」策略，避免依赖任何单一平台的加载器扩展能力）：
+
+| 位置 | 服务对象 | 角色 |
+|---|---|---|
+| `.claude-plugin/plugin.json` | Claude Code + atomcode | 加载清单（skills / commands / hooks 资产字段）——atomcode 加载器搜索顺序 `.atomcode-plugin → .claude-plugin`，本 plugin 只保留后者，走 CC 兼容路径 |
+| `.claude-plugin/marketplace.json` | Claude Code + atomcode | git marketplace 声明 |
+| 根 `plugin.json` | Agent Plugins 1.0.0 生态（含所有遵循该标准的客户端） | Agent Plugins 1.0.0 跨平台元数据（`$schema` / `name` / `version` / `description` / `author`）——遵循该标准的客户端通过此清单识别并加载 `skills/` 目录 |
+| `package.json` | Pi Agent | `pi.skills` 字段指向 `./skills` |
 
 - 只接受 JSON（不接受 YAML）
-- 合法字段：`name` / `version` / `description` / `skills` / `commands` / `hooks`
-- **`skills` / `commands` 字段是路径数组**，本 plugin 用 `["./skills"]` / `["./commands"]`，加载器会自动递归发现所有 `SKILL.md` 和命令文件
+- `.claude-plugin/plugin.json` 合法字段（Claude Code + atomcode 兼容并集）：`name` / `version` / `description` / `skills` / `commands` / `hooks`
+- **`skills` / `commands` 字段接受字符串或路径数组**，本 plugin 用字符串 `"./skills"` / `"./commands"`（字符串形态是 atomcode 原生支持，Claude Code 也识别为"追加默认路径"）
 - **没有 `constraints` / `profiles` / `tiers` 字段**——这些必须以 skill 形态存在
+- **根 `plugin.json` schema 是 closed**（Agent Plugins 1.0.0 官方规范）：只允许 `$schema` / `name` / `version` / `description` / `author` / `homepage` / `repository` / `license` / `keywords` / `extensions`；v1 定义只有 `skills/` + `mcp.json` 两种组件——本 plugin 的 `commands/` 目录仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载
 
-**根目录 `plugin.json`（Agent Plugins 1.0.0 清单）**：根目录另有遵循 [Agent Plugins 1.0.0 规范](https://agent-plugins.org/schemas/1.0.0/plugin.schema.json) 的 `plugin.json`（`$schema` 字段指向该 schema），声明跨平台元数据（`$schema` / `name` / `version` / `description` / `author`），与 `.atomcode-plugin/plugin.json` 的 atomcode 加载清单（skills / commands / hooks 资产字段）角色不同、字段集不同——atomcode 加载器认 `.atomcode-plugin/plugin.json`，根目录清单服务 Agent Plugins 规范生态的互认。两份清单的 `name` / `version` / `description` 必须保持一致，version bump 时同步（见下方版本发布流程）。
+**多平台 manifest 一致性**：四处清单的 `name` / `version` / `description` 必须完全一致，version bump 时同步（见下方版本发布流程）。description 保持纯 ASCII（atomcode TUI plugin manager 按字节下标切截断，多字节字符会导致 panic）。
 
 ### 版本发布流程（version bump 与发布文档同步）
 
-**任何 `version` 变更（根目录 `plugin.json` + `.atomcode-plugin/plugin.json` + `marketplace.json` 同步 bump）必须与 CHANGELOG.md、RELEASE_NOTES.md 的更新在同一个逻辑变更内完成**——不允许只 bump 版本不更新发布文档。版本号在三处必须一致（根目录 `plugin.json` / `.atomcode-plugin/plugin.json` / `marketplace.json`，description 保持纯 ASCII）。
+**任何 `version` 变更（四处清单同步 bump：根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`）必须与 CHANGELOG.md、RELEASE_NOTES.md 的更新在同一个逻辑变更内完成**——不允许只 bump 版本不更新发布文档。版本号在四处必须一致，`description` 字段也必须完全一致（保持纯 ASCII，atomcode TUI plugin manager 按字节下标切截断，多字节字符会导致 panic）。
 
 - **CHANGELOG.md**：按 Keep a Changelog 格式在文件顶部新增当前版本条目（最新在上），按 Fixed / Changed / Docs 等类别记录；历史条目只读，不修改（过时的"发布提示"类临时标注可更新为已结清状态，但不改动已发布的变更记录）。
 - **RELEASE_NOTES.md**：更新为当前版本发布说明——本版本定位（新增/修复/重构版）、行为变更表（升级用户感知的差异）、升级步骤（bump 版本号同步）、完整变更列表指向 CHANGELOG 对应条目。
@@ -283,7 +296,9 @@ manifest 文件位于 `.atomcode-plugin/plugin.json`，被 atomcode 使用。
 
 Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读触发，不靠 hook 强制。
 
-**例外——状态持久化 hook**：`hooks/td_state_sync.py` 是唯一允许的 hook（`SessionEnd` 事件）。它不做任何流程强制，只在会话结束时从文件系统事实校正 `.td-state/` 状态文件（`archive-counter.yaml` 按 `archive/` 目录重算、`audit-history.yaml` 补缺失报告记录）——这是"防 agent 漏写状态"的兜底，不是流程门禁，与触发式哲学不冲突。
+**例外——状态持久化 hook**：`hooks/td_state_sync.js` 是唯一允许的 hook（`SessionEnd` 事件）。它不做任何流程强制，只在会话结束时从文件系统事实校正 `.td-state/` 状态文件（`archive-counter.yaml` 按 `archive/` 目录重算、`audit-history.yaml` 补缺失报告记录）——这是"防 agent 漏写状态"的兜底，不是流程门禁，与触发式哲学不冲突。
+
+实现用 Node（CJS + `node:` 内置模块，零依赖、零构建、无 package.json），与 OpenSpec CLI 的 Node 运行时一致——用户装 OpenSpec 即已满足 hook 的运行时要求，不引入第二个解释器。hook 脚本新增或改写前，必须先在临时 fixture 上对照旧实现逐字节比对产出（状态文件是持久数据，等价性不能靠读代码判断）。
 
 atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.json 的 `hooks` 字段接受路径字符串（本 plugin 用 `"./hooks/hooks.json"`），文件内为 `{ "<Event>": [{ "hooks": [{ "type": "command", "command": "...", "timeout": <s> }] }] }`。事件名大小写不敏感（`SessionEnd` / `session_end` 等价）。hook 经 stdin 收 JSON、stdout 决定处理；命令串可用 `${ATOMCODE_PLUGIN_ROOT}` / `${CLAUDE_PLUGIN_ROOT}` 环境变量指向 plugin 安装目录。**Hook 需信任后才激活**：安装时告知不运行，`atomcode plugin trust <name>` 授权后下次 session 生效；插件更新后 hook 命令哈希变更会失效，需重新 trust。
 

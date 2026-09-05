@@ -2,6 +2,41 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.8.0] - 2026-09-05
+
+### Added
+
+- **多平台支持（Claude Code + Pi Agent）**：加载清单由 `.atomcode-plugin/` 迁移到 `.claude-plugin/`（atomcode 加载器搜索顺序 `.atomcode-plugin → .claude-plugin`，本 plugin 走 CC 兼容路径），新增根目录 `package.json`（Pi Agent 的 `pi.skills` 指向 `./skills`）。三个平台共享仓库根目录同一份 `skills/`（18 个 skill），无副本无 symlink。README 补三平台安装 / 信任 / 命令前缀差异说明，AGENTS.md 补「支持的 code agent」表与四处 manifest 一致性规则。
+- **review Security 维度**：`requesting-code-review` 新增安全维度（注入面 / 凭证与权限 / 外部输入校验 / 敏感数据暴露）与报告字段。
+- **风险驱动的 review 深度分档**：`requesting-code-review` 按 tasks.md 任务的 `风险` 字段分档——high 全查四维度（安全维度必查）、medium 查三维度 + 安全红线、low 抽查 Spec compliance、无 `风险` 字段的独立 review 请求按 medium，落点 `writing-plans` 的「风险 → review 深度」契约。
+- **baseline 漂移定向刷新闭环**：`td-system-audit` 步骤 6 映射表新增「baseline spec 与代码漂移 → td-reverse-spec」行；`references/audit-report-template.md` 主基调 3 清单补 baseline 对齐检查项与漂移信号判定（分系统存在绕过 td 工作流的代码提交 / archive 复盘记录过模型偏差 / 用户反馈文档与代码行为不一致，任一命中即抽查对应分系统）。
+- **td-reverse-spec 第二入口契约**：除「中途接手」首次建立 baseline 外，承接 audit 检出的漂移分系统做定向刷新——只对漂移分系统执行反推（分系统边界也已变化时先重走边界识别），用新反推结果**覆盖更新**其 `openspec/specs/<subsystem>/spec.md`；该分系统有未归档 change 触及时先完成 archive 再刷新，避免与 archive sync 双写冲突。
+- **既有架构与代码风格遵循约束**：`td-explore` 步骤 3 读项目状态时同时识别既有架构风格与代码约定（分系统边界 / 命名 / 模块组织 / 错误处理模式），作为候选方向的隐性约束——不遵循的方向必须显式标注偏离及理由；`td-propose` 影响评估新增「与既有架构/风格的遵循关系」必填字段，偏离需写明偏离点与理由并触发 `human-in-loop` 让用户确认；`td-apply` 步骤 4 TDD 实现默认对齐既有风格与实现模式；`requesting-code-review` 新增 Code consistency 维度与报告字段。
+
+### Changed（行为变更）
+
+- **tier 判据三档互斥化**：`field-assessment` 识别流程 §3 的 tier 判据由重叠区间（文件数 100+ / 10–100 / 3–10）改为互斥区间（源码文件 200+ / 20–199 / <20，部署单元 4+ / 2–3 / 1），补计数口径注（源码文件 = 手写代码 + 测试源文件，排除 vendor / 生成代码 / lock 文件 / 纯静态资源 / 文档与 CI 配置）与判据不明确时的 `human-in-loop` 兜底。三份 tier 变体的「与其他 tier 的切换」阈值改为指向 §3 的判据指针（单一事实源），3 profile × 3 tier 的强度数值不变。
+- **hook 运行时改 Node**：`hooks/td_state_sync.py` 替换为 `hooks/td_state_sync.js`（Node ≥20.19.0，CJS + `node:` 内置模块，零依赖），与 OpenSpec CLI 共用同一运行时，去除 Python 依赖；`hooks.json` 的环境变量由 `${ATOMCODE_PLUGIN_ROOT}` 改为 `${CLAUDE_PLUGIN_ROOT}`。hook 触发时机与校正逻辑不变（SessionEnd 兜底，非流程门禁）。
+- **7 个 SKILL.md description 精简**：去掉「OpenSpec 契约层入口」等重复前缀与「服务主基调第 X 条」填充语，收敛触发词、去掉引号包裹（`td-propose` / `td-explore` / `td-apply` / `td-archive` / `td-init` / `td-reverse-spec` / `td-system-audit`）。
+
+### Fixed
+
+- **td-apply 装配点新增定义点豁免漏洞**：`references/change-point-classes.md` ③ 装配点类补「装配点的新增定义点也属本类——纯新增、无既有 caller 不豁免标注」；新增跨包同语义锚点特判——同一语义在多个分系统各自落地定义（路径锚点 / 根目录解析 / 相对路径基准等）时每个定义点独立计为 ③ 变更点，变更点清单须列出全部定义点（file:line）并附一致性依据（同源传参或同锚一致性测试二选一）；纯新增定义点没有既有 caller 可查时，实测与校验改为验证一致性依据成立，不得因「无 caller」跳过。
+- **使用态审核 4 处问题**：`requesting-code-review` description 补「架构 review」触发场景与 critical 阻塞语义；`td-propose` greenfield explore 判据具象化为用户可枚举信号；`wip-limit` override 回路补落点说明（override 场景的 WIP 确认落 `proposal.md`，非 override 场景的加人手确认由 `brooks-law` 落 `design.md`，两处不冲突）；`td-apply` 前置检查精简为「触发条件 + 指向权威文件」。
+- **5 处模糊指令消歧**：`td-system-audit` 信号触发「关键链缓冲被多次压缩」改为「压缩 2 次以上」（与 `systematic-debugging` 的失败 2 次以上阈值口径对齐）；同 skill 收敛 `audit-history.yaml` / `audits/` 的「首次运行时按需创建」冗余（同段 null 语义已承载创建条件）；`td-init` gitignore 约束消除并列句歧义（「文件当前可能不存在，但一旦创建就进版本库」）；`td-explore` 步骤 6 模板说明与下节「条目标号规则」硬约束消歧；`brainstorming` 用动作词替换软词。
+- **config-context-guidance 重复节**：删除与 `td-init` 重复的「定位」节。
+
+### Removed
+
+- 删除 `.atomcode-plugin/` 目录（`plugin.json` 移为 `.claude-plugin/plugin.json`，`marketplace.json` 迁移为 `.claude-plugin/marketplace.json`）。
+- 删除 `hooks/td_state_sync.py`（由 Node 版 `hooks/td_state_sync.js` 取代，产出等价）。
+
+### Docs
+
+- AGENTS.md：三层结构表述优化，补「支持的 code agent」表、`package.json` 目录条目、四处 manifest 一致性与版本发布流程（四处清单同步 bump）；CONTRIBUTING.md / README.md 同步多平台安装路径。
+- README.md：补 Claude Code / Pi Agent 安装说明、三平台命令前缀差异表、hook 运行时前置（Node.js ≥20.19.0）与 Agent Plugins 1.0.0 规范说明。
+- `.gitignore`：新增 Node / pnpm 段（`node_modules/` / `dist/` / `*.tsbuildinfo`）。
+
 ## [1.7.1] - 2026-09-02
 
 ### Fixed

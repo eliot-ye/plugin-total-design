@@ -1,6 +1,6 @@
 ---
 name: td-init
-description: 初始化 total-design 工作流：检查 OpenSpec 结构 + 配置 .gitignore 防多人协作假冲突。触发场景：用户说"初始化"、"td init"、"开始用 td"、"搭 td 工作流"、"加 .gitignore"。
+description: 初始化 total-design 工作流。触发场景：用户说"初始化"、"td init"、"开始用 td"、"搭 td 工作流"。
 user-invocable: true
 disable-model-invocation: true
 argument-hint: (no arguments)
@@ -65,7 +65,7 @@ init 是"把系统的工作方式先立起来"——先有 specs 基线、change
 
 **为什么**：`.td-state/` 下所有状态文件（`profile-tier.yaml` / `archive-counter.yaml` / `audit-history.yaml` / `audits/`）都能从文件系统事实推导（`archive/` 目录、`audits/*.md` 等），提交进 git 只会制造假冲突——两人同时 archive / audit 时对同一份 YAML 读改写，git 报冲突或静默丢失。忽略后冲突面归零，文件仍留在本地，本工作流（含 `SessionEnd` hook）照常读写。
 
-**必须提交、不要 ignore， 文件可以不存在**：`openspec/config.yaml`（团队共享 context）、`openspec/specs/`（主 spec）、`openspec/changes/`（change 资产）、`openspec/todo.md`。
+**必须提交、不要 ignore**（文件当前可能不存在，但一旦创建就进版本库）：`openspec/config.yaml`（团队共享 context）、`openspec/specs/`（主 spec）、`openspec/changes/`（change 资产）、`openspec/todo.md`。
 
 ### 4. 老项目迁移检查
 

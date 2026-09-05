@@ -1,0 +1,26 @@
+{
+  "name": "total-design",
+  "version": "1.8.0",
+  "description": "A system-engineering design department for your coding agent. OpenSpec contract layer + Superpowers behavior layer + Qian Xuesen systems-engineering keynote.",
+  "keywords": [
+    "pi-package",
+    "openspec",
+    "system-engineering",
+    "tdd",
+    "code-review",
+    "contract"
+  ],
+  "author": {
+    "name": "Eliot Ye",
+    "email": "eliot_ye@163.com"
+  },
+  "license": "MIT",
+  "homepage": "https://atomgit.com/eliot-ye/plugin-total-design",
+  "repository": {
+    "type": "git",
+    "url": "https://atomgit.com/eliot-ye/plugin-total-design"
+  },
+  "pi": {
+    "skills": ["./skills"]
+  }
+}

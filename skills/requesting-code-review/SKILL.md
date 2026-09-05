@@ -1,6 +1,6 @@
 ---
 name: requesting-code-review
-description: 任务间的 review，critical issue 阻塞进度。服务主基调第 2 条。触发场景：propose 后、apply 前架构 review；关键链任务 / checkpoint 时；用户要求 review 时。
+description: 架构 review 与任务间代码 review。critical issue 阻塞进度。触发场景：propose 完成后/apply 前；关键链任务 / checkpoint 时；用户要求 review 时。
 user-invocable: false
 ---
 
@@ -21,13 +21,25 @@ user-invocable: false
 
 ### 1. Review 维度
 
-对被 review 的代码，从两个维度看：
+review 深度由 tasks.md 对应任务的 `风险` 字段决定（风险判据见 `writing-plans` 任务模板）：
+
+- **high** → 全查下方四个维度（安全维度必查）
+- **medium** → 查 Spec compliance / Code quality / Code consistency 三维度；安全维度只查红线（硬编码凭证、关闭鉴权等）
+- **low** → 抽查 Spec compliance
+- 无 `风险` 字段（无 tasks.md 的独立 review 请求）→ 按 medium
 
 #### Spec compliance（契约符合度）
 
 - 代码实现了 tasks.md 里的任务吗？
 - 代码符合 design.md 里的设计决策吗？
 - 代码违反了 proposal 的"系统工程影响评估"里说的边界吗？
+
+#### Security（安全）
+
+- 注入面：命令 / 路径 / SQL / 反序列化？
+- 权限与凭证：硬编码凭证、凭证进日志、鉴权被绕过？
+- 外部输入有校验吗？
+- 敏感数据（个人信息 / 业务数据）暴露或泄漏？
 
 #### Code quality（代码质量）
 
@@ -36,6 +48,12 @@ user-invocable: false
 - 函数长度 / 复杂度？
 - 错误处理完整吗？
 - 测试覆盖了边界情况吗？
+
+#### Code consistency（与既有风格一致性）
+
+- 新代码与项目既有代码风格 / 命名 / 模块组织一致吗？
+- 沿用了既有实现模式，还是另起一套？
+- 偏离既有风格但 proposal 的"与既有架构/风格的遵循关系"未写明 → warning（字段定义见 `td-propose` 步骤 6.c）
 
 ### 2. Issue 分级
 
@@ -55,11 +73,18 @@ user-invocable: false
 - [ ] 实现符合 design.md
 - [ ] 实现符合 proposal 系统工程影响评估边界
 
+### Security
+- <OK / 问题 / 不适用（low 风险）>
+
 ### Code Quality
 - 命名：<OK / 问题>
 - DRY：<OK / 问题>
 - 错误处理：<OK / 问题>
 - 测试覆盖：<OK / 问题>
+
+### Code Consistency
+- 与既有风格一致性：<OK / 问题>
+- 实现模式沿用：<OK / 另起一套>
 
 ### Issues
 

@@ -8,8 +8,8 @@
   "plugins": [
     {
       "name": "total-design",
-      "description": "A system-engineering design department for your agent: OpenSpec contract layer + Superpowers behavior layer + Qian Xuesen systems-engineering keynote, packed as an atomcode plugin.",
-      "version": "1.7.1",
+      "description": "A system-engineering design department for your coding agent. OpenSpec contract layer + Superpowers behavior layer + Qian Xuesen systems-engineering keynote.",
+      "version": "1.8.0",
       "source": "./",
       "author": {
         "name": "Eliot Ye",

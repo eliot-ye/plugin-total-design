@@ -1,6 +1,6 @@
 ---
 name: td-propose
-description: 创建 change，生成 proposal/design/tasks artifact。OpenSpec 契约层入口。触发场景：用户说"提一个 change"、"propose"、"开个新改动"、"建 proposal"、"想建 X 功能"。
+description: 创建 change，生成 proposal/design/tasks artifact。触发场景：用户说"提一个 change"、"propose"、"建 proposal"、"想建 X 功能"。
 user-invocable: true
 argument-hint: <change-name or description>
 ---
@@ -60,7 +60,7 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
   - 用户已给明确描述 → 检查候选池里是否有语义重合的主条目，有则提示用户"TODO 池里已有近似条目，要不要基于它 propose？"——同一条主条目可以承接多个 change（每个 change 一个子项追加），不算重复建 change。
   - 候选池是 backlog（可以无限多），活跃 change 才是 WIP——池里有候选不构成阻塞，只有活跃 change 数触发 `constraints` 的 `references/wip-limit.md`。
 - **brownfield reverse-spec 检查**（`$_TD_PROFILE` 为单值，与下方 greenfield 检查互斥，仅命中其一）：若 `$_TD_PROFILE == profile-brownfield`，检查 `openspec/specs/` 下是否已有相关分系统的 baseline spec。没有 → 触发 `constraints` 的 `references/human-in-loop.md`，提示用户"你对现有系统还没建立认识，propose 大改动风险高。先 `/td-reverse-spec` 吗？"——用户同意后执行 `/td-reverse-spec` 建立 baseline，完成后回到本步骤继续 propose。
-- **greenfield explore 检查**（同上互斥，仅命中其一）：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空（还没建立初始 spec），检查会话内是否已做过充分探索。判据：会话历史里是否出现过 `/td-explore` 调用且完成了探索对话。没有 → 触发 `constraints` 的 `references/human-in-loop.md`，提示用户"greenfield 最容易犯的错是'想到了就建'。先 `/td-explore` 探索充分再 propose 吗？"——用户同意后执行 `/td-explore`，完成后回到本步骤继续 propose。
+- **greenfield explore 检查**（同上互斥，仅命中其一）：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空（还没建立初始 spec），检查会话内是否已做过充分探索。判据：会话历史里是否出现过 `/td-explore` 调用且**用户明确说"探索够了" / "开始 propose" / "按 X 方向建"**（或等价信号）。没有 → 触发 `constraints` 的 `references/human-in-loop.md`，提示用户"greenfield 最容易犯的错是'想到了就建'。先 `/td-explore` 探索充分再 propose 吗？"——用户同意后执行 `/td-explore`，完成后回到本步骤继续 propose。
 
 ### 4. 创建 change 目录
 
@@ -113,6 +113,7 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 - 这是局部优化还是全局协调：
 - 如果是局部优化，对全局失调的风险：
 - 预期行为模型：这个改动的预期系统行为是什么？用什么数据/测试验证这个预期？（这是综合集成的"模型"载体——见 `system-engineering` 的「主基调四条」第 3 条「模型载体」节）
+- 与既有架构/风格的遵循关系：新设计默认遵循既有分系统的架构风格与代码约定（分系统边界 / 命名 / 模块组织 / 错误处理模式）；偏离既有架构或风格（重构老架构、引入新模式）→ 写明偏离点与理由，并触发 `constraints` 的 `references/human-in-loop.md` 让用户确认（主基调第 1 条"局部动作从整体性能反推"）
 ```
 
 没填这一节的 proposal 不算 apply-ready。

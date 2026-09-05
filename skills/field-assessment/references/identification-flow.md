@@ -29,9 +29,13 @@ agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `
 
 | tier | 判据（任一成立即取该 tier，取最高） | 系统层次 |
 |---|---|---|
-| `tier-large` | 文件数 100+ **或** 多团队 **或** 多仓库 **或** 多部署单元 | 多层嵌套的分系统，可能有跨仓库依赖 |
-| `tier-medium` | 文件数 10–100 **或** 单团队多人 **或** 1–3 个部署单元 | 有明显的模块/分系统边界 |
-| `tier-small` | 文件数 3–10 **或** 单人/单团队 **或** 1 个部署单元 | 扁平，无明显分系统边界 |
+| `tier-large` | 源码文件 200+ **或** 多团队 **或** 多仓库 **或** 部署单元 4+（或存在跨部署单元依赖） | 多层嵌套的分系统，可能有跨仓库依赖 |
+| `tier-medium` | 源码文件 20–199 **或** 单团队多人 **或** 部署单元 2–3 | 有明显的模块/分系统边界 |
+| `tier-small` | 源码文件 <20 **或** 单人 **或** 1 个部署单元 | 扁平，无明显分系统边界 |
+
+**计数口径**：源码文件 = 手写代码文件 + 测试源文件；排除 vendor / 生成代码 / lock 文件 / 纯静态资源 / 文档与 CI 配置。
+
+**判据不明确时**（如文件少但单文件巨大且紧耦合、计数口径难以取舍）→ 触发 `constraints` 的 `references/human-in-loop.md`，问用户系统的规模与复杂度（与 profile 判读的兜底对称）。
 
 系统有"明显分系统边界"即使文件少，也升级到 `tier-medium`。系统拆成多个独立子系统 → 每个子系统独立定 tier（见 `subsystem-tiering.md`）。
 
@@ -110,7 +114,7 @@ openspec/.td-state/
 profile: <profile-greenfield | profile-brownfield | profile-maintenance>
 tier: <tier-small | tier-medium | tier-large>
 judged_at: <ISO8601 时间戳>
-judge_reason: <一句话判据，如"已上线 + 有 CI/CD → maintenance；文件 120 个 → large">
+judge_reason: <一句话判据，如"已上线 + 有真实用户流量 + 有 CI/CD → maintenance；源码文件 260 个 → large">
 # 子系统独立定 tier（可选，仅当系统内部有明显分系统边界时）
 subsystems:
   - name: <subsystem-A>

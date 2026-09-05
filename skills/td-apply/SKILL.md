@@ -1,6 +1,6 @@
 ---
 name: td-apply
-description: 实施任务，按 artifact 走。OpenSpec 契约层入口。触发场景：用户说"apply"、"实施"、"开始写代码"、"按 change 干"、"执行 tasks"、"开始执行"、"go"。执行入口统一走本 skill，行为层 executing-plans 由本流程内部调用。
+description: 实施任务，按 artifact 走。OpenSpec 契约层入口。触发场景：用户说"apply"、"实施"、"按 change 干"、"执行 tasks"、"开始执行"、"go"
 user-invocable: true
 argument-hint: <change-name>
 ---
@@ -49,8 +49,8 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 6.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"——与 `td-archive` 步骤 3 的旧 change 兜底对称（propose 6.c 对新 change 仍强制必填，本处只放行存量旧 change，不削弱 propose 侧约束）。
 - **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检。
 - **caller impact 分析节必填**：若 `$_TD_TIER` 为 `tier-medium` / `tier-large` 且 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检——propose 6.c 漏执行时由本条兜底，后续步骤 4 实测子节不再重复此检查。
-- **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。**阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威描述在该 skill；override 通过后继续步骤 3）。propose 与 apply 两处都必须执行硬阻塞 + override 机制。
-- **`constraints` 的 `references/critical-buffer.md`**：tasks.md 里是否标注关键链？是否留了 project buffer（按当前 tier 比例，查表 1 的 critical-buffer 行；表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
+- **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。已达 → **阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威在该文件；override 通过后继续步骤 3）。
+- **`constraints` 的 `references/critical-buffer.md`**：tasks.md 是否已标注关键链 + project buffer（比例按表 1 当前 tier 行；表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - 其余 constraint（`constraints` 的 `references/brooks-law.md` / `references/delay-decision.md` / `references/human-in-loop.md`）在实施过程中按需触发，不在本步预判。
 
 ### 3. 读 change 的 artifact
@@ -84,8 +84,8 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 1. **`writing-plans`**（若 tasks.md 粒度不够细）：细化任务序列
 2. **`executing-plans`**（按任务序列执行，内部按任务粒度嵌套触发以下 skill）：
-   - **`test-driven-development`**：每个任务先写失败测试，再写实现
-   - **`requesting-code-review`**：checkpoint 时做 review
+   - **`test-driven-development`**：每个任务先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑
+   - **`requesting-code-review`**：checkpoint 时做 review（含与既有风格一致性检查）
    - **`verification-before-completion`**：每个任务完成前必须跑验证命令
 
 ### 5. 触发 apply 全局粒度的工程管理约束

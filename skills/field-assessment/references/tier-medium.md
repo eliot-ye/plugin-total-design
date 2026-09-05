@@ -24,5 +24,5 @@ medium 系统的关键链通常不是单任务序列，而是"分系统 A 改 �
 
 ## 与其他 tier 的切换
 
-- 文件数增长到 100+ → 切 `tier-large`（变体文件 `tier-large.md`）
-- 系统简化到 10 文件以下 → 切 `tier-small`（变体文件 `tier-small.md`）
+- 命中更高 tier 判据 → 切 `tier-large`（变体文件 `tier-large.md`）；简化到更低 tier → 切 `tier-small`（变体文件 `tier-small.md`）
+- 判据见 `identification-flow.md`「### 3. 判读 tier（三选一）」节（单一事实源）

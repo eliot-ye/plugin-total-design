@@ -13,6 +13,11 @@ Thumbs.db
 tmp/
 .cache/
 
+# Node / pnpm
+node_modules/
+dist/
+*.tsbuildinfo
+
 # Python（hooks/td_state_sync.py 的字节码产物）
 __pycache__/
 *.pyc
