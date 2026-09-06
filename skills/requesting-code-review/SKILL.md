@@ -128,7 +128,7 @@ review 对象不是代码，是 proposal 的分系统切分与设计决策。此
 
 `td-apply` 完成判定链的最后阶段：先全绿拿验证证据（6.1 + 6.2），再对整体做 review。触发条件与 tier 分层强度由 `td-apply` 步骤 6.3 持有，本节只定义执行语义。
 
-**与 checkpoint review 的分工**：checkpoint review（第 1–4 节）是任务粒度的增量检查；本节是 change 级的整体检查——跨任务接口衔接、模块拼装后的整体 Spec compliance。每个任务各自绿，拼起来仍可能失调（接口对不上、风格两套、边界互相踩），这是本节存在的理由。
+**与 checkpoint review 的分工**：checkpoint review（第 1–4 节）是任务粒度的增量检查；本节是 change 级的整体检查——跨任务接口衔接、模块拼装后的整体 Spec compliance。每个任务各自绿，拼起来仍可能失调（接口对不上、风格两套、边界互相踩）。
 
 **review 对象**：本 change 的全部新增 / 修改代码（不是单个任务的 diff）。
 
@@ -137,7 +137,7 @@ review 对象不是代码，是 proposal 的分系统切分与设计决策。此
 1. 当前 agent 环境自带 code review 工具 → 优先调用，把上方 review 对象与深度档位作为范围输入
 2. 工具 review 失败（不可用 / 报错 / 超时）或环境无 review 工具 → LLM 人工 review：按第 1 节维度、第 2 节分级、第 3 节报告格式执行（报告标题用 change 名）
 
-**深度档位**：按 tasks.md 全部任务 `风险` 字段的**最高档**取——收尾 review 的对象是整体，不逐任务各取各档。
+**深度档位**：tier-medium / tier-large 按 tasks.md 全部任务 `风险` 字段的**最高档**取——收尾 review 的对象是整体，不逐任务各取各档；tier-small 按 `td-apply` 步骤 6.3 的保底抽查执行。
 
 **critical 阻塞**：沿用第 4 节——修复后重跑 `verification-before-completion`（修复使既有验证证据失效，见其「之前测过」条），重跑通过且无 critical，change 才算 done。
 
