@@ -2,6 +2,21 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.9.0] - 2026-09-06
+
+### Added
+
+- **change 级收尾 code review（`td-apply` 步骤 6.3）**：完成判定链新增硬步骤——两层验证（change-level + 系统级）全部通过后、change 判 done 前，对本 change 的全部新增 / 修改代码做一次收尾 review；review 判出 critical → **change 不算 done**，修复后重跑 6.1 change-level 验证（修复使既有验证证据失效）。tier 分层：`tier-small` 保底抽查（只查 Spec compliance + 安全红线——小 change 可能全程轮不到 checkpoint review，收尾是它唯一的 review 机会，不整体跳过）；`tier-medium` / `tier-large` 按 tasks.md 全部任务`风险`字段最高档取。原 6.3 current-change audit 顺移为 6.4（audit 在 review 之后跑），表 3（`field-assessment/references/audit-frequency.md`）与 `executing-plans` 的锚点同步 6.3 → 6.4。
+- **`requesting-code-review` 第 6 节「change 级收尾 review」**：review 对象为本 change 全部新增 / 修改代码（不是单个任务 diff）；执行方式为工具优先、LLM 兜底——当前 agent 环境自带 code review 工具时优先调用（review 对象与深度档位作为范围输入），工具失败（不可用 / 报错 / 超时）或无工具则按第 1–3 节做 LLM 人工 review；与 checkpoint review 的分工：checkpoint 是任务粒度增量检查，收尾是 change 级整体检查（跨任务接口衔接、模块拼装后的整体 Spec compliance——任务各自绿，拼起来仍可能失调）；critical 阻塞沿用第 4 节。description 与「触发时机」节补 change 收尾触发场景。
+
+### Changed（行为变更）
+
+- **apply 完成判定链变硬**：1.8.0 为「两层验证通过即 done」；1.9.0 起为三层——6.1 change-level 验证 + 6.2 系统级验证 + 6.3 收尾 review 无 critical，三层全过才算 done，之后才进 6.4 current-change audit 与 archive。
+
+### Fixed
+
+- **使用态审核 2 处问题**（收尾 review 节）：删除「这是本节存在的理由」结构辩护句（开发态泄漏，不服务使用态 LLM 执行决策）；「深度档位」段补 `tier-small` 保底抽查分支（引用 `td-apply` 步骤 6.3），消除孤立触发本 skill 时的语义空洞。
+
 ## [1.8.0] - 2026-09-05
 
 ### Added
