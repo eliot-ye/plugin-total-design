@@ -39,7 +39,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
 
 1. **`system-engineering`** — 主基调四条进入上下文。
-2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 6.3）。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 6.4）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断是否触发 / tasks 是否合规。
 
 ### 2. 前置检查
@@ -118,9 +118,18 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 
 **层次观归位**：当 `field-assessment` 识别流程允许子系统独立定 tier 时，本步骤的跨分系统边界验证应**按子系统层次分别验证**——每个子系统按自己的 tier 强度验证，跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则）。子系统独立定 tier 的执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
 
-#### 6.3 current-change audit（按表 3 频率）
+#### 6.3 change 级收尾 code review（硬步骤）
 
-两层验证通过后，对照表 3 的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`（表 3 见 `field-assessment/references/audit-frequency.md`）：
+两层验证（6.1 + 6.2）全部通过后，对本 change 的全部新增 / 修改代码做一次 change 级收尾 review——review 是完成判定链的最后阶段：先全绿拿验证证据，再对整体做 review。**执行语义由 `requesting-code-review` 的「change 级收尾 review」节承载**（review 对象、工具优先 / LLM 兜底的执行方式、与 checkpoint review 的分工在那里），本步骤只定义触发条件与 tier 分层强度：
+
+- `tier-small`：保底抽查——只查 Spec compliance + 安全红线。小 change 可能全程轮不到 checkpoint review，收尾是它唯一的 review 机会，不整体跳过
+- `tier-medium` / `tier-large`：review 深度按 tasks.md 全部任务 `风险` 字段的最高档取
+
+review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 change-level 验证（修复使既有验证证据失效，见 `verification-before-completion` 的「之前测过」条）；无 critical → 进入 6.4。
+
+#### 6.4 current-change audit（按表 3 频率）
+
+6.1–6.3 都通过后，对照表 3 的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`（表 3 见 `field-assessment/references/audit-frequency.md`）：
 
 - `tier-small`：不要求
 - `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 3）

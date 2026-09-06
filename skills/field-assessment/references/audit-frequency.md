@@ -1,6 +1,6 @@
 # audit 频率（表 3）
 
-各 tier 的 system-audit 触发频率（表 3）。`td-archive` 步骤 5.2 判定 project audit 阈值、`executing-plans` 步骤 3 与 `td-apply` 步骤 6.3 判定 current-change audit 触发时读本表；与其他位置出现的频率表述冲突时，以本表为准。
+各 tier 的 system-audit 触发频率（表 3）。`td-archive` 步骤 5.2 判定 project audit 阈值、`executing-plans` 步骤 3 与 `td-apply` 步骤 6.4 判定 current-change audit 触发时读本表；与其他位置出现的频率表述冲突时，以本表为准。
 
 ## 表 3：system-audit 频率
 
@@ -20,6 +20,6 @@ current-change audit 的触发 skill 按 tier 分工：
 |---|---|---|
 | `tier-small` | 不要求 | — |
 | `tier-medium` | `executing-plans` 步骤 3 | 每个关键链任务完成时 |
-| `tier-large` | `td-apply` 步骤 6.3 | 每完成 1 个 change |
+| `tier-large` | `td-apply` 步骤 6.4 | 每完成 1 个 change |
 
 project scope audit 的触发统一由 `td-archive` 步骤 5.2 驱动（archive 计数器达阈值即建议）。
