@@ -96,6 +96,15 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 - `constraints` 的 `references/delay-decision.md`：apply 期间遇到顶层架构层次的可逆决策时（与任务粒度的"实现细节可逆决策"不重叠）
 - `constraints` 的 `references/human-in-loop.md`：apply 期间遇到"超出当前 change scope 的影响"等 apply 全局必停场景时（任务粒度的 checkpoint 必停由 executing-plans 负责）。步骤 6.2 边界验证失败时的"root cause 在 plan 之外 → 停下来问用户"也走本类 apply 全局必停通道。
 
+#### 设计回写（实施中发现 artifact 有错）
+
+实施途中发现 design / spec / proposal 与代码现实冲突（前提假设不成立、设计方案行不通、spec 漏了场景）——这属于 apply 全局必停场景，不允许 agent 自行绕过 artifact 继续写。执行序列：
+
+1. **停下实施**，触发 `constraints` 的 `references/human-in-loop.md` 让用户拍板：(a) 回写 artifact（改完继续实施），还是 (b) 改代码迁就 artifact（仅限冲突确实属于实现细节时）。
+2. 用户选回写 → 在本 change 内直接更新对应 artifact（design / spec delta；proposal 的"系统工程影响评估"节失实的一并修正），并在 tasks.md 记录"回写了 X，原因：<…>"。
+3. **证据失效重跑**：回写使受影响任务的既有验证证据作废——按 `verification-before-completion` 的「之前测过」条重跑受影响任务的验证；回写波及分系统边界时，重跑步骤 6.2 对应边界的验证。重跑全绿后才继续实施。
+4. 继续实施。
+
 ### 6. 完成判定
 
 所有任务 `[x]` 后，做**两层最终验证**，两层都通过才算 done：
@@ -141,4 +150,4 @@ review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 ch
 
 - 不跳过任务，按 tasks.md 顺序
 - 每个任务必须有验证证据，"我觉得改对了"不算
-- 遇到 proposal 与实际代码冲突时，停下来问用户：是改 proposal 还是改代码？
+- 遇到 proposal 与实际代码冲突时，停下来问用户：是改 proposal 还是改代码？（执行序列见步骤 5 的「设计回写」）

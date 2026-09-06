@@ -72,6 +72,8 @@ archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预�
 1. **proposal 的"系统工程影响评估"节** —— 永远存在（propose 必填项），是"预期"侧的主锚点。
 2. **`openspec/specs/` 下的主 spec baseline** —— 若该 change 改动的分系统在 `openspec/specs/<subsystem>/spec.md` 有 reverse-spec 或前序 archive sync 沉淀的 baseline，把 baseline 作为"改之前真实状态"的对照源之一，复盘要回答"change 的 spec delta 是否破坏了 baseline 声明的契约 / 不变量"。**baseline 不存在**（greenfield 首个 change、或该分系统从未被 reverse-spec）→ 跳过本对照源，仅用 proposal 自述做复盘，不阻塞 archive。
 
+   CLI 加持：对照源 2 存在时，用 `openspec show "<name>" --diff`（OpenSpec CLI ≥ v1.11）取本 change 对主 spec 的真实变更行——delta 里与主 spec 逐字相同的保留场景会被过滤，只留真正改动的行；契约对照只需审 diff 命中的行是否触碰 baseline 的契约 / 不变量。CLI 版本低于 v1.11（无此 flag）→ 降级为通读 delta 全文逐场景对照，不阻塞 archive。
+
 没这一节，archive 拒绝继续。这是 `/td-system-audit` "实际 vs 预期"审计的数据来源——闭环必须闭合。
 
 ### 4. archive（含 sync）
@@ -89,6 +91,8 @@ openspec archive "<name>" --yes
 **归档成功后 TODO 子项勾选**：触发 `todo-pool` 的「勾选子项」子流程（传入本次归档的 change 名）。
 
 **Purpose TBD housekeeping 检查**：`openspec archive` sync 主 spec 时，新生成的主 spec `## Purpose` 节会保留 td-archive 模板默认值 `TBD - created by archiving change <name>. Update Purpose after archive.`——这是已知的 sync 副作用，不能让 TBD 残留到下一次 audit。sync 完成后立即按 `references/purpose-tbd-housekeeping.md` 执行子流程（读涉及主 spec → grep `^TBD - created by archiving` → 命中则本步骤内补写一句话 Purpose → 再次 grep 确认无残留）。
+
+**归档完整性自证**：sync 完成后跑 `openspec validate --archived`（OpenSpec CLI ≥ v1.9）——由 CLI 校验 `archive/` 下每个 change 的 tasks.md 全部 `[x]`。通过 → 归档完整性有命令背书，不再靠人工目测；不通过 → 本次归档（或历史归档）存在未完成任务混入，停下报给用户，不带病继续。CLI 版本低于 v1.9（无此 flag）→ 跳过本自证，完整性由步骤 2 前置检查单独承担，不阻塞。
 
 ### 5. archive 后接力动作
 

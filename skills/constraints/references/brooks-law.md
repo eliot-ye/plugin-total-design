@@ -12,7 +12,7 @@ Brooks 在《人月神话》里说："向一个进度落后的项目加人手，
 
 当用户想"加人手"（招人、加 agent、并行多 subagent）来加快进度时，agent 触发本文件提醒三件事（强度按表 1 的 brooks-law 行：tier-small 不强制——轻提示即可；tier-medium 提醒；tier-large 强制；表 1 见 `field-assessment/references/strength-matrix.md`）：
 
-1. **协调成本**：新人 onboarding 时间 + 现有成员沟通开销增加
+1. **协调成本**：新人 onboarding 时间 + 现有成员沟通开销增加——成员间的沟通路径数按 n(n-1)/2 增长，协调成本随并行成员数超线性上升
 2. **可并行性**：这个任务真的可并行吗？还是它的关键链是串行的？（参考同目录 `critical-buffer.md`）
 3. **替代方案**：加人手之前，是否试过"减少 WIP"、"缩小范围"、"延迟非关键决策"？
 

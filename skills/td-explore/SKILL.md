@@ -63,6 +63,8 @@ explore 不简化还原问题，允许矛盾并存，这是对复杂巨系统的
 
 **产物要求**：explore 阶段**按需产出候选方向**，每个标注系统工程影响与可逆性（完整评估维度见步骤 5）。产物留在会话上下文里（explore 不落盘 spec，见文末 Guardrails）。**决策已闭合、无新信息时不凑方向**——现场判读已无新的候选维度、用户已授权继续时，正确输出是一句话"没有需要你的决策点，直接继续推进"，而不是为凑格式生成伪选项（对齐 `constraints` 的 `references/human-in-loop.md` 的"不对所有动作都问一下"红线）。`/td-propose` 步骤 3 的"greenfield explore 检查"会读会话历史判定是否已做过充分探索（判据见 `td-propose` 步骤 3）。
 
+**先查仓库再提问**：向用户提出事实类问题（"现在 X 是怎么做的""有没有 Y 配置"）之前，先在仓库里找答案——代码、`openspec/specs/`、`openspec/config.yaml`、README 与配置文件里已有的事实不问用户，自查后直接带入对话（步骤 2 / 步骤 3 读到的现场背景优先复用）。确实需要问时，问题附**基于现场证据的推荐默认值**（"建议走 A，依据是 <代码 / spec 里的信号>，可以吗"），不出裸问题。仓库证据与用户认知冲突时，摆出证据让用户裁决，不默默采信任一方。
+
 **与 `constraints` 的 `references/delay-decision.md` 的连接**：explore 阶段"不落盘 spec"本质上是延迟决策（语义与触发提醒见该文件「触发时机」节的"与 `td-explore` 的连接"条）。这与 `td-propose` 步骤 3 的"greenfield explore 检查"协同——greenfield 项目先 explore 再 propose。
 
 ### 5. 系统工程视角评估
