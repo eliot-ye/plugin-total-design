@@ -15,6 +15,7 @@ user-invocable: false
 - **`td-propose` 完成后、`td-apply` 动手前（架构 review）**——proposal 刚定型，进入实施前先检查分系统切分与设计决策，此时改架构成本最低
 - `executing-plans` 的 checkpoint 时机
 - 每完成一个关键链任务
+- **`td-apply` 步骤 6.3 的 change 级收尾**——两层验证（change-level + 系统级）全绿后、change 判 done 前（触发条件与 tier 分层强度见该步骤，执行语义见本 skill 第 6 节）
 - 用户显式要求 review
 
 ## 工作方式
@@ -122,6 +123,23 @@ review 对象不是代码，是 proposal 的分系统切分与设计决策。此
 - **nit**：命名等——可忽略
 
 架构 review 的 critical 与 code review 的 critical 同样适用"不继续"规则——只是这里"不继续"意味着不进入任务实施。
+
+### 6. change 级收尾 review
+
+`td-apply` 完成判定链的最后阶段：先全绿拿验证证据（6.1 + 6.2），再对整体做 review。触发条件与 tier 分层强度由 `td-apply` 步骤 6.3 持有，本节只定义执行语义。
+
+**与 checkpoint review 的分工**：checkpoint review（第 1–4 节）是任务粒度的增量检查；本节是 change 级的整体检查——跨任务接口衔接、模块拼装后的整体 Spec compliance。每个任务各自绿，拼起来仍可能失调（接口对不上、风格两套、边界互相踩）。
+
+**review 对象**：本 change 的全部新增 / 修改代码（不是单个任务的 diff）。
+
+**执行方式（工具优先，LLM 兜底）**：
+
+1. 当前 agent 环境自带 code review 工具 → 优先调用，把上方 review 对象与深度档位作为范围输入
+2. 工具 review 失败（不可用 / 报错 / 超时）或环境无 review 工具 → LLM 人工 review：按第 1 节维度、第 2 节分级、第 3 节报告格式执行（报告标题用 change 名）
+
+**深度档位**：tier-medium / tier-large 按 tasks.md 全部任务 `风险` 字段的**最高档**取——收尾 review 的对象是整体，不逐任务各取各档；tier-small 按 `td-apply` 步骤 6.3 的保底抽查执行。
+
+**critical 阻塞**：沿用第 4 节——修复后重跑 `verification-before-completion`（修复使既有验证证据失效，见其「之前测过」条），重跑通过且无 critical，change 才算 done。
 
 ## 与其他 skill 的关系
 
