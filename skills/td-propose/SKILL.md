@@ -84,7 +84,11 @@ openspec status --change "<name>" --json
 
 用任务跟踪工具跟踪进度。循环体对每个 artifact 执行下述四子步，全部 `applyRequires` artifact 走完且必填项全过才进入步骤 7。
 
-**6.a 合并会话内已有探索产物**：若本次会话已产出 `td-explore` 的候选方向评估（对话形式交付），把其中的候选方向取舍与"系统工程影响"评估合并进 proposal 骨架，作为 6.c 必填项的输入。没有产物则跳过，直接从 template 构建。
+**6.a 合并会话内已有探索产物**：
+
+- 若本次会话已产出 `td-explore` 的候选方向评估（对话形式交付），把其中的候选方向取舍与"系统工程影响"评估合并进 proposal 骨架，作为 6.c 必填项的输入。没有产物 → 跳过本条。
+- 会话上下文中没有本次 change 触及分系统的 baseline spec 内容（如本会话没走过 `/td-explore`，或其读取内容已不在上下文）→ 读 `openspec/specs/` 下相关分系统的 `spec.md`（契约与不变量），作为 6.c"与既有架构/风格的遵循关系"与整体影响判断的输入；相关分系统在 `openspec/specs/` 下没有 baseline（greenfield 首个 change）→ 跳过。
+- 两者皆无 → 直接从 template 构建。
 
 **6.b 创建 artifact**：
 
@@ -96,8 +100,6 @@ openspec instructions <artifact-id> --change "<name>" --json
 - 应用 `context` 和 `rules` 作为约束——**不要把它们复制进 artifact 文件**
 - 读已完成的依赖 artifact 作为 context
 - 写到 `resolvedOutputPath`
-
-greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空，第一个 change 的 proposal 还要建立初始 spec baseline——这是后续所有改动的影响评估依据。
 
 **6.c 必填项检查**（每个 artifact 写完后立即做，缺项 → 回 6.b 补写，不进 6.d）：
 
