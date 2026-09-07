@@ -40,7 +40,7 @@ constraint 列为子约束逻辑名，路径同表 1：
 | `critical-buffer` | 不确定性较低 | 不确定性中等 | 不确定性最高 |
 | `brooks-law` | 小团队加人手影响有限，不强制 | 中团队加人手要考虑 onboarding，提醒 | 大系统加人手几乎必然拖慢，强制 |
 | `delay-decision` | 表 1 说"强"（三个 tier 都强）。小系统回滚成本低，更该延迟——这是"强"在小系统的具体含义 | 强 | 强（仅模块层以下延迟；顶层架构进 tier-large 总体设计文档，不靠延迟决策处理） |
-| `human-in-loop` | —（无额外 tier 触发条件，仅用 `constraints` 的 `references/human-in-loop.md` 的第 1–5 类通用基线） | —（同 tier-small；公共契约变更属基线第 1 类，不重复列为 tier 加成） | + 总体设计文档审阅 |
+| `human-in-loop` | —（语义见上方「表 1 第 5 行（human-in-loop）语义说明」节） | —（同左） | + 总体设计文档审阅 |
 
 ## 表 2：profile 在 human-in-loop 上的场景加成
 
@@ -59,7 +59,7 @@ constraint 列为子约束逻辑名，路径同表 1：
 
 ### 表 2 profile-maintenance × tier-large 说明
 
-maintenance × large 下的强度由 tier-large 表 1 行决定（wip-limit 上限 3 / critical-buffer 50% / brooks-law 强制 / delay-decision 强 / human-in-loop + 总体设计文档审阅）。profile-maintenance 只决定流程侧重（轻量 proposal + 生产稳定性），不改变这些强度。该格为「—」不表示生产改动保护在 tier-large 减弱——生产环境改动已属通用基线第 3 类（所有 tier 生效），tier-large 的审阅重心由「总体设计文档审阅」tier 加成覆盖，无 profile 独有加成可列；medium 格的「+ 生产环境改动前」仅是强调，不改变基线已生效的事实。
+maintenance × large 下的强度由 tier-large 表 1 行决定——profile 只决定流程侧重（轻量 proposal + 生产稳定性），不改变强度。该格为「—」不表示生产改动保护在 tier-large 减弱：生产环境改动已属通用基线第 3 类（所有 tier 生效），tier-large 的审阅重心由「总体设计文档审阅」tier 加成覆盖；medium 格的「+ 生产环境改动前」仅是强调，不改变基线已生效的事实。
 
 system-audit 周期性由表 3（`audit-frequency.md`）决定，不在表 2 范围内。
 

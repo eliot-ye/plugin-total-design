@@ -1,6 +1,6 @@
 ---
 name: td-propose
-description: 创建 change，生成 proposal/design/tasks artifact。OpenSpec 契约层入口。
+description: 创建 change，生成 proposal/design/tasks artifact。
 argument-hint: <change-name or description>
 args: optional
 ---

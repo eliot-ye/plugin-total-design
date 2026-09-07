@@ -29,11 +29,11 @@ init 是"把系统的工作方式先立起来"——先有 specs 基线、change
 
 ### 1. 激活主基调与配置层
 
-激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
+按下述三步序列激活主基调与配置层——只注入强度，不做触发判断：
 
 1. **`system-engineering`** — 主基调四条进入上下文。
 2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`。greenfield 项目（仓库空或只有脚手架）通常判为 `profile-greenfield`；init 阶段 profile/tier 可能还没建立 `.td-state/` 缓存，按"文件不存在现判"处理。
-3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断。
 
 ### 2. 检查 OpenSpec 结构
 

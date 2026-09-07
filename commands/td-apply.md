@@ -1,6 +1,6 @@
 ---
 name: td-apply
-description: 实施任务，按 artifact 走。OpenSpec 契约层入口。
+description: 实施任务，按 artifact 走。
 argument-hint: <change-name>
 args: optional
 ---

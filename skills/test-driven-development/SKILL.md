@@ -12,12 +12,6 @@ user-invocable: false
 - `constraints` 的 `references/human-in-loop.md`
 - `system-engineering`
 
-## 服务的主基调原则
-
-**主基调第 1 条：系统工程。** 测试不是"代码质量的副产物"，是系统行为的契约。没有契约，agent 写的代码就是"自说自话"。
-
-**契约的层次性**：TDD 的 RED-GREEN-REFACTOR 是**分系统层次**的契约（单个任务的行为契约）。但本工作流里还有**系统整体层次**的契约——已 archive 的 change sync 到 `openspec/specs/` 的主 spec 契约。当 TDD 的"删除代码"强制与已 archive 的 spec 契约冲突时，**系统整体层次契约优先**：先触发 `constraints` 的 `references/human-in-loop.md` 让用户决定是改 spec 契约还是保留代码，而不是直接删除代码破坏已 archive 的 spec 契约。
-
 ## 触发时机
 
 - 在 `executing-plans` 流程中，每个任务实施时（执行入口是 `/td-apply`，本 skill 由 executing-plans 内部按任务粒度调用，不独立触发）
@@ -60,11 +54,9 @@ user-invocable: false
 
 如果 agent 发现代码已经写了但对应测试不存在或后加：**删除代码，从 RED 重新开始。** 不是"补测试"，是"重来"。
 
-这个规则看起来激进，但它防止了"测试只是为了配合已写代码"的腐烂。
-
 **例外（brownfield 老代码）：** 本规则只适用于**当前 change 新写的代码**。接手项目时已存在的老代码本来就没测试，强制删除会摧毁系统——老代码走 brownfield 的路径（见 `field-assessment` 的 `references/profile-brownfield.md`「TDD 边界」节）：先加 characterization test 锁定现有行为，再重构。
 
-**例外 2（已 archive 的 spec 契约冲突）：** 当 TDD 的"删除代码"强制会破坏已 archive 的 change sync 到 `openspec/specs/` 的主 spec 契约时，**不直接删除**——先触发 `constraints` 的 `references/human-in-loop.md` 让用户决定：(a) 改 spec 契约（重新 propose 修改主 spec），还是 (b) 保留代码（放弃本次 TDD 的删除强制，记录为"已知契约偏离"）。这是"系统整体层次契约优先于分系统层次 TDD 强制"的执行规则。
+**例外 2（已 archive 的 spec 契约冲突）：** 当 TDD 的"删除代码"强制会破坏已 archive 的 change sync 到 `openspec/specs/` 的主 spec 契约时，**不直接删除**——先触发 `constraints` 的 `references/human-in-loop.md` 让用户决定：(a) 改 spec 契约（重新 propose 修改主 spec），还是 (b) 保留代码（放弃本次 TDD 的删除强制，记录为"已知契约偏离"）。这是"系统整体契约（已 archive 的主 spec）优先于本次 TDD 删除强制"的执行规则。
 
 ### 不接受"这个没法测"
 
@@ -97,7 +89,6 @@ user-invocable: false
 ## 与其他 skill 的关系
 
 - 与 `systematic-debugging` 配合：RED 失败时，如果失败原因不明确，触发 systematic-debugging
-- 与 `td-archive` 配合：TDD 的 RED-GREEN-REFACTOR 是分系统层次的契约；archive 的"实际 vs 预期"复盘是系统整体层次的契约验证。两者是"模型载体"在分系统层次和系统整体层次的互补（见 `system-engineering` 的「主基调四条」第 3 条「模型载体」节）。
 
 ## 不做的事
 

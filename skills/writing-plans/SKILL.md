@@ -12,10 +12,6 @@ user-invocable: false
 - `constraints` 的 `references/delay-decision.md`
 - `field-assessment`
 
-## 服务的主基调原则
-
-**主基调第 1 条：系统工程。** 每个任务不能只看自己，必须标注"这个局部动作影响哪些分系统"。
-
 ## 与 td-propose / td-apply 的边界
 
 tasks.md 分两个阶段完成：

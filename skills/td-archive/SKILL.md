@@ -34,11 +34,11 @@ archive 后触发 profile 重新评估——这是总体设计部的职责：项
 
 ### 1. 激活主基调与配置层
 
-激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
+按下述三步序列激活主基调与配置层——只注入强度，不做触发判断：
 
 1. **`system-engineering`** — 主基调四条进入上下文。
-2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（archive 需要表 3 判定 system-audit 频率触发）。会话内缓存，后续步骤直接引用。
-3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断是否触发 / tasks 是否合规。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3（archive 需要表 3 判定 system-audit 频率触发）。会话内缓存。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断——后续步骤据此判断 constraint 触发与 tasks 合规。
 
 ### 2. 前置检查
 
@@ -90,7 +90,7 @@ openspec archive "<name>" --yes
 
 **归档成功后 TODO 子项勾选**：触发 `todo-pool` 的「勾选子项」子流程（传入本次归档的 change 名）。
 
-**Purpose TBD housekeeping 检查**：`openspec archive` sync 主 spec 时，新生成的主 spec `## Purpose` 节会保留 td-archive 模板默认值 `TBD - created by archiving change <name>. Update Purpose after archive.`——这是已知的 sync 副作用，不能让 TBD 残留到下一次 audit。sync 完成后立即按 `references/purpose-tbd-housekeeping.md` 执行子流程（读涉及主 spec → grep `^TBD - created by archiving` → 命中则本步骤内补写一句话 Purpose → 再次 grep 确认无残留）。
+**Purpose TBD housekeeping 检查**：`openspec archive` sync 主 spec 时，主 spec `## Purpose` 节会残留模板默认值 TBD（已知 sync 副作用），不能让它留到下一次 audit。**检测（OpenSpec CLI ≥ v1.11）**：`openspec validate --specs` 会报告仍携带 Purpose 占位符的 capability（默认 warning；命中与否以输出中的 warning 为准，不看退出码）——命中 → 基于已归档 change 的 proposal「What Changes」节为该主 spec 补写一句话 Purpose，复检确认无残留。CLI < v1.11 → 按 `references/purpose-tbd-housekeeping.md` 的人工 grep 步骤执行同等检查与补写。
 
 **归档完整性自证**：sync 完成后跑 `openspec validate --archived`（OpenSpec CLI ≥ v1.9）——由 CLI 校验 `archive/` 下每个 change 的 tasks.md 全部 `[x]`。通过 → 归档完整性有命令背书，不再靠人工目测；不通过 → 本次归档（或历史归档）存在未完成任务混入，停下报给用户，不带病继续。CLI 版本低于 v1.9（无此 flag）→ 跳过本自证，完整性由步骤 2 前置检查单独承担，不阻塞。
 

@@ -11,12 +11,6 @@ user-invocable: false
 - `field-assessment`（判读 profile × tier 与表 3 current-change 触发归属）
 - `constraints` 的 `references/human-in-loop.md`（checkpoint 必停判据）
 
-## 服务的主基调原则
-
-**主基调第 2 条：总体设计部。** 执行不是"闷头干"，是"分系统工程师（agent）干一段，总体设计部（用户）checkpoint 一次"。
-
-**《工程控制论》反馈控制回路归位**：任务执行流程是契约级误差检测 + 校正回路（完整回路见 `system-engineering` 的「反馈控制回路」节）。
-
 ## 触发时机
 
 - 由 `td-apply` 步骤 4 的行为层触发序列调用（tasks.md 已就绪；粒度不够细时先经 `writing-plans` 细化）——执行入口统一走 `/td-apply`，本 skill 不独立触发

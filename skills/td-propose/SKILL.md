@@ -38,11 +38,11 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 ### 1. 激活主基调与配置层
 
-激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
+按下述三步序列激活主基调与配置层——只注入强度，不做触发判断：
 
 1. **`system-engineering`** — 主基调四条进入上下文。propose 的每个判断都在主基调四条框架下做。
-2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）。会话内缓存，后续步骤直接引用。
-3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断 wip-limit / human-in-loop 是否触发。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）。会话内缓存。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断触发——wip-limit / human-in-loop 是否触发由后续步骤据此判断。
 
 ### 2. 读现场背景（config.yaml context）
 
@@ -150,9 +150,9 @@ openspec instructions <artifact-id> --change "<name>" --json
 - 已知 caller：只列确定已知的高危 caller（file:line + 预判结论：兼容 / 需适配 / caller 不消费返回值）——完整 caller 清单不由本节承担，由 `td-apply` 步骤 4 的引用搜索实测产出
 ```
 
-本节是前馈定位（类别标注 + 高危 go/no-go），不追求完整 caller 清单——人工预判清单不可靠，完整清单由 `td-apply` 步骤 4 实测产出并兜底；实测发现本节未标注的 caller，或与预判结论冲突 → 补做兼容确认，或按 apply 全局必停通道上报。
+本节是前馈定位（类别标注 + 高危 go/no-go），完整 caller 清单不由本节承担——由 `td-apply` 步骤 4 实测产出并兜底；实测发现本节未标注的 caller，或与预判结论冲突 → 补做兼容确认，或按 apply 全局必停通道上报。
 
-tier 分层：tier-small 可跳过（提醒性质，跳过时在 proposal 注明）；tier-medium / tier-large 必填（必填的是变更点类别标注 + 高危标记，负担轻）——缺项的 proposal 不算 apply-ready。
+tier 分层：tier-small 可跳过（提醒性质，跳过时在 proposal 注明）；tier-medium / tier-large 必填（必填的是变更点类别标注 + 高危标记）——缺项的 proposal 不算 apply-ready。
 
 - **tasks.md 必填：关键链标注与 project buffer**
 
