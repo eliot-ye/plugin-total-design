@@ -20,7 +20,7 @@ user-invocable: false
 
 任何复杂工程都需要一个**站在系统全局立场**的群体，专门负责总体方案、协调各分系统。
 
-**对工作流的含义：** agent 自己不能既当"分系统工程师"又当"总体设计部"。`brainstorming` skill 升级为"总体设计部"工作方式；`/td-system-audit` 命令是总体设计部的周期性自检机制。
+**对工作流的含义：** agent 自己不能既当"分系统工程师"又当"总体设计部"。`td-explore` 承载总体设计部工作方式；`/td-system-audit` 命令是总体设计部的周期性自检机制。
 
 ### 3. 从定性到定量的综合集成
 
@@ -49,7 +49,7 @@ user-invocable: false
 - **apply（控制执行 + 实时误差检测）**：按 tasks.md 实施，TDD 是契约级误差检测，verification 是系统级误差检测。
 - **archive（反馈控制回路闭合）**："实际 vs 预期"复盘是事后误差检测，修正下一个 propose 的预测模型。
 
-本工作流里多个闭环实现都是这个反馈控制回路的具体形态：`td-system-audit` 步骤 7"修复后重跑 audit 闭环"、`systematic-debugging` 4-phase 闭环、`executing-plans` 步骤 3 的 human checkpoint、`verification-before-completion` 第 6 节系统级验证。下游 skill 触发这些闭环时，应意识到这是《工程控制论》反馈控制原理在本工作流里的工程化，不是孤立的"重跑一下"。
+本工作流里多个闭环实现都是这个反馈控制回路的具体形态：`td-system-audit` 步骤 7"修复后重跑 audit 闭环"、`systematic-debugging` 4-phase 闭环、`executing-plans` 步骤 1 的 human checkpoint、`verification-before-completion` 第 6 节系统级验证。下游 skill 触发这些闭环时，应意识到这是《工程控制论》反馈控制原理在本工作流里的工程化，不是孤立的"重跑一下"。
 
 ## 如何使用本 skill
 

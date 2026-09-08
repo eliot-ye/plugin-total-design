@@ -61,7 +61,7 @@ tasks.md 分两个阶段完成：
 
 ### 5. task 只写 agent 能编程性执行的步骤
 
-task 是 `executing-plans` 直接消费的条目，主体必须是 agent 能**编程性执行**的动作——写代码、跑测试、执行 CLI 命令、改配置等；非编程性动作（人工目测、用户验收、第三方审批等）不得作为独立 task。动作清单与降级规则见 `references/task-template.md` 的「任务主体约束」节（单一权威）。
+task 是 `td-apply` 步骤 4 直接消费的条目，主体必须是 agent 能**编程性执行**的动作——写代码、跑测试、执行 CLI 命令、改配置等；非编程性动作（人工目测、用户验收、第三方审批等）不得作为独立 task。动作清单与降级规则见 `references/task-template.md` 的「任务主体约束」节（单一权威）。
 
 `writing-plans` 生成 tasks.md 时按此约束过滤：非编程性动作不进入 task 列表，只落在 `验证` 字段。已存在的 tasks.md 若含此类历史遗留的独立 task，apply 阶段由用户自行决定保留为人工检查项还是降级，本 skill 不预设行为。
 

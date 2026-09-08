@@ -13,24 +13,12 @@ user-invocable: false
 
 ## 触发时机
 
-- 由 `td-apply` 步骤 4 的行为层触发序列调用（tasks.md 已就绪；粒度不够细时先经 `writing-plans` 细化）——执行入口统一走 `/td-apply`，本 skill 不独立触发
-- **current-change audit 触发**（随本 skill 的 Human checkpoint 触发）：tier 分层与触发归属见 `field-assessment/references/audit-frequency.md` 的「current-change scope 的触发 skill 归属」表（表 3）——本 skill 只负责 `tier-medium`（每个关键链任务完成时触发），`tier-small` 不要求，`tier-large` 由 `td-apply` 步骤 6.4 负责。
+- 由 `td-apply` 步骤 4 在复杂场景下按需调用（关键链 checkpoint / 失败处理）——执行入口统一走 `/td-apply`，本 skill 不独立触发，不接管基本执行循环
+- **current-change audit 触发**（随本 skill 的 checkpoint 触发）：tier 分层与触发归属见 `field-assessment/references/audit-frequency.md` 的「current-change scope 的触发 skill 归属」表（表 3）——本 skill 只负责 `tier-medium`（每个关键链任务完成时触发），`tier-small` 不要求，`tier-large` 由 `td-apply` 步骤 6.4 负责。
 
 ## 工作方式
 
-### 1. 按 tasks.md 顺序执行
-
-不跳任务，不并行（除非 plan 里显式标了并行）。
-
-### 2. 每个任务执行流程
-
-1. 触发 `test-driven-development`：先写失败测试
-2. 写实现
-3. 跑测试，确认绿
-4. 触发 `verification-before-completion`：跑验证命令
-5. 更新 tasks.md：`- [ ]` → `- [x]`，加验证证据
-
-### 3. Human checkpoint
+### 1. Human checkpoint
 
 在以下时机停下来问用户：
 
@@ -60,7 +48,9 @@ checkpoint 格式：
 继续吗？
 ```
 
-### 4. 失败处理
+checkpoint 时做 `requesting-code-review`（含与既有风格一致性检查）。
+
+### 2. 失败处理
 
 任务执行失败时：
 

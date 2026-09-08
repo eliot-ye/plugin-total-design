@@ -20,7 +20,7 @@ user-invocable: false
 
 - agent 即将声称"任务完成" / "bug 修复" / "测试通过" / "可以 commit 了"
 - 任何"我搞定了"类的声明之前
-- `executing-plans` 里任务标记 `[x]` 之前
+- `td-apply` 步骤 4 里任务标记 `[x]` 之前
 - `requesting-code-review` 给出"可以继续"之前
 
 ## 工作方式

@@ -7,7 +7,7 @@
 | 层 | 强度 |
 |---|---|
 | OpenSpec 契约层 | **强**：proposal 先行，必须填"系统工程影响评估" |
-| 行为层（skills） | **强**：full SDD，brainstorming → writing-plans → TDD → review → verify 全走 |
+| 行为层（skills） | **强**：full SDD，td-explore → writing-plans → TDD → review → verify 全走 |
 | 工程管理约束层 | **中**：WIP 限制启动，brooks-law 提醒，delay-decision 强 |
 
 ## 特殊规则

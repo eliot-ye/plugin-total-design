@@ -10,8 +10,8 @@ user-invocable: false
 
 - 测试失败，且失败原因不明确
 - 用户报告 bug
-- agent 自己的修复尝试失败 2 次以上（触发 debug 流程的阈值；与 `executing-plans` 步骤 4 的"失败 3 次反思 plan"是不同层面的两个阈值——2 次触发 debug、3 次反思 plan）
-- `executing-plans` 里任务执行失败
+- agent 自己的修复尝试失败 2 次以上（触发 debug 流程的阈值；与 `executing-plans` 步骤 2 的"失败 3 次反思 plan"是不同层面的两个阈值——2 次触发 debug、3 次反思 plan）
+- `executing-plans` 的失败处理被触发时（任务执行失败，由 `td-apply` 步骤 4 委托）
 
 ## 4-Phase 流程
 

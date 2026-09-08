@@ -23,13 +23,13 @@
 
 **开放标准支持**：本 plugin 符合 [Agent Plugins 1.0.0 规范](https://agent-plugins.org/specification)——根目录 `plugin.json` 的 `$schema` 字段声明 conformance。任何遵循该标准的客户端都能通过根 `plugin.json` 识别并加载 `skills/` 目录（v1 定义 skills + mcp.json 两种组件，`commands/` 目录不在 v1 规范内）。
 
-**分发路径与 skills 目录**：所有平台共享仓库根目录的 `skills/`（18 个 skill）——各平台各自扫描，不需要副本或 symlink。`commands/`（8 个命令文件）仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载（Agent Plugins 1.0.0 v1 未定义 commands 组件）。
+**分发路径与 skills 目录**：所有平台共享仓库根目录的 `skills/`（17 个 skill）——各平台各自扫描，不需要副本或 symlink。`commands/`（8 个命令文件）仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载（Agent Plugins 1.0.0 v1 未定义 commands 组件）。
 
 ## 依赖图谱与分析
 
 **任何对本仓库LLM文件的更改——无论改 SKILL.md、命令文件、还是 AGENTS.md 本身——动笔前必须先完成下列分析步骤，全部执行完才能开始用户要求的改动。跳过这一步直接改 = 把局部失调注入系统。**
 
-理由：本 plugin 的 18 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
+理由：本 plugin 的 17 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
 
 ### 分析步骤（必须按序执行，每步产出可见证据）
 
@@ -68,7 +68,7 @@
 约束层 / 行为层 / 契约层自上而下：
 
 - **约束层（constraints）** — 钱学森系统工程主基调 + Brooks / Goldratt / 精益局部规律；每个局部动作从整体性能反推，局部优化不能制造全局失调。
-- **行为层（skills）** — Superpowers 转译的 brainstorming→plan→TDD→review→verify 强制流程；触发式，不靠人盯。
+- **行为层（skills）** — Superpowers 转译的 explore→plan→TDD→review→verify 强制流程；触发式，不靠人盯。
 - **契约层（commands）** — OpenSpec 转译的 propose→apply→archive artifact 流；agree before you build。
 
 约束层是第零层，是另外两层立起来的前提。`constraints` skill 承载 5 份局部规律 references，每份 references 必须显式声明它服务钱学森系统工程主基调的哪一条。
@@ -89,7 +89,7 @@ total-design/
 ├── plugin.json             ← 根目录 Agent Plugins 1.0.0 清单（跨平台元数据：$schema/name/version/description/author）
 ├── package.json            ← Pi Agent package（pi.skills 指向 ./skills）
 │
-├── skills/                  ← 18 个 skill（profile/tier 变体在 field-assessment/references/ 下；5 个局部规律变体在 constraints/references/ 下）
+├── skills/                  ← 17 个 skill（profile/tier 变体在 field-assessment/references/ 下；5 个局部规律变体在 constraints/references/ 下）
 ├── commands/                ← 8 个 command
 │
 └── hooks/                   ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
@@ -237,7 +237,7 @@ args: none|option|required
 
 1. 审核对象 = 使用态 LLM 实际会读到的文本：frontmatter + 正文 + references/ + 命令文件。
 2. **使用态 LLM 视角的具体检查面**（四维度之前先跑，发现即修）：
-   - **触发语义**：description 触发词是否清晰、无歧义、不与其他 skill 重叠冲突？重叠场景下使用态 LLM 会触发哪个 skill（如 brainstorming 与 td-explore 都管"需求不清"）？`user-invocable` / `disable-model-invocation` 语义是否正确（决定自动触发 vs 显式调用）？
+   - **触发语义**：description 触发词是否清晰、无歧义、不与其他 skill 重叠冲突？`user-invocable` / `disable-model-invocation` 语义是否正确（决定自动触发 vs 显式调用）？
    - **正文自包含性**：正文孤立加载能否执行？"见 X 的「Y」节"类引用的锚点是否真实存在（grep 验证）？依赖技能节与正文实际引用一致（不漏列/多列）？
    - **入口链**：slash 命令 → 同名 skill 转发是否无缝（命令文件"立刻调用"目标存在）？只读命令例外（td-list）是否清晰？
 
@@ -314,7 +314,7 @@ atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.
 
 - **skill 名**：kebab-case，无冒号（atomcode `validate_skill_name` 规则）
 - **命令名**：`td-<verb>` 或 `td-<noun>`，扁平 kebab-case
-- **文件名**：`SKILL.md`（目录式；本 plugin 18 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
+- **文件名**：`SKILL.md`（目录式；本 plugin 17 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
 - **主基调 skill**：`system-engineering`，是所有局部约束的前提，不单独触发（`user-invocable: false`）
 - **skill body 内引用其他 skill 用逻辑名**（如 `constraints`、`field-assessment`），由当前平台的加载器负责拼前缀（atomcode 下为 `total-design:<name>`）——这是预留多平台扩展的关键设计。skill frontmatter 不写 `aliases`，调用名一律由平台加载器按 plugin 名拼接。子约束（如 `wip-limit` / `human-in-loop` / `critical-buffer` / `brooks-law` / `delay-decision`）作为 `constraints` 的 `references/<name>.md` 变体文件存在，body 内引用时写 `constraints` 的 `references/<name>.md`（逻辑名 + 变体路径）
 

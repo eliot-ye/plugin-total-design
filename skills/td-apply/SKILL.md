@@ -80,13 +80,26 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 本子节是**事前**误差检测（不破坏既有 caller），实测确认过的 caller 清单同时是步骤 6.2 边界验证的边界输入；步骤 6.2 是**事后**误差检测（新行为是否正确）。分工不同，不重复。
 
-架构 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。行为层触发序列：
+架构 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。
 
-1. **`writing-plans`**（若 tasks.md 粒度不够细）：细化任务序列
-2. **`executing-plans`**（按任务序列执行，内部按任务粒度嵌套触发以下 skill）：
-   - **`test-driven-development`**：每个任务先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑
-   - **`requesting-code-review`**：checkpoint 时做 review（含与既有风格一致性检查）
-   - **`verification-before-completion`**：每个任务完成前必须跑验证命令
+#### 任务执行
+
+**粒度不够细时先细化**：tasks.md 粒度不够 → 触发 `writing-plans` 细化任务序列。
+
+**基本执行循环**（td-apply 自持，逐任务循环直至全部完成）：
+
+1. 读任务的"验证"字段与"风险"字段
+2. 触发 `test-driven-development`：先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑
+3. 触发 `verification-before-completion`：跑验证命令，拿到验证证据
+4. 更新 tasks.md：`- [ ]` → `- [x]`，附验证证据
+
+**复杂场景按需委托 `executing-plans`**：以下任一条件命中时，在基本执行循环的对应位置触发 `executing-plans` 的 checkpoint / 失败处理能力——td-apply 仍是执行主体，`executing-plans` 提供管理层能力（checkpoint 调度 + 失败处理回路），不接管基本执行循环：
+
+- **关键链 checkpoint**：完成一个关键链任务时 → 触发 `executing-plans` 的 checkpoint（含 `requesting-code-review` 做 review，含与既有风格一致性检查）
+- **任务执行失败**：触发 `executing-plans` 的失败处理（内含 `systematic-debugging` 4-phase 流程；失败 2 次以上触发 debug、3 次反思 plan）
+- **current-change audit**（tier-medium）：每个关键链任务完成时随 checkpoint 触发，见步骤 6.4
+
+条件不命中时全程走 td-apply 自持的基本执行循环，不加载 `executing-plans`。
 
 ### 5. 触发 apply 全局粒度的工程管理约束
 
@@ -141,7 +154,7 @@ review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 ch
 6.1–6.3 都通过后，对照表 3 的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`（表 3 见 `field-assessment/references/audit-frequency.md`）：
 
 - `tier-small`：不要求
-- `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 3）
+- `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 1）
 - `tier-large`：每完成 1 个 change 触发——本步骤即触发点
 
 触发即调用 `/td-system-audit current-change`，把本次 change 的"实际 vs 预期"对照主基调过一遍。
