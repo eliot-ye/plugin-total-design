@@ -2,6 +2,30 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.10.0] - 2026-09-08
+
+### Added
+
+- **TDD 变异自检（`test-driven-development`）**：high 风险测试全绿后做一次变异自检——临时翻转一处核心断言对应的产线逻辑（改返回值 / 破坏边界），确认测试集转红后还原；不转红 = 该断言什么都没保护，回测试设计步骤重写。medium / low 不做。
+- **设计回写（`td-apply` 步骤 5）**：实施途中发现 design / spec / proposal 与代码现实冲突 → 全局必停，触发 `human-in-loop` 让用户拍板：回写 artifact（改完继续）或改代码迁就（仅限实现细节冲突）；用户选回写则更新对应 artifact 并在 tasks.md 记录，且受影响任务的既有验证证据作废——重跑全绿后才继续实施。
+- **wip-limit「常见合理化」对照表**（`constraints/references/wip-limit.md`）：4 类 agent 自我说服（"就超一个""change 互不相关""先 override 回头立刻 archive""合并几个 change 一起过"）逐条给出现实反驳，与「触发时机」节的二次 override 提醒衔接。
+- **td-archive CLI 加持**：步骤 3 对照源 2 存在时用 `openspec show "<name>" --diff`（OpenSpec CLI ≥ v1.11）取本 change 对主 spec 的真实变更行，契约对照只审 diff 命中行；步骤 4 sync 后跑 `openspec validate --archived`（≥ v1.9）自证归档完整性。两个 flag 均带版本降级，低版本不阻塞 archive。
+- **td-explore「先查仓库再提问」**：事实类问题（"现在 X 是怎么做的""有没有 Y 配置"）先在仓库自查（代码 / `openspec/specs/` / config / README），已有事实不问用户；确需提问时附基于现场证据的推荐默认值；仓库证据与用户认知冲突时摆证据让用户裁决。
+- brooks-law「协调成本」论据补量化：沟通路径数按 n(n-1)/2 增长，协调成本随并行成员数超线性上升。
+- AGENTS.md 审核维度 3 新增「仪式性内容」检查线（仓库元文档，非运行时资产）：方法论文本须绑定执行动作，给出判定线与「服务的主基调原则」节合格形态（声明原则 + 约束的动作，收紧写法而非删节）。
+
+### Changed（行为变更）
+
+- **brainstorming 内联进 `td-explore`，skill 数 18 → 17**：提问提炼方法论成为 td-explore 内建流程，无功能损失；`/total-design:brainstorming` 显式调用入口消失，需求不清场景由 `/td-explore` 承接（其 description 已含"优先路由到这里"语义）。AGENTS.md / README / 各 SKILL.md 引用全部同步，运行时资产零残留。
+- **td-archive 步骤 3 复盘深度按 tier 分层**：`tier-small` 只对照 2 字段（实际影响分系统 + 预期行为模型验证），`tier-medium` / `tier-large` 保持 5 字段——小系统的 5 字段对照表是纯形式化。
+- **td-apply Guardrails 并行例外**：「不跳过任务，按 tasks.md 顺序」补「tasks.md 显式标注并行的任务除外」。
+- **token 优化**：指令侧冗余精简（21 文件 -83 行）；高频预加载段收敛（system-engineering 四条展开、6 处归位段、executing-plans body 63→50 行）——每次 propose+apply+archive 生命周期省约 700-900 token；writing-plans / test-driven-development / requesting-code-review / systematic-debugging 4 个行为层 skill 补精简版「服务的主基调原则」节。
+
+### Fixed
+
+- **初始 spec 建立的写入方表述**（profile-greenfield）：propose 以 change 的 spec delta 形态建立初始 spec，由 archive sync 落进 `openspec/specs/` 成为 baseline——propose 不直写主 spec 目录（原表述易被读成 propose 直写）。
+- **td-propose 步骤 6.a 补读 baseline spec**：会话上下文无本次 change 触及分系统的 baseline spec 内容时，读 `openspec/specs/` 相关 spec.md（契约与不变量）作为「与既有架构/风格的遵循关系」与整体影响判断的输入（greenfield 首个 change 无 baseline → 跳过）；原 greenfield 特例段由本逻辑取代删除。
+
 ## [1.9.0] - 2026-09-06
 
 ### Added
