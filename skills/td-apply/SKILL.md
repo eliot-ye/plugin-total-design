@@ -46,7 +46,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
 
-- **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 6.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"——与 `td-archive` 步骤 3 的旧 change 兜底对称（propose 6.c 对新 change 仍强制必填，本处只放行存量旧 change）。
+- **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 6.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"
 - **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检。
 - **caller impact 分析节必填**：若 `$_TD_TIER` 为 `tier-medium` / `tier-large` 且 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检——propose 6.c 漏执行时由本条兜底，后续步骤 4 实测子节不再重复此检查。
 - **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。已达 → **阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威在该文件；override 通过后继续步骤 3）。
@@ -161,6 +161,6 @@ review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 ch
 
 ## Guardrails
 
-- 不跳过任务，按 tasks.md 顺序
+- 不跳过任务，按 tasks.md 顺序；tasks.md 显式标注并行的任务除外
 - 每个任务必须有验证证据，"我觉得改对了"不算
 - 遇到 proposal 与实际代码冲突时，停下来问用户：是改 proposal 还是改代码？（执行序列见步骤 5 的「设计回写」）
