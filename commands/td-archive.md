@@ -1,6 +1,6 @@
 ---
 name: td-archive
-description: 完成后归档。OpenSpec 契约层入口。
+description: 完成后归档。
 argument-hint: <change-name>
 args: optional
 ---

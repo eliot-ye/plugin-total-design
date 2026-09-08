@@ -1,6 +1,6 @@
 ---
 name: td-apply
-description: 实施任务，按 artifact 走。OpenSpec 契约层入口。触发场景：用户说"apply"、"实施"、"按 change 干"、"执行 tasks"、"开始执行"、"go"
+description: 实施任务，按 artifact 走。触发场景：用户说"apply"、"实施"、"按 change 干"、"执行 tasks"、"开始执行"、"go"
 user-invocable: true
 argument-hint: <change-name>
 ---
@@ -20,13 +20,13 @@ argument-hint: <change-name>
 
 apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。每个任务对系统整体的影响，必须由 agent 持续持有。
 
-**核心论点归位——"总体性能不等于各部分性能之和"**：步骤 6.2 的"系统级验证（跨分系统边界，硬步骤）"是核心论点最直接的体现（论点与工程化解释的完整展开见 `verification-before-completion` 的「服务的主基调原则」节「核心论点归位」段）。本步骤只定义触发条件与 tier 分层强度，执行语义在 `verification-before-completion` 第 6 节。
+**核心论点归位**：步骤 6.2 系统级验证是"总体性能≠各部分之和"的最直接体现。执行语义见 `verification-before-completion` 第 6 节。
 
 **系统工程主基调第 2 条：总体设计部。**
 
 apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constraints` 的 `references/human-in-loop.md` 让用户（总体设计部）拍。
 
-**《工程控制论》反馈控制回路归位**：apply 是控制执行 + 实时误差检测环节（完整回路见 `system-engineering` 的「反馈控制回路」节）。
+**反馈控制回路归位**：apply 是控制执行 + 实时误差检测环节。
 
 ## 输入 - change 名。空则推导或问用户"想 apply 哪个 change"
 
@@ -36,17 +36,17 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 ### 1. 激活主基调与配置层
 
-激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
+按下述三步序列激活主基调与配置层——只注入强度，不做触发判断：
 
 1. **`system-engineering`** — 主基调四条进入上下文。
-2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存，后续步骤直接引用。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 6.4）。
-3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断是否触发 / tasks 是否合规。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 6.4）。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断——后续步骤据此判断 constraint 触发与 tasks 合规。
 
 ### 2. 前置检查
 
 对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
 
-- **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 6.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"——与 `td-archive` 步骤 3 的旧 change 兜底对称（propose 6.c 对新 change 仍强制必填，本处只放行存量旧 change，不削弱 propose 侧约束）。
+- **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 6.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"
 - **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检。
 - **caller impact 分析节必填**：若 `$_TD_TIER` 为 `tier-medium` / `tier-large` 且 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检——propose 6.c 漏执行时由本条兜底，后续步骤 4 实测子节不再重复此检查。
 - **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。已达 → **阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威在该文件；override 通过后继续步骤 3）。
@@ -80,13 +80,26 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 本子节是**事前**误差检测（不破坏既有 caller），实测确认过的 caller 清单同时是步骤 6.2 边界验证的边界输入；步骤 6.2 是**事后**误差检测（新行为是否正确）。分工不同，不重复。
 
-架构 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。行为层触发序列：
+架构 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。
 
-1. **`writing-plans`**（若 tasks.md 粒度不够细）：细化任务序列
-2. **`executing-plans`**（按任务序列执行，内部按任务粒度嵌套触发以下 skill）：
-   - **`test-driven-development`**：每个任务先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑
-   - **`requesting-code-review`**：checkpoint 时做 review（含与既有风格一致性检查）
-   - **`verification-before-completion`**：每个任务完成前必须跑验证命令
+#### 任务执行
+
+**粒度不够细时先细化**：tasks.md 粒度不够 → 触发 `writing-plans` 细化任务序列。
+
+**基本执行循环**（td-apply 自持，逐任务循环直至全部完成）：
+
+1. 读任务的"验证"字段与"风险"字段
+2. 触发 `test-driven-development`：先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑
+3. 触发 `verification-before-completion`：跑验证命令，拿到验证证据
+4. 更新 tasks.md：`- [ ]` → `- [x]`，附验证证据
+
+**复杂场景按需委托 `executing-plans`**：以下任一条件命中时，在基本执行循环的对应位置触发 `executing-plans` 的 checkpoint / 失败处理能力——td-apply 仍是执行主体，`executing-plans` 提供管理层能力（checkpoint 调度 + 失败处理回路），不接管基本执行循环：
+
+- **关键链 checkpoint**：完成一个关键链任务时 → 触发 `executing-plans` 的 checkpoint（含 `requesting-code-review` 做 review，含与既有风格一致性检查）
+- **任务执行失败**：触发 `executing-plans` 的失败处理（内含 `systematic-debugging` 4-phase 流程；失败 2 次以上触发 debug、3 次反思 plan）
+- **current-change audit**（tier-medium）：每个关键链任务完成时随 checkpoint 触发，见步骤 6.4
+
+条件不命中时全程走 td-apply 自持的基本执行循环，不加载 `executing-plans`。
 
 ### 5. 触发 apply 全局粒度的工程管理约束
 
@@ -95,6 +108,15 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 - `constraints` 的 `references/brooks-law.md`：用户在 apply 期间想加人手 / 并行 subagent 加速时
 - `constraints` 的 `references/delay-decision.md`：apply 期间遇到顶层架构层次的可逆决策时（与任务粒度的"实现细节可逆决策"不重叠）
 - `constraints` 的 `references/human-in-loop.md`：apply 期间遇到"超出当前 change scope 的影响"等 apply 全局必停场景时（任务粒度的 checkpoint 必停由 executing-plans 负责）。步骤 6.2 边界验证失败时的"root cause 在 plan 之外 → 停下来问用户"也走本类 apply 全局必停通道。
+
+#### 设计回写（实施中发现 artifact 有错）
+
+实施途中发现 design / spec / proposal 与代码现实冲突（前提假设不成立、设计方案行不通、spec 漏了场景）——这属于 apply 全局必停场景，不允许 agent 自行绕过 artifact 继续写。执行序列：
+
+1. **停下实施**，触发 `constraints` 的 `references/human-in-loop.md` 让用户拍板：(a) 回写 artifact（改完继续实施），还是 (b) 改代码迁就 artifact（仅限冲突确实属于实现细节时）。
+2. 用户选回写 → 在本 change 内直接更新对应 artifact（design / spec delta；proposal 的"系统工程影响评估"节失实的一并修正），并在 tasks.md 记录"回写了 X，原因：<…>"。
+3. **证据失效重跑**：回写使受影响任务的既有验证证据作废——按 `verification-before-completion` 的「之前测过」条重跑受影响任务的验证；回写波及分系统边界时，重跑步骤 6.2 对应边界的验证。重跑全绿后才继续实施。
+4. 继续实施。
 
 ### 6. 完成判定
 
@@ -132,13 +154,13 @@ review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 ch
 6.1–6.3 都通过后，对照表 3 的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`（表 3 见 `field-assessment/references/audit-frequency.md`）：
 
 - `tier-small`：不要求
-- `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 3）
+- `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 1）
 - `tier-large`：每完成 1 个 change 触发——本步骤即触发点
 
 触发即调用 `/td-system-audit current-change`，把本次 change 的"实际 vs 预期"对照主基调过一遍。
 
 ## Guardrails
 
-- 不跳过任务，按 tasks.md 顺序
+- 不跳过任务，按 tasks.md 顺序；tasks.md 显式标注并行的任务除外
 - 每个任务必须有验证证据，"我觉得改对了"不算
-- 遇到 proposal 与实际代码冲突时，停下来问用户：是改 proposal 还是改代码？
+- 遇到 proposal 与实际代码冲突时，停下来问用户：是改 proposal 还是改代码？（执行序列见步骤 5 的「设计回写」）

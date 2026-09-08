@@ -20,7 +20,7 @@ OpenSpec 契约层入口。在写代码之前，让人和 AI 对"建什么、为
 
 proposal 里的"系统工程影响评估"节是这个原则的工程化体现——agent 不只写"what"和"how"，必须写"这会对系统整体产生什么影响"，完成从定性到定量的综合集成。其中"预期行为模型"字段是综合集成的"模型"载体（见 `system-engineering` 的「主基调四条」第 3 条「模型载体」节）。
 
-**《工程控制论》反馈控制回路归位**：propose 是前馈控制环节（建立控制目标，完整回路见 `system-engineering` 的「反馈控制回路」节）。
+**反馈控制回路归位**：propose 是前馈控制环节（建立控制目标）。
 
 ## 输入
 
@@ -38,11 +38,11 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 
 ### 1. 激活主基调与配置层
 
-激活主基调与配置层。只注入强度不做判断，按下述三步序列执行：
+按下述三步序列激活主基调与配置层——只注入强度，不做触发判断：
 
 1. **`system-engineering`** — 主基调四条进入上下文。propose 的每个判断都在主基调四条框架下做。
-2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）。会话内缓存，后续步骤直接引用。
-3. **其余 constraint** — 只把强度值读入上下文，不在本步判断是否触发——后续步骤据此判断 wip-limit / human-in-loop 是否触发。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）。会话内缓存。
+3. **其余 constraint** — 只把强度值读入上下文，不在本步判断触发——wip-limit / human-in-loop 是否触发由后续步骤据此判断。
 
 ### 2. 读现场背景（config.yaml context）
 
@@ -84,7 +84,11 @@ openspec status --change "<name>" --json
 
 用任务跟踪工具跟踪进度。循环体对每个 artifact 执行下述四子步，全部 `applyRequires` artifact 走完且必填项全过才进入步骤 7。
 
-**6.a 合并会话内已有探索产物**：若本次会话已产出 `td-explore` 的候选方向评估（对话形式交付），把其中的候选方向取舍与"系统工程影响"评估合并进 proposal 骨架，作为 6.c 必填项的输入。没有产物则跳过，直接从 template 构建。
+**6.a 合并会话内已有探索产物**：
+
+- 若本次会话已产出 `td-explore` 的候选方向评估（对话形式交付），把其中的候选方向取舍与"系统工程影响"评估合并进 proposal 骨架，作为 6.c 必填项的输入。没有产物 → 跳过本条。
+- 会话上下文中没有本次 change 触及分系统的 baseline spec 内容（如本会话没走过 `/td-explore`，或其读取内容已不在上下文）→ 读 `openspec/specs/` 下相关分系统的 `spec.md`（契约与不变量），作为 6.c"与既有架构/风格的遵循关系"与整体影响判断的输入；相关分系统在 `openspec/specs/` 下没有 baseline（greenfield 首个 change）→ 跳过。
+- 两者皆无 → 直接从 template 构建。
 
 **6.b 创建 artifact**：
 
@@ -96,8 +100,6 @@ openspec instructions <artifact-id> --change "<name>" --json
 - 应用 `context` 和 `rules` 作为约束——**不要把它们复制进 artifact 文件**
 - 读已完成的依赖 artifact 作为 context
 - 写到 `resolvedOutputPath`
-
-greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空，第一个 change 的 proposal 还要建立初始 spec baseline——这是后续所有改动的影响评估依据。
 
 **6.c 必填项检查**（每个 artifact 写完后立即做，缺项 → 回 6.b 补写，不进 6.d）：
 
@@ -148,9 +150,9 @@ greenfield 特例：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs
 - 已知 caller：只列确定已知的高危 caller（file:line + 预判结论：兼容 / 需适配 / caller 不消费返回值）——完整 caller 清单不由本节承担，由 `td-apply` 步骤 4 的引用搜索实测产出
 ```
 
-本节是前馈定位（类别标注 + 高危 go/no-go），不追求完整 caller 清单——人工预判清单不可靠，完整清单由 `td-apply` 步骤 4 实测产出并兜底；实测发现本节未标注的 caller，或与预判结论冲突 → 补做兼容确认，或按 apply 全局必停通道上报。
+本节是前馈定位（类别标注 + 高危 go/no-go），完整 caller 清单不由本节承担——由 `td-apply` 步骤 4 实测产出并兜底；实测发现本节未标注的 caller，或与预判结论冲突 → 补做兼容确认，或按 apply 全局必停通道上报。
 
-tier 分层：tier-small 可跳过（提醒性质，跳过时在 proposal 注明）；tier-medium / tier-large 必填（必填的是变更点类别标注 + 高危标记，负担轻）——缺项的 proposal 不算 apply-ready。
+tier 分层：tier-small 可跳过（提醒性质，跳过时在 proposal 注明）；tier-medium / tier-large 必填（必填的是变更点类别标注 + 高危标记）——缺项的 proposal 不算 apply-ready。
 
 - **tasks.md 必填：关键链标注与 project buffer**
 

@@ -33,6 +33,15 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
    d. 用户确认后，在 change 的 `proposal.md` 里记录"override WIP 上限，用户已确认风险"——作为后续 `/td-system-audit` 的输入。同一步骤 a 中 `brooks-law` 的加人手确认由 `brooks-law` 自行落点（`design.md` 作为"已知风险"，非 override 场景的加人手确认）；override 场景的 WIP 确认由本文件落点（`proposal.md`）——两处落点不冲突。
    e. 才继续执行后续步骤。
 
+### 常见合理化
+
+| 合理化（agent 对自己说的话） | 现实 |
+|---|---|
+| "就超一个，用户赶进度" | 一次 override 就让硬约束变软——约束力在于每次超限都有控制流后果，豁免一次 = 建立先例（「触发时机」节的二次 override 提醒正是为连续 override 准备的） |
+| "这些 change 互不相关，不会互相干扰" | "相互作用无法同时持有"不依赖主观相关性——上下文切换成本、buffer 消耗、冲突窗口都是客观存在（主基调第 4 条） |
+| "先 override 完成这个，回头立刻 archive" | "立刻"没有控制流保证——override 记录进 `proposal.md`，就是给 `/td-system-audit` 留下回检证据（override 流程 d 步） |
+| "合并几个 change 一起过，效率更高" | 并行装配 = 多条关键链抢同一个 project buffer，协调成本随并行数超线性增长（同目录 `brooks-law.md`） |
+
 ## 触发时机
 
 - 用户想 `/td-propose` 一个新 change，但活跃 change 数已达上限

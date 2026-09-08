@@ -22,7 +22,7 @@ AI coding agent 的失控不是"模型不够强"，是**没有工程纪律**：
 ## 三层结构
 
 - **约束层（constraints）** — 钱学森系统工程主基调 + Brooks / Goldratt / 精益局部规律；局部优化不能制造全局失调
-- **行为层（skills）** — brainstorming → plan → TDD → review → verify 强制流程，触发式不靠人盯
+- **行为层（skills）** — explore → plan → TDD → review → verify 强制流程，触发式不靠人盯
 - **契约层（commands）** — propose → apply → archive 的 artifact 流，agree before you build
 
 约束层是第零层，是另外两层立起来的前提。
@@ -34,7 +34,7 @@ AI coding agent 的失控不是"模型不够强"，是**没有工程纪律**：
 | 来源 | 角色 | 出处 |
 |---|---|---|
 | **OpenSpec** | 契约层：propose → apply → archive | https://github.com/Fission-AI/OpenSpec |
-| **Superpowers** | 行为层：brainstorming → plan → TDD → review → verify | https://github.com/obra/superpowers |
+| **Superpowers** | 行为层：explore → plan → TDD → review → verify | https://github.com/obra/superpowers |
 | **钱学森系统工程** | 约束层主基调：系统工程 / 总体设计部 / 综合集成 / 开放的复杂巨系统 | 《系统工程论》《创建系统学》 |
 
 不原样照搬：OpenSpec 转译成 code agent slash 命令、Superpowers 转译成 skill、钱学森做成局部约束的前提。
@@ -127,12 +127,12 @@ Pi 通过仓库根目录 `package.json` 的 `pi.skills` 字段加载 skills 目�
 
 ## Skill 清单
 
-18 个 skill 分布在四层：
+17 个 skill 分布在四层：
 
 | 层 | 数量 | 代表 |
 |---|---|---|
 | 约束层 | 2 | `system-engineering` 主基调 + `constraints` 承载 5 份局部规律 |
-| 行为层 | 7 | brainstorming / writing-plans / executing-plans / test-driven-development / requesting-code-review / systematic-debugging / verification-before-completion |
+| 行为层 | 6 | writing-plans / executing-plans / test-driven-development / requesting-code-review / systematic-debugging / verification-before-completion |
 | 配置层 | 2 | `field-assessment`（profile×tier 配置入口）+ `todo-pool`（`openspec/todo.md` 格式约定） |
 | 契约层 | 7 | 7 个 td-* skill，与 command 一一对应 |
 

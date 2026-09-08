@@ -7,7 +7,7 @@
 | 层 | 强度 |
 |---|---|
 | OpenSpec 契约层 | **强**：proposal 先行，必须填"系统工程影响评估" |
-| 行为层（skills） | **强**：full SDD，brainstorming → writing-plans → TDD → review → verify 全走 |
+| 行为层（skills） | **强**：full SDD，td-explore → writing-plans → TDD → review → verify 全走 |
 | 工程管理约束层 | **中**：WIP 限制启动，brooks-law 提醒，delay-decision 强 |
 
 ## 特殊规则
@@ -18,7 +18,7 @@ greenfield 最容易犯的错是"我想到了就建"。先 `/td-explore` 探索�
 
 ### 2. 初始 spec 建立
 
-第一个 `/td-propose` 不只是建 change，还要建立 `openspec/specs/` 下的初始 spec。这是 baseline。
+第一个 change 的目标之一是让系统有初始 spec baseline：`/td-propose` 以 change 的 spec delta 形态建立初始 spec（走 propose 的 artifact 流），`/td-archive` 的 sync 把它落进 `openspec/specs/` 成为 baseline。propose 不直写主 spec 目录。
 
 ### 3. 避免"完美架构"陷阱
 

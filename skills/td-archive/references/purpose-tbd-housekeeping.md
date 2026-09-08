@@ -1,6 +1,6 @@
 # Purpose TBD Housekeeping
 
-`td-archive` 步骤 4 的子流程。`openspec archive` sync 主 spec 时，新生成的主 spec `## Purpose` 节会保留 td-archive 模板默认值 `TBD - created by archiving change <name>. Update Purpose after archive.`——这是已知的 sync 副作用，不能让 TBD 残留到下一次 audit。
+`td-archive` 步骤 4 的降级子流程（OpenSpec CLI < v1.11 时使用；≥ v1.11 由 `openspec validate --specs` 直接检出，见 `td-archive` 步骤 4）。`openspec archive` sync 主 spec 时，新生成的主 spec `## Purpose` 节会保留 td-archive 模板默认值 `TBD - created by archiving change <name>. Update Purpose after archive.`——这是已知的 sync 副作用，不能让 TBD 残留到下一次 audit。
 
 ## 触发时机
 
