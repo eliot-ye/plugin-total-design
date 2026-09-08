@@ -6,6 +6,10 @@ user-invocable: false
 
 # Test-Driven Development
 
+## 服务的主基调原则
+
+**主基调第 3 条：从定性到定量的综合集成。** 测试是综合集成的模型载体——先写失败测试是建立预期模型（定性），写实现让测试通过是验证模型（定量）。
+
 ## 依赖技能
 
 - `field-assessment`

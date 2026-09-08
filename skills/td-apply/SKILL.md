@@ -20,13 +20,13 @@ argument-hint: <change-name>
 
 apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。每个任务对系统整体的影响，必须由 agent 持续持有。
 
-**核心论点归位——"总体性能不等于各部分性能之和"**：步骤 6.2 的"系统级验证（跨分系统边界，硬步骤）"是核心论点最直接的体现（论点与工程化解释的完整展开见 `verification-before-completion` 的「服务的主基调原则」节「核心论点归位」段）。本步骤只定义触发条件与 tier 分层强度，执行语义在 `verification-before-completion` 第 6 节。
+**核心论点归位**：步骤 6.2 系统级验证是"总体性能≠各部分之和"的最直接体现。执行语义见 `verification-before-completion` 第 6 节。
 
 **系统工程主基调第 2 条：总体设计部。**
 
 apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constraints` 的 `references/human-in-loop.md` 让用户（总体设计部）拍。
 
-**《工程控制论》反馈控制回路归位**：apply 是控制执行 + 实时误差检测环节（完整回路见 `system-engineering` 的「反馈控制回路」节）。
+**反馈控制回路归位**：apply 是控制执行 + 实时误差检测环节。
 
 ## 输入 - change 名。空则推导或问用户"想 apply 哪个 change"
 

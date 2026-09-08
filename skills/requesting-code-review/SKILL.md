@@ -6,6 +6,10 @@ user-invocable: false
 
 # Requesting Code Review
 
+## 服务的主基调原则
+
+**主基调第 1 条：系统工程。** review 是防"局部最优但全局失调"的检测层——每个任务的代码、每次架构的切分，都要对照整体契约检查。
+
 ## 触发时机
 
 - **`td-propose` 完成后、`td-apply` 动手前（架构 review）**——proposal 刚定型，进入实施前先检查分系统切分与设计决策，此时改架构成本最低

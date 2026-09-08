@@ -6,6 +6,10 @@ user-invocable: false
 
 # Writing Plans
 
+## 服务的主基调原则
+
+**主基调第 4 条：开放的复杂巨系统。** 任务拆分按系统层次（分系统边界 → 分系统内部层次 → 时间粒度），不是平面切分——这是层次观的工程化。
+
 ## 依赖技能
 
 - `constraints` 的 `references/critical-buffer.md`

@@ -24,7 +24,7 @@ argument-hint: "<scope: current-change | project>  (optional, default current-ch
 
 audit 的对照标准是主基调四条，不是"代码质量"或"进度"——这是系统工程视角的审计，不是项目管理视角的审计。
 
-**《工程控制论》反馈控制回路归位**：步骤 7"修复后重跑 audit 闭环"是反馈控制回路的具体形态（完整回路见 `system-engineering` 的「反馈控制回路」节）。
+**反馈控制回路归位**：步骤 7"修复后重跑 audit 闭环"是反馈控制回路的具体形态。
 
 ## 输入 - audit 的范围。空则默认 `current-change`
 
