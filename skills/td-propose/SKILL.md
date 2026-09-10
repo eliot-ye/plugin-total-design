@@ -154,14 +154,15 @@ openspec instructions <artifact-id> --change "<name>" --json
 
 tier 分层：tier-small 可跳过（提醒性质，跳过时在 proposal 注明）；tier-medium / tier-large 必填（必填的是变更点类别标注 + 高危标记）——缺项的 proposal 不算 apply-ready。
 
-- **tasks.md 必填：关键链标注与 project buffer**
+- **tasks.md 必填：关键链标注、project buffer、任务主体约束**
 
 tasks.md 必须：
 
 - 标注关键链（critical chain）：哪条任务序列是项目的关键路径
 - 留 project buffer：按当前 tier 比例（查表 1 的 critical-buffer 行，会话内已缓存；表 1 见 `field-assessment/references/strength-matrix.md`）
+- 每条 task 主体是 agent 能**编程性执行**的动作（写代码 / 跑测试 / 执行 CLI / 改配置等）；非编程性动作（人工目测 / 用户验收 / 第三方审批 / 人工回归测试等）不得作为独立 task，必须降级为该 task 的 `验证` 字段——权威定义见 `writing-plans/references/task-template.md`「任务主体约束」节
 
-粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `constraints` 的 `references/critical-buffer.md` 的「识别关键链」节。
+粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `constraints` 的 `references/critical-buffer.md` 的「识别关键链」节；主体不合规 → 把非编程性动作降级到对应 task 的 `验证` 字段，回 6.b 补写。
 
 **6.d 循环判定**：
 
