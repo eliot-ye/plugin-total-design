@@ -1,7 +1,7 @@
 ---
 name: td-list
-description: 列出所有未归档的变更。触发场景：用户说"列一下 change"、"有哪些 in flight"、"未归档"、"现在在做什么"。
-argument-hint: (no arguments)
+description: 列出所有未归档的变更
+disable-model-invocation: true
 args: none
 ---
 
