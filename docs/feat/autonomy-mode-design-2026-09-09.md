@@ -23,8 +23,8 @@
 | 主基调条 | 关系 |
 |---|---|
 | 第 1 条：系统工程 | apply 仍在系统全局立场上推进，不因离线而降级 |
-| 第 2 条：总体设计部 | 决策权不下放给 agent，只行使时机从 apply 前移到 propose——人仍拍所有系统级决策 |
-| 第 3 条：综合集成 | propose 阶段的"已确认决策清单"是更完整的从定性到定量——决策更前置、更结构化 |
+| 第 2 条：总体设计部 | 决策权始终在人，只是行使时机从 apply 前移到 propose——人在 propose 拍板所有系统级决策，apply 不再临场问人 |
+| 第 3 条：综合集成 | 7 类编号清单强制逐类显式确认（`[已确认]` / `[不适用]` / `[不覆盖]` 三态），避免 apply 阶段凭 agent 判断临场补拍 |
 | 第 4 条：开放的复杂巨系统 | autonomous 模式下 agent 不并行硬解系统级问题，只在已确认框架内做实现 |
 
 ## 核心机制
@@ -45,14 +45,14 @@ set_reason: <一句话，如"批量执行已确认的 change，人不在场">
 
 #### 放在 `.td-state/` 的理由
 
-`.td-state/` 现有四个文件全部满足"可从文件系统事实推导"的契约。`autonomy.yaml` 是用户偏好，**不可推导**——这踩断了第一条腿。但 gitignore 仍成立，理由是第二条腿：**per-user 偏好不该跨人共享**。两个人的自治策略不同，提交进 git 只会制造冲突。
+`.td-state/` 现有三个文件（`archive-counter.yaml` / `audit-history.yaml` / `profile-tier.yaml`）全部满足"可从文件系统事实推导"的契约。`autonomy.yaml` 是用户偏好，**不可推导**——这踩断了第一条腿。但 gitignore 仍成立，理由是第二条腿：**per-user 偏好不该跨人共享**。两个人的自治策略不同，提交进 git 只会制造冲突。
 
-| 理由 | 现有四个文件 | autonomy.yaml |
+| 理由 | 现有三个文件 | autonomy.yaml |
 |---|---|---|
 | 可从文件系统推导 | ✅ | ❌（用户偏好） |
 | per-machine / 不该跨人共享 | ✅ | ✅ |
 
-不放 `openspec/config.yaml`（团队共享文件，自治策略是 per-user 的）。不靠环境变量（不持久，"设好就走人"场景下每次开 session 要重设）。不靠 `field-assessment` 判读（AGENTS.md 规定"无静态配置文件"，自治模式不是可观察事实）。
+不放 `openspec/config.yaml`（团队共享文件，自治策略是 per-user 的）。不靠环境变量（不持久，"设好就走人"场景下每次开 session 要重设）。不靠 `field-assessment` 判读（自治模式不是可观察事实，无静态配置文件）。
 
 ### 2. 独立文件——已确认决策清单
 
@@ -197,7 +197,7 @@ autonomous 模式下没有人来"延后处理"warning，但全自动修复可能
 1. 收尾 code review 判出 warning → agent 尝试修复一次（按 review 给出的建议）。
 2. 修复后重跑 change-level 验证（6.1）+ 收尾 code review（6.3）。
 3. 仍 warning → 记录到 `autonomy-manifest.md` 运行记录表，标"warning 未消除，延后人工处理"，继续归档流程（warning 不阻塞归档，与 human-in-loop 模式一致）。
-4. critical 不在此列——架构 review critical 或收尾 code review critical → 回退当前 change（`git stash push -u -m "rollback <change-name>" -- . ':(exclude)openspec/changes/<change-name>/**'` 撤销代码改动含未跟踪源码，保留 artifact 不删），在 `autonomy-log.yaml` 写 `rolled-back` 条目，编排者继续下一个 change。人回来后看日志 + `git stash list` 决定是 `pop` 救回改 proposal 重来、还是 `drop` 放弃。
+4. critical 不在此列——架构 review critical 或收尾 code review critical → 走第 4 节回退机制（命令形式与日志写入均以第 4 节为单一事实源），编排者继续下一个 change。
 
 ### 5. `.td-state/autonomy-log.yaml`——进度与失败日志
 
@@ -247,7 +247,7 @@ skill 不包 `while (changes remain)` 循环。三层结构各司其职：
 理由：
 
 1. agent 的 native session loop 已经是循环——用户给一个 goal，agent 会持续工作直到 goal 达成或被打断。skill 再包循环是重复语义。
-2. 符合 AGENTS.md 的触发式哲学——skill 设定 goal + per-change 协议，agent loop 自然驱动迭代。
+2. 符合本 plugin 的触发式哲学——skill 只设定 goal + per-change 协议，循环由 agent 自然驱动迭代，不靠 hook 或显式循环强制。
 3. `/loop` 是可选增强层——skill 本身不依赖 `/loop`，小批量单 session 够用；大批量用户自行选 `/loop` 包装。
 4. resume 检查点是已有状态文件——`tasks.md`（change 内进度）+ `autonomy-log.yaml`（跨 change 进度），不需要新 checkpoint 机制。
 
@@ -256,9 +256,7 @@ skill 不包 `while (changes remain)` 循环。三层结构各司其职：
 ```
 td-autonomous-run:
   0. 检查 .td-state/autonomy.yaml 是否存在：
-     - 不存在 → 提示"当前未配置自治模式，将创建 autonomy.yaml 并切换到 autonomous 模式。
-       注意：autonomous 模式下，每个 change 在 archive 成功且无失败记录后将自动 commit。
-       确认继续？"→ 用户确认后创建文件（mode: autonomous；set_at = 当前时间；set_reason = 用户一句话说明或默认"批量执行已确认的 change，人不在场"）
+     - 不存在 → 提示"当前未配置自治模式。继续将创建 autonomy.yaml 并切换到 autonomous 模式：此后每个 change 在 archive 成功且无失败记录时将自动 commit（相当于批量 commit 授权，可随时改 mode 字段中止）。确认继续？"→ 用户确认后创建文件（mode: autonomous；set_at = 当前时间；set_reason = 用户一句话说明或默认"批量执行已确认的 change，人不在场"）
      - 存在但 mode != autonomous → 提示"当前是 human-in-loop 模式，无需编排"
   1. 读 autonomy.yaml 确认 mode == autonomous
   2. 读 openspec/todo.md 拿优先级序列（P0 → P1 → P2；格式规则见 `todo-pool` 的「格式约定」节）
@@ -272,7 +270,7 @@ td-autonomous-run:
 
 每个 change 结束时，编排者按结果写 `autonomy-log.yaml`：
 - 全部验证通过 + archive + commit 成功 → `completed`
-- 前提假设不成立 / 测试失败 2 次以上根因在 plan 外 / 新 caller / 架构 review critical / 收尾 code review critical / audit 触发第 7 类 → `rolled-back`（含 `reason` / `detail` / `stash_ref`，代码已 `git stash push -u ... ':(exclude)openspec/changes/<name>/**'` 撤销，编排者继续下一个；audit 触发时 `reason` 显式标注"audit 触发第 7 类"）
+- 前提假设不成立 / 测试失败 2 次以上根因在 plan 外 / 新 caller / 架构 review critical / 收尾 code review critical / audit 触发第 7 类 → `rolled-back`（含 `reason` / `detail` / `stash_ref`，代码按第 4 节回退机制 `git stash push -u -m "rollback <change-name>" -- . ':(exclude)openspec/changes/<change-name>/**'` 撤销，编排者继续下一个；audit 触发时 `reason` 显式标注"audit 触发第 7 类"）
 
 #### commit 落脚点
 
@@ -287,7 +285,7 @@ archive 成功 →
     无失败记录 → git add -A && git commit（conventional commits 格式，co-authored trailer）
 ```
 
-**`git add -A` 的前置不变式**：本 change 的产出跨越源码改动、`openspec/changes/archive/<date>-<name>/`、`openspec/specs/`（sync）、`openspec/todo.md`（勾选），无法用固定路径列表表达，故用 `git add -A`。安全性靠不变式保证——**commit 时工作树只含本 change 的改动**。该不变式由三条机制守住：① 编排者顺序执行，上一个 change commit 完成后工作树已干净，本 change 从干净基线开始；② 回退用 `git stash push -u ... ':(exclude)openspec/changes/<name>/**'` 清空工作树（含未跟踪源码），不残留；③ 编排者在 commit 前读 `git status --porcelain`，若发现不属于本 change 的改动路径（例如前序 session 中断残留的其他 change 文件）→ 停止整个批次（不写 autonomy-log，因为这不是"change 失败"、是"批次基线被污染"——写一条 rolled-back 会误导人以为该 change 有问题），提示人处理后再续跑。
+**`git add -A` 的前置不变式**：本 change 的产出跨越源码改动、`openspec/changes/archive/YYYY-MM-DD-<change-name>/`、`openspec/specs/`（sync）、`openspec/todo.md`（勾选），无法用固定路径列表表达，故用 `git add -A`。安全性靠不变式保证——**commit 时工作树只含本 change 的改动**。该不变式由三条机制守住：① 编排者顺序执行，上一个 change commit 完成后工作树已干净，本 change 从干净基线开始；② 回退按第 4 节回退机制清空工作树（含未跟踪源码），不残留；③ 编排者在 commit 前读 `git status --porcelain`，若发现不属于本 change 的改动路径（例如前序 session 中断残留的其他 change 文件）→ 停止整个批次（不写 autonomy-log，因为这不是"change 失败"、是"批次基线被污染"——写一条 rolled-back 会误导人以为该 change 有问题），提示人处理后再续跑。
 
 commit 消息模板（SKILL.md 自包含书写，不引用本仓库的 AGENTS.md）：
 
@@ -356,7 +354,7 @@ hook 补项的等价性要求与现有校正逻辑一致：只补"文件系统�
 | **identification-flow.md** | 持久化层目录树加 autonomy.yaml + autonomy-log.yaml | |
 | **td-apply/references/autonomy-template.md** | 新建：autonomy.yaml + autonomy-log.yaml + autonomy-manifest.md 三个文件模板与读写规则 | |
 | **wip-limit.md** | 加 autonomous 模式说明：autonomous 模式下 WIP 检查不生效（不 override、不阻塞），仅 human-in-loop 模式生效 | |
-| **hooks/td_state_sync.js** | SessionEnd 校正补一项：检查有 `archive/<change-name>/` 目录且对应 commit 存在但 autonomy-log.yaml 缺 `completed` 条目的 change → 补写（不用 tasks.md 全 `[x]` 判定） | |
+| **hooks/td_state_sync.js** | SessionEnd 校正补一项：检查有 `archive/YYYY-MM-DD-<change-name>/` 目录且对应 commit 存在但 autonomy-log.yaml 缺 `completed` 条目的 change → 补写（不用 tasks.md 全 `[x]` 判定） | |
 
 blast radius：11 个文件（8 个改 + 3 个新建：td-autonomous-run SKILL.md / td-autonomous-run 命令文件 / td-apply/references/autonomy-template.md）。热点节点：human-in-loop.md（入边最多）、td-propose（契约层入口）。
 
@@ -371,7 +369,7 @@ blast radius：11 个文件（8 个改 + 3 个新建：td-autonomous-run SKILL.m
 | 用户忘记切回 human-in-loop 模式 | 中 | td-archive 步骤 5 检测 autonomy-log.yaml 有 rolled-back 条目时提示"有 N 个 change 需人工处理，建议切回 human-in-loop 处理" |
 | `.td-state/` 语义从"全部可推导"变为"可推导 + per-user 偏好" | 低 | gitignore 理由仍成立（第二条腿），在 AGENTS.md 补充说明 |
 | session 中断时 change 内进度未落盘 | 中 | tasks.md 的 `[x]` 标记是渐进写盘的；SessionEnd hook 只在 `archive/` 目录 + commit 双事实成立时补写 `completed`，不用 tasks 全 `[x]` 判定 |
-| 回退丢码后代码不可恢复 | 低 | 回退用 `git stash push` 而非 `git checkout`，改动留在 stash 栈可 `pop` 救回；`autonomy-log.yaml` 记录 `stash_ref` 便于人回来定位 |
+| 回退后改动丢失、人回来无法救回 | 低 | 回退用 `git stash push` 而非 `git checkout`，改动留在 stash 栈可 `pop` 救回；`autonomy-log.yaml` 记录 `stash_ref` 便于人回来定位 |
 | 批量执行中前序 change 改变基线导致 manifest caller 实测过时 | 中 | manifest 加「前置依赖」字段，编排者按依赖序执行减少漂移；apply 阶段"只复核不新增"不放宽 scope 边界，新 caller 一律回退 |
 | 编排 skill 的 goal 语义不被所有 agent 平台支持 | 低 | skill 用自然语言设 goal，不依赖平台特有 API；`/loop` 是可选增强 |
 | autonomous 模式下自动 commit 违反"用户未确认不 commit" | 低 | 步骤 0 创建 autonomy.yaml 时显式提示"将自动 commit"并等待用户确认；用户可随时修改 mode 字段中止；只 commit 无失败记录的 change |
@@ -390,11 +388,11 @@ blast radius：11 个文件（8 个改 + 3 个新建：td-autonomous-run SKILL.m
 
 6. **循环驱动者**：新增编排 skill `td-autonomous-run`（+ 同名命令文件）。skill 不实现循环——设 goal + per-change 协议，agent native session loop 驱动迭代。`/loop` 是可选跨 session 增强层。
 
-7. **session 边界**：`autonomy-log.yaml` 只有 `completed` / `rolled-back` 两种 action，跨 session 续跑靠读进度链。resume 粒度三档：change 之间跳已完成、change 内按 tasks.md `[x]` 续跑、回退的跳过不重试。SessionEnd hook 补写漏记的 `completed` 条目，判定条件是 `archive/<change-name>/` 目录存在且对应 commit 存在（不用 tasks.md 全 `[x]`——tasks 全打勾不等于 change 完成，td-apply 步骤 6 的四层验证在 tasks 之后跑）。
+7. **session 边界**：`autonomy-log.yaml` 只有 `completed` / `rolled-back` 两种 action，跨 session 续跑靠读进度链。resume 粒度三档：change 之间跳已完成、change 内按 tasks.md `[x]` 续跑、回退的跳过不重试。SessionEnd hook 补写漏记的 `completed` 条目，判定条件是 `archive/YYYY-MM-DD-<change-name>/` 目录存在且对应 commit 存在（不用 tasks.md 全 `[x]`——tasks 全打勾不等于 change 完成，td-apply 步骤 6 的四层验证在 tasks 之后跑）。
 
 8. **"范围内 vs 超出范围"判定**：manifest 的 7 类清单与 human-in-loop 的 7 类必停场景一一对应——第 1-5 类由 manifest 显式覆盖（`[已确认]` / `[不适用]`），第 6 类标 `[不适用]`、第 7 类标 `[不覆盖]`。运行时触发的 human-in-loop 场景能对应到第 1-5 类且标 `[已确认]` → 按结论执行；无法对应、或对应到 `[不适用]` 但实际触发了、或触发第 7 类 → 走残留场景处理，一律回退。"实现细节"的边界明确：TDD 红绿重构、代码风格对齐、测试策略调整、内部模块实现——这些不属于 7 类必停场景，autonomous 模式下照常自主。
 
-9. **code review critical / warning 的处理**：critical（架构 review 或收尾 code review）→ **回退当前 change**（`git stash push -m "rollback <change-name>"` 撤销代码改动，保留 artifact 不删），写 `rolled-back` 条目（含 `stash_ref`），编排者继续下一个 change，人回来后 `git stash pop` 救回改 proposal 重来或 `git stash drop` 放弃。不用 `git checkout`——那是不可恢复操作，autonomous 模式下 agent 无人现场确认没有第二次机会；stash 保留恢复路径。warning → 修一次 → 重跑 code review（最多 1 轮），仍 warning → 记录到 manifest 运行记录表延后人工处理，不阻塞归档。
+9. **code review critical / warning 的处理**：critical（架构 review 或收尾 code review）→ **回退当前 change**（`git stash push -u -m "rollback <change-name>" -- . ':(exclude)openspec/changes/<change-name>/**'` 撤销代码改动含未跟踪源码，保留 artifact 不删，命令形式与第 4 节回退机制一致），写 `rolled-back` 条目（含 `stash_ref`），编排者继续下一个 change，人回来后 `git stash pop` 救回改 proposal 重来或 `git stash drop` 放弃。不用 `git checkout`——那是不可恢复操作，autonomous 模式下 agent 无人现场确认没有第二次机会；stash 保留恢复路径。warning → 修一次 → 重跑 code review（最多 1 轮），仍 warning → 记录到 manifest 运行记录表延后人工处理，不阻塞归档。
 
 10. **td-system-audit 在 autonomous 模式下**：audit 照常跑，但 audit 触发 human-in-loop（第 7 类）时一律回退当前 change，`reason` 显式标注"audit 触发第 7 类"——audit 发现的问题可能就是"agent 做了不该做的事"，写日志让人回来审查。
 
