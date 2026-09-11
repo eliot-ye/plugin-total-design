@@ -222,7 +222,7 @@ args: none|option|required
 
 ### 版本发布流程（version bump 与发布文档同步）
 
-**任何 `version` 变更（四处清单同步 bump：根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`）必须与 CHANGELOG.md、RELEASE_NOTES.md 的更新在同一个逻辑变更内完成**——不允许只 bump 版本不更新发布文档。版本号在四处必须一致，`description` 字段也必须完全一致（保持纯 ASCII，atomcode TUI plugin manager 按字节下标切截断，多字节字符会导致 panic）。
+**版本号是否 bump 是发布决策，不是改动的自动后果**——改 SKILL.md / 命令文件 / 文档不默认要求 bump；只有你决定发布新版本时才 bump。**决定 bump 时**，四处清单（根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`）的 `version` 变更必须与 CHANGELOG.md、RELEASE_NOTES.md 的更新在同一个逻辑变更内完成——不允许只 bump 版本不更新发布文档。版本号在四处必须一致，`description` 字段也必须完全一致（保持纯 ASCII，atomcode TUI plugin manager 按字节下标切截断，多字节字符会导致 panic）。
 
 - **CHANGELOG.md**：按 Keep a Changelog 格式在文件顶部新增当前版本条目（最新在上），按 Fixed / Changed / Docs 等类别记录；历史条目只读，不修改（过时的"发布提示"类临时标注可更新为已结清状态，但不改动已发布的变更记录）。
 - **RELEASE_NOTES.md**：更新为当前版本发布说明——本版本定位（新增/修复/重构版）、行为变更表（升级用户感知的差异）、升级步骤（bump 版本号同步）、完整变更列表指向 CHANGELOG 对应条目。
