@@ -1,78 +1,59 @@
-# total-design v1.10.0 发布说明
+# total-design v1.10.1 发布说明
 
-> 面向使用态用户：升级前请先读「⚠️ 行为变更」与「升级步骤」。
+> 面向使用态用户：升级前请先读「⚠️ 行为修正」与「升级步骤」。
 
 ## 本版本是什么
 
-1.10.0 是 **精简加固版**：token 成本下降 + 一批流程加固 + 结构收敛。
+1.10.1 是 **修复版**：三处缺陷修复——触发列表去重 + propose 入口堵漏 + 待办池防污染。无新增 / 删除 skill 或命令，结构不变（17 个 skill + 8 个 command）。
 
-- **Token 优化**：指令侧冗余精简（21 文件 -83 行）、高频预加载段收敛（主基调四条展开、归位段、executing-plans body）——每次 propose+apply+archive 生命周期省约 700-900 token。
-- **结构收敛**：brainstorming 内联进 `td-explore`，skill 数 18 → 17（无功能损失，显式调用入口消失）。
-- **流程加固**：TDD 变异自检（测试可证伪性）、apply 设计回写（artifact 与代码现实冲突的执行序列）、td-archive CLI 加持（契约对照与归档完整性有命令背书）、td-explore 先查仓库再提问。
+- **触发列表去重**：td-* 命令与同名 skill 双重注册进 agent 触发列表——命令文件本是极薄 slash 入口，自动触发语义应由 skill 单一承载；修复后命令移出触发列表，slash 显式调用不受影响。
+- **propose 堵漏**：tasks.md 必填项补「任务主体约束」，非编程性动作（人工 UAT 走查类）不再混进任务清单。
+- **待办池防污染**：审计落池前先做候选资格判定，"已完成 change 的验收步骤"不再被当成 backlog 候选落进 `openspec/todo.md`。
 
-## 本次变更
+## 本次修复
 
-### brainstorming 内联进 td-explore（skill 数 18 → 17）
+### td-* 命令与同名 skill 双重注册进触发列表（8 个命令文件）
 
-提问提炼方法论成为 `td-explore` 的内建流程，探索质量不降；`/total-design:brainstorming` 显式调用入口消失，需求不清场景由 `/td-explore` 承接（其触发词已含"优先路由到这里"语义）。AGENTS.md / README / 各 SKILL.md 引用全部同步，运行时资产零残留。
+缺陷：命令 description 与同名 skill 的 frontmatter description 同时进 agent 触发列表，同一逻辑名双重注册——agent 触发时命中两份等价指令，且命令侧枚举的触发场景与 skill 侧是两套口径。
 
-### TDD 变异自检（test-driven-development）
+修复：`/td-propose` / `/td-explore` / `/td-apply` / `/td-archive` / `/td-reverse-spec` / `/td-system-audit` / `/td-init` / `/td-list` 的 frontmatter 用 `disable-model-invocation: true` 替换 `argument-hint` 字段，命令移出自动触发列表；description 精简为一句核心描述，移除触发场景枚举与尾句句号。触发判断收敛到同名 skill 的 frontmatter description（单一承载），命令只是 slash 入口。
 
-high 风险测试全绿后做一次变异自检——临时翻转一处核心断言对应的产线逻辑（改返回值 / 破坏边界），确认测试集转红，然后还原；不转红 = 该断言什么都没保护，回测试设计步骤重写。medium / low 不做（成本收益不成立）。
+### td-propose 步骤 6.c 补「任务主体约束」必填项
 
-### 设计回写（td-apply 步骤 5）
+tasks.md 必填项由「关键链标注 + project buffer」扩为「关键链标注、project buffer、任务主体约束」：每条 task 主体必须是 agent 能**编程性执行**的动作（写代码 / 跑测试 / 执行 CLI / 改配置等），非编程性动作（人工目测 / 用户验收 / 第三方审批 / 人工回归测试等）不得作为独立 task，必须降级为该 task 的 `验证` 字段。权威定义引用 `writing-plans/references/task-template.md`「任务主体约束」节。根因：propose 触发时 `writing-plans` 不进 system prompt（`user-invocable: false`），约束存在但未被预加载——使用态 LLM 填 OpenSpec 空 template 时按先验补出"手工 UAT 走查"类 task。本次只堵 propose 入口，`td-apply` 步骤 2 对称校验未同步（历史 tasks.md 走 apply 不被拦）。
 
-实施途中发现 design / spec / proposal 与代码现实冲突（前提假设不成立、方案行不通、spec 漏场景）→ 全局必停，不允许绕过 artifact 继续写。执行序列：停下 → `human-in-loop` 让用户拍板（回写 artifact / 改代码迁就，后者仅限实现细节冲突）→ 回写则更新 artifact 并在 tasks.md 记录 → 受影响任务的既有验证证据作废、重跑全绿后才继续。
+### 审计落池候选资格判定（todo-pool + td-system-audit）
 
-### td-archive CLI 加持
+`todo-pool`「落池条目」子流程新增候选资格权威判定：落池条目必须是 **backlog 候选——想做、用户认可、但暂不排期的开发工作**。两类不落池：已交付内容的验收/验证手段（代码已写、测试已过——落池会把"已完成 change 的验收步骤"当成"未排期的开发工作"，污染候选池）、不可改写为可验证结果的问题陈述。`td-system-audit` 步骤 5 改为引用式前置判断：判定不适用 → 直接跳过，不向用户提出落池询问。
 
-- 步骤 3 契约对照：对照源 2 存在时用 `openspec show "<name>" --diff`（OpenSpec CLI ≥ v1.11）取本 change 对主 spec 的真实变更行，只审 diff 命中行是否触碰 baseline 契约 / 不变量。
-- 步骤 4 归档完整性自证：sync 后跑 `openspec validate --archived`（≥ v1.9），由 CLI 校验归档 change 的 tasks.md 全部 `[x]`。
-- 两个 flag 均带版本降级：CLI 版本不够 → 自动退回原流程（通读 delta 逐场景对照 / 步骤 2 前置检查单独承担），不阻塞 archive。
+## ⚠️ 行为修正
 
-### td-explore「先查仓库再提问」
-
-事实类问题（"现在 X 是怎么做的""有没有 Y 配置"）先在仓库自查（代码 / `openspec/specs/` / config / README），已有事实不问用户；确需提问时附基于现场证据的推荐默认值（"建议走 A，依据是 <信号>，可以吗"），不出裸问题；仓库证据与用户认知冲突时摆证据让用户裁决。
-
-### 其他
-
-- **wip-limit「常见合理化」对照表**：4 类 agent 自我说服（"就超一个""change 互不相关""先 override 回头立刻 archive""合并几个 change 一起过"）逐条给出现实反驳。
-- **td-archive 步骤 3 复盘深度按 tier 分层**：tier-small 只对照 2 字段（实际影响分系统 + 预期行为模型验证），medium / large 保持 5 字段。
-- **td-apply Guardrails 并行例外**：tasks.md 显式标注并行的任务不受「按顺序」约束。
-- **行为层补齐**：writing-plans / test-driven-development / requesting-code-review / systematic-debugging 4 个 skill 补精简版「服务的主基调原则」节。
-- **AGENTS.md**（仓库元文档，非运行时资产）：审核维度 3 新增「仪式性内容」检查线——方法论文本须绑定执行动作。
-
-## ⚠️ 行为变更
-
-| 变更 | 1.9.0 旧行为 | 1.10.0 新行为 |
+| 缺陷 | 1.10.0 表现 | 1.10.1 修正 |
 |---|---|---|
-| brainstorming 入口 | 独立 skill（18 个），可 `/total-design:brainstorming` 显式调用 | **内联进 td-explore**（17 个），显式入口消失；需求不清 → `/td-explore` |
-| apply 中 artifact 与代码冲突 | Guardrails 仅一句"停下来问用户"，无执行序列 | **步骤 5「设计回写」完整序列**：必停 → 用户拍板 → 回写并记录 → 受影响验证重跑 |
-| high 风险测试 | 全绿即通过，无可证伪性检查 | **变异自检**：翻转断言确认测试转红，不转红重写 |
-| 契约对照（td-archive 步骤 3） | 通读 delta 全文逐场景对照 | CLI ≥ v1.11 用 `--diff` 只审真实变更行；低版本自动降级，不阻塞 |
-| 归档完整性 | 步骤 2 前置检查人工承担 | CLI ≥ v1.9 加 `validate --archived` 命令自证；低版本跳过，不阻塞 |
-| archive 复盘深度 | 三个 tier 均 5 字段对照 | tier-small 只对照 2 字段；medium / large 不变 |
-| 上下文成本 | — | 每次 propose+apply+archive 生命周期省约 700-900 token |
+| 命令与 skill 双重注册触发列表 | agent 可按上下文自动触发命令文件，与同名 skill 重复命中 | 命令文件 `disable-model-invocation`：仅用户显式 `/td-*` 调用；agent 自动触发走同名 skill |
+| 命令 description 与 skill 触发词两套口径 | 命令 description 含触发场景枚举、尾句带句号 | 一句核心描述；触发场景只在 skill frontmatter description |
+| tasks.md 混入非编程性 task（td-propose 6.c） | 只查关键链标注 + buffer，人工 UAT 走查类 task 可能混入 | 必查任务主体约束：非编程性动作降级为 task 的 `验证` 字段，回 6.b 补写 |
+| 审计落池污染待办池（td-system-audit 步骤 5） | 报告"建议的下一步动作"整体询问是否落池 | 先做候选资格判定；不适用直接跳过，不询问 |
 
-**不改变的**：8 个命令文件、td-* artifact 流（propose → apply → archive）、表 1/2/3 强度数值（`field-assessment` 单一事实源）、WIP 硬约束 + override 机制、5 个子约束执行规则、`requesting-code-review` 第 1–6 节、hook 脚本与触发时机、`.td-state/` 持久化约定、四处 manifest 的 name / description / author——均不变。
+**不改变的**：skill 数与结构（17 skill + 8 command）、td-* artifact 流（propose → apply → archive）、表 1/2/3 强度数值（`field-assessment` 单一事实源）、WIP 硬约束 + override 机制、5 个子约束执行规则、`requesting-code-review` 各节、hook 脚本与触发时机、`.td-state/` 持久化约定、四处 manifest 的 name / description / author——均不变。
 
 ## 升级步骤
 
-1. **bump 版本**：四处清单的 `version` 已同步改为 `1.10.0`（根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`，description 保持纯 ASCII 且四处完全一致）。
-2. **运行时前置**：不变——Node.js ≥20.19.0（OpenSpec CLI 与 SessionEnd hook 共用）；OpenSpec CLI：`npm install -g @fission-ai/openspec@latest`。建议升到 ≥ v1.11 以获得 td-archive 契约对照的 `--diff` 加持（≥ v1.9 获得 `validate --archived`；更低版本自动降级，不阻塞流程）。
+1. **bump 版本**：四处清单的 `version` 已同步改为 `1.10.1`（根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`，description 保持纯 ASCII 且四处完全一致）。
+2. **运行时前置**：不变——Node.js ≥20.19.0（OpenSpec CLI 与 SessionEnd hook 共用）；OpenSpec CLI：`npm install -g @fission-ai/openspec@latest`。
 3. **重新安装**（按平台）：
    - atomcode：`/plugin marketplace add <this-repo-url>` → `/plugin install total-design`
    - Claude Code：`claude plugin marketplace add <this-repo-url>` → `claude plugin install total-design`（或 `claude --plugin-dir <this-repo-path>`）
    - Pi Agent：`pi install git:<this-repo-url>`
 4. **重新 trust**：本次 hook 命令串未变更（哈希不变），已 trust 的安装无需重新 trust；全新安装按平台执行 `atomcode plugin trust total-design`。
 5. **验证**：
-   - 四处清单版本号同为 1.10.0，description 四处逐字一致。
-   - skill 数与结构：`ls -d skills/*/ | wc -l` 输出 `17`；`ls skills/brainstorming` 无输出。
-   - brainstorming 零残留：`grep -rn brainstorming skills/ commands/` 无输出。
-   - 加固节存在：`grep -n "变异自检" skills/test-driven-development/SKILL.md`、`grep -n "设计回写" skills/td-apply/SKILL.md`、`grep -n "先查仓库再提问" skills/td-explore/SKILL.md`、`grep -n "常见合理化" skills/constraints/references/wip-limit.md` 均有输出。
-   - CLI 加持节存在：`grep -n "openspec show" skills/td-archive/SKILL.md`、`grep -n "validate --archived" skills/td-archive/SKILL.md` 均有输出。
-   - 逻辑名/命令名/路径/CLI 命令/环境变量不变：`field-assessment` / `/td-explore` / `openspec list` / `$_TD_TIER` 等。
+   - 四处清单版本号同为 1.10.1，description 四处逐字一致。
+   - 触发列表去重：`grep -l "disable-model-invocation" commands/*.md | wc -l` 输出 `8`；`grep -rn "argument-hint" commands/` 无输出。
+   - 任务主体约束存在：`grep -n "任务主体约束" skills/td-propose/SKILL.md` 有输出。
+   - 候选资格判定存在：`grep -n "候选资格判定" skills/todo-pool/SKILL.md`、`grep -n "候选资格" skills/td-system-audit/SKILL.md` 均有输出。
+   - skill 数与结构不变：`ls -d skills/*/ | wc -l` 输出 `17`。
+   - 逻辑名/命令名/路径/CLI 命令/环境变量不变：`field-assessment` / `/td-propose` / `openspec list` / `$_TD_TIER` 等。
 
 ## 完整变更列表
 
-见 [CHANGELOG.md](./CHANGELOG.md) 的 [1.10.0] 条目。
+见 [CHANGELOG.md](./CHANGELOG.md) 的 [1.10.1] 条目。
