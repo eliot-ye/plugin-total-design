@@ -1,7 +1,7 @@
 ---
 name: td-archive
-description: 完成后归档。
-argument-hint: <change-name>
+description: 完成后归档
+disable-model-invocation: true
 args: optional
 ---
 

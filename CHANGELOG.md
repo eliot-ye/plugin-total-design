@@ -2,6 +2,19 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.10.1] - 2026-09-13
+
+### Fixed
+
+- **td-* 命令与同名 skill 双重注册进触发列表**（8 个命令文件）：命令 description 与同名 skill 的 frontmatter description 同时进 agent 的触发列表，同一逻辑名双重注册——命令文件本是极薄 slash 入口，自动触发语义应由 skill 单一承载，命令不应占触发位。修复：`argument-hint` 字段替换为 `disable-model-invocation: true`，命令移出自动触发列表（slash 显式调用不受影响）；description 精简为一句核心描述，移除触发场景枚举与尾句句号，触发判断收敛到同名 skill。
+
+- **td-propose 步骤 6.c 补「任务主体约束」必填项**：tasks.md 必填项由「关键链标注 + project buffer」扩为「关键链标注、project buffer、任务主体约束」——每条 task 主体必须是 agent 能**编程性执行**的动作（写代码 / 跑测试 / 执行 CLI / 改配置等），非编程性动作（人工目测 / 用户验收 / 第三方审批 / 人工回归测试等）不得作为独立 task，降级为该 task 的 `验证` 字段；权威定义引用 `writing-plans/references/task-template.md`「任务主体约束」节，并补主体不合规时回 6.b 补写的回退指引。根因：使用态 LLM 触发 propose 时预加载依赖只有 `system-engineering` + `field-assessment`，`writing-plans` 是 `user-invocable: false` 不进 system prompt——约束存在但未被预加载，LLM 填 OpenSpec 空 template 时按先验补出"手工 UAT 走查"类非编程性 task。本次只堵 propose 入口，`td-apply` 步骤 2 对称校验未同步（历史 tasks.md 走 apply 不被拦，新 propose 走 6.c 会被拦）。
+- **审计落池未做候选资格判定导致待办池污染**：`todo-pool`「落池条目」子流程新增候选资格权威判定——落池条目必须是 backlog 候选（想做、用户认可、但暂不排期的开发工作），已交付内容的验收/验证手段（代码已写、测试已过）与不可改写为可验证结果的问题陈述**不落池**；`td-system-audit` 步骤 5 改为引用式前置判断，判定不适用直接跳过、不向用户提出询问——修复审计报告把"已完成 change 的验收步骤"当 backlog 候选落进 `openspec/todo.md`。
+
+### Docs
+
+- AGENTS.md（仓库元文档，非运行时资产）：版本发布流程节澄清版本号 bump 是发布决策、不是改动的自动后果。
+
 ## [1.10.0] - 2026-09-08
 
 ### Added

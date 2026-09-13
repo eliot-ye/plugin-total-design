@@ -1,7 +1,7 @@
 ---
 name: td-apply
-description: 实施任务，按 artifact 走。
-argument-hint: <change-name>
+description: 实施任务，按 artifact 走
+disable-model-invocation: true
 args: optional
 ---
 

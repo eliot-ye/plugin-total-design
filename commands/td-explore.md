@@ -1,7 +1,7 @@
 ---
 name: td-explore
-description: 不带 stakes 的思考伙伴，写代码前先探索。
-argument-hint: <topic or question>
+description: 探索提案主题
+disable-model-invocation: true
 args: optional
 ---
 
