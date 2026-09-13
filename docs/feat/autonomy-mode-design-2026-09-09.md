@@ -127,8 +127,9 @@ openspec/changes/<change-name>/
 
 ## caller impact 实测（propose 阶段完成，跨模式）
 - [已实测] caller 清单：<file:line + 兼容结论>
+- [实测基线] <HEAD 短哈希>
 - [无未知 caller] 实测未发现 proposal 未标注的 caller
-- [不适用] 未命中触发条件：<判断依据>（未命中 change-point-classes.md 触发条件时以本行替代上面两行）
+- [不适用] 未命中触发条件：<判断依据>（未命中 change-point-classes.md 触发条件时以本行替代上面三行）
 ```
 
 #### autonomy-manifest.md 结构（autonomous 模式专用，apply 阶段创建）
@@ -164,7 +165,7 @@ propose 阶段做实测，结果写入 proposal.md 的「caller impact 实测」
 
 **与触发条件的关系**：`td-apply/references/change-point-classes.md` 的触发条件（跨分系统 或 命中四类变更点任一）**保留不变**，仍是单一事实源。「跨模式必填，不区分 tier」的确切含义：命中触发条件的 change 必填实测——proposal 三节中唯一带触发条件的节，废除的是 tier 维度的减免（tier-medium"信号触发" / tier-small"默认跳过"不再存在；tier-large 现行"无条件实测"被触发条件收编——无四类变更点即无实测输入，逐变更点 sweep 无从发起）。未命中触发条件的 change 同样写「caller impact 实测」节，标 `[不适用]` 并附判断依据（与 7 类清单的 `[不适用]` 同型）——proposal 三节结构统一，apply 与编排者无需推断"该不该有节"。
 
-apply 阶段改为"只复核不新增"，复核语义含两部分：① 无新增 caller（propose 阶段未标注的 caller 在 apply 阶段被实测发现）；② 已标注 caller 的兼容结论在当前基线可复现（前序 change 若改变了已标注 caller 的行为，本 change 的实测必须能重现 propose 阶段标注的兼容结论；无法复现 → 视同"新 caller"）。两部分中任一部分失败 → autonomous 模式回退当前 change（在运行记录表追加回退条目）；human-in-loop 模式下仍走 human-in-loop 第 4 类必停场景（停下问用户），与当前行为一致。
+apply 阶段改为"只复核不新增"，复核语义含两部分：① 无新增 caller（propose 阶段未标注的 caller 在 apply 阶段被实测发现）；② 已标注 caller 的兼容结论在当前基线可复现（前序 change 若改变了已标注 caller 的行为，本 change 的实测必须能重现 propose 阶段标注的兼容结论；无法复现 → 视同"新 caller"）。两部分中任一部分失败 → autonomous 模式回退当前 change（在运行记录表追加回退条目）；human-in-loop 模式下仍走 human-in-loop 第 4 类必停场景（停下问用户），与当前行为一致。复核第 ① 部分按实测基线判定：proposal 实测节记录的基线（HEAD 短哈希）与当前 HEAD 一致 → 抽查；基线已前移（前序 change 落库）→ 对变更点清单全量重查——staleness 缓解的第三层（补在下方两层之上）。
 
 **staleness 缓解**：批量执行时前序 change 会改变代码基线，导致后续 change 的 proposal caller 实测过时。缓解分两层——
 
@@ -184,7 +185,7 @@ autonomous 模式下，td-apply 步骤 5 的 human-in-loop 触发逻辑变为：
     → 未显式覆盖 → 走残留场景处理（见第 5 节）
 ```
 
-**判定规则**：proposal「已确认决策清单」节的 7 类与 human-in-loop 的 7 类必停场景一一对应——第 1-5 类由清单显式覆盖（标 `[已确认]` 或 `[不适用]`），第 6 类（WIP override）标 `[不适用]`（autonomous 模式下 WIP 检查不生效，结构上不可能触发），第 7 类（audit 触发）标 `[不覆盖]`（一律回退，`reason` 标注 audit 触发第 7 类）。运行时触发的 human-in-loop 场景能明确对应到第 1-5 类且标 `[已确认]` 时，按该类条目的结论执行；无法对应、或对应到的条目标的是 `[不适用]` 但实际触发了、或触发第 7 类 → 走残留场景处理（见第 5 节），一律回退。
+**判定规则**：proposal「已确认决策清单」节的 7 类与 human-in-loop 的 7 类必停场景一一对应——第 1-5 类由清单显式覆盖（标 `[已确认]` 或 `[不适用]`），第 6 类（WIP override）标 `[不适用]`（autonomous 模式下 WIP 检查不生效，结构上不可能触发），第 7 类（audit 触发）标 `[不覆盖]`（一律回退，`reason` 标注 audit 触发第 7 类）。运行时触发的 human-in-loop 场景能明确对应到第 1-5 类且标 `[已确认]` 时，按该类条目的结论执行；无法对应、或对应到的条目标的是 `[不适用]` 但实际触发了、对应条目标 `[已确认]` 但场景无法明确对应到该条目结论、或触发第 7 类 → 走残留场景处理（见第 5 节），一律回退。
 
 **"实现细节"的边界**：agent 可自主的范围仅限于——TDD 的红绿重构循环、代码风格对齐既有实现、测试策略调整、内部模块实现细节。这些不属于 human-in-loop 7 类必停场景，autonomous 模式下照常自主执行。一旦触碰 7 类中任何一类的实际触发条件 → 走上面的 proposal 清单查询逻辑。
 
@@ -224,6 +225,7 @@ td-apply 步骤 4 在复杂场景下委托 `executing-plans`（关键链 checkpo
 |---|---|---|
 | 清单命中 `[已确认]` | 按结论执行 | 按结论执行 + 写运行记录 |
 | 清单 `[不适用]` 但实际触发 | 停下问用户 | 回退 |
+| 清单 `[已确认]` 但场景对不上该条目结论 | 停下问用户 | 回退 |
 | 清单未覆盖 / 无法对应 | 停下问用户 | 回退 |
 | 第 7 类 audit 触发 | 停下问用户 | 回退 + `reason` 标注 |
 
@@ -326,7 +328,7 @@ entries:
     stash_ref: <git stash list 的引用，如 "stash@{0}">
 ```
 
-`completed` 条目在 change 成功 archive + commit 后写入；`rolled-back` 条目在 change 因不可预测的运行时冲突被回退时写入（前提假设不成立 / 测试失败 2 次以上根因在 plan 外 / 新 caller / review critical / audit 触发第 7 类），并记录 `stash_ref` 指向撤销代码所在的 stash（人回来 `git stash list` 可对照定位）。audit 触发时 `reason` 字段显式标注"audit 触发第 7 类"，人回来时能识别批次级问题（如 profile/tier 误判导致整批走偏）。两种条目共同构成进度链——编排者和跨 session 恢复都靠读这个文件决定"从哪续跑"。
+`completed` 条目在 change 成功 archive + commit 后写入；`rolled-back` 条目在 change 因不可预测的运行时冲突被回退时写入（前提假设不成立 / 测试失败 2 次以上根因在 plan 外 / 新 caller / review critical / audit 触发第 7 类），并记录 `stash_ref` 指向撤销代码所在的 stash（人回来 `git stash list` 可对照定位）。audit 触发时 `reason` 字段显式标注"audit 触发第 7 类"，人回来时能识别批次级问题（如 profile/tier 误判导致整批走偏）。两种条目共同构成进度链——编排者和跨 session 恢复都靠读这个文件决定"从哪续跑"。`completed` 有两个写入方：编排流程（commit 后）与 SessionEnd hook 的补漏（仅当文件已存在，summary 标注补记来源，落地口径见第 9 节）。
 
 比上一轮设计更简单——不需要 `auto_resolution` 字段，也不设 `paused` action：autonomous 模式下 agent 不做系统级自治决策，也不做批次级停止信号（批次级停止只在 `git add -A` 前置不变式违反时发生，属于编排者基线检查、不写入本文件）。
 
@@ -376,6 +378,8 @@ td-autonomous-run:
   6. 设 goal: "按优先级处理剩余依赖满足的 change，每个走 td-apply → td-archive → commit，直到全部完成或剩余待执行为空"
   7. agent native loop 驱动迭代；**每个 change 开始前重读 `autonomy.yaml` 的 mode**——若已被改为 `human-in-loop` 则停止本批次（"随时中止"靠这条循环内重读生效，不等当前 change 跑完）
 ```
+
+**落地步骤编号说明**（实现与上表编号的差异）：td-* 标准强制"步骤 1 = 激活主基调与配置层"，故实现中上表步骤 0 拆为步骤 1.4（读 mode）+ 步骤 2（模式确认：不存在 → 引导创建 + commit 授权 / 非 autonomous → 提示结束）；步骤 2/3（todo 优先级 / 排除已处理）合并为实现步骤 3「构建待执行队列」（含依赖满足过滤与兜底环检测，即上表步骤 5）；步骤 6/7 合并为实现步骤 4「设定目标并驱动循环」；commit 落脚点为实现步骤 5；跨 session 续跑为实现步骤 6。下文与已决结论中提到的"步骤 0"按此映射到实现步骤 1.4 + 2。
 
 每个 change 结束时，编排者按结果写 `autonomy-log.yaml`：
 - 全部验证通过 + archive + commit 成功 → `completed`
@@ -443,7 +447,7 @@ autonomous 模式意味着用户不在场，但 agent session 有边界（上下
 
 现有 `td_state_sync.js`（SessionEnd hook）校正 `archive-counter.yaml` 和 `audit-history.yaml`。autonomous 模式下需要补一项：
 
-- 校正 `autonomy-log.yaml`：检查 `openspec/changes/archive/` 下存在日期前缀的本 change 目录（`YYYY-MM-DD-<change-name>/`） **且** 有对应 commit 但 `autonomy-log.yaml` 缺 `completed` 条目的 change → 补写 `completed`（archive 可能被 session 中断跳过了，但归档事实已成立）。"对应 commit" 的判定：`git log --all --format=%s` 中存在包含 `<change-name>` 的提交——commit 消息模板的 subject 固定含 `<change-name>`，故可 grep 定位；两个文件系统事实同时成立才补写。
+- 校正 `autonomy-log.yaml`（**仅当该文件已存在**——文件不存在 = 项目从未做过 autonomous 批量执行，hook 不凭空创建）：检查 `openspec/changes/archive/` 下存在日期前缀的本 change 目录（`YYYY-MM-DD-<change-name>/`） **且** 有对应 commit 但 `autonomy-log.yaml` 缺 `completed` 条目的 change → 补写 `completed`（archive 可能被 session 中断跳过了，但归档事实已成立）。"对应 commit" 的判定：`git log --all --format=%s` 中存在包含 `<change-name>` 的提交——commit 消息模板的 subject 固定含 `<change-name>`，故可定位；落地实现按整词匹配（防短名误配），并以目录 mtime 晚于该 change 最新条目 timestamp 为前置（同名城守卫，见已决结论 17）；两个文件系统事实同时成立才补写。
 - **不**用 `tasks.md` 全 `[x]` 作为补写条件——tasks 全打勾不等于 change 完成，td-apply 步骤 6 的四层验证（6.1 change-level / 6.2 系统级 / 6.3 收尾 code review / 6.4 audit）都在 tasks 之后跑，session 完全可能在 tasks 全 `[x]` 后、验证未跑完时中断。用 tasks 全 `[x]` 补写 `completed` 会让编排者跳过一个未通过最终验证的 change，违反 hook「只补文件系统事实已成立但状态文件漏记的条目，不创造新事实」的约束。
 - 不补写 `rolled-back`——回退是 agent 主动行为，hook 不代劳判定。
 
@@ -453,11 +457,14 @@ hook 补项的等价性要求与现有校正逻辑一致：只补"文件系统�
 
 | 文件 | 改动 | 热点 |
 |---|---|---|
-| **AGENTS.md** | `.td-state/` 语义扩展为三类（可推导 / 用户偏好 autonomy.yaml / agent 行为记录 autonomy-log.yaml）；gitignore 理由仍成立（per-machine 第二条腿）；设计原则加 autonomous 模式说明；hook 契约补 autonomy-log 补漏项 | |
+| **AGENTS.md** | `.td-state/` 语义扩展为三类（可推导 / 用户偏好 autonomy.yaml / agent 行为记录 autonomy-log.yaml）；gitignore 理由仍成立（per-machine 第二条腿）；设计原则加 autonomous 模式说明；hook 契约补 autonomy-log 补漏项；计数 17→18、8→9、契约层 8、td-* 共享片段口径同步 | |
+| **README.md** | 命令 8→9 / skill 17→18 / 命令表加 td-autonomous-run 行 /「仅用户触发」口径（td-init 与 td-autonomous-run）/ 契约层 8 + 离线批量执行典型工作流块 | 二期新增行 |
 | **human-in-loop.md** | 新增顶层节「autonomous 模式下的触发路径」——集中说明"触发场景识别不变，但触发后走查 proposal「已确认决策清单」节 → 执行 / 回退的分支"。**位置说明**：不分散加到现有「触发机制」「触发时 agent 应做的事」「不需要停下来的场景」三节（会让三节的语义分裂），而是新增顶层节分离"识别"与"分支"两条逻辑——使用态 LLM 读到"命中第 1-5 类" → 知道去查 proposal 的「已确认决策清单」节。 | 🔥 约束层核心，被 td-apply / td-propose / td-system-audit 引用 |
 | **td-propose SKILL.md** | 步骤 6.c 加 proposal 新必填节：「前置依赖」+「已确认决策清单」+「caller impact 实测」（三节跨模式，human-in-loop 与 autonomous 都写，不区分 tier）；写入「前置依赖」节前做环检测（阻止循环依赖写入）；不再创建 `autonomy-manifest.md`；既有「caller impact 分析」节保留变更点类别标注职责（实测 sweep 的输入），"完整 caller 清单由 td-apply 步骤 4 实测产出"的指向更新为"由本 proposal 的「caller impact 实测」节承载"；删除 tier 分层表述（tier-small 可跳过 / tier-medium-large 必填 → 命中触发条件即必填，见已决结论 16） | 🔥 契约层核心 |
 | **td-apply SKILL.md** | 步骤 1 加读 autonomy.yaml + proposal 的「已确认决策清单」/「caller impact 实测」两节（不再读 autonomy-manifest.md）；autonomous 模式下**创建** `autonomy-manifest.md`（只含运行记录表）；步骤 4 caller impact 改为"只复核不新增"（复核含"无新增 caller" + "已标注 caller 的兼容结论在当前基线可复现"两部分，复核依据读 proposal 的「caller impact 实测」节）；步骤 5 human-in-loop 触发逻辑改为"proposal 清单显式覆盖→执行 / 未覆盖→按第 5 节回退"；步骤 6.3 code review warning 记录延后不自动修（与 human-in-loop 模式一致，critical 才回退）；回退时在 autonomy-manifest.md 运行记录表追加条目 + 在 autonomy-log.yaml 追加全局条目；autonomous 模式下不委托 `executing-plans`（checkpoint 结构性关闭、失败处理自持、tier-medium current-change audit 载体移至本 skill 关键链任务完成后直接触发，见第 3 节守卫与已决结论 15）；步骤 4 的 tier 分层（硬闸门 / 信号触发 / 提醒）删除——复核义务随 proposal 实测节内容传递（已决结论 16） | |
 | **td-apply/references/change-point-classes.md** | 触发条件与四类变更点定义不变；「三层防护」分工表述更新为实测前移后的形态——propose 侧变更点类别标注 + caller 实测（前移后）、apply 侧 caller 复核（无新增 caller + 兼容结论可复现）、架构 review 校验 | |
+| **field-assessment/references/audit-frequency.md** | 表 3 频率数值不动；读者清单去 executing-plans 硬编码，「current-change scope 的触发 skill 归属」节加 autonomous 模式分支（任务粒度触发归 td-apply 步骤 4 执行循环，步骤 6.4 只在 6.1–6.3 后跑一次不承担任务粒度） | 图谱复核新增 |
+| **requesting-code-review/references/architecture-review-checklist.md** | 一处：「caller impact 分析」节字段描述与 td-propose 6.c 新结构对齐（完整 caller 清单与兼容结论由 proposal 实测节承载） | 图谱复核新增 |
 | **td-archive SKILL.md** | 步骤 4 读 `.td-state/autonomy-log.yaml` 判断该 change 的 action：`rolled-back` → 不归档（提示人工处理）；步骤 5 加检测 autonomy-log.yaml 的 rolled-back 条目并提示处理。**不检测 autonomy-manifest.md 的存在性**（manifest 不再作为 autonomous-ready 标记） | |
 | **td-autonomous-run SKILL.md** | **新建**：编排 skill。步骤 0 检查 autonomy.yaml 是否存在（不存在则引导用户确认创建 + commit 授权）→ 读 openspec/todo.md 拿优先级 → 读 autonomy-log.yaml 排除已处理 → 读 openspec list 交叉匹配 → 读 proposal「前置依赖」节检查依赖满足 → 设 goal → agent native loop 驱动。每个 change archive 成功后执行 commit。**不再检查 autonomy-manifest.md 的存在性**（autonomous-ready 概念已作废）。正文用平台无关表述：不写死 `/loop` / `schedule_wakeup` 等平台特有命令名，跨 session 循环包装以"可选增强（atomcode 下为 `/loop` + 定时唤醒）"表述 | 新增 skill |
 | **td-autonomous-run description 建议** | frontmatter description 需明确「批量执行」+「依赖满足」两个触发关键词，与 `td-apply`（单个 change 的实施）语义正交——建议：「批量执行已确认的 change，按 todo.md 优先级走 apply → archive → commit 循环；仅在 `.td-state/autonomy.yaml` mode 为 autonomous 时生效。」 | |
@@ -465,13 +472,13 @@ hook 补项的等价性要求与现有校正逻辑一致：只补"文件系统�
 | **identification-flow.md** | 持久化层目录树加 autonomy.yaml + autonomy-log.yaml | |
 | **td-apply/references/autonomy-template.md** | 新建：autonomy.yaml + autonomy-log.yaml + autonomy-manifest.md 三个文件模板与读写规则 + 回退命令原文（第 5 节命令的单一事实源）。**归属说明**：td-apply 是运行时的创建与追加方（autonomous 模式下创建 manifest、回退时向 manifest 运行记录表 + autonomy-log 追加条目）+ 回退命令的执行方，故由 td-apply 的 references 目录承担模板所有权；其他 skill（td-propose 写 proposal 新节、td-autonomous-run 读取与编排、td-archive 检查）通过 `td-apply` 的 `references/autonomy-template.md` 路径引用——不在各自 SKILL.md 里复制模板文本 | |
 | **wip-limit.md** | 加 autonomous 模式说明：autonomous 模式下 WIP 检查不生效（不 override、不阻塞），仅 human-in-loop 模式生效 | |
-| **hooks/td_state_sync.js** | SessionEnd 校正补一项：检查有 `archive/YYYY-MM-DD-<change-name>/` 目录且对应 commit 存在但 autonomy-log.yaml 缺 `completed` 条目的 change → 补写（不用 tasks.md 全 `[x]` 判定） | |
+| **hooks/td_state_sync.js** | SessionEnd 校正补一项：检查有 `archive/YYYY-MM-DD-<change-name>/` 目录且对应 commit 存在但 autonomy-log.yaml 缺 `completed` 条目的 change → 补写（不用 tasks.md 全 `[x]` 判定；仅当 autonomy-log.yaml 已存在，见第 9 节；含同名城 mtime 守卫与 change 名整词匹配，见已决结论 17） | |
 
-blast radius：12 个文件（9 个改 + 3 个新建：td-autonomous-run SKILL.md / td-autonomous-run 命令文件 / td-apply/references/autonomy-template.md）。热点节点：human-in-loop.md（入边最多）、td-propose（契约层入口）。
+blast radius（两期落地合计口径）：15 个运行时文件（12 改 + 3 新建：td-apply/references/autonomy-template.md / td-autonomous-run SKILL.md / td-autonomous-run 命令文件），另有本设计稿自身。热点节点：human-in-loop.md（入边最多）、td-propose（契约层入口）。
 
 ## 风险评估
 
-**blast radius 12 个文件（9 个改 + 3 个新建），其中 2 个是约束/契约层核心。**
+**blast radius 15 个运行时文件（12 改 + 3 新建，两期合计落地口径），其中 2 个是约束/契约层核心。**
 
 | 风险 | 严重度 | 缓解 |
 |---|---|---|
@@ -501,7 +508,7 @@ blast radius：12 个文件（9 个改 + 3 个新建：td-autonomous-run SKILL.m
 
 7. **session 边界**：`autonomy-log.yaml` 只有 `completed` / `rolled-back` 两种 action，跨 session 续跑靠读进度链。resume 粒度三档：change 之间跳已完成、change 内按 tasks.md `[x]` 续跑、回退的跳过不重试。SessionEnd hook 补写漏记的 `completed` 条目，判定条件是 `archive/YYYY-MM-DD-<change-name>/` 目录存在且对应 commit 存在（不用 tasks.md 全 `[x]`——tasks 全打勾不等于 change 完成，td-apply 步骤 6 的四层验证在 tasks 之后跑）。
 
-8. **"范围内 vs 超出范围"判定**：proposal「已确认决策清单」节的 7 类与 human-in-loop 的 7 类必停场景一一对应——第 1-5 类由清单显式覆盖（`[已确认]` / `[不适用]`），第 6 类标 `[不适用]`、第 7 类标 `[不覆盖]`。运行时触发的 human-in-loop 场景能对应到第 1-5 类且标 `[已确认]` → 按结论执行；无法对应、或对应到 `[不适用]` 但实际触发了、或触发第 7 类 → 走残留场景处理，一律回退。"实现细节"的边界明确：TDD 红绿重构、代码风格对齐、测试策略调整、内部模块实现——这些不属于 7 类必停场景，autonomous 模式下照常自主。
+8. **"范围内 vs 超出范围"判定**：proposal「已确认决策清单」节的 7 类与 human-in-loop 的 7 类必停场景一一对应——第 1-5 类由清单显式覆盖（`[已确认]` / `[不适用]`），第 6 类标 `[不适用]`、第 7 类标 `[不覆盖]`。运行时触发的 human-in-loop 场景能对应到第 1-5 类且标 `[已确认]` → 按结论执行；无法对应、或对应到 `[不适用]` 但实际触发了、对应到 `[已确认]` 但场景对不上该条目结论、或触发第 7 类 → 走残留场景处理，一律回退。"实现细节"的边界明确：TDD 红绿重构、代码风格对齐、测试策略调整、内部模块实现——这些不属于 7 类必停场景，autonomous 模式下照常自主。
 
 9. **code review critical / warning 的处理**：critical 与 warning 分两条路径，语义分层与 human-in-loop 模式一致（详见第 5 节"code review critical 的处理"与"code review warning 的处理"两个子节）——
     - **critical（收尾 code review）**：agent 做**删减性修复一次**（只删/回退被 review 判 critical 的具体改动，不重写业务逻辑），重跑 change-level 验证 + code review；仍 critical → **回退当前 change**（`git stash push -u -m "rollback <change-name>" -- . ':(exclude)openspec/changes/<change-name>/**'` 撤销代码改动含未跟踪源码，保留 artifact 不删，命令形式与第 5 节回退机制一致），写 `rolled-back` 条目（含 `stash_ref`），编排者继续下一个 change。不允许修改性修复——修改可能引入新 critical。
@@ -522,3 +529,13 @@ blast radius：12 个文件（9 个改 + 3 个新建：td-autonomous-run SKILL.m
 15. **executing-plans 在 autonomous 模式下的处置**：守卫放在调用方 td-apply——autonomous 模式下不委托 `executing-plans`，`executing-plans` 本身不改（checkpoint 语义在 human-in-loop 模式下成立），不入改动文件表。checkpoint 是人在回路的任务粒度形态（"继续吗？"需人应答），autonomous 下结构性关闭，与 WIP 第 6 类同构；关键链任务完成照常推进并记 manifest 运行记录。失败处理由 td-apply 自持：`systematic-debugging` → root cause 在 plan 内修复重试、在 plan 外按第 5 节回退。tier-medium current-change audit 载体从 checkpoint 移至 td-apply 关键链任务完成后直接触发，频率不变（表 3）。
 
 16. **caller impact 实测与触发条件的关系**：`change-point-classes.md` 的触发条件保留（单一事实源），「跨模式必填，不区分 tier」= 命中触发条件的 change 必填实测 + tier 分层取消（tier-medium 信号触发 / tier-small 默认跳过废除，tier-large"无条件实测"被触发条件收编）；未命中触发条件写 `[不适用]` + 判断依据，proposal 三节结构统一。既有「caller impact 分析」节保留变更点类别标注职责（实测 sweep 的输入），"完整清单由 td-apply 步骤 4 实测产出"的旧指向更新为 proposal 实测节承载。该文件入改动文件表，blast radius 11 → 12。
+
+17. **审核增量（实现超出本稿字面的加固，均已落地）**：两期实现经逐文件深审与 fixture 实测后落地的加固，方向与本稿一致、字面未载——
+    - **实测基线锚点**：proposal「caller impact 实测」节加 `[实测基线]` 行（HEAD 短哈希）；apply 复核按基线判定——一致 → 抽查，已前移 → 全量重查（staleness 缓解第三层）。
+    - **判定表穷尽**：autonomous 分支判定表补「`[已确认]` 但场景无法明确对应到该条目结论 → 回退」行——第 4 类（超 scope）在模板里恒写 `[已确认]`，scope 溢出原落在判定表未定义格。
+    - **归档 gate 生命周期**：同一 change 多条目按最新一条判定（latest-entry-wins）+ 用户显式确认解除阻塞（append-only，不回写日志）；`completed` 双写入方（编排流程 + hook 补记）。
+    - **前置依赖满足性核对**：td-apply 步骤 2 在 apply 时核对 `[依赖 X]` 条目已 archive——本稿只在 propose 做环检测、编排者入队时过滤，apply 时刻无核对，批量序在单人交互路径上不可执行。
+    - **hook 补记的同名城守卫**：目录 mtime 晚于该 change 最新条目 timestamp 才补记——同名 re-propose 后回退时，旧周期的 archive 目录 + 旧 commit 仍满足双事实，不校验时间会把回退 change 伪造成已完成（change 名整词匹配防短名误配）。
+    - **消解本稿内部矛盾**：§6 的 completed「commit 后写入」与 §8 编排者「读 completed 判定 commit」互为前置（鸡生蛋）——实现改为 commit 前 `git status --porcelain` 批次基线检查（替代失败判定）→ commit → 写 completed。
+    - **apply-ready 缺项的 autonomous 分支**：proposal 新节缺项时 autonomous 模式不等待人工补节——按残留场景回退（一期之前的旧 change 混入批队列时，缺节不再挂死批次）。
+    - **mode 读取不跨调用缓存**：td-apply 每次调用重读 `autonomy.yaml` 的 `mode`（原设计"会话内缓存"在用户两次调用之间手改 mode 时读到旧值）——循环内重读由编排者承担，本条兜住绕过编排者直接调用 td-apply 的路径。

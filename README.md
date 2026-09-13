@@ -108,7 +108,7 @@ Pi 通过仓库根目录 `package.json` 的 `pi.skills` 字段加载 skills 目�
 
 ## 命令清单
 
-8 个 slash 命令，扁平 kebab-case：
+9 个 slash 命令，扁平 kebab-case：
 
 | 命令 | 用途 |
 |---|---|
@@ -119,24 +119,25 @@ Pi 通过仓库根目录 `package.json` 的 `pi.skills` 字段加载 skills 目�
 | `/td-reverse-spec` | 中途接手项目：先 reverse-spec 已有代码 |
 | `/td-archive` | 完成后归档 |
 | `/td-system-audit` | 周期性对照系统工程主基调自检 |
+| `/td-autonomous-run` | 批量执行已确认的 change：apply → archive → commit 循环（autonomous 模式编排入口，含 commit 授权确认） |
 | `/td-list` | 列出所有活跃 change 态势（只读） |
 
-`td-init` 是唯一仅用户可触发的命令；其余 6 个 td-* command 也可被 agent 自动触发；`td-list` 只读、无同名 skill。
+`td-init` 与 `td-autonomous-run` 仅用户可触发；其余 6 个 td-* command 也可被 agent 自动触发；`td-list` 只读、无同名 skill。
 
 ---
 
 ## Skill 清单
 
-17 个 skill 分布在四层：
+18 个 skill 分布在四层：
 
 | 层 | 数量 | 代表 |
 |---|---|---|
 | 约束层 | 2 | `system-engineering` 主基调 + `constraints` 承载 5 份局部规律 |
 | 行为层 | 6 | writing-plans / executing-plans / test-driven-development / requesting-code-review / systematic-debugging / verification-before-completion |
 | 配置层 | 2 | `field-assessment`（profile×tier 配置入口）+ `todo-pool`（`openspec/todo.md` 格式约定） |
-| 契约层 | 7 | 7 个 td-* skill，与 command 一一对应 |
+| 契约层 | 8 | 8 个 td-* skill（除只读的 `td-list` 外与 command 一一对应） |
 
-除 7 个 td-* 外全部 `user-invocable: false`，由 agent 按上下文自动触发。详细规则见 [CONTRIBUTING.md](CONTRIBUTING.md) 与 [AGENTS.md](AGENTS.md)。
+除 8 个 td-* 外全部 `user-invocable: false`，由 agent 按上下文自动触发。详细规则见 [CONTRIBUTING.md](CONTRIBUTING.md) 与 [AGENTS.md](AGENTS.md)。
 
 ---
 
@@ -168,6 +169,14 @@ Pi 通过仓库根目录 `package.json` 的 `pi.skills` 字段加载 skills 目�
 1. /td-propose fix-bug-<name>    ← 轻量 proposal
 2. /td-apply fix-bug-<name>      ← 修复 + 回归测试
 3. /td-archive fix-bug-<name>    ← 归档
+```
+
+**离线批量执行（autonomous 模式）：**
+
+```
+1. /td-propose A、B、C            ← 人在场逐个 propose 并确认（proposal 含已确认决策清单）
+2. /td-autonomous-run             ← 确认切换 autonomous 模式 + commit 授权，离线批量执行
+3. 回来后审查运行记录             ← autonomy-log.yaml（completed / rolled-back）+ 回退条目的 stash_ref
 ```
 
 ---

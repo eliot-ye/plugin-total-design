@@ -9,6 +9,13 @@
  * 3. audits/.incomplete.log：按当前不完整报告集合整文件重写——
  *    它是 hook 自身派生的现状快照而非用户数据，重写即校正：自动去重、
  *    已解决项退出、已删除报告消失。
+ * 4. autonomy-log.yaml：补漏记的 completed 条目（仅当该文件已存在——
+ *    文件不存在 = 项目从未做过 autonomous 批量执行，hook 不凭空创建）。
+ *    补记条件 = 两个文件系统事实同时成立：archive/YYYY-MM-DD-<change>/
+ *    目录存在，且对应 commit 存在（git log --all 的 subject 含 <change>）。
+ *    按"同一 change 最新条目"判定：已是 completed 不重复补；最新为
+ *    rolled-back 的 change 其目录会被 td-archive 的归档 gate 挡住而不存在，
+ *    不会被补——用户确认处理并归档后，目录出现，补记即日志收敛。
  *
  * 会话结束时由 atomcode 以 SessionEnd 事件调用。任何失败静默退出，不影响会话。
  * 运行时：Node >= 20.19.0（与 OpenSpec CLI 的 Node 要求一致，本 plugin 无独立 Node 下限）。
@@ -19,6 +26,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const { execFileSync } = require("node:child_process");
 
 const REPORT_NAME_RE = /^(\d{8}-\d{6})-([a-z-]+)\.md$/;
 
@@ -226,6 +234,93 @@ function syncAuditHistory(stateDir) {
   }
 }
 
+function syncAutonomyLog(stateDir, openspecDir) {
+  /* 为 autonomy-log.yaml 补漏记的 completed 条目（见文件头职责 4）。
+   * 保守口径：autonomy-log.yaml 不存在 → 直接返回，不创建。
+   * 只追加不删改既有条目（append-only，与 autonomy-template.md 的读写规则一致）。
+   */
+  const logPath = path.join(stateDir, "autonomy-log.yaml");
+  if (!fs.existsSync(logPath)) return;
+  const archiveDir = path.join(openspecDir, "changes", "archive");
+  if (!fs.existsSync(archiveDir) || !fs.statSync(archiveDir).isDirectory()) return;
+
+  // 每个 change 的最新条目 action 与 timestamp——change: 行设定当前 change，
+  // 其前的 timestamp: / 其后的 action: 行归属它；后出现的条目覆盖先出现的 = 最新为准
+  const latestAction = new Map();
+  const latestTs = new Map();
+  let currentChange = null;
+  let currentTs = null;
+  for (const line of fs.readFileSync(logPath, "utf8").split("\n")) {
+    // timestamp 是列表项首个键，行首带 "- " 前缀（如 "  - timestamp: ..."）
+    const mt = line.match(/^\s*-?\s*timestamp:\s*(.*)/);
+    if (mt) {
+      currentTs = mt[1].trim();
+      continue;
+    }
+    const mc = line.match(/^\s*change:\s*(.*)/);
+    if (mc) {
+      currentChange = mc[1].trim();
+      continue;
+    }
+    const ma = line.match(/^\s*action:\s*(\S+)/);
+    if (ma && currentChange) {
+      latestAction.set(currentChange, ma[1]);
+      latestTs.set(currentChange, currentTs);
+    }
+  }
+  const alreadyCompleted = new Set(
+    [...latestAction.entries()].filter(([, a]) => a === "completed").map(([c]) => c)
+  );
+
+  // 事实 2：对应 commit 存在——git log --all 的 subject 含 change 名。
+  // 非 git 仓库 / git 不可用 → 事实不可验证，不补（hook 永不因环境问题崩溃）。
+  let subjects;
+  try {
+    subjects = execFileSync("git", ["log", "--all", "--pretty=%s"], {
+      cwd: openspecDir,
+      encoding: "utf8",
+      maxBuffer: 10 * 1024 * 1024,
+    });
+  } catch (err) {
+    return;
+  }
+
+  // 事实 1：archive/YYYY-MM-DD-<change>/ 目录存在。
+  const dirs = fs
+    .readdirSync(archiveDir)
+    .filter((e) => /^\d{4}-\d{2}-\d{2}-.+/.test(e))
+    .filter((e) => fs.statSync(path.join(archiveDir, e)).isDirectory());
+
+  const missing = dirs.filter((full) => {
+    const name = full.replace(/^\d{4}-\d{2}-\d{2}-/, "");
+    if (alreadyCompleted.has(name)) return false;
+    // 目录必须比该 change 的最新条目新——同名 re-propose 后回退时，旧周期的
+    // archive 目录与旧 commit 仍满足双事实，不校验时间会把回退 change 伪造成已完成
+    const ts = latestTs.get(name);
+    if (ts) {
+      const t = Date.parse(ts);
+      if (!Number.isNaN(t) && fs.statSync(path.join(archiveDir, full)).mtimeMs <= t) return false;
+    }
+    // change 名按整词匹配（前后不能是字母数字或连字符），防短名误匹配长名子串
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const nameRe = new RegExp(`(?<![a-z0-9-])${escaped}(?![a-z0-9-])`);
+    return nameRe.test(subjects);
+  });
+  if (!missing.length) return;
+
+  let header = "";
+  const content = fs.readFileSync(logPath, "utf8");
+  if (!content.endsWith("\n")) header += "\n";
+  if (!content.includes("entries:")) header += "entries:\n";
+  const block = missing.map((full) => {
+    // 归档日期取自目录名前缀（文件系统事实）；具体时刻不可考，取当日零点
+    const date = full.slice(0, 10);
+    const name = full.replace(/^\d{4}-\d{2}-\d{2}-/, "");
+    return `  - timestamp: ${date}T00:00:00\n    change: ${name}\n    action: completed\n    summary: "SessionEnd hook 补记：archive 目录与对应 commit 均成立，状态文件漏写"\n`;
+  }).join("");
+  fs.appendFileSync(logPath, header + block, "utf8");
+}
+
 function main() {
   let cwd = process.cwd();
   try {
@@ -248,6 +343,11 @@ function main() {
   }
   try {
     syncAuditHistory(stateDir);
+  } catch (err) {
+    // 文件系统失败不影响会话
+  }
+  try {
+    syncAutonomyLog(stateDir, openspecDir);
   } catch (err) {
     // 文件系统失败不影响会话
   }

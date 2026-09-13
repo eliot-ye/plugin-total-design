@@ -57,7 +57,7 @@ entries:
 读写规则：
 
 - `rolled-back` 条目由 `td-apply` 在 autonomous 回退时追加（其步骤 5）。
-- `completed` 条目由批量编排流程在该 change 成功 archive + commit 后写入；非批量流程不写——无条目即表示该 change 未走批量执行，各读取方（`td-archive` 步骤 4 的归档 gate / 步骤 5.4 的残留提示）按"无条目"处理。
+- `completed` 条目有两个写入方：批量编排流程在该 change 成功 archive + commit 后写入（`td-autonomous-run` 步骤 5）；SessionEnd hook 按「`archive/YYYY-MM-DD-<change>/` 目录 + 对应 commit」双事实补记漏写的条目（仅当本文件已存在，`summary` 标注补记来源，见 `hooks/td_state_sync.js`）。各读取方（`td-archive` 步骤 4 的归档 gate / 步骤 5.4 的残留提示）按最新条目判定。
 - 同一 change 有多条条目时以最新一条为准（append-only：只追加，不删改历史条目；`td-archive` 的归档 gate 与残留提示按最新条目判定；change 经人工处理后重做完成 → 由归档 gate 的用户确认解除阻塞，不回写日志）。
 - 文件不存在 → 视为空，读取方不得因文件缺失阻塞。
 

@@ -41,7 +41,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 1. **`system-engineering`** — 主基调四条进入上下文。
 2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 6.4）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断——后续步骤据此判断 constraint 触发与 tasks 合规。
-4. **运行模式** — 读 `openspec/.td-state/autonomy.yaml` 的 `mode` 字段（文件不存在 → 视为 `human-in-loop`），会话内缓存；`autonomous` 模式下本步骤创建本 change 的 `autonomy-manifest.md`（运行记录表，模板与读写规则见 `references/autonomy-template.md`；后续步骤写入时文件不存在（如中断恢复）→ 按模板补建）。模式分支语义见 `constraints` 的 `references/human-in-loop.md`「autonomous 模式下的触发路径」节。
+4. **运行模式** — 读 `openspec/.td-state/autonomy.yaml` 的 `mode` 字段（文件不存在 → 视为 `human-in-loop`），**每次调用本 skill 都重读，不沿用会话内旧值**——用户可能在两次调用之间手改 `mode`；"随时中止"的循环内重读由编排者（`td-autonomous-run` 步骤 4）承担，本条的重读兜住绕过编排者直接调用本 skill 的路径。`autonomous` 模式下本步骤创建本 change 的 `autonomy-manifest.md`（运行记录表，模板与读写规则见 `references/autonomy-template.md`；后续步骤写入时文件不存在（如中断恢复）→ 按模板补建）。模式分支语义见 `constraints` 的 `references/human-in-loop.md`「autonomous 模式下的触发路径」节。
 
 ### 2. 前置检查
 
@@ -49,7 +49,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 6.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"
 - **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检。
-- **proposal 新节必填（apply-ready 判定）**：「前置依赖」+「已确认决策清单」两节必填；caller impact 触发条件命中（条件与四类变更点定义见 `references/change-point-classes.md`）时「caller impact 分析」+「caller impact 实测」两节必填（跨模式，不区分 tier，节结构见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检——propose 6.c 漏执行时由本条兜底，后续步骤 4 复核子节不再重复此检查。本条同时核对「前置依赖」的满足性：`[依赖 X]` 条目对应的 change 已 archive（不在 `openspec list` 活跃列表）→ 通过；未满足 → human-in-loop 模式下阻塞本步骤并问用户，autonomous 模式下按步骤 5 的残留场景处理（回退）。
+- **proposal 新节必填（apply-ready 判定）**：「前置依赖」+「已确认决策清单」两节必填；caller impact 触发条件命中（条件与四类变更点定义见 `references/change-point-classes.md`）时「caller impact 分析」+「caller impact 实测」两节必填（跨模式，不区分 tier，节结构见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**：human-in-loop 模式下提示用户回 `/td-propose` 步骤 6.c 补节；autonomous 模式下不等待补节（无人可等）——按步骤 5 的残留场景处理（回退，编排者继续下一个 change）。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检——propose 6.c 漏执行时由本条兜底，后续步骤 4 复核子节不再重复此检查。本条同时核对「前置依赖」的满足性：`[依赖 X]` 条目对应的 change 已 archive（不在 `openspec list` 活跃列表）→ 通过；未满足 → human-in-loop 模式下阻塞本步骤并问用户，autonomous 模式下按步骤 5 的残留场景处理（回退）。
 - **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。已达 → **阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威在该文件；override 通过后继续步骤 3）。autonomous 模式下跳过本项——WIP 检查不生效，见 `constraints` 的 `references/wip-limit.md` 的「autonomous 模式下不生效」节。
 - **`constraints` 的 `references/critical-buffer.md`**：tasks.md 是否已标注关键链 + project buffer（比例按表 1 当前 tier 行；表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - 其余 constraint（`constraints` 的 `references/brooks-law.md` / `references/delay-decision.md` / `references/human-in-loop.md`）在实施过程中按需触发，不在本步预判。

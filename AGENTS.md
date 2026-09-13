@@ -23,13 +23,13 @@
 
 **开放标准支持**：本 plugin 符合 [Agent Plugins 1.0.0 规范](https://agent-plugins.org/specification)——根目录 `plugin.json` 的 `$schema` 字段声明 conformance。任何遵循该标准的客户端都能通过根 `plugin.json` 识别并加载 `skills/` 目录（v1 定义 skills + mcp.json 两种组件，`commands/` 目录不在 v1 规范内）。
 
-**分发路径与 skills 目录**：所有平台共享仓库根目录的 `skills/`（17 个 skill）——各平台各自扫描，不需要副本或 symlink。`commands/`（8 个命令文件）仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载（Agent Plugins 1.0.0 v1 未定义 commands 组件）。
+**分发路径与 skills 目录**：所有平台共享仓库根目录的 `skills/`（18 个 skill）——各平台各自扫描，不需要副本或 symlink。`commands/`（9 个命令文件）仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载（Agent Plugins 1.0.0 v1 未定义 commands 组件）。
 
 ## 依赖图谱与分析
 
 **任何对本仓库LLM文件的更改——无论改 SKILL.md、命令文件、还是 AGENTS.md 本身——动笔前必须先完成下列分析步骤，全部执行完才能开始用户要求的改动。跳过这一步直接改 = 把局部失调注入系统。**
 
-理由：本 plugin 的 17 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
+理由：本 plugin 的 18 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
 
 ### 分析步骤（必须按序执行，每步产出可见证据）
 
@@ -89,8 +89,8 @@ total-design/
 ├── plugin.json             ← 根目录 Agent Plugins 1.0.0 清单（跨平台元数据：$schema/name/version/description/author）
 ├── package.json            ← Pi Agent package（pi.skills 指向 ./skills）
 │
-├── skills/                  ← 17 个 skill（profile/tier 变体在 field-assessment/references/ 下；5 个局部规律变体在 constraints/references/ 下）
-├── commands/                ← 8 个 command
+├── skills/                  ← 18 个 skill（profile/tier 变体在 field-assessment/references/ 下；5 个局部规律变体在 constraints/references/ 下）
+├── commands/                ← 9 个 command
 │
 └── hooks/                   ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
     ├── hooks.json           ← hook 声明（plugin.json 的 "hooks" 字段指向本文件）
@@ -143,7 +143,7 @@ disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 
 **必须有 `## 服务的主基调原则` 一节的 skill：**
 
 - 约束层 1 个 `constraints` skill（承载 5 个局部规律 references：`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop`）—— `constraints` skill 必须显式声明它承载的每个局部规律服务 `system-engineering` 主基调的哪一条；5 份 references 各自也必须有 `## 服务的主基调原则` 一节
-- 契约层 7 个 td-* skill —— 同上
+- 契约层 8 个 td-* skill —— 同上
 
 `system-engineering` 自己是主基调本身，不需要这一节。行为层 / 配置层 skill 可选这一节，但写了更清晰。
 
@@ -197,7 +197,7 @@ args: none|option|required
 **立刻调用 `<command-name>` skill，参数 `$ARGUMENTS`。**       ← 如果 args 是 none，可以不需要下半句
 ```
 
-7 个命令文件 (`td-propose` / `td-explore` / `td-apply` / `td-reverse-spec` / `td-archive` / `td-system-audit` / `td-init`) 都遵循这个极薄模板——命令只是 slash 入口，真正的逻辑在同名 skill (`skills/<td-*>/SKILL.md`) 里。这样同一份逻辑既能被 slash command 触发，也能被 agent 自动触发。
+8 个命令文件 (`td-propose` / `td-explore` / `td-apply` / `td-reverse-spec` / `td-archive` / `td-system-audit` / `td-init` / `td-autonomous-run`) 都遵循这个极薄模板——命令只是 slash 入口，真正的逻辑在同名 skill (`skills/<td-*>/SKILL.md`) 里。这样同一份逻辑既能被 slash command 触发，也能被 agent 自动触发。
 
 **例外：`td-list`**——只读命令（`openspec list` 列活跃 change），无同名 skill，逻辑直接写在命令文件里，不遵循极薄模板。它不需要被 agent 自动触发（只是查询入口），故不为其建 skill。
 
@@ -297,7 +297,9 @@ args: none|option|required
 
 Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读触发，不靠 hook 强制。
 
-**例外——状态持久化 hook**：`hooks/td_state_sync.js` 是唯一允许的 hook（`SessionEnd` 事件）。它不做任何流程强制，只在会话结束时从文件系统事实校正 `.td-state/` 状态文件（`archive-counter.yaml` 按 `archive/` 目录重算、`audit-history.yaml` 补缺失报告记录）——这是"防 agent 漏写状态"的兜底，不是流程门禁，与触发式哲学不冲突。
+**例外——状态持久化 hook**：`hooks/td_state_sync.js` 是唯一允许的 hook（`SessionEnd` 事件）。它不做任何流程强制，只在会话结束时从文件系统事实校正 `.td-state/` 状态文件（`archive-counter.yaml` 按 `archive/` 目录重算、`audit-history.yaml` 补缺失报告记录、`autonomy-log.yaml` 仅在该文件已存在时按「archive 目录 + 对应 commit」双事实补漏记 `completed` 条目）——这是"防 agent 漏写状态"的兜底，不是流程门禁，与触发式哲学不冲突。`.td-state/` 因此含三类文件：可推导状态（hook 可校正）/ 用户偏好（`autonomy.yaml`，hook 不碰）/ agent 行为记录（`autonomy-log.yaml`，hook 只补漏）——三类都是 per-machine 状态，gitignore 理由不变。
+
+**autonomous 运行模式**：`td-autonomous-run` 编排 skill 提供离线批量执行（apply → archive → commit 循环）。模式由 `autonomy.yaml` 的 `mode` 字段承载（文件不存在 = human-in-loop，现有行为不变）；切换模式与批量 commit 授权都由用户显式确认，清单未覆盖的必停场景一律回退——决策权始终在人，编排者只驱动顺序执行，不替人做系统级决策。
 
 实现用 Node（CJS + `node:` 内置模块，零依赖、零构建、无 package.json），与 OpenSpec CLI 的 Node 运行时一致——用户装 OpenSpec 即已满足 hook 的运行时要求，不引入第二个解释器。hook 脚本新增或改写前，必须先在临时 fixture 上对照旧实现逐字节比对产出（状态文件是持久数据，等价性不能靠读代码判断）。
 
@@ -315,15 +317,15 @@ atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.
 
 - **skill 名**：kebab-case，无冒号（atomcode `validate_skill_name` 规则）
 - **命令名**：`td-<verb>` 或 `td-<noun>`，扁平 kebab-case
-- **文件名**：`SKILL.md`（目录式；本 plugin 17 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
+- **文件名**：`SKILL.md`（目录式；本 plugin 18 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
 - **主基调 skill**：`system-engineering`，是所有局部约束的前提，不单独触发（`user-invocable: false`）
 - **skill body 内引用其他 skill 用逻辑名**（如 `constraints`、`field-assessment`），由当前平台的加载器负责拼前缀（atomcode 下为 `total-design:<name>`）——这是预留多平台扩展的关键设计。skill frontmatter 不写 `aliases`，调用名一律由平台加载器按 plugin 名拼接。子约束（如 `wip-limit` / `human-in-loop` / `critical-buffer` / `brooks-law` / `delay-decision`）作为 `constraints` 的 `references/<name>.md` 变体文件存在，body 内引用时写 `constraints` 的 `references/<name>.md`（逻辑名 + 变体路径）
 
 ### td-* skill 共享片段
 
-7 个 td-* skill 的 body 里曾经各自重复"平台命名表""逻辑名说明""步骤 1 激活主基调与配置层"。这三段按本节规范**自包含书写**——因为 SKILL.md 禁止引用 AGENTS.md（见上方"SKILL 不可引用 AGENTS 文件"），td-* skill 的 body 不能"指向本节"，必须把规范内容写进各自文件。本节是给本仓库开发 agent 的统一规范，不是运行时资产：
+8 个 td-* skill 的 body 里曾经各自重复"平台命名表""逻辑名说明""步骤 1 激活主基调与配置层"。这三段按本节规范**自包含书写**——因为 SKILL.md 禁止引用 AGENTS.md（见上方"SKILL 不可引用 AGENTS 文件"），td-* skill 的 body 不能"指向本节"，必须把规范内容写进各自文件。本节是给本仓库开发 agent 的统一规范，不是运行时资产：
 
-**平台命名**：7 个 td-* skill 在不同平台下的调用名由当前平台的加载器按 plugin 名拼前缀（atomcode 下为 `total-design:<name>`），不写入 frontmatter。body 不再放平台命名表，引用其他 skill 一律用逻辑名，由当前平台加载器负责拼前缀。
+**平台命名**：8 个 td-* skill 在不同平台下的调用名由当前平台的加载器按 plugin 名拼前缀（atomcode 下为 `total-design:<name>`），不写入 frontmatter。body 不再放平台命名表，引用其他 skill 一律用逻辑名，由当前平台加载器负责拼前缀。
 
 **td-* 标准步骤 1**（每个 td-* skill 的"### 1. 激活主基调与配置层"都按此序列自包含书写，只注入强度不做判断）：
 
