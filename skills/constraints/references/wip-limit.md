@@ -33,6 +33,10 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
    d. 用户确认后，在 change 的 `proposal.md` 里记录"override WIP 上限，用户已确认风险"——作为后续 `/td-system-audit` 的输入。同一步骤 a 中 `brooks-law` 的加人手确认由 `brooks-law` 自行落点（`design.md` 作为"已知风险"，非 override 场景的加人手确认）；override 场景的 WIP 确认由本文件落点（`proposal.md`）——两处落点不冲突。
    e. 才继续执行后续步骤。
 
+### autonomous 模式下不生效
+
+运行模式为 autonomous（`openspec/.td-state/autonomy.yaml` 的 `mode` 字段，文件不存在视为 `human-in-loop`）时，WIP 检查整体跳过——不检测、不阻塞、不进入 override 流程。理由：WIP 约束的是**人同时并行处理的 change 数**（防认知过载，主基调第 4 条），autonomous 模式下 agent 是顺序执行——一个 change 走完 apply → archive → commit 才做下一个，不存在"同时并行"的语义；propose 阶段人还在场时 WIP 已生效过。human-in-loop 模式（默认）下本节不适用，照常执行「硬约束 + override 机制」。
+
 ### 常见合理化
 
 | 合理化（agent 对自己说的话） | 现实 |

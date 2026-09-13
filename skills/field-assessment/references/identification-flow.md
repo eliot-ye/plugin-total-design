@@ -93,6 +93,8 @@ openspec/.td-state/
 ├── profile-tier.yaml        ← field-assessment 维护：profile/tier 判读缓存 + 触发重判的时间戳
 ├── archive-counter.yaml     ← td-archive 维护：累计归档计数（system-audit 频率触发用）
 ├── audit-history.yaml       ← td-system-audit 维护：audit 时间戳序列
+├── autonomy.yaml            ← 用户偏好（可选）：运行模式 mode 字段；文件不存在视为 human-in-loop；模板见 td-apply/references/autonomy-template.md
+├── autonomy-log.yaml        ← autonomous 模式批量执行时由 td-apply /编排流程追加：跨 change 进度与失败日志；模板见 td-apply/references/autonomy-template.md
 └── audits/                  ← td-system-audit 维护：每次完整 audit 报告
 ```
 

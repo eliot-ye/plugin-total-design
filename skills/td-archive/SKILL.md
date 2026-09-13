@@ -87,6 +87,8 @@ archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预�
 
 ### 4. archive（含 sync）
 
+**autonomy 归档 gate**：读 `openspec/.td-state/autonomy-log.yaml`（文件不存在 → 视为无条目，跳过本检查）中本 change 的条目——**同一 change 有多条条目时以最新一条为准**：最新 `action` 为 `rolled-back` → **不归档**，提示用户"该 change 在 autonomous 执行中已回退，需人工处理后重走（失败详情与 `stash_ref` 见该条目）；人工处理完成并确认后可重新归档"——用户显式确认已处理 → 本次继续归档（日志保持 append-only，不删改历史条目）；无条目或最新为 `completed` → 继续归档。模板与读写规则见 `td-apply` 的 `references/autonomy-template.md`。
+
 ```bash
 openspec archive "<name>" --yes
 ```
@@ -136,6 +138,10 @@ archive 是"完成一个 change"的事件，正好对照表 3（system-audit 频
 #### 5.3 WIP 释放检查
 
 归档后，活跃 change 数减少。如果之前有因 WIP 限制阻塞的新 change，提示用户："WIP 释放了（当前活跃 `<n>` / 上限 `<limit>`），可以 `/td-propose` 之前想做的 X 了。"
+
+#### 5.4 autonomy 残留提示
+
+读 `openspec/.td-state/autonomy-log.yaml`（不存在 → 跳过本检查）：存在最新条目为 `action: rolled-back` 的 change（同一 change 多条条目以最新为准）→ 提示用户"有 N 个 change 已回退待人工处理（`stash_ref` 可定位改动），建议切回 human-in-loop 模式处理"。无 → 跳过。
 
 ## Guardrails
 

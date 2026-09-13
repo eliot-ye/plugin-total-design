@@ -1,6 +1,6 @@
 # audit 频率（表 3）
 
-各 tier 的 system-audit 触发频率（表 3）。`td-archive` 步骤 5.2 判定 project audit 阈值、`executing-plans` 步骤 1 与 `td-apply` 步骤 6.4 判定 current-change audit 触发时读本表；与其他位置出现的频率表述冲突时，以本表为准。
+各 tier 的 system-audit 触发频率（表 3）。`td-archive` 步骤 5.2 判定 project audit 阈值、current-change audit 触发时读本表（current-change 的触发 skill 归属按运行模式分派，见下方「current-change scope 的触发 skill 归属」节）；与其他位置出现的频率表述冲突时，以本表为准。
 
 ## 表 3：system-audit 频率
 
@@ -14,7 +14,7 @@
 
 ### current-change scope 的触发 skill 归属
 
-current-change audit 的触发 skill 按 tier 分工：
+current-change audit 的触发 skill 按 tier 与运行模式分派。human-in-loop 模式（默认）：
 
 | tier | 触发 skill | 触发位置 |
 |---|---|---|
@@ -22,4 +22,6 @@ current-change audit 的触发 skill 按 tier 分工：
 | `tier-medium` | `executing-plans` 步骤 1 | 每个关键链任务完成时 |
 | `tier-large` | `td-apply` 步骤 6.4 | 每完成 1 个 change |
 
-project scope audit 的触发统一由 `td-archive` 步骤 5.2 驱动（archive 计数器达阈值即建议）。
+**autonomous 模式**：`td-apply` 不委托 `executing-plans`（checkpoint 需人应答，结构性关闭）——tier-medium 的 current-change audit 改由 `td-apply` 在任务执行循环（其步骤 4）中于每个关键链任务完成后直接触发，频率不变（表 3 的 current-change scope 列）；tier-small / tier-large 的归属与 human-in-loop 模式相同。
+
+project scope audit 的触发统一由 `td-archive` 步骤 5.2 驱动（archive 计数器达阈值即建议），与运行模式无关。

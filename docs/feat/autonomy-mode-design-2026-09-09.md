@@ -128,6 +128,7 @@ openspec/changes/<change-name>/
 ## caller impact 实测（propose 阶段完成，跨模式）
 - [已实测] caller 清单：<file:line + 兼容结论>
 - [无未知 caller] 实测未发现 proposal 未标注的 caller
+- [不适用] 未命中触发条件：<判断依据>（未命中 change-point-classes.md 触发条件时以本行替代上面两行）
 ```
 
 #### autonomy-manifest.md 结构（autonomous 模式专用，apply 阶段创建）
@@ -161,6 +162,8 @@ openspec/changes/<change-name>/
 
 propose 阶段做实测，结果写入 proposal.md 的「caller impact 实测」节（跨模式必填，不区分 tier）。**tier-small 例外取消**：当前 tier-small 在 human-in-loop 模式下可跳过 caller 实测，本设计下 tier-small 也必须实测——理由见上方设计约束节"决策早闭合的普遍性"段。
 
+**与触发条件的关系**：`td-apply/references/change-point-classes.md` 的触发条件（跨分系统 或 命中四类变更点任一）**保留不变**，仍是单一事实源。「跨模式必填，不区分 tier」的确切含义：命中触发条件的 change 必填实测——proposal 三节中唯一带触发条件的节，废除的是 tier 维度的减免（tier-medium"信号触发" / tier-small"默认跳过"不再存在；tier-large 现行"无条件实测"被触发条件收编——无四类变更点即无实测输入，逐变更点 sweep 无从发起）。未命中触发条件的 change 同样写「caller impact 实测」节，标 `[不适用]` 并附判断依据（与 7 类清单的 `[不适用]` 同型）——proposal 三节结构统一，apply 与编排者无需推断"该不该有节"。
+
 apply 阶段改为"只复核不新增"，复核语义含两部分：① 无新增 caller（propose 阶段未标注的 caller 在 apply 阶段被实测发现）；② 已标注 caller 的兼容结论在当前基线可复现（前序 change 若改变了已标注 caller 的行为，本 change 的实测必须能重现 propose 阶段标注的兼容结论；无法复现 → 视同"新 caller"）。两部分中任一部分失败 → autonomous 模式回退当前 change（在运行记录表追加回退条目）；human-in-loop 模式下仍走 human-in-loop 第 4 类必停场景（停下问用户），与当前行为一致。
 
 **staleness 缓解**：批量执行时前序 change 会改变代码基线，导致后续 change 的 proposal caller 实测过时。缓解分两层——
@@ -186,6 +189,16 @@ autonomous 模式下，td-apply 步骤 5 的 human-in-loop 触发逻辑变为：
 **"实现细节"的边界**：agent 可自主的范围仅限于——TDD 的红绿重构循环、代码风格对齐既有实现、测试策略调整、内部模块实现细节。这些不属于 human-in-loop 7 类必停场景，autonomous 模式下照常自主执行。一旦触碰 7 类中任何一类的实际触发条件 → 走上面的 proposal 清单查询逻辑。
 
 不再有"自治处理本该人拍板的决策"这个分支。agent 不替人做系统级决策，只做实现细节。
+
+#### executing-plans 委托的 autonomous 守卫
+
+td-apply 步骤 4 在复杂场景下委托 `executing-plans`（关键链 checkpoint / 失败处理 / tier-medium current-change audit）。autonomous 模式下**不委托**——守卫放在调用方 td-apply，`executing-plans` 本身不改（其 checkpoint 语义在 human-in-loop 模式下仍然成立）：
+
+- **关键链 checkpoint**：checkpoint 是人在回路的任务粒度形态（格式以"继续吗？"收尾，需人应答），人不在场时结构性关闭——与 WIP 第 6 类"结构上不可能触发"同构。关键链任务完成照常推进，在 autonomy-manifest.md 运行记录表记一行替代 checkpoint 记录，不等待确认。
+- **失败处理**：`executing-plans` 失败处理的终点"root cause 在 plan 之外 → 停下来问用户"由第 5 节回退替换。失败处理由 td-apply 自持：任务失败 → 触发 `systematic-debugging` 4-phase → root cause 在 plan 内 → 修复重试（实现细节，照常自主）；在 plan 之外 → 按第 5 节残留场景表回退（前提假设不成立 / 测试失败 2 次以上根因在 plan 外，表内已有对应行）。
+- **tier-medium current-change audit**：当前该 audit 随 executing-plans 的 checkpoint 触发（td-apply 步骤 6.4），载体随 checkpoint 关闭——autonomous 模式下改由 td-apply 在每个关键链任务完成后直接触发，频率不变（表 3）；audit 触发 human-in-loop 第 7 类时按已决结论 10 回退。
+
+不在第 5 节残留场景表加 checkpoint 行——守卫后 checkpoint 在 autonomous 模式下不会触发，无残留场景可言。
 
 ### 4. 两种模式下的 LLM 思考差异
 
@@ -339,13 +352,13 @@ skill 不包 `while (changes remain)` 循环。三层结构各司其职：
 |---|---|---|
 | **session 内循环** | agent native session loop | 在单个 session 内逐 change 驱动 apply → archive → commit |
 | **进度持久化** | `autonomy-log.yaml`（`completed` / `rolled-back` 条目） | 记录每个 change 的处理结果，跨 session 续跑依据 |
-| **跨 session 恢复** | 用户重新触发 `/td-autonomous-run` 或 `/loop /td-autonomous-run` + `schedule_wakeup` | session 断了之后恢复循环 |
+| **跨 session 恢复** | 用户重新触发 `/td-autonomous-run`；跨 session 循环包装（atomcode 下为 `/loop` + `schedule_wakeup`）为可选增强，skill 正文不写死平台命令名 | session 断了之后恢复循环 |
 
 理由：
 
 1. agent 的 native session loop 已经是循环——用户给一个 goal，agent 会持续工作直到 goal 达成或被打断。skill 再包循环是重复语义。
 2. 符合本 plugin 的触发式哲学——skill 只设定 goal + per-change 协议，循环由 agent 自然驱动迭代，不靠 hook 或显式循环强制。
-3. `/loop` 是可选增强层——skill 本身不依赖 `/loop`，小批量单 session 够用；大批量用户自行选 `/loop` 包装。
+3. 跨 session 循环包装是可选增强层（atomcode 下为 `/loop` + `schedule_wakeup`）——skill 本身不依赖任何平台特有机制，小批量单 session 够用；大批量用户自行选所在平台的循环包装。SKILL.md 正文用平台无关措辞（"跨 session 循环包装（可选）"），不写死平台命令名，atomcode 命令名只作括注示例。
 4. resume 检查点是已有状态文件——`tasks.md`（change 内进度）+ `autonomy-log.yaml`（跨 change 进度），不需要新 checkpoint 机制。
 
 #### skill 行为
@@ -397,7 +410,7 @@ Co-Authored-By: AtomCode (<model>) <noreply@atomgit.com>
 
 #### 两种使用模式
 
-**不用 `/loop`（简单模式，适合 2-3 个 change）**：
+**不用跨 session 循环包装（简单模式，适合 2-3 个 change）**：
 ```
 用户: /td-autonomous-run
   → skill 设 goal
@@ -406,12 +419,12 @@ Co-Authored-By: AtomCode (<model>) <noreply@atomgit.com>
   → 用户回来重新触发 /td-autonomous-run → 从断点续跑
 ```
 
-**用 `/loop`（跨 session 模式，适合大批量）**：
+**用跨 session 循环包装（跨 session 模式，适合大批量；仅限提供该机制的平台——atomcode 下为 `/loop` + `schedule_wakeup`，其他平台按各自等价机制使用）**：
 ```
-用户: /loop /td-autonomous-run
-  → 同上，但 schedule_wakeup 在 session 断后自动恢复
+用户: <循环包装> /td-autonomous-run
+  → 同上，但平台的定时唤醒机制在 session 断后自动恢复
   → 每次被唤醒时读 autonomy-log.yaml 续跑
-  → 全部完成 / 剩余待执行为空 / mode 被改为 human-in-loop 时，skill 结束，/loop 无续跑目标自然停止
+  → 全部完成 / 剩余待执行为空 / mode 被改为 human-in-loop 时，skill 结束，循环包装无续跑目标自然停止
 ```
 
 ### 9. session 边界——跨 session 续跑
@@ -442,10 +455,11 @@ hook 补项的等价性要求与现有校正逻辑一致：只补"文件系统�
 |---|---|---|
 | **AGENTS.md** | `.td-state/` 语义扩展为三类（可推导 / 用户偏好 autonomy.yaml / agent 行为记录 autonomy-log.yaml）；gitignore 理由仍成立（per-machine 第二条腿）；设计原则加 autonomous 模式说明；hook 契约补 autonomy-log 补漏项 | |
 | **human-in-loop.md** | 新增顶层节「autonomous 模式下的触发路径」——集中说明"触发场景识别不变，但触发后走查 proposal「已确认决策清单」节 → 执行 / 回退的分支"。**位置说明**：不分散加到现有「触发机制」「触发时 agent 应做的事」「不需要停下来的场景」三节（会让三节的语义分裂），而是新增顶层节分离"识别"与"分支"两条逻辑——使用态 LLM 读到"命中第 1-5 类" → 知道去查 proposal 的「已确认决策清单」节。 | 🔥 约束层核心，被 td-apply / td-propose / td-system-audit 引用 |
-| **td-propose SKILL.md** | 步骤 6.c 加 proposal 新必填节：「前置依赖」+「已确认决策清单」+「caller impact 实测」（三节跨模式，human-in-loop 与 autonomous 都写，不区分 tier）；写入「前置依赖」节前做环检测（阻止循环依赖写入）；不再创建 `autonomy-manifest.md` | 🔥 契约层核心 |
-| **td-apply SKILL.md** | 步骤 1 加读 autonomy.yaml + proposal 的「已确认决策清单」/「caller impact 实测」两节（不再读 autonomy-manifest.md）；autonomous 模式下**创建** `autonomy-manifest.md`（只含运行记录表）；步骤 4 caller impact 改为"只复核不新增"（复核含"无新增 caller" + "已标注 caller 的兼容结论在当前基线可复现"两部分，复核依据读 proposal 的「caller impact 实测」节）；步骤 5 human-in-loop 触发逻辑改为"proposal 清单显式覆盖→执行 / 未覆盖→按第 5 节回退"；步骤 6.3 code review warning 记录延后不自动修（与 human-in-loop 模式一致，critical 才回退）；回退时在 autonomy-manifest.md 运行记录表追加条目 + 在 autonomy-log.yaml 追加全局条目 | |
+| **td-propose SKILL.md** | 步骤 6.c 加 proposal 新必填节：「前置依赖」+「已确认决策清单」+「caller impact 实测」（三节跨模式，human-in-loop 与 autonomous 都写，不区分 tier）；写入「前置依赖」节前做环检测（阻止循环依赖写入）；不再创建 `autonomy-manifest.md`；既有「caller impact 分析」节保留变更点类别标注职责（实测 sweep 的输入），"完整 caller 清单由 td-apply 步骤 4 实测产出"的指向更新为"由本 proposal 的「caller impact 实测」节承载"；删除 tier 分层表述（tier-small 可跳过 / tier-medium-large 必填 → 命中触发条件即必填，见已决结论 16） | 🔥 契约层核心 |
+| **td-apply SKILL.md** | 步骤 1 加读 autonomy.yaml + proposal 的「已确认决策清单」/「caller impact 实测」两节（不再读 autonomy-manifest.md）；autonomous 模式下**创建** `autonomy-manifest.md`（只含运行记录表）；步骤 4 caller impact 改为"只复核不新增"（复核含"无新增 caller" + "已标注 caller 的兼容结论在当前基线可复现"两部分，复核依据读 proposal 的「caller impact 实测」节）；步骤 5 human-in-loop 触发逻辑改为"proposal 清单显式覆盖→执行 / 未覆盖→按第 5 节回退"；步骤 6.3 code review warning 记录延后不自动修（与 human-in-loop 模式一致，critical 才回退）；回退时在 autonomy-manifest.md 运行记录表追加条目 + 在 autonomy-log.yaml 追加全局条目；autonomous 模式下不委托 `executing-plans`（checkpoint 结构性关闭、失败处理自持、tier-medium current-change audit 载体移至本 skill 关键链任务完成后直接触发，见第 3 节守卫与已决结论 15）；步骤 4 的 tier 分层（硬闸门 / 信号触发 / 提醒）删除——复核义务随 proposal 实测节内容传递（已决结论 16） | |
+| **td-apply/references/change-point-classes.md** | 触发条件与四类变更点定义不变；「三层防护」分工表述更新为实测前移后的形态——propose 侧变更点类别标注 + caller 实测（前移后）、apply 侧 caller 复核（无新增 caller + 兼容结论可复现）、架构 review 校验 | |
 | **td-archive SKILL.md** | 步骤 4 读 `.td-state/autonomy-log.yaml` 判断该 change 的 action：`rolled-back` → 不归档（提示人工处理）；步骤 5 加检测 autonomy-log.yaml 的 rolled-back 条目并提示处理。**不检测 autonomy-manifest.md 的存在性**（manifest 不再作为 autonomous-ready 标记） | |
-| **td-autonomous-run SKILL.md** | **新建**：编排 skill。步骤 0 检查 autonomy.yaml 是否存在（不存在则引导用户确认创建 + commit 授权）→ 读 openspec/todo.md 拿优先级 → 读 autonomy-log.yaml 排除已处理 → 读 openspec list 交叉匹配 → 读 proposal「前置依赖」节检查依赖满足 → 设 goal → agent native loop 驱动。每个 change archive 成功后执行 commit。**不再检查 autonomy-manifest.md 的存在性**（autonomous-ready 概念已作废） | 新增 skill |
+| **td-autonomous-run SKILL.md** | **新建**：编排 skill。步骤 0 检查 autonomy.yaml 是否存在（不存在则引导用户确认创建 + commit 授权）→ 读 openspec/todo.md 拿优先级 → 读 autonomy-log.yaml 排除已处理 → 读 openspec list 交叉匹配 → 读 proposal「前置依赖」节检查依赖满足 → 设 goal → agent native loop 驱动。每个 change archive 成功后执行 commit。**不再检查 autonomy-manifest.md 的存在性**（autonomous-ready 概念已作废）。正文用平台无关表述：不写死 `/loop` / `schedule_wakeup` 等平台特有命令名，跨 session 循环包装以"可选增强（atomcode 下为 `/loop` + 定时唤醒）"表述 | 新增 skill |
 | **td-autonomous-run description 建议** | frontmatter description 需明确「批量执行」+「依赖满足」两个触发关键词，与 `td-apply`（单个 change 的实施）语义正交——建议：「批量执行已确认的 change，按 todo.md 优先级走 apply → archive → commit 循环；仅在 `.td-state/autonomy.yaml` mode 为 autonomous 时生效。」 | |
 | **td-autonomous-run 命令文件** | **新建**：`commands/td-autonomous-run.md`，极薄模板转发同名 skill | 新增命令 |
 | **identification-flow.md** | 持久化层目录树加 autonomy.yaml + autonomy-log.yaml | |
@@ -453,22 +467,22 @@ hook 补项的等价性要求与现有校正逻辑一致：只补"文件系统�
 | **wip-limit.md** | 加 autonomous 模式说明：autonomous 模式下 WIP 检查不生效（不 override、不阻塞），仅 human-in-loop 模式生效 | |
 | **hooks/td_state_sync.js** | SessionEnd 校正补一项：检查有 `archive/YYYY-MM-DD-<change-name>/` 目录且对应 commit 存在但 autonomy-log.yaml 缺 `completed` 条目的 change → 补写（不用 tasks.md 全 `[x]` 判定） | |
 
-blast radius：11 个文件（8 个改 + 3 个新建：td-autonomous-run SKILL.md / td-autonomous-run 命令文件 / td-apply/references/autonomy-template.md）。热点节点：human-in-loop.md（入边最多）、td-propose（契约层入口）。
+blast radius：12 个文件（9 个改 + 3 个新建：td-autonomous-run SKILL.md / td-autonomous-run 命令文件 / td-apply/references/autonomy-template.md）。热点节点：human-in-loop.md（入边最多）、td-propose（契约层入口）。
 
 ## 风险评估
 
-**blast radius 11 个文件（8 个改 + 3 个新建），其中 2 个是约束/契约层核心。**
+**blast radius 12 个文件（9 个改 + 3 个新建），其中 2 个是约束/契约层核心。**
 
 | 风险 | 严重度 | 缓解 |
 |---|---|---|
-| caller impact 实测前移增加 proposal 工作量 | 中 | 只在 autonomous 模式下要求，human-in-loop 模式不变 |
+| caller impact 实测前移等 proposal 三新节增加 propose 工作量 | 中 | 跨模式必填是显式接受的代价，不设模式豁免——「决策早闭合的普遍性」对两种模式成立；仅 autonomous 要求会与已决结论 1（autonomy.yaml 首建时机）、结论 4（无 autonomous-ready 概念）冲突，并打断「propose 完即离场」的使用时序；含 tier-small 例外取消（tier-small 的 propose 开销增幅最大） |
 | autonomous 模式下 apply 遇到不可预测冲突 | 低（设计如此） | 一律回退并写日志、撤销代码改动，编排者继续下一个 change；audit 触发时 `reason` 标注第 7 类，人回来能识别批次级问题 |
 | 用户忘记切回 human-in-loop 模式 | 中 | td-archive 步骤 5 检测 autonomy-log.yaml 有 rolled-back 条目时提示"有 N 个 change 需人工处理，建议切回 human-in-loop 处理" |
 | `.td-state/` 语义从"全部可推导"变为"可推导 + 用户偏好 + agent 行为记录"三类 | 低 | gitignore 理由仍成立（per-machine 第二条腿），AGENTS.md 补充说明；hook 契约明确 autonomy.yaml 用户偏好类不碰、autonomy-log.yaml 只补漏 completed |
 | session 中断时 change 内进度未落盘 | 中 | tasks.md 的 `[x]` 标记是渐进写盘的；SessionEnd hook 只在 `archive/` 目录 + commit 双事实成立时补写 `completed`，不用 tasks 全 `[x]` 判定 |
 | 回退后改动丢失、人回来无法救回 | 低 | 回退用 `git stash push` 而非 `git checkout`，改动留在 stash 栈可 `pop` 救回；`autonomy-log.yaml` 记录 `stash_ref` 便于人回来定位 |
 | 批量执行中前序 change 改变基线导致 proposal caller 实测过时 | 中 | proposal 加「前置依赖」节，编排者按依赖序执行减少漂移；apply 阶段"只复核不新增"不放宽 scope 边界，新 caller 一律回退 |
-| 编排 skill 的 goal 语义不被所有 agent 平台支持 | 低 | skill 用自然语言设 goal，不依赖平台特有 API；`/loop` 是可选增强 |
+| 编排 skill 的 goal 语义不被所有 agent 平台支持 | 低 | skill 用自然语言设 goal，不依赖平台特有 API；跨 session 循环包装是可选增强，SKILL.md 正文用平台无关措辞（不写死 `/loop` / `schedule_wakeup`，atomcode 命令名只作括注示例） |
 | autonomous 模式下自动 commit 违反"用户未确认不 commit" | 低 | 步骤 0 创建 autonomy.yaml 时显式提示"将自动 commit"并等待用户确认；用户可随时修改 mode 字段中止；只 commit 无失败记录的 change |
 
 ## 已决结论（开放问题闭环）
@@ -483,7 +497,7 @@ blast radius：11 个文件（8 个改 + 3 个新建：td-autonomous-run SKILL.m
 
 5. **多个待执行 change 的顺序**：按 `openspec/todo.md` 优先级（P0 → P1 → P2），与 td-propose 挑候选一致。不再按"是否 autonomous-ready"筛选——所有 change 都经过同一份 proposal 新节，无筛选差异。
 
-6. **循环驱动者**：新增编排 skill `td-autonomous-run`（+ 同名命令文件）。skill 不实现循环——设 goal + per-change 协议，agent native session loop 驱动迭代。`/loop` 是可选跨 session 增强层。
+6. **循环驱动者**：新增编排 skill `td-autonomous-run`（+ 同名命令文件）。skill 不实现循环——设 goal + per-change 协议，agent native session loop 驱动迭代。跨 session 循环包装是可选跨 session 增强层（atomcode 下为 `/loop`）；SKILL.md 正文用平台无关措辞，不写死平台命令名。
 
 7. **session 边界**：`autonomy-log.yaml` 只有 `completed` / `rolled-back` 两种 action，跨 session 续跑靠读进度链。resume 粒度三档：change 之间跳已完成、change 内按 tasks.md `[x]` 续跑、回退的跳过不重试。SessionEnd hook 补写漏记的 `completed` 条目，判定条件是 `archive/YYYY-MM-DD-<change-name>/` 目录存在且对应 commit 存在（不用 tasks.md 全 `[x]`——tasks 全打勾不等于 change 完成，td-apply 步骤 6 的四层验证在 tasks 之后跑）。
 
@@ -504,3 +518,7 @@ blast radius：11 个文件（8 个改 + 3 个新建：td-autonomous-run SKILL.m
 13. **循环依赖检测**：propose 阶段做**唯一阻止点**——写入 proposal「前置依赖」节前做环检测，检测到循环依赖（含经由其他 change 间接成环）→ 不写入，先与用户确认依赖链修正。编排者 `td-autonomous-run` 步骤 5 做**兜底识别**：构造待执行队列时若发现挂起链闭合 → 在 goal 里显式标记"疑似循环依赖：<change 列表>"，标记后保持挂起、不自动修复。两层职责分离：propose 阻止写入、编排者识别并报告残留。
 
 14. **manifest 是 autonomous 模式专用**：`autonomy-manifest.md` 只在 autonomous 模式下由 td-apply 创建，只承载运行记录（决策清单 + 前置依赖 + caller 实测已迁到 proposal.md，跨模式共享）。其价值前提是"人不在 apply 现场"——human-in-loop 下人在场，无需记录运行轨迹。归档 gate 归 autonomy-log（不在 manifest 内），同样以"人不在场"为价值前提。原「文件存在即等于该 change 是 autonomous-ready」的判定不变式已消失——autonomous-ready 概念随清单迁移 proposal 而作废，是否批量执行改由 `autonomy.yaml` 的 mode + `/td-autonomous-run` 调用表达，manifest 不再承担"是否需要批量执行"的标记职责。
+
+15. **executing-plans 在 autonomous 模式下的处置**：守卫放在调用方 td-apply——autonomous 模式下不委托 `executing-plans`，`executing-plans` 本身不改（checkpoint 语义在 human-in-loop 模式下成立），不入改动文件表。checkpoint 是人在回路的任务粒度形态（"继续吗？"需人应答），autonomous 下结构性关闭，与 WIP 第 6 类同构；关键链任务完成照常推进并记 manifest 运行记录。失败处理由 td-apply 自持：`systematic-debugging` → root cause 在 plan 内修复重试、在 plan 外按第 5 节回退。tier-medium current-change audit 载体从 checkpoint 移至 td-apply 关键链任务完成后直接触发，频率不变（表 3）。
+
+16. **caller impact 实测与触发条件的关系**：`change-point-classes.md` 的触发条件保留（单一事实源），「跨模式必填，不区分 tier」= 命中触发条件的 change 必填实测 + tier 分层取消（tier-medium 信号触发 / tier-small 默认跳过废除，tier-large"无条件实测"被触发条件收编）；未命中触发条件写 `[不适用]` + 判断依据，proposal 三节结构统一。既有「caller impact 分析」节保留变更点类别标注职责（实测 sweep 的输入），"完整清单由 td-apply 步骤 4 实测产出"的旧指向更新为 proposal 实测节承载。该文件入改动文件表，blast radius 11 → 12。

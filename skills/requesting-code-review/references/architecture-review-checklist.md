@@ -14,7 +14,7 @@ review 对象是 proposal 的分系统切分与设计决策，不是代码。此
 - 有无循环依赖（A ↔ B）
 - 有无隐式依赖（共享数据库、共享配置、时序耦合）
 - 一个改动是否牵动过多分系统（过度耦合信号）
-- 命中 caller impact 触发条件时（触发条件与四类变更点定义见 `td-apply/references/change-point-classes.md`，单一事实源），proposal 是否附「caller impact 分析」节（变更点类别标注 + 高危标记 + 已知高危 caller，见 `td-propose` 步骤 6.c）
+- 命中 caller impact 触发条件时（触发条件与四类变更点定义见 `td-apply/references/change-point-classes.md`，单一事实源），proposal 是否附「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c；完整 caller 清单与兼容结论由 proposal 的「caller impact 实测」节承载）
 
 ## 分级与阻塞
 

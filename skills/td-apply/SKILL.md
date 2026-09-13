@@ -41,6 +41,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 1. **`system-engineering`** — 主基调四条进入上下文。
 2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存。apply 期间**不主动触发 project-scope system-audit**，但按表 3 的 current-change scope 频率触发 current-change audit（见步骤 6.4）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断——后续步骤据此判断 constraint 触发与 tasks 合规。
+4. **运行模式** — 读 `openspec/.td-state/autonomy.yaml` 的 `mode` 字段（文件不存在 → 视为 `human-in-loop`），会话内缓存；`autonomous` 模式下本步骤创建本 change 的 `autonomy-manifest.md`（运行记录表，模板与读写规则见 `references/autonomy-template.md`；后续步骤写入时文件不存在（如中断恢复）→ 按模板补建）。模式分支语义见 `constraints` 的 `references/human-in-loop.md`「autonomous 模式下的触发路径」节。
 
 ### 2. 前置检查
 
@@ -48,8 +49,8 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 6.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"
 - **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检。
-- **caller impact 分析节必填**：若 `$_TD_TIER` 为 `tier-medium` / `tier-large` 且 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检——propose 6.c 漏执行时由本条兜底，后续步骤 4 实测子节不再重复此检查。
-- **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。已达 → **阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威在该文件；override 通过后继续步骤 3）。
+- **proposal 新节必填（apply-ready 判定）**：「前置依赖」+「已确认决策清单」两节必填；caller impact 触发条件命中（条件与四类变更点定义见 `references/change-point-classes.md`）时「caller impact 分析」+「caller impact 实测」两节必填（跨模式，不区分 tier，节结构见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检——propose 6.c 漏执行时由本条兜底，后续步骤 4 复核子节不再重复此检查。本条同时核对「前置依赖」的满足性：`[依赖 X]` 条目对应的 change 已 archive（不在 `openspec list` 活跃列表）→ 通过；未满足 → human-in-loop 模式下阻塞本步骤并问用户，autonomous 模式下按步骤 5 的残留场景处理（回退）。
+- **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。已达 → **阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威在该文件；override 通过后继续步骤 3）。autonomous 模式下跳过本项——WIP 检查不生效，见 `constraints` 的 `references/wip-limit.md` 的「autonomous 模式下不生效」节。
 - **`constraints` 的 `references/critical-buffer.md`**：tasks.md 是否已标注关键链 + project buffer（比例按表 1 当前 tier 行；表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - 其余 constraint（`constraints` 的 `references/brooks-law.md` / `references/delay-decision.md` / `references/human-in-loop.md`）在实施过程中按需触发，不在本步预判。
 
@@ -62,25 +63,23 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 3. `specs/` 下的 spec 文件
 4. `tasks.md`（实施步骤）
 
-### 4. 架构 review 复核 + caller impact 实测 + 触发行为层
+### 4. 架构 review 复核 + caller impact 复核 + 触发行为层
 
-**进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 7 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 实测」子节**；**有改动 → 重新触发 `requesting-code-review` 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合，检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
+**进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 7 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 复核」子节**；**有改动 → 重新触发 `requesting-code-review` 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合，检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
 
-#### Caller Impact 实测（任务实施前的闸门）
+#### Caller Impact 复核（任务实施前的闸门）
 
-**触发**：触发条件、四类变更点定义、边界裁定与已知盲区见 `references/change-point-classes.md`（单一事实源）；触发条件未命中 → 跳过本子节（不给小改动加流程开销）。
+**触发**：proposal 的「caller impact 实测」节标 `[不适用]`（未命中触发条件）→ 跳过本子节；标 `[已实测]` → 执行复核。触发条件、四类变更点定义、边界裁定与已知盲区见 `references/change-point-classes.md`（单一事实源）。
 
-**执行（实测为主——caller 清单由引用搜索实测产出，不由人工预判清单充当）**：
+**执行（只复核不新增——完整 caller 实测已在 propose 阶段完成，结果进 proposal 的「caller impact 实测」节）**：
 
-1. 对 proposal 标注的每个变更点，用符号引用搜索 / 调用方追踪 / 文本 grep 类工具实测 caller，产出 caller 清单（file:line + 调用形式）。
-2. 逐 caller 确认兼容（签名匹配 / 返回值未被消费 / 装配点已接 / 语义不变），记录确认结论。
-3. 实测发现 proposal 未标注的 caller，或与已知 caller 的预判结论冲突 → 补做兼容确认，或经步骤 5 的 apply 全局必停通道上报「超出当前 change scope」——不得静默跳过。
+1. **无新增 caller**：用符号引用搜索 / 调用方追踪 / 文本 grep 类工具检查 proposal 的变更点——proposal 实测节记录的基线与当前 HEAD 一致 → 抽查；基线已前移（前序 change 落库）→ 对变更点清单全量重查。确认当前基线下没有 proposal 未标注的 caller。
+2. **兼容结论可复现**：逐个已标注 caller 确认 proposal 记录的兼容结论（签名匹配 / 返回值未被消费 / 装配点已接 / 语义不变）在当前基线可复现——前序 change 可能已改变该 caller 的行为，无法复现 → 视同新 caller。
+3. 复核任一部分失败 → human-in-loop 模式下补做兼容确认，或经步骤 5 的 apply 全局必停通道上报「超出当前 change scope」；autonomous 模式下按步骤 5 的残留场景处理（回退）——不得静默跳过。
 
-**tier 分层**：tier-large = 硬闸门（无条件实测；caller 清单 + 逐 caller 结论未产出，不进入任务实施）；tier-medium = 信号触发（满足任一信号则强制实测：变更点属 ①③ 高危类 / proposal 对某已知 caller 标注"需适配" / 架构 review 对 caller 影响提出疑问；纯内部实现细节且无信号 → 可跳过并在 tasks.md 记录理由）；tier-small = 提醒（默认跳过）。caller 清单与结论记录到 tasks.md（对应任务的验证证据或单独附注）。
+本子节是**事前**误差检测（不破坏既有 caller），复核确认过的 caller 清单同时是步骤 6.2 边界验证的边界输入；步骤 6.2 是**事后**误差检测（新行为是否正确）。分工不同，不重复。
 
-本子节是**事前**误差检测（不破坏既有 caller），实测确认过的 caller 清单同时是步骤 6.2 边界验证的边界输入；步骤 6.2 是**事后**误差检测（新行为是否正确）。分工不同，不重复。
-
-架构 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。
+架构 review 与 caller impact 复核均通过后，按 `tasks.md` 的任务序列实施。
 
 #### 任务执行
 
@@ -101,6 +100,11 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 条件不命中时全程走 td-apply 自持的基本执行循环，不加载 `executing-plans`。
 
+**autonomous 模式下不委托 `executing-plans`**（checkpoint 需人应答，无人可等）：
+
+- 关键链任务完成照常推进，在 `autonomy-manifest.md` 运行记录表记一行替代 checkpoint 记录；tier-medium 的 current-change audit 改由本步骤的执行循环在每个关键链任务完成后直接触发（频率不变，表 3）
+- 任务失败处理自持：触发 `systematic-debugging` 4-phase 流程 → root cause 在 plan 内 → 修复重试（失败 2 次以上触发 debug、3 次反思 plan，阈值同上）；root cause 在 plan 之外 → 按步骤 5 的残留场景回退
+
 ### 5. 触发 apply 全局粒度的工程管理约束
 
 本步骤触发 **apply 全局粒度**的工程管理约束：
@@ -108,6 +112,16 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 - `constraints` 的 `references/brooks-law.md`：用户在 apply 期间想加人手 / 并行 subagent 加速时
 - `constraints` 的 `references/delay-decision.md`：apply 期间遇到顶层架构层次的可逆决策时（与任务粒度的"实现细节可逆决策"不重叠）
 - `constraints` 的 `references/human-in-loop.md`：apply 期间遇到"超出当前 change scope 的影响"等 apply 全局必停场景时（任务粒度的 checkpoint 必停由 executing-plans 负责）。步骤 6.2 边界验证失败时的"root cause 在 plan 之外 → 停下来问用户"也走本类 apply 全局必停通道。
+
+#### autonomous 模式下的分支（查清单 / 回退）
+
+autonomous 模式下，上述必停场景触发时不执行「停下来问用户」，改按 `constraints` 的 `references/human-in-loop.md`「autonomous 模式下的触发路径」节分支：查本 change `proposal.md` 的「已确认决策清单」节——对应类标 `[已确认]` 且场景能明确对应到该条目结论 → 按确认结论执行，在 `autonomy-manifest.md` 运行记录表记录"沿用 proposal 清单确认"（决策来源标注清单类目）；标 `[不适用]` 但实际触发、标 `[已确认]` 但场景无法明确对应到该条目结论、无法对应到第 1–5 类、或触发第 7 类（audit）→ **回退当前 change**：
+
+1. 撤销本 change 的代码改动（保留 artifact 不删）——回退命令原文与读写规则见 `references/autonomy-template.md`（单一事实源，本文件不复制命令文本）。
+2. 在 `autonomy-manifest.md` 运行记录表追加回退条目，并在 `openspec/.td-state/autonomy-log.yaml` 追加全局条目（`change: <change-name>`、`action: rolled-back`，含 `reason` / `detail` / `stash_ref`；audit 触发时 `reason` 标注"audit 触发第 7 类"）。
+3. 本 change 终止，待人工处理后再续；human-in-loop 模式不受本节影响，照常走必停等待。
+
+场景细分：`brooks-law` 的加人手咨询在 autonomous 模式下不触发（顺序执行无并行加人语义）；可逆决策不等待——按 `constraints` 的 `references/delay-decision.md` 以最简方案往前走；不可逆/近似不可逆决策（第 1–3 类）走上方清单分支。下方「设计回写」在 autonomous 模式下同样按本分支处理——前提假设不成立属残留场景，回退而非临场改设计。
 
 #### 设计回写（实施中发现 artifact 有错）
 
@@ -149,12 +163,14 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 
 review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 change-level 验证（修复使既有验证证据失效，见 `verification-before-completion` 的「之前测过」条）；无 critical → 进入 6.4。
 
+**修复策略按模式分派**：human-in-loop 模式下修复方式不限（修改性修复可行——用户在场评估新方案的风险）。autonomous 模式下只做**删减性修复一次**（仅删除/回退被 review 判 critical 的具体改动，不重写业务逻辑——修改性修复可能引入新 critical，无人现场拍板是否值得冒险），随后重跑 6.1 + 本步骤 review；仍 critical → 按步骤 5 的残留场景回退。review 判出 warning → 记录后延后处理，不自动修复（两种模式一致：warning 不阻塞完成判定；autonomous 下记录进 `autonomy-manifest.md` 运行记录表并标"warning 延后人工处理"）。
+
 #### 6.4 current-change audit（按表 3 频率）
 
 6.1–6.3 都通过后，对照表 3 的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`（表 3 见 `field-assessment/references/audit-frequency.md`）：
 
 - `tier-small`：不要求
-- `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 1）
+- `tier-medium`：每个关键链任务完成时触发——human-in-loop 模式下该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 1）；autonomous 模式下该粒度由步骤 4 的执行循环在每个关键链任务完成后直接触发（checkpoint 结构性关闭，见步骤 4；本步骤只在 6.1–6.3 都通过后执行，不承担任务粒度触发）
 - `tier-large`：每完成 1 个 change 触发——本步骤即触发点
 
 触发即调用 `/td-system-audit current-change`，把本次 change 的"实际 vs 预期"对照主基调过一遍。
@@ -163,4 +179,4 @@ review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 ch
 
 - 不跳过任务，按 tasks.md 顺序；tasks.md 显式标注并行的任务除外
 - 每个任务必须有验证证据，"我觉得改对了"不算
-- 遇到 proposal 与实际代码冲突时，停下来问用户：是改 proposal 还是改代码？（执行序列见步骤 5 的「设计回写」）
+- 遇到 proposal 与实际代码冲突时，human-in-loop 模式下停下来问用户：是改 proposal 还是改代码？（执行序列见步骤 5 的「设计回写」）；autonomous 模式下按步骤 5 的残留场景回退
