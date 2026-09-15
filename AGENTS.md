@@ -218,11 +218,11 @@ args: none|option|required
 - **没有 `constraints` / `profiles` / `tiers` 字段**——这些必须以 skill 形态存在
 - **根 `plugin.json` schema 是 closed**（Agent Plugins 1.0.0 官方规范）：只允许 `$schema` / `name` / `version` / `description` / `author` / `homepage` / `repository` / `license` / `keywords` / `extensions`；v1 定义只有 `skills/` + `mcp.json` 两种组件——本 plugin 的 `commands/` 目录仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载
 
-**多平台 manifest 一致性**：四处清单的 `name` / `version` / `description` 必须完全一致，version bump 时同步（见下方版本发布流程）。description 保持纯 ASCII（atomcode TUI plugin manager 按字节下标切截断，多字节字符会导致 panic）。
+**多平台 manifest 一致性**：四处清单的 `name` / `version` / `description` 必须完全一致，version bump 时同步；`description` 保持纯 ASCII（atomcode TUI plugin manager 按字节下标切截断，多字节字符会导致 panic）。
 
 ### 版本发布流程（version bump 与发布文档同步）
 
-**版本号是否 bump 是发布决策，不是改动的自动后果**——改 SKILL.md / 命令文件 / 文档不默认要求 bump；只有你决定发布新版本时才 bump。**决定 bump 时**，四处清单（根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`）的 `version` 变更必须与 CHANGELOG.md、RELEASE_NOTES.md 的更新在同一个逻辑变更内完成——不允许只 bump 版本不更新发布文档。版本号在四处必须一致，`description` 字段也必须完全一致（保持纯 ASCII，atomcode TUI plugin manager 按字节下标切截断，多字节字符会导致 panic）。
+**版本号是否 bump 是发布决策，不是改动的自动后果**——改 SKILL.md / 命令文件 / 文档不默认要求 bump；只有你决定发布新版本时才 bump。**决定 bump 时**，四处清单（根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`）的 `version` 变更必须与 CHANGELOG.md、RELEASE_NOTES.md 的更新在同一个逻辑变更内完成——不允许只 bump 版本不更新发布文档。一致性约束见上方「多平台 manifest 一致性」条。
 
 - **CHANGELOG.md**：按 Keep a Changelog 格式在文件顶部新增当前版本条目（最新在上），按 Fixed / Changed / Docs 等类别记录；历史条目只读，不修改（过时的"发布提示"类临时标注可更新为已结清状态，但不改动已发布的变更记录）。
 - **RELEASE_NOTES.md**：更新为当前版本发布说明——本版本定位（新增/修复/重构版）、行为变更表（升级用户感知的差异）、升级步骤（bump 版本号同步）、完整变更列表指向 CHANGELOG 对应条目。
@@ -303,15 +303,11 @@ Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读�
 
 atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.json 的 `hooks` 字段接受路径字符串（本 plugin 用 `"./hooks/hooks.json"`），文件内为 `{ "<Event>": [{ "hooks": [{ "type": "command", "command": "...", "timeout": <s> }] }] }`。事件名大小写不敏感（`SessionEnd` / `session_end` 等价）。hook 经 stdin 收 JSON、stdout 决定处理；命令串可用 `${ATOMCODE_PLUGIN_ROOT}` / `${CLAUDE_PLUGIN_ROOT}` 环境变量指向 plugin 安装目录。**Hook 需信任后才激活**：安装时告知不运行，`atomcode plugin trust <name>` 授权后下次 session 生效；插件更新后 hook 命令哈希变更会失效，需重新 trust。
 
-### 4. 不原样照搬 Superpowers
+### 4. 不原样照搬 Superpowers / 不重新实现 OpenSpec CLI
 
-转译时去掉 Superpowers 自己的 plugin 引用、marketplace 引用，只保留方法论内核。每个 skill 加 `## 服务的主基调原则` 一节。
+转译而非搬运：Superpowers 的方法论内核保留但去掉其 plugin / marketplace 引用，每个 skill 加 `## 服务的主基调原则` 一节；OpenSpec 的方法论转译为 slash command，CLI 功能仍调用外部 `openspec` 命令，不在命令文件里重实现。
 
-### 5. 不重新实现 OpenSpec CLI
-
-本 plugin 转译 OpenSpec 的方法论到 atomcode，不重新实现 OpenSpec 的 CLI。命令调用 `openspec` CLI 工具。
-
-### 6. 设计变更评估维度（动笔前的强制评估）
+### 5. 设计变更评估维度（动笔前的强制评估）
 
 **任何为本 plugin 新增能力 / skill / 命令 / 流程分支的设计讨论，在拍板执行前必须产出「重量 / 价值 / 代价」三维度评估。** 评估结论决定做不做、做多大——不是"写完之后顺便说明一下"。
 
@@ -368,13 +364,10 @@ atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.
 - **主基调 skill**：`system-engineering`，是所有局部约束的前提，不单独触发（`user-invocable: false`）
 - **skill body 内引用其他 skill 用逻辑名**（如 `constraints`、`field-assessment`），由当前平台的加载器负责拼前缀（atomcode 下为 `total-design:<name>`）——这是预留多平台扩展的关键设计。skill frontmatter 不写 `aliases`，调用名一律由平台加载器按 plugin 名拼接。子约束（如 `wip-limit` / `human-in-loop` / `critical-buffer` / `brooks-law` / `delay-decision`）作为 `constraints` 的 `references/<name>.md` 变体文件存在，body 内引用时写 `constraints` 的 `references/<name>.md`（逻辑名 + 变体路径）
 
-### td-* skill 共享片段
+### td-* skill 标准步骤 1
 
-7 个 td-* skill 的 body 里曾经各自重复"平台命名表""逻辑名说明""步骤 1 激活主基调与配置层"。这三段按本节规范**自包含书写**——因为 SKILL.md 禁止引用 AGENTS.md（见上方"SKILL 不可引用 AGENTS 文件"），td-* skill 的 body 不能"指向本节"，必须把规范内容写进各自文件。本节是给本仓库开发 agent 的统一规范，不是运行时资产：
+7 个 td-* skill 的 body 里曾各自重复"步骤 1 激活主基调与配置层"。因为 SKILL.md 禁止引用 AGENTS.md，td-* skill 的 body 必须把此序列自包含书写。此序列也定义"预加载 vs 按需触发"的分界（见上方「SKILL.md 编辑」的 `## 依赖技能` 语义定义）。**只注入强度不做判断**：
 
-**平台命名**：7 个 td-* skill 在不同平台下的调用名由当前平台的加载器按 plugin 名拼前缀（atomcode 下为 `total-design:<name>`），不写入 frontmatter。body 不再放平台命名表，引用其他 skill 一律用逻辑名，由当前平台加载器负责拼前缀。
-
-**td-* 标准步骤 1**（每个 td-* skill 的"### 1. 激活主基调与配置层"都按此序列自包含书写，只注入强度不做判断）：
 
 1. **`system-engineering`** — 主基调四条进入上下文。各 td-* skill 在这一条后补自己的注解（如"reverse-spec 是总体设计部在接手阶段的工作"）。
 2. **profile × tier 识别** — 调用 `field-assessment` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）+ 表 3（system-audit 频率，仅 archive/apply 需要）读入上下文。会话内缓存，后续步骤直接引用。
