@@ -51,6 +51,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 - **caller impact 分析节必填**：若 `$_TD_TIER` 为 `tier-medium` / `tier-large` 且 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检——propose 6.c 漏执行时由本条兜底，后续步骤 4 实测子节不再重复此检查。
 - **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。已达 → **阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威在该文件；override 通过后继续步骤 3）。
 - **`constraints` 的 `references/critical-buffer.md`**：tasks.md 是否已标注关键链 + project buffer（比例按表 1 当前 tier 行；表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
+- **scenario→test 覆盖账本必填**：若 change 的 `applyRequires` 含 `specs` artifact，检查 proposal 是否附了 scenario→test 覆盖账本（见 `td-propose/references/scenario-test-map-template.md`）。缺账本或有 unmapped scenario 未标 `N/A` → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补账本。tier-small 仅在 `applyRequires` 含 `specs` 且含可执行测试面时检查。
 - 其余 constraint（`constraints` 的 `references/brooks-law.md` / `references/delay-decision.md` / `references/human-in-loop.md`）在实施过程中按需触发，不在本步预判。
 
 ### 3. 读 change 的 artifact
@@ -125,6 +126,8 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 #### 6.1 change-level 验证
 
 触发 `verification-before-completion` 做 change-level 最终验证（全量测试 / lint / build / type check）。
+
+若 change 含 scenario→test 覆盖账本，审计账本全绿——所有非 `N/A` 行状态为 🟢，`N/A` 行须有等价机械校验项且校验通过。有未映射 scenario 或未标 `N/A` 的 unmapped scenario → **blocking defect**，不通过本步骤。
 
 #### 6.2 系统级验证（跨分系统边界，硬步骤）
 
