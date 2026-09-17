@@ -2,13 +2,13 @@
 
 > 装上它，你的 agent 就有了一个总体设计部。
 
-感谢你考虑为 total-design 贡献！这是一个开源的 atomcode plugin，把 OpenSpec（契约层）+ Superpowers（行为层）+ 钱学森系统工程（约束层主基调）封装成一个可分发的 plugin。
+感谢你考虑为 total-design 贡献！这是一个开源的 code agent plugin，把 OpenSpec（契约层）+ Superpowers（行为层）+ 钱学森系统工程（约束层主基调）封装成一个可分发的 plugin。
 
 ## 项目身份
 
 先读 `AGENTS.md` 了解项目身份和结构。简单说：
 
-- 这是一个 **atomcode plugin**，不是应用项目
+- 这是一个 **code agent plugin**（atomcode / Claude Code / Pi Agent 等遵循 Agent Plugins 1.0.0 规范的客户端均可加载），不是应用项目
 - 产出形态：一组 Markdown 文件（`SKILL.md` / 命令文件）+ manifest
 - 没有可执行代码，所有"逻辑"都是 Markdown 指令
 
@@ -179,9 +179,9 @@ Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读�
 
 **贡献约束**：不要在命令文件里实现 OpenSpec CLI 已经有的功能。命令文件应该是"调用 CLI + 触发 skills + 遵守 constraints"的编排，不是 CLI 本身。
 
-## atomcode plugin 规范（贡献前必读）
+## 加载器规范（贡献前必读）
 
-以下事实来自 atomcode 源码 `crates/atomcode-core/src/plugin/manifest.rs` 和 `skill.rs`：
+以下事实来自 atomcode 源码 `crates/atomcode-core/src/plugin/manifest.rs` 和 `skill.rs`（atomcode 走 CC 兼容路径加载本 plugin，Claude Code 的对应字段规则与其一致）：
 
 | 项 | 规则 |
 |---|---|

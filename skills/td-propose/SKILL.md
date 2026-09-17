@@ -219,6 +219,14 @@ tasks.md 必须：
 
 粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `constraints` 的 `references/critical-buffer.md` 的「识别关键链」节；主体不合规 → 把非编程性动作降级到对应 task 的 `验证` 字段，回 6.b 补写。
 
+- **proposal.md 必填：scenario→test 覆盖账本**（当 `applyRequires` 含 `specs` artifact 时）
+
+change 的 `applyRequires` 含 `specs` artifact 时，proposal 定型后须产出 scenario→test 覆盖账本——把 specs/ 里每个 `#### Scenario:` 映射到一个具名测试。格式与规则见 `references/scenario-test-map-template.md`。
+
+unmapped scenario → 回 6.b 补 scenario 的测试意图，或在账本里显式标 `N/A` 并给机械校验项。缺账本 → 不算 apply-ready。
+
+tier 分层：tier-small 仅当 `applyRequires` 含 `specs` **且**含可执行测试面时强制，否则跳过并在账本头注明理由；tier-medium / tier-large 强制。
+
 **6.d 循环判定**：
 
 ```bash
