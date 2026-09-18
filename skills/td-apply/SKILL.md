@@ -77,9 +77,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 2. 逐 caller 确认兼容（签名匹配 / 返回值未被消费 / 装配点已接 / 语义不变），记录确认结论。
 3. 实测发现 proposal 未标注的 caller，或与已知 caller 的预判结论冲突 → 补做兼容确认，或经步骤 5 的 apply 全局必停通道上报「超出当前 change scope」——不得静默跳过。
 
-**tier 分层**：tier-large = 硬闸门（无条件实测；caller 清单 + 逐 caller 结论未产出，不进入任务实施）；tier-medium = 信号触发（满足任一信号则强制实测：变更点属 ①③ 高危类 / proposal 对某已知 caller 标注"需适配" / 架构 review 对 caller 影响提出疑问；纯内部实现细节且无信号 → 可跳过并在 tasks.md 记录理由）；tier-small = 提醒（默认跳过）。caller 清单与结论记录到 tasks.md（对应任务的验证证据或单独附注）。
-
-本子节是**事前**误差检测（不破坏既有 caller），实测确认过的 caller 清单同时是步骤 6.2 边界验证的边界输入；步骤 6.2 是**事后**误差检测（新行为是否正确）。分工不同，不重复。
+**tier 分层**：tier-large = 硬闸门（无条件实测；caller 清单 + 逐 caller 结论未产出，不进入任务实施）；tier-medium = 信号触发（满足任一信号则强制实测：变更点命中四类变更点任一类 / proposal 对某已知 caller 标注"需适配" / 架构 review 对 caller 影响提出疑问；纯内部实现细节且无信号 → 可跳过并在 tasks.md 记录理由）；tier-small = 提醒（默认跳过）。caller 清单与结论记录到 tasks.md（对应任务的验证证据或单独附注）。
 
 架构 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。
 
