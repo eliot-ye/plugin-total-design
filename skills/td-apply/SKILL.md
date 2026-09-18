@@ -49,7 +49,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 6.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"
 - **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检。
-- **proposal 新节必填（apply-ready 判定）**：「前置依赖」+「已确认决策清单」两节必填；caller impact 触发条件命中（条件与四类变更点定义见 `references/change-point-classes.md`）时「caller impact 分析」+「caller impact 实测」两节必填（跨模式，不区分 tier，节结构见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**：human-in-loop 模式下提示用户回 `/td-propose` 步骤 6.c 补节；autonomous 模式下不等待补节（无人可等）——按步骤 5 的残留场景处理（回退，编排者继续下一个 change）。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检——propose 6.c 漏执行时由本条兜底，后续步骤 4 复核子节不再重复此检查。本条同时核对「前置依赖」的满足性：`[依赖 X]` 条目对应的 change 已 archive（不在 `openspec list` 活跃列表）→ 通过；未满足 → human-in-loop 模式下阻塞本步骤并问用户，autonomous 模式下按步骤 5 的残留场景处理（回退）。
+- **proposal 必填节检查（apply-ready 判定）**：「已确认决策清单」节必填（两种模式都填，只含第 1–3 类；节结构见 `td-propose` 步骤 6.c）；caller impact 触发条件命中（条件与四类变更点定义见 `references/change-point-classes.md`）时「caller impact 分析」节必填（tier 分层见该文件与 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**：human-in-loop 模式下提示用户回 `/td-propose` 步骤 6.c 补节；autonomous 模式下不等待补节（无人可等）——按步骤 5 的残留场景处理（回退，编排者继续下一个 change）。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检。autonomous 模式下本条同时核对「前置依赖」节（autonomous 专有节）的满足性：`[依赖 X]` 条目对应的 change 已 archive（不在 `openspec list` 活跃列表）→ 通过；未满足 → 按步骤 5 的残留场景处理（回退）。
 - **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。已达 → **阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威在该文件；override 通过后继续步骤 3）。autonomous 模式下跳过本项——WIP 检查不生效，见 `constraints` 的 `references/wip-limit.md` 的「autonomous 模式下不生效」节。
 - **`constraints` 的 `references/critical-buffer.md`**：tasks.md 是否已标注关键链 + project buffer（比例按表 1 当前 tier 行；表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - **scenario→test 覆盖账本必填**：若 change 的 `applyRequires` 含 `specs` artifact，检查 proposal 是否附了 scenario→test 覆盖账本（见 `td-propose/references/scenario-test-map-template.md`）。缺账本或有 unmapped scenario 未标 `N/A` → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补账本。tier-small 仅在 `applyRequires` 含 `specs` 且含可执行测试面时检查。
@@ -64,23 +64,25 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 3. `specs/` 下的 spec 文件
 4. `tasks.md`（实施步骤）
 
-### 4. 架构 review 复核 + caller impact 复核 + 触发行为层
+### 4. 架构 review 复核 + caller impact 实测 + 触发行为层
 
-**进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 7 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 复核」子节**；**有改动 → 重新触发 `requesting-code-review` 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合，检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
+**进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 7 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 实测」子节**；**有改动 → 重新触发 `requesting-code-review` 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合，检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
 
-#### Caller Impact 复核（任务实施前的闸门）
+#### Caller Impact 实测（任务实施前的闸门）
 
-**触发**：proposal 的「caller impact 实测」节标 `[不适用]`（未命中触发条件）→ 跳过本子节；标 `[已实测]` → 执行复核。触发条件、四类变更点定义、边界裁定与已知盲区见 `references/change-point-classes.md`（单一事实源）。
+**触发**：触发条件、四类变更点定义、边界裁定与已知盲区见 `references/change-point-classes.md`（单一事实源）；触发条件未命中 → 跳过本子节（不给小改动加流程开销）。
 
-**执行（只复核不新增——完整 caller 实测已在 propose 阶段完成，结果进 proposal 的「caller impact 实测」节）**：
+**执行（实测为主——caller 清单由引用搜索实测产出，不由人工预判清单充当）**：
 
-1. **无新增 caller**：用符号引用搜索 / 调用方追踪 / 文本 grep 类工具检查 proposal 的变更点——proposal 实测节记录的基线与当前 HEAD 一致 → 抽查；基线已前移（前序 change 落库）→ 对变更点清单全量重查。确认当前基线下没有 proposal 未标注的 caller。
-2. **兼容结论可复现**：逐个已标注 caller 确认 proposal 记录的兼容结论（签名匹配 / 返回值未被消费 / 装配点已接 / 语义不变）在当前基线可复现——前序 change 可能已改变该 caller 的行为，无法复现 → 视同新 caller。
-3. 复核任一部分失败 → human-in-loop 模式下补做兼容确认，或经步骤 5 的 apply 全局必停通道上报「超出当前 change scope」；autonomous 模式下按步骤 5 的残留场景处理（回退）——不得静默跳过。
+1. 对 proposal 标注的每个变更点，用符号引用搜索 / 调用方追踪 / 文本 grep 类工具实测 caller，产出 caller 清单（file:line + 调用形式）。
+2. 逐 caller 确认兼容（签名匹配 / 返回值未被消费 / 装配点已接 / 语义不变），记录确认结论。
+3. 实测发现 proposal 未标注的 caller，或与已知 caller 的预判结论冲突 → human-in-loop 模式下补做兼容确认，或经步骤 5 的 apply 全局必停通道上报「超出当前 change scope」；autonomous 模式下按步骤 5 的残留场景处理（回退）——不得静默跳过。
 
-本子节是**事前**误差检测（不破坏既有 caller），复核确认过的 caller 清单同时是步骤 6.2 边界验证的边界输入；步骤 6.2 是**事后**误差检测（新行为是否正确）。分工不同，不重复。
+**tier 分层**：tier-large = 硬闸门（无条件实测；caller 清单 + 逐 caller 结论未产出，不进入任务实施）；tier-medium = 信号触发（满足任一信号则强制实测：变更点属 ①③ 高危类 / proposal 对某已知 caller 标注"需适配" / 架构 review 对 caller 影响提出疑问；纯内部实现细节且无信号 → 可跳过并在 tasks.md 记录理由）；tier-small = 提醒（默认跳过）。caller 清单与结论记录到 tasks.md（对应任务的验证证据或单独附注）。
 
-架构 review 与 caller impact 复核均通过后，按 `tasks.md` 的任务序列实施。
+本子节是**事前**误差检测（不破坏既有 caller），实测确认过的 caller 清单同时是步骤 6.2 边界验证的边界输入；步骤 6.2 是**事后**误差检测（新行为是否正确）。分工不同，不重复。
+
+架构 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。
 
 #### 任务执行
 
@@ -116,7 +118,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 #### autonomous 模式下的分支（查清单 / 回退）
 
-autonomous 模式下，上述必停场景触发时不执行「停下来问用户」，改按 `constraints` 的 `references/human-in-loop.md`「autonomous 模式下的触发路径」节分支：查本 change `proposal.md` 的「已确认决策清单」节——对应类标 `[已确认]` 且场景能明确对应到该条目结论 → 按确认结论执行，在 `autonomy-manifest.md` 运行记录表记录"沿用 proposal 清单确认"（决策来源标注清单类目）；标 `[不适用]` 但实际触发、标 `[已确认]` 但场景无法明确对应到该条目结论、无法对应到第 1–5 类、或触发第 7 类（audit）→ **回退当前 change**：
+autonomous 模式下，上述必停场景触发时不执行「停下来问用户」，改按 `constraints` 的 `references/human-in-loop.md`「autonomous 模式下的触发路径」节分支：查本 change `proposal.md` 的「已确认决策清单」节——对应类标 `[已确认]` 且场景能明确对应到该条目结论 → 按确认结论执行，在 `autonomy-manifest.md` 运行记录表记录"沿用 proposal 清单确认"（决策来源标注清单类目）；场景无法明确对应到清单条目结论、清单标 `[不适用]` 但实际触发、无法对应到第 1–3 类、或触发 audit（第 7 类场景）→ **回退当前 change**：
 
 1. 撤销本 change 的代码改动（保留 artifact 不删）——回退命令原文与读写规则见 `references/autonomy-template.md`（单一事实源，本文件不复制命令文本）。
 2. 在 `autonomy-manifest.md` 运行记录表追加回退条目，并在 `openspec/.td-state/autonomy-log.yaml` 追加全局条目（`change: <change-name>`、`action: rolled-back`，含 `reason` / `detail` / `stash_ref`；audit 触发时 `reason` 标注"audit 触发第 7 类"）。

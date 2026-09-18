@@ -49,7 +49,7 @@ argument-hint: (no arguments)
 1. 读 `openspec/todo.md` 拿优先级序列（P0 → P1 → P2；格式规则见 `todo-pool` 的「格式约定」节；文件不存在 → 队列只按活跃 change 推导）。
 2. 读 `openspec/.td-state/autonomy-log.yaml`（文件不存在 → 视为空；文件模板与读写规则见 `td-apply` 的 `references/autonomy-template.md`），**排除已处理的 change**：最新条目为 `completed` → 跳过；最新条目为 `rolled-back` → 跳过且**不重试**（人回来处理）。
 3. 跑 `openspec list` 拿活跃 change 列表，与 todo.md 优先级序列交叉匹配 → 待执行队列。
-4. 逐 change 读 proposal 的「前置依赖」节（跨模式必填节，缺节 → 该 change 不入队，提示回 `/td-propose` 步骤 6.c 补节）：`[依赖 X]` 条目对应的 change 已完成并 commit（不在 `openspec list` 活跃列表）→ 依赖满足；未满足 → 跳过，等依赖满足后再触发；依赖的 change 被回退 → 跳过，并在 goal 里提示"N 个 change 因依赖未满足挂起"。
+4. 逐 change 读 proposal 的「前置依赖」节（autonomous 专有节）：`[依赖 X]` 条目对应的 change 已完成并 commit（不在 `openspec list` 活跃列表）→ 依赖满足；未满足 → 跳过，等依赖满足后再触发；依赖的 change 被回退 → 跳过，并在 goal 里提示"N 个 change 因依赖未满足挂起"。缺节 → 该 change 不入队——存量 change（human-in-loop 模式下 propose 的，天然缺本节）切到 autonomous 后属此情形，提示用户回 `/td-propose` 步骤 6.c 补节（补写时按该节的 autonomous 分支要求做环检测），补齐后重新触发本命令。
 5. **兜底环检测**：构造队列时若发现挂起链闭合（A 依赖 B、B 依赖 A，或经由更多 change 的间接链）→ 在 goal 里显式标记"疑似循环依赖：<change 列表>"，标记后这些 change 保持挂起、**不自动修复**——propose 阶段写入「前置依赖」前的环检测是唯一阻止点（见 `td-propose` 步骤 6.c），本 skill 只识别与报告。
 
 ### 4. 设定目标并驱动循环
@@ -65,7 +65,7 @@ argument-hint: (no arguments)
 1. 读 `autonomy-log.yaml` 该 change 的最新条目（文件不存在 → 视为无条目）：最新为 `rolled-back` → **不 commit**（与 `td-archive` 步骤 4 的归档 gate 双保险），提示人工处理。
 2. 无条目或最新非 `rolled-back` → commit 前跑 `git status --porcelain`：若存在不属于本 change 的改动路径（如前序 session 中断残留的其他 change 文件）→ **停止整个批次**（不写 autonomy-log——批次基线被污染不是"change 失败"，写入 rolled-back 会误导人以为该 change 有问题），提示人处理后续跑。
 3. 工作树只含本 change 改动 → `git add -A && git commit`。`git add -A` 的安全性靠不变式保证：编排者顺序执行（上一 change commit 后工作树已干净）+ 回退清空工作树（`td-apply` 步骤 5）+ 本步 commit 前的 `git status --porcelain` 检查。
-4. commit 后向 `autonomy-log.yaml` 追加该 change 的 `completed` 条目（`summary` 一句话结果，如"全部任务验证通过，caller impact 复核通过，已 commit"）。
+4. commit 后向 `autonomy-log.yaml` 追加该 change 的 `completed` 条目（`summary` 一句话结果，如"全部任务验证通过，caller impact 实测通过，已 commit"）。
 
 commit 消息模板（自包含，HEREDOC 提交以保留换行）：
 

@@ -1,6 +1,6 @@
 # 四类变更点（caller impact）
 
-四类变更点与 caller impact 触发条件的单一事实源（其他位置的表述与本文件冲突时，以本文件为准）。命中触发条件即进入 caller impact 三层防护：propose 侧的变更点类别标注 + caller 实测（实测已前移至 propose，完整 caller 清单与兼容结论进 proposal 的「caller impact 实测」节，见 `td-propose` 步骤 6.c）、apply 侧的 caller 复核（"无新增 caller" + "已标注 caller 的兼容结论在当前基线可复现"两部分，见 `td-apply` 步骤 4）、架构 review 清单的校验（校验层）。
+四类变更点与 caller impact 触发条件的单一事实源（其他位置的表述与本文件冲突时，以本文件为准）。命中触发条件即进入 caller impact 三层防护：propose 侧的变更点类别标注（见 `td-propose` 步骤 6.c）、apply 侧的 caller 实测（caller 清单与逐 caller 兼容结论由引用搜索实测产出，见 `td-apply` 步骤 4）、架构 review 清单的校验（校验层）。
 
 ## 触发条件
 

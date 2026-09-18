@@ -30,7 +30,7 @@ set_reason: <一句话，说明为何切换到该模式>
 | 时间 | 步骤 | 事件 | 决策来源 |
 |---|---|---|---|
 | <ISO8601> | 步骤 5 | 沿用 proposal 已确认：<事件一句话> | proposal「已确认决策清单」第 N 类 |
-| <ISO8601> | 步骤 4 | caller impact 复核通过，无新增 caller | proposal「caller impact 实测」 |
+| <ISO8601> | 步骤 4 | caller impact 实测通过，无未知 caller | `td-apply` 步骤 4 实测闸门 |
 | <ISO8601> | 步骤 5 | ⚠️ 回退：<失败一句话> | 超出已确认范围 |
 ```
 
@@ -45,7 +45,7 @@ entries:
   - timestamp: <ISO8601>
     change: <change-name>
     action: completed        # completed | rolled-back
-    summary: <一句话结果，如"全部任务验证通过，caller impact 复核通过，已 commit">
+    summary: <一句话结果，如"全部任务验证通过，caller impact 实测通过，已 commit">
   - timestamp: <ISO8601>
     change: <change-name>
     action: rolled-back

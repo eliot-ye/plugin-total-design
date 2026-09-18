@@ -149,25 +149,14 @@ openspec instructions <artifact-id> --change "<name>" --json
 - 高危标记：涉及 ①③ 类（公共符号 / 装配点）的变更点标"高危"——这是 propose 阶段的 go/no-go 决策点，由用户确认是否值得动公共契约
 ```
 
-本节是下方「caller impact 实测」sweep 的输入（变更点类别标注 + 高危 go/no-go），完整 caller 清单与兼容结论由「caller impact 实测」节承载；实测发现本节未标注的 caller，或与预判结论冲突 → 补做兼容确认，或按 apply 全局必停通道上报。
+本节是 apply 阶段「Caller Impact 实测」闸门的输入（变更点类别标注 + 高危 go/no-go）；完整 caller 清单与兼容结论由 `td-apply` 步骤 4 实测产出。
 
-触发条件命中即必填（跨模式，不区分 tier）——缺项的 proposal 不算 apply-ready。
+tier 分层：tier-small 可跳过（提醒性质，跳过时在 proposal 注明）；tier-medium / tier-large 必填（必填的是变更点类别标注 + 高危标记）——缺项的 proposal 不算 apply-ready。
 
-- **proposal.md 必填节：前置依赖**（跨模式）
-
-```markdown
-## 前置依赖
-
-- [无依赖] 本 change 不依赖其他 change 的完成
-- [依赖 <change-a>] 需 <change-a> 已完成并 commit 后方可执行
-```
-
-写入本节前必须做**环检测**：本 change 的依赖图中不允许出现循环（本 change → 依赖 A → … → 本 change，含经由其他 change 间接成环）。检测到环 → 不写入，先与用户确认依赖链修正（通常是拆分 change 或改依赖方向）。
-
-- **proposal.md 必填节：已确认决策清单**（跨模式，对照 `constraints` 的 `references/human-in-loop.md` 7 类必停场景）
+- **proposal.md 必填节：已确认决策清单**（跨模式，对照 `constraints` 的 `references/human-in-loop.md` 第 1–3 类必停场景）
 
 ```markdown
-## 已确认决策清单（对照 human-in-loop 7 类必停场景）
+## 已确认决策清单（对照 human-in-loop 第 1–3 类必停场景）
 
 ### 第 1 类：公共契约变更
 - [已确认] API 变更：<具体变更 + 确认结论>
@@ -178,36 +167,20 @@ openspec instructions <artifact-id> --change "<name>" --json
 
 ### 第 3 类：生产环境影响
 - [已确认] <生产环境影响 + 确认结论> / [不适用] 无生产环境影响
-
-### 第 4 类：超 scope 影响
-- [已确认] 分系统切分：<来自 design.md>
-- [已确认] 超 scope 可能性：<排除依据>
-
-### 第 5 类：agent 置信度低
-- [已确认] 不确定性已消除：<design.md 兜底依据> / [不适用] 无遗留不确定性
-
-### 第 6 类：WIP override
-- [不适用] autonomous 模式下 WIP 检查不生效，结构上不可能触发（human-in-loop 模式下由 `wip-limit` override 流程触发，不在本清单覆盖）
-
-### 第 7 类：audit 触发
-- [不覆盖] audit 触发一律回退（autonomous 模式），不由本清单覆盖
 ```
 
-条目三态：`[已确认]`（附具体变更 + 确认结论）/ `[不适用]`（附排除依据）/ `[不覆盖]`。第 1–5 类逐类覆盖，第 6、7 类按上方固定结论写。清单必须填完才算 apply-ready——它是 autonomous 模式下 apply 分支的判定依据（分支表见 `constraints` 的 `references/human-in-loop.md`「autonomous 模式下的触发路径」节），不可逆决策（第 1–3 类）在此闭合而非延迟到 apply 触发时才问人（与 `constraints` 的 `references/delay-decision.md` 的可逆性判据一致）。
+条目三态：`[已确认]`（附具体变更 + 确认结论）/ `[不适用]`（附排除依据）。三类逐类覆盖，清单必须填完才算 apply-ready——不可逆决策（第 1–3 类）在此闭合而非延迟到 apply 触发时才问人（与 `constraints` 的 `references/delay-decision.md` 的可逆性判据一致）；清单同时是 autonomous 模式下 apply 分支的判定依据（分支表见 `constraints` 的 `references/human-in-loop.md`「autonomous 模式下的触发路径」节）。
 
-- **proposal.md 必填节：caller impact 实测**（跨模式；与「caller impact 分析」同为触发条件命中时必填——条件见 `td-apply/references/change-point-classes.md`）
-
-触发条件命中 → 在 propose 阶段对变更点清单逐点实测 caller（符号引用搜索 / 调用方追踪），逐 caller 记录兼容结论（签名匹配 / 返回值未被消费 / 装配点已接 / 语义不变），并在节内记录实测基线（当前 HEAD 短哈希，供 apply 复核对照基线是否前移）；未命中 → 写 `[不适用]` + 判断依据。
+- **proposal.md 必填节：前置依赖**（仅 autonomous 模式——运行模式为 `autonomous`（`openspec/.td-state/autonomy.yaml` 的 `mode` 字段，文件不存在视为 `human-in-loop`）时必填；human-in-loop 模式下不写本节）
 
 ```markdown
-## caller impact 实测（propose 阶段完成）
-- [已实测] caller 清单：<file:line + 兼容结论>
-- [实测基线] <HEAD 短哈希>
-- [无未知 caller] 实测未发现变更点清单外的 caller
-- [不适用] 未命中触发条件：<判断依据>（未命中时以本行替代上面三行）
+## 前置依赖
+
+- [无依赖] 本 change 不依赖其他 change 的完成
+- [依赖 <change-a>] 需 <change-a> 已完成并 commit 后方可执行
 ```
 
-apply 阶段对本节只复核不新增实测（见 `td-apply` 步骤 4）。
+写入本节前必须做**环检测**：本 change 的依赖图中不允许出现循环（本 change → 依赖 A → … → 本 change，含经由其他 change 间接成环）。检测到环 → 不写入，先与用户确认依赖链修正（通常是拆分 change 或改依赖方向）。
 
 - **tasks.md 必填：关键链标注、project buffer、任务主体约束**
 
