@@ -99,6 +99,7 @@ openspec instructions <artifact-id> --change "<name>" --json
 - 读 `template` 作为结构
 - 应用 `context` 和 `rules` 作为约束——**不要把它们复制进 artifact 文件**
 - 读已完成的依赖 artifact 作为 context
+- 术语纪律：artifact 全文沿用用户原词与既有 baseline spec 的既有术语，同一概念只用一个词——不另造同义词、不在中英之间随意切换；用户原词优先
 - 写到 `resolvedOutputPath`
 
 **6.c 必填项检查**（每个 artifact 写完后立即做，缺项 → 回 6.b 补写，不进 6.d）：
