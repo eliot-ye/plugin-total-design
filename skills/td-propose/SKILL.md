@@ -99,6 +99,7 @@ openspec instructions <artifact-id> --change "<name>" --json
 - 读 `template` 作为结构
 - 应用 `context` 和 `rules` 作为约束——**不要把它们复制进 artifact 文件**
 - 读已完成的依赖 artifact 作为 context
+- 术语纪律：artifact 全文沿用用户原词与既有 baseline spec 的既有术语，同一概念只用一个词——不另造同义词、不在中英之间随意切换；用户原词优先
 - 写到 `resolvedOutputPath`
 
 **6.c 必填项检查**（每个 artifact 写完后立即做，缺项 → 回 6.b 补写，不进 6.d）：
@@ -163,6 +164,14 @@ tasks.md 必须：
 - 每条 task 主体是 agent 能**编程性执行**的动作（写代码 / 跑测试 / 执行 CLI / 改配置等）；非编程性动作（人工目测 / 用户验收 / 第三方审批 / 人工回归测试等）不得作为独立 task，必须降级为该 task 的 `验证` 字段——权威定义见 `writing-plans/references/task-template.md`「任务主体约束」节
 
 粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `constraints` 的 `references/critical-buffer.md` 的「识别关键链」节；主体不合规 → 把非编程性动作降级到对应 task 的 `验证` 字段，回 6.b 补写。
+
+- **proposal.md 必填：scenario→test 覆盖账本**（当 `applyRequires` 含 `specs` artifact 时）
+
+change 的 `applyRequires` 含 `specs` artifact 时，proposal 定型后须产出 scenario→test 覆盖账本——把 specs/ 里每个 `#### Scenario:` 映射到一个具名测试。格式与规则见 `references/scenario-test-map-template.md`。
+
+unmapped scenario → 回 6.b 补 scenario 的测试意图，或在账本里显式标 `N/A` 并给机械校验项。缺账本 → 不算 apply-ready。
+
+tier 分层：tier-small 仅当 `applyRequires` 含 `specs` **且**含可执行测试面时强制，否则跳过并在账本头注明理由；tier-medium / tier-large 强制。
 
 **6.d 循环判定**：
 

@@ -2,6 +2,25 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.11.0] - 2026-09-19
+
+### Added
+
+- **scenario→test 覆盖账本（specs↔tests 可追溯性闭环）**：`applyRequires` 含 `specs` artifact 的 change，proposal 定型后须产出覆盖账本——specs/ 里每个 `#### Scenario:` 映射到一个具名测试，格式与 `N/A` 规则见新模板 `td-propose/references/scenario-test-map-template.md`。`td-propose` 步骤 6.c 新增必填项：unmapped scenario → 回 6.b 补测试意图，或显式标 `N/A` 并附等价机械校验项；tier-small 仅当 `applyRequires` 含 specs 且含可执行测试面时强制。`td-apply` 步骤 2 补 apply-ready 前置检查（缺账本不算 apply-ready）、步骤 6.1 补账本审计（非 `N/A` 行全 🟢 且 `N/A` 行等价机械校验通过，缺 → blocking defect）。`td-archive` 步骤 3 复盘新增账本状态字段（全绿 / 有哪些 `N/A` 条目及理由）。此前任务粒度 / change 粒度 / 系统粒度三个验证粒度之间没有 scenario 粒度可追溯性，scenario 可写得很具体、任务全绿、却从未被任何测试断言。
+- **Review 上下文隔离（`requesting-code-review`）**：新增共享前置约束节，适用于第 5 节架构 review 与第 6 节 change 级收尾 review（checkpoint review 同样适用）——review 作者与被审对象同源时不得在 authoring context 内联自评。隔离载体按优先级：环境自带 code review 工具 > subagent（fresh-context，同模型）> 同上下文自评（降级，不阻塞不询问）。唯一硬约束：降级时 Verdict 锚点行须标注 `reviewed-by: unisolated-self`，不得无标注降级、不得跳过检查维度、不得编造 Verdict；tier 只影响标注强调程度（tier-large 须显著标注置信度低于有隔离版本），不决定能否降级。review 过程只读——critical 判出后的修复是作者动作，不是 reviewer 动作。
+- **Verdict 机器可读锚点行（`requesting-code-review`）**：review 报告 Verdict 节首行改为三态锚点（无 critical = `APPROVED`；有 warning 且用户接受延后 = `APPROVED_WITH_CHANGES`；有 critical = `MUST_FIX_CRITICAL`），第二行 `reviewed-by` 标注隔离状态，第三行自由文本保留服务人读；下游 `td-apply` 步骤 6.3 优先读锚点行，缺锚点行按 `MUST_FIX_CRITICAL` 保守处理，不静默放行。Verdict 前置验证：给出"可以继续"之前先触发 `verification-before-completion` 拿验证证据。
+- **artifact 术语纪律（`td-propose` 步骤 6.b）**：artifact 写作时沿用用户原词与既有 baseline spec 的既有术语，同一概念只用一个词——不另造同义词、不在中英之间随意切换，用户原词优先；降低术语漂移对 TDD 期望推导（从 spec 场景推导期望）与后续 change 检索的损害。
+
+### Fixed
+
+- **tier-medium caller 实测信号清单收窄（`td-apply` 步骤 4）**：原信号清单只含"变更点属 ①③ 高危类"，纯 ②（Protocol 方法变更）或 ④（返回值语义变更）的跨分系统 change 在 tier-medium 下可完全绕过 apply 侧实测，与 `change-point-classes.md`"命中触发条件即进入三层防护"的权威承诺矛盾；扩为"命中四类变更点任一类"，与触发条件权威对齐，堵住行为空洞。
+- **架构 review「接口偏大」判据可判定化**：`requesting-code-review/references/architecture-review-checklist.md` 低耦合维度补可判定信号——调用方无需理解模块内部结构即可正确调用；需先读懂内部实现才能用 → 接口偏大信号（分级仍为 warning，不阻塞）。
+
+### Docs
+
+- AGENTS.md（仓库元文档，非运行时资产）：新增「设计变更评估维度」节——重量（量化表）/ 价值（场景分解 + 价值来源判据逐项标注工程痛点 vs 生态对齐）/ 代价（分级表）/ 风险不对称性（判错双向代价对称性）/ 结论（做 / 不做 / 缩窄范围做三选一），作为动笔前第二道前置门；含哲学漂移判定问句（"这是谁的思路"答案是否仍唯一）。
+- schema-borrowing 设计稿（`docs/archive/`，非运行时资产）：v3→v6 复核后归档，必要集 A3+B1+A1+A2 已落笔进运行时资产（即本版本 Added / Fixed 各项）。
+
 ## [1.10.1] - 2026-09-13
 
 ### Fixed
