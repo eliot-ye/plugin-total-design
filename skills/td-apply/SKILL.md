@@ -95,7 +95,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 **复杂场景按需委托 `executing-plans`**：以下任一条件命中时，在基本执行循环的对应位置触发 `executing-plans` 的 checkpoint / 失败处理能力——td-apply 仍是执行主体，`executing-plans` 提供管理层能力（checkpoint 调度 + 失败处理回路），不接管基本执行循环：
 
 - **关键链 checkpoint**：完成一个关键链任务时 → 触发 `executing-plans` 的 checkpoint（含 `requesting-code-review` 做 review，含与既有风格一致性检查）
-- **任务执行失败**：触发 `executing-plans` 的失败处理（内含 `systematic-debugging` 4-phase 流程；失败 2 次以上触发 debug、3 次反思 plan）
+- **任务执行失败**：触发 `executing-plans` 的失败处理（内含 `systematic-debugging` 4-phase 流程；失败次数阈值见 `systematic-debugging` 触发时机节）
 - **current-change audit**（tier-medium）：每个关键链任务完成时随 checkpoint 触发，见步骤 6.4
 
 条件不命中时全程走 td-apply 自持的基本执行循环，不加载 `executing-plans`。

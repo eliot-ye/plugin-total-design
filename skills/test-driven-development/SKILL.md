@@ -12,7 +12,6 @@ user-invocable: false
 
 ## 依赖技能
 
-- `field-assessment`
 - `constraints` 的 `references/human-in-loop.md`
 - `system-engineering`
 

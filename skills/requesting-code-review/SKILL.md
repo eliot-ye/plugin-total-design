@@ -76,10 +76,7 @@ review 对象与作者为同一 agent 的产出时，review 不得在 authoring 
 
 **降级必须如实标注**（唯一硬约束）：降级时 review 报告的 Verdict 锚点行后须标注 `reviewed-by: unisolated-self`（形态见第 3 节 Verdict 模板）。不得无标注地降级、不得因无隔离而跳过检查维度、不得编造 Verdict——降级后给出的 Verdict 仍须写出具体检查结论。
 
-**tier 对标注的强调程度**（tier 不决定能否降级，只影响标注强调）：
-
-- tier-large：自评降级时报告须显著标注「本次 critical 判断基于无隔离自评，置信度低于有隔离版本」
-- tier-medium / tier-small：常规标注即可
+**tier 对标注的强调程度**：tier 不决定能否降级，只影响标注强调——tier-large 自评降级时须显著标注「本次 critical 判断基于无隔离自评，置信度低于有隔离版本」；tier-medium / tier-small 常规标注即可。
 
 **review 只读**：review 过程中只允许产出 review 报告，不得修改被审 artifact 与源码（review 判出 critical 后的修复是作者动作，不是 reviewer 动作）。
 

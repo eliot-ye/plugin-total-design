@@ -47,4 +47,4 @@ checkpoint 时做 `requesting-code-review`（含与既有风格一致性检查�
 
 1. 触发 `systematic-debugging`：4-phase root cause
 2. root cause 在 plan 之外 → 停下来问用户
-3. 不"硬刚"——失败 3 次反思 plan（2 次触发 debug、3 次反思，阈值见 `systematic-debugging` 触发时机）
+3. 不"硬刚"——触发 debug / 反思 plan 的失败次数阈值见 `systematic-debugging` 触发时机节（单一事实源）

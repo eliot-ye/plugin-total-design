@@ -13,7 +13,6 @@ user-invocable: false
 ## 依赖技能
 
 - `constraints` 的 `references/critical-buffer.md`
-- `constraints` 的 `references/delay-decision.md`
 - `field-assessment`
 
 ## 与 td-propose / td-apply 的边界
