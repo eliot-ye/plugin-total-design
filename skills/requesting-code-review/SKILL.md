@@ -85,6 +85,12 @@ review 对象与作者为同一 agent 的产出时，review 不得在 authoring 
 
 ### 3. Review 报告
 
+**证据与判级约束**（适用于全部 review 类型）：
+
+- **证据强制指位**：每个非 OK 判定必须给出证据位置（`file:line` 或 artifact 节名）；Issues 的"位置"字段必填。指不出位置的抽象批评不构成有效 issue。
+- **证据充分性判级**：critical 候选若指不出具体证据位置，不得标 critical——降为"待验证疑点"，触发 `constraints` 的 `references/human-in-loop.md` 向用户求证。只有"存在证据"计入 critical；"可能存在"不算。
+- **Issues 条数上限**：最多 5 条（按严重度排序）——防止 nit 淹没重点，超出的 nit 合并为一句汇总。
+
 ```markdown
 ## Code Review：<task name>
 

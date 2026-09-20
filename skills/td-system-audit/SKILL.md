@@ -87,6 +87,8 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 ### 6. 触发修复
 
+**存疑路由**：对照清单里标注"存疑"的发现不进修复表——先向用户求证，用户确认成立后按对应行触发，确认不成立则仅记录。agent 不替用户拍板存疑发现是否成立（`constraints` 的 `references/human-in-loop.md` 语义）。
+
 对每个严重问题，按下表触发修复（constraint 类问题走 `constraints` 的 references 变体文件）：
 
 | 严重问题类型 | 触发的 constraint（`constraints` 的 references 变体） |
