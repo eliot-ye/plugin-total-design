@@ -23,13 +23,13 @@
 
 **开放标准支持**：本 plugin 符合 [Agent Plugins 1.0.0 规范](https://agent-plugins.org/specification)——根目录 `plugin.json` 的 `$schema` 字段声明 conformance。任何遵循该标准的客户端都能通过根 `plugin.json` 识别并加载 `skills/` 目录（v1 定义 skills + mcp.json 两种组件，`commands/` 目录不在 v1 规范内）。
 
-**分发路径与 skills 目录**：所有平台共享仓库根目录的 `skills/`（17 个 skill）——各平台各自扫描，不需要副本或 symlink。`commands/`（8 个命令文件）仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载（Agent Plugins 1.0.0 v1 未定义 commands 组件）。
+**分发路径与 skills 目录**：所有平台共享仓库根目录的 `skills/`（18 个 skill）——各平台各自扫描，不需要副本或 symlink。`commands/`（8 个命令文件）仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载（Agent Plugins 1.0.0 v1 未定义 commands 组件）。
 
 ## 依赖图谱与分析
 
 **任何对本仓库LLM文件的更改——无论改 SKILL.md、命令文件、还是 AGENTS.md 本身——动笔前必须先完成下列分析步骤，全部执行完才能开始用户要求的改动。跳过这一步直接改 = 把局部失调注入系统。**
 
-理由：本 plugin 的 17 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
+理由：本 plugin 的 18 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
 
 ### 分析步骤（必须按序执行，每步产出可见证据）
 
@@ -89,7 +89,7 @@ total-design/
 ├── plugin.json             ← 根目录 Agent Plugins 1.0.0 清单（跨平台元数据：$schema/name/version/description/author）
 ├── package.json            ← Pi Agent package（pi.skills 指向 ./skills）
 │
-├── skills/                  ← 17 个 skill（profile/tier 变体在 field-assessment/references/ 下；5 个局部规律变体在 constraints/references/ 下）
+├── skills/                  ← 18 个 skill（profile/tier 变体在 field-assessment/references/ 下；5 个局部规律变体在 constraints/references/ 下）
 ├── commands/                ← 8 个 command
 │
 └── hooks/                   ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
@@ -156,6 +156,8 @@ disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 
 - AGENTS.md 是给**本仓库的开发 agent** 看的元指令，不是 plugin 的运行时资产。装上 plugin 的用户 agent 不会读这个仓库的 AGENTS.md。
 - SKILL.md 一旦出现 `AGENTS.md` 字样，等于把一份只对仓库内部生效的约定泄漏给下游 agent，造成歧义。
 - 多平台扩展时（同步到 `.claude/` / `.codex/` 等），AGENTS.md 路径不保证存在，引用会变成死链。
+
+**对象性豁免（操作对象 ≠ 权威引用）**：当 skill 的职责就是操作**用户项目**的 agent 指令文件（读取、判重、写入、整理——如 `agents-md-hygiene`）时，文件名以操作对象身份出现在正文/frontmatter 是合法的，不属本条禁令。判据：该提及是否把文件当作规则来源（"见 AGENTS.md""按 AGENTS.md 的约定执行"→ 禁止），还是当作被处理的数据（"主指令文件 ≤ 200 行""读主指令文件判重"→ 允许）。对象性提及必须同时满足：① 指用户项目中的同名文件，不指向本仓库的 AGENTS.md；② 不从该文件引入任何规则，只描述对它的操作。
 
 执行细则：
 
@@ -360,7 +362,7 @@ atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.
 
 - **skill 名**：kebab-case，无冒号（atomcode `validate_skill_name` 规则）
 - **命令名**：`td-<verb>` 或 `td-<noun>`，扁平 kebab-case
-- **文件名**：`SKILL.md`（目录式；本 plugin 17 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
+- **文件名**：`SKILL.md`（目录式；本 plugin 18 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
 - **主基调 skill**：`system-engineering`，是所有局部约束的前提，不单独触发（`user-invocable: false`）
 - **skill body 内引用其他 skill 用逻辑名**（如 `constraints`、`field-assessment`），由当前平台的加载器负责拼前缀（atomcode 下为 `total-design:<name>`）——这是预留多平台扩展的关键设计。skill frontmatter 不写 `aliases`，调用名一律由平台加载器按 plugin 名拼接。子约束（如 `wip-limit` / `human-in-loop` / `critical-buffer` / `brooks-law` / `delay-decision`）作为 `constraints` 的 `references/<name>.md` 变体文件存在，body 内引用时写 `constraints` 的 `references/<name>.md`（逻辑名 + 变体路径）
 
