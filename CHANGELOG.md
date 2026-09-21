@@ -2,6 +2,24 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.12.0] - 2026-09-21
+
+### Added
+
+- **agents-md-hygiene skill（配置层，第 18 个 skill）**：指令文件（AGENTS.md / CLAUDE.md / `.atomcode.md` 等）编写规范——主指令文件体量上限、写入前判重与三选一归属判定、超限拆分指针化按需加载、与 `openspec/specs` 的单一事实源联动（含无 openspec 结构的降级路径），附增改/瘦身子流程。`user-invocable: false`，由 agent 判读触发。
+- **review / audit 判级须证据指位（`requesting-code-review` + `td-system-audit`）**：非 OK 判定必须给出证据位置（文件:行号或 artifact 指位），无证据的 critical 自动降级为"待验证疑点"，走 `human-in-loop` 显式路由用户求证，agent 不替用户拍板；review 报告 Issues 上限 5 条。audit 报告模板对照清单改为三态判定（符合 / 违反 / 存疑），违反须指证据位置，新增存疑列；`td-system-audit` 步骤 6 新增存疑路由——存疑发现不进修复表，先向用户求证再决定是否触发修复。
+- **WIP 连续 override 检测（`constraints/references/wip-limit.md`）**：WIP 超限提示时若检测到已有 change 的 `proposal.md` 记录过 override，额外提示"已连续 override，WIP 硬约束正在失效"——防止 override 滥用。
+
+### Changed
+
+- **使用态审核收敛（约 30 个文件）**：按使用态 LLM 视角四维度审核收敛重复表述与错列——强度表述统一改为按 `field-assessment` 表 1/表 2/表 3 取值的引用式；失败次数阈值（debug 2 次 / 反思 3 次）收敛至 `systematic-debugging` 单一权威；TDD / writing-plans 依赖技能节移除按需触发项；tier 变体文件删除零信息量 audit 频率指针节，tier-large 层次观段收敛为指向 `subsystem-tiering.md` 的一行指针；`td-explore` 步骤 4 评估维度收敛为指向步骤 5；`constraints`「如何被引用」节收敛为指向子约束映射表。
+- **subsystem-tiering 持久化表述修正**：与 yaml 模板口径对齐。
+
+### Docs
+
+- AGENTS.md：「SKILL 不可引用 AGENTS 文件」规则补对象性豁免判据（操作对象 ≠ 权威引用——skill 职责就是操作用户项目的指令文件时，文件名以被处理数据身份出现合法）；skill 计数 17→18、命令计数说明同步。
+- README.md：skill 计数 17→18，配置层分布 2→3。
+
 ## [1.11.0] - 2026-09-19
 
 ### Added
