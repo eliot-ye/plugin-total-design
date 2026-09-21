@@ -18,13 +18,7 @@ argument-hint: "<scope: current-change | project>  (optional, default current-ch
 
 **系统工程主基调第 2 条：总体设计部。**
 
-本命令本身就是总体设计部的工程化体现——周期性自检是总体设计部的核心职责。
-
-**系统工程主基调第 1 条：系统工程。**
-
-audit 的对照标准是主基调四条，不是"代码质量"或"进度"——这是系统工程视角的审计，不是项目管理视角的审计。
-
-**反馈控制回路归位**：步骤 7"修复后重跑 audit 闭环"是反馈控制回路的具体形态。
+本命令是总体设计部（主基调 2）的工程化体现；audit 的对照标准是主基调四条（主基调 1），不是"代码质量"或"进度"。步骤 7"修复后重跑 audit 闭环"是反馈控制回路的具体形态。
 
 ## 输入 - audit 的范围。空则默认 `current-change`
 
@@ -39,7 +33,7 @@ audit 的对照标准是主基调四条，不是"代码质量"或"进度"——�
 
 system-audit 不是只在用户显式调用时才跑。agent 应在以下时机主动建议 audit：
 
-- **频率触发**：对照表 3（system-audit 频率，按当前 tier 的 project scope / current-change scope 阈值；表 3 见 `field-assessment/references/audit-frequency.md`）。频率事实源在表 3，本 skill 不重写——`td-archive` 步骤 5.2 已维护"累计 archive 计数器"，达阈值即建议。
+- **频率触发**：对照表 3（system-audit 频率，按当前 tier 的 project scope / current-change scope 阈值；表 3 见 `field-assessment/references/audit-frequency.md`）——达阈值的判定与计数器维护由 `td-archive` 步骤 5.2 负责。
 - **信号触发**：
   - 用户表达"感觉最近推进不顺利"时
   - 关键链缓冲被压缩 2 次以上
@@ -51,7 +45,7 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 按下述三步序列激活主基调与配置层——只注入强度，不做触发判断：
 
 1. **`system-engineering`** — 主基调四条进入上下文。
-2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存。读表 3 是为了 audit 报告里能引用"本次 audit 距上次 project scope audit 间隔 X 个 change"，频率达阈值的判定由 `td-archive` 步骤 5.2 负责（那里维护 `archive-counter.yaml` 并达阈值判定）。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存。读表 3 只为报告里引用间隔；频率达阈值的判定与计数器维护归 `td-archive` 步骤 5.2（见「触发时机」）。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断。
 
 ### 2. 收集审计对象
@@ -97,8 +91,8 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 | agent 自己拍板了 | `constraints` 的 `references/human-in-loop.md`（回去问用户） |
 | 可逆决策被过早闭合 | `constraints` 的 `references/delay-decision.md`（重新打开决策） |
 | 同时开太多 change（WIP 超限） | `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」（阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override） |
-| 局部最优但全局失调 | `constraints` 的 `references/human-in-loop.md`（让总体设计部判断）。本工作流没有专门的"全局失调"constraint——这个判断必须由总体设计部做，不能由 agent 自己拍板（主基调第 2 条） |
-| baseline spec 与代码漂移（主基调 3 对齐检查确认） | `td-reverse-spec`（对漂移分系统定向刷新，覆盖更新其 `openspec/specs/<subsystem>/spec.md`；该分系统有未归档 change 触及时先完成 archive 再刷新，避免与 archive sync 双写冲突） |
+| 局部最优但全局失调 | `constraints` 的 `references/human-in-loop.md`（让总体设计部判断）。存疑/失调的判定语义见 `references/audit-report-template.md` 主基调 1 清单——这个判断必须由总体设计部做，不能由 agent 自己拍板 |
+| baseline spec 与代码漂移（主基调 3 对齐检查确认） | `td-reverse-spec`（对漂移分系统定向刷新，覆盖更新其 `openspec/specs/<subsystem>/spec.md`；未归档 change 触及时的 archive 前置要求见 `td-reverse-spec` 的「入口契约」节） |
 
 ### 7. 修复后重跑 audit 闭环
 
@@ -115,4 +109,4 @@ system-audit 不是只在用户显式调用时才跑。agent 应在以下时机�
 
 - audit 的定位是"总体设计部的周期性自检"，不是找错问责——语气要建设性
 - audit 报告必须包含"建议的下一步动作"，不只是"你这里错了"
-- 频率触发的 audit 不要超出表 3 频率（表 3 见 `field-assessment/references/audit-frequency.md`，tier-medium 的 current-change 按关键链任务粒度触发是合法频率）；「触发时机」的信号触发与步骤 7 的修复闭环重跑不受此限——过频会变成形式主义
+- 频率触发的 audit 不要超出表 3 频率（表 3 见 `field-assessment/references/audit-frequency.md`，tier-medium 的 current-change 按关键链任务粒度触发是合法频率）——"建议动作本身不限频，实际执行 audit 频率不超表 3"；「触发时机」的信号触发与步骤 7 的修复闭环重跑不受此限——过频会变成形式主义

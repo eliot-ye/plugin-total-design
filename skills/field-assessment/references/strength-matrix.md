@@ -30,14 +30,13 @@ constraint 列为子约束逻辑名，路径为 `constraints` 的 `references/<n
 
 tier-small 20% project buffer 偏低于 CCPM 标准（通常 30%）。tier-small 保留 20% 是基于小系统低不确定性的假设；如果 tier-small 项目实际有高不确定性（如新技术栈、不熟悉的 domain），agent 应主动建议提升 buffer 比例到 30%。
 
-### 表 1 注解（3 tier × 5 constraint）
+### 表 1 注解（3 tier × 4 constraint）
 
-constraint 列为子约束逻辑名，路径同表 1：
+constraint 列为子约束逻辑名，路径同表 1。`critical-buffer` 不单列注解——其 tier 差异已由表 1 行的 buffer 比例直接体现（20% → 35% → 50%）：
 
 | constraint | tier-small 注解 | tier-medium 注解 | tier-large 注解 |
 |---|---|---|---|
 | `wip-limit` | 小系统允许稍微并行 | 中系统并行开始有协调成本 | 大系统并行硬解 = 失控 |
-| `critical-buffer` | 不确定性较低 | 不确定性中等 | 不确定性最高 |
 | `brooks-law` | 小团队加人手影响有限，不强制 | 中团队加人手要考虑 onboarding，提醒 | 大系统加人手几乎必然拖慢，强制 |
 | `delay-decision` | 表 1 说"强"（三个 tier 都强）。小系统回滚成本低，更该延迟——这是"强"在小系统的具体含义 | 强 | 强（仅模块层以下延迟；顶层架构进 tier-large 总体设计文档，不靠延迟决策处理） |
 | `human-in-loop` | —（语义见上方「表 1 第 5 行（human-in-loop）语义说明」节） | —（同左） | + 总体设计文档审阅 |
@@ -55,7 +54,7 @@ constraint 列为子约束逻辑名，路径同表 1：
 
 "—" 表示该格无 profile 场景加成，仅用表 1 第 5 行的 tier 基线。2 个有加成的 profile 在 tier-small 下都没有超出 tier 基线的加成。
 
-最终 human-in-loop 强度 = `constraints` 的 `references/human-in-loop.md` 的第 1–5 类通用基线 ∪ 表 1 第 5 行 tier 加成 ∪ 表 2 profile 场景加成。三者叠加，不替换。
+最终 human-in-loop 强度 = `constraints` 的 `references/human-in-loop.md` 的第 1–5 类通用基线 ∪ 表 1 第 5 行 tier 加成 ∪ 表 2 profile 场景加成（叠加语义见上方「表 1 第 5 行（human-in-loop）语义说明」节）。
 
 ### 表 2 profile-maintenance × tier-large 说明
 

@@ -1,7 +1,5 @@
 # 架构 Review 检查清单（proposal 完成后、apply 前）
 
-review 对象是 proposal 的分系统切分与设计决策，不是代码。此时改架构成本最低。
-
 ## 高内聚
 
 - 每个分系统职责是否单一（一个分系统只做一件事）
@@ -18,6 +16,4 @@ review 对象是 proposal 的分系统切分与设计决策，不是代码。此
 
 ## 分级与阻塞
 
-分级与阻塞语义由 `requesting-code-review` skill 第 5 节持有：架构 review 按该节的 critical / warning / nit 判定，critical **阻塞 apply**，先回 propose 改 proposal 再继续。
-
-架构 review 的 critical 与 code review 的 critical 同样适用"不继续"规则——只是这里"不继续"意味着不进入任务实施。
+分级与阻塞语义由 `requesting-code-review` skill 第 5 节持有：架构 review 按该节的 critical / warning / nit 判定，critical **阻塞 apply**，先回 propose 改 proposal 再继续——"不继续"即不进入任务实施。

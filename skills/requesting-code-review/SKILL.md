@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 服务的主基调原则
 
-**主基调第 1 条：系统工程。** review 是防"局部最优但全局失调"的检测层——每个任务的代码、每次架构的切分，都要对照整体契约检查。
+**主基调第 1 条：系统工程。** review 是防"局部最优但全局失调"的检测层——动作：每个任务的代码、每次架构切分，都对照整体契约检查。
 
 ## 触发时机
 
@@ -163,7 +163,7 @@ review 对象不是代码，是 proposal 的分系统切分与设计决策。此
 1. 当前 agent 环境自带 code review 工具 → 优先调用，把上方 review 对象与深度档位作为范围输入
 2. 工具 review 失败（不可用 / 报错 / 超时）或环境无 review 工具 → LLM 人工 review：按第 1 节维度、第 2 节分级、第 3 节报告格式执行（报告标题用 change 名）
 
-**深度档位**：tier-medium / tier-large 按 tasks.md 全部任务 `风险` 字段的**最高档**取——收尾 review 的对象是整体，不逐任务各取各档；tier-small 按 `td-apply` 步骤 6.3 的保底抽查执行。
+**深度档位**：以 `td-apply` 步骤 6.3 持有的 tier 分层为准（tier-medium / tier-large 按全部任务 `风险` 最高档；tier-small 保底抽查）。
 
 **critical 阻塞**：沿用第 4 节——修复后重跑 `verification-before-completion`（修复使既有验证证据失效，见其「之前测过」条），重跑通过且无 critical，change 才算 done。
 

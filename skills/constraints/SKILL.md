@@ -31,7 +31,4 @@ user-invocable: false
 
 ## 如何被引用
 
-- 触发路径（命中场景 → 读本 skill → 按映射读 references）见上方「子约束映射」节，此处不重复
-- 约束强度（表 1 第 1–5 行）+ human-in-loop 场景加成（表 2）+ system-audit 频率（表 3）由 `field-assessment` 的「如何被引用」节读取策略注入（快车道或现判路径）
-- 子约束之间互相引用的路径为 `references/<name>.md`（相对本 SKILL.md 所在目录）
-- override 回路编排（`wip-limit` → `brooks-law` → `critical-buffer` → `human-in-loop` → 记录）由 `references/wip-limit.md` 单一持有
+引用路径统一见上方「子约束映射」节：命中触发场景 → 读本 skill → 按映射读对应 `references/<name>.md`；约束强度（表 1/表 2/表 3）与 override 回路编排由各 references 文件与 `field-assessment` 的「如何被引用」节持有，此处不重复。

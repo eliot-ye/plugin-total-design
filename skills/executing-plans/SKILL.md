@@ -1,6 +1,6 @@
 ---
 name: executing-plans
-description: 批量执行任务，带 human checkpoint。
+description: 复杂场景管理层：checkpoint 调度与失败处理。
 user-invocable: false
 ---
 
@@ -25,19 +25,10 @@ checkpoint 格式：
 
 ```
 ## Checkpoint <N>
-
 ### 完成的任务
-- [x] <task A> — 验证：<test output>
-- [x] <task B> — 验证：<test output>
-
-### 下一步
-- <task C>
-- <task D>
-
-### 需要你拍板的
-- <decision 1>
-- <decision 2>
-
+- [x] <task> — 验证：<test output>
+### 下一步 / 需要你拍板的
+- <task> / <decision>
 继续吗？
 ```
 
@@ -47,4 +38,4 @@ checkpoint 时做 `requesting-code-review`（含与既有风格一致性检查�
 
 1. 触发 `systematic-debugging`：4-phase root cause
 2. root cause 在 plan 之外 → 停下来问用户
-3. 不"硬刚"——触发 debug / 反思 plan 的失败次数阈值见 `systematic-debugging` 触发时机节（单一事实源）
+3. 不"硬刚"——失败次数阈值分两个层面、各自持有：**同一任务失败 2 次 → 触发 `systematic-debugging`（阈值归该 skill 的「触发时机」节）；3 次 → 反思 plan（回到 checkpoint 询问用户，阈值归本节）**

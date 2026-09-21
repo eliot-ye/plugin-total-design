@@ -16,9 +16,7 @@ OpenSpec 契约层入口。在写代码之前，让人和 AI 对"建什么、为
 
 ## 服务的主基调原则
 
-**系统工程主基调第 3 条：从定性到定量的综合集成。**
-
-proposal 里的"系统工程影响评估"节是这个原则的工程化体现——agent 不只写"what"和"how"，必须写"这会对系统整体产生什么影响"，完成从定性到定量的综合集成。其中"预期行为模型"字段是综合集成的"模型"载体（见 `system-engineering` 的「主基调四条」第 3 条「模型载体」节）。
+**系统工程主基调第 3 条：从定性到定量的综合集成。** 本 skill 的具体动作是：步骤 6.c 强制 proposal 写"系统工程影响评估"节（含"预期行为模型"字段，即综合集成的"模型"载体），完成从定性到定量的综合集成。
 
 **反馈控制回路归位**：propose 是前馈控制环节（建立控制目标）。
 
@@ -55,10 +53,9 @@ proposal 里的"系统工程影响评估"节是这个原则的工程化体现—
 - `constraints` 的 `references/wip-limit.md`（硬阻塞 + override）：当前活跃 change 数已达上限？已达 → **阻塞本步骤，不执行步骤 4**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威描述在该 skill；override 通过后继续步骤 4）。
 - `constraints` 的 `references/human-in-loop.md`：用户描述是否清晰到可以 propose？不清楚 → 用询问用户机制问"想做什么 change"。
 - **TODO 池检查**：读 `openspec/todo.md`（不存在 → 跳过本子项，视为空池，不主动创建文件）。todo.md 的主条目/change 子项/优先级/分节规则见 `todo-pool` 的「格式约定」节。
-  - 列出全部**未勾选**（`- [ ]`）主条目作为候选池，**按优先级排序呈现**（P0 → P1 → P2，未标注视为 P2）。
+  - 列出全部**未勾选**（`- [ ]`）主条目作为候选池，**按优先级排序呈现**（P0 → P1 → P2，未标注视为比 P2 更低、排在最后）。
   - 若输入内容为空或用户没有明确 change 描述 → 询问用户让用户从候选池挑一个条目（或"不挑了，直接描述新 change"）。用户挑中某条目 → change 名从条目语义推导。
   - 用户已给明确描述 → 检查候选池里是否有语义重合的主条目，有则提示用户"TODO 池里已有近似条目，要不要基于它 propose？"——同一条主条目可以承接多个 change（每个 change 一个子项追加），不算重复建 change。
-  - 候选池是 backlog（可以无限多），活跃 change 才是 WIP——池里有候选不构成阻塞，只有活跃 change 数触发 `constraints` 的 `references/wip-limit.md`。
 - **brownfield reverse-spec 检查**（`$_TD_PROFILE` 为单值，与下方 greenfield 检查互斥，仅命中其一）：若 `$_TD_PROFILE == profile-brownfield`，检查 `openspec/specs/` 下是否已有相关分系统的 baseline spec。没有 → 触发 `constraints` 的 `references/human-in-loop.md`，提示用户"你对现有系统还没建立认识，propose 大改动风险高。先 `/td-reverse-spec` 吗？"——用户同意后执行 `/td-reverse-spec` 建立 baseline，完成后回到本步骤继续 propose。
 - **greenfield explore 检查**（同上互斥，仅命中其一）：若 `$_TD_PROFILE == profile-greenfield` 且 `openspec/specs/` 为空（还没建立初始 spec），检查会话内是否已做过充分探索。判据：会话历史里是否出现过 `/td-explore` 调用且**用户明确说"探索够了" / "开始 propose" / "按 X 方向建"**（或等价信号）。没有 → 触发 `constraints` 的 `references/human-in-loop.md`，提示用户"greenfield 最容易犯的错是'想到了就建'。先 `/td-explore` 探索充分再 propose 吗？"——用户同意后执行 `/td-explore`，完成后回到本步骤继续 propose。
 
@@ -151,7 +148,7 @@ openspec instructions <artifact-id> --change "<name>" --json
 - 已知 caller：只列确定已知的高危 caller（file:line + 预判结论：兼容 / 需适配 / caller 不消费返回值）——完整 caller 清单不由本节承担，由 `td-apply` 步骤 4 的引用搜索实测产出
 ```
 
-本节是前馈定位（类别标注 + 高危 go/no-go），完整 caller 清单不由本节承担——由 `td-apply` 步骤 4 实测产出并兜底；实测发现本节未标注的 caller，或与预判结论冲突 → 补做兼容确认，或按 apply 全局必停通道上报。
+本节是前馈定位（类别标注 + 高危 go/no-go），完整 caller 清单不由本节承担——由 `td-apply` 步骤 4 实测产出并兜底；实测兜底与上报规则见 `td-apply` 步骤 4 对应子节。
 
 tier 分层：tier-small 可跳过（提醒性质，跳过时在 proposal 注明）；tier-medium / tier-large 必填（必填的是变更点类别标注 + 高危标记）——缺项的 proposal 不算 apply-ready。
 
@@ -187,7 +184,7 @@ openspec status --change "<name>" --json
 
 调 `requesting-code-review` 的架构 review（见该 skill 第 5 节），review 对象是 proposal 的分系统切分与设计决策，检查清单见该 skill 的 `references/architecture-review-checklist.md`。
 
-分级定义见 `requesting-code-review` 第 5 节（critical / warning / nit）。本步骤只持有阻塞后回路：架构 review 判为 critical → 阻塞，回步骤 6 改 proposal 再重新 review；warning → 记录到 proposal，可延后；nit → 可忽略。
+分级定义见 `requesting-code-review` 的「Issue 分级」节（critical / warning / nit）。本步骤只持有阻塞后回路：架构 review 判为 critical → 阻塞，回步骤 6 改 proposal 再重新 review；warning → 记录到 proposal，可延后；nit → 可忽略。
 
 架构 review 通过（无 critical）才进入步骤 8。
 

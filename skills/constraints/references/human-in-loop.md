@@ -24,9 +24,9 @@
 
 以上第 1–5 类是**通用基线**，所有 profile × tier 下都生效——这是"必须停"的下限。
 
-`field-assessment` 表 1 第 5 行定义各 tier 的 human-in-loop **额外触发条件**（如 tier-large 的"+ 总体设计文档审阅"；tier-small / tier-medium 无额外条件）。表 2 定义各 profile 的**场景加成**（如 brownfield 的"+ 改老代码前"（tier-medium / tier-large）、maintenance 的"+ 生产环境改动前"（tier-medium））。
+`field-assessment` 表 1 第 5 行定义各 tier 的 human-in-loop **额外触发条件**（tier 加成），表 2 定义各 profile 的**场景加成**——各加成的具体条件均以表 1、表 2 为准。
 
-最终生效强度 = 第 1–5 类通用基线 **+** 表 1 tier 加成 **+** 表 2 profile 加成，三者叠加都生效，不替换。表 2 的 profile 加成与基线场景重叠时（如 brownfield"改老代码前"与基线第 4 类超 scope 场景、maintenance"生产环境改动前"与基线第 3 类），叠加只是强调，不矛盾。
+最终生效强度 = 第 1–5 类通用基线 **+** 表 1 tier 加成 **+** 表 2 profile 加成，三者叠加都生效，不替换。表 2 的 profile 加成与基线场景重叠时（如 brownfield"改老代码前"与基线第 4 类超 scope 场景、maintenance"生产环境改动前"与基线第 3 类），叠加只是强调，不矛盾。与其他位置表述冲突时，以表 2 为准。
 
 **第 6、7 类的叠加语义**：第 6 类（WIP override）和第 7 类（audit 触发修复）是**特定流程的触发通道**，**不参与 profile × tier 叠加**——它们分别由 `wip-limit` override 流程和 `/td-system-audit` 触发，与 profile/tier 强度无关。但 override 流程里触发的 `brooks-law` / `critical-buffer` 评估，仍按当前 tier 强度执行。
 
@@ -38,11 +38,9 @@
 2. 在已闭合的设计框架内的实施细节
 3. verification 步骤（除非失败且 agent 不知如何修复）
 
-## 触发机制
-
-本文件不靠 hook 强制，靠 agent 自觉识别上述场景。当 agent 识别到上述第 1–5 类场景时，**必须暂停**，停下来询问用户，**不得自行推进**。
-
 ## 触发时 agent 应做的事
+
+本文件不靠 hook 强制，靠 agent 自觉识别场景；识别到后按以下步骤执行：
 
 1. 描述当前状态："我正在做 X，遇到了 Y 决策点"
 2. 列出选项 + 每个选项的影响

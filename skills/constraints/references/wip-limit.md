@@ -24,6 +24,7 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
    - 阻塞当前 `/td-propose` 或 `/td-apply`，不执行后续步骤。
    - 告诉用户："tier-XXX 下 WIP 上限是 N，当前活跃 N 个。并行硬解复杂巨系统会制造全局失调（主基调第 4 条）。"
    - 给出两个选项：(a) 先 `/td-archive` 一个再 propose/apply；(b) 显式 override。
+   - **连续 override 检测**：若当前活跃 change 中已有 change 的 `proposal.md` 记录过 override（override 流程 d 步的落点），在本步提示里额外加一句"已连续 override，WIP 硬约束正在失效"——防止 override 滥用。
    - 等待用户决策。
 4. **override 流程（用户选 override 时）**——本文件是 override 回路的单一编排点，子步序列如下：
 
@@ -37,7 +38,7 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
 
 | 合理化（agent 对自己说的话） | 现实 |
 |---|---|
-| "就超一个，用户赶进度" | 一次 override 就让硬约束变软——约束力在于每次超限都有控制流后果，豁免一次 = 建立先例（「触发时机」节的二次 override 提醒正是为连续 override 准备的） |
+| "就超一个，用户赶进度" | 一次 override 就让硬约束变软——约束力在于每次超限都有控制流后果，豁免一次 = 建立先例 |
 | "这些 change 互不相关，不会互相干扰" | "相互作用无法同时持有"不依赖主观相关性——上下文切换成本、buffer 消耗、冲突窗口都是客观存在（主基调第 4 条） |
 | "先 override 完成这个，回头立刻 archive" | "立刻"没有控制流保证——override 记录进 `proposal.md`，就是给 `/td-system-audit` 留下回检证据（override 流程 d 步） |
 | "合并几个 change 一起过，效率更高" | 并行装配 = 多条关键链抢同一个 project buffer，协调成本随并行数超线性增长（同目录 `brooks-law.md`） |
@@ -46,7 +47,6 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
 
 - 用户想 `/td-propose` 一个新 change，但活跃 change 数已达上限
 - 用户想同时推进多个 change
-- **override 后的二次检测**：用户对某次 WIP 超限显式 override 后，下一次 `/td-propose` 或 `/td-apply` 再次检测到 WIP 超限时，本文件应在 override 流程里额外提示"上次已 override 一次，连续 override 会让 WIP 硬约束彻底失效"——防止 override 滥用。
 - **被 `/td-system-audit` 触发修复时**：audit 发现"同时开太多 change（WIP 超限）"问题时，触发本文件的「硬约束 + override 机制」节（触发方：`td-system-audit` 步骤 6），阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override。
 
 ## 触发时 agent 应做的事
