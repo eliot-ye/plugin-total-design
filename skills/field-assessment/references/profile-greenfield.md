@@ -26,7 +26,7 @@ greenfield 容易陷入"先把架构设计完美"。用 `constraints` 的 `refer
 
 ### 4. tier 松绑优先
 
-本 profile 的"行为层强：full SDD"与 tier-small 的"不强求重流程"冲突时，**以 tier 为准**——tier 决定约束强度与流程重量，profile 只决定流程侧重（greenfield 侧重 explore→propose 的完整路径，不改变各 tier 的强度）。greenfield × small 时流程从简，greenfield × medium/large 时再走全套 SDD。
+本 profile 的"行为层强：full SDD"与 tier-small 的"不强求重流程"冲突时，**以 tier 为准**（profile 只决定流程侧重、不改变强度，见 `identification-flow.md`「变体文件」节）。greenfield × small 时流程从简，greenfield × medium/large 时再走全套 SDD。
 
 ## 与其他 profile 的切换
 

@@ -127,13 +127,13 @@ Pi 通过仓库根目录 `package.json` 的 `pi.skills` 字段加载 skills 目�
 
 ## Skill 清单
 
-17 个 skill 分布在四层：
+18 个 skill 分布在四层：
 
 | 层 | 数量 | 代表 |
 |---|---|---|
 | 约束层 | 2 | `system-engineering` 主基调 + `constraints` 承载 5 份局部规律 |
 | 行为层 | 6 | writing-plans / executing-plans / test-driven-development / requesting-code-review / systematic-debugging / verification-before-completion |
-| 配置层 | 2 | `field-assessment`（profile×tier 配置入口）+ `todo-pool`（`openspec/todo.md` 格式约定） |
+| 配置层 | 3 | `field-assessment`（profile×tier 配置入口）+ `todo-pool`（`openspec/todo.md` 格式约定）+ `agents-md-hygiene`（用户项目 agent 指令文件编写规范） |
 | 契约层 | 7 | 7 个 td-* skill，与 command 一一对应 |
 
 除 7 个 td-* 外全部 `user-invocable: false`，由 agent 按上下文自动触发。详细规则见 [CONTRIBUTING.md](CONTRIBUTING.md) 与 [AGENTS.md](AGENTS.md)。

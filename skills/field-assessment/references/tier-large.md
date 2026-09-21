@@ -2,10 +2,6 @@
 
 本文件是 `field-assessment` tier 维度三变体之一。判读命中 `tier-large` 后读本文件（判据见 `identification-flow.md`「### 3. 判读 tier（三选一）」节，任一成立取最高）。
 
-## system-audit 频率
-
-见表 3 的 tier-large 行（表 3 见 `audit-frequency.md`）。
-
 ## 特殊规则
 
 ### 1. 总体设计文档必填
@@ -39,7 +35,7 @@ audit 报告里特别关注：
 - 关键链 buffer 是否被压缩
 - 是否有"应该触发 human-in-loop 但没触发"的决策
 
-**层次观归位**：当识别流程允许子系统独立定 tier 时，project scope audit 按子系统层次分别审计（分层审计的完整语义见 `td-system-audit` 步骤 2）——执行规则见 `subsystem-tiering.md`。
+系统有子系统独立定 tier 时，project scope audit 按子系统层次分别审计——执行规则见 `subsystem-tiering.md`。
 
 ## 与其他 tier 的切换
 

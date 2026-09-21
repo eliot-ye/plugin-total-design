@@ -16,15 +16,11 @@ argument-hint: <change-name>
 
 ## 服务的主基调原则
 
-**系统工程主基调第 1 条：系统工程。**
-
-apply 不是"按任务清单打勾"，是"在系统全局立场上推进实施"。每个任务对系统整体的影响，必须由 agent 持续持有。
+**系统工程主基调第 1 条：系统工程。** 本 skill 的具体动作是：步骤 6.2 对照 proposal 影响评估跑跨分系统边界验证，在系统全局立场上推进实施，而非按任务清单打勾。
 
 **核心论点归位**：步骤 6.2 系统级验证是"总体性能≠各部分之和"的最直接体现。执行语义见 `verification-before-completion` 第 6 节。
 
-**系统工程主基调第 2 条：总体设计部。**
-
-apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constraints` 的 `references/human-in-loop.md` 让用户（总体设计部）拍。
+**系统工程主基调第 2 条：总体设计部。** 本 skill 的具体动作是：apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constraints` 的 `references/human-in-loop.md` 让用户（总体设计部）拍。
 
 **反馈控制回路归位**：apply 是控制执行 + 实时误差检测环节。
 
@@ -44,11 +40,11 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 ### 2. 前置检查
 
-对照步骤 1 注入的强度与当前 change 状态，判断是否触发：
+对照步骤 1 注入的强度与当前 change 状态，判断是否触发。**双闸门声明**：下列与 `td-propose` 步骤 6.c 重叠的检查（总体设计文档、caller impact 分析节）在两处分别校验，避免漏检——propose 漏执行时由本步兜底：
 
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 6.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"
-- **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检。
-- **caller impact 分析节必填**：若 `$_TD_TIER` 为 `tier-medium` / `tier-large` 且 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。与 `td-propose` 步骤 6.c 的检查在两处分别校验，避免漏检——propose 6.c 漏执行时由本条兜底，后续步骤 4 实测子节不再重复此检查。
+- **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。
+- **caller impact 分析节必填**：若 `$_TD_TIER` 为 `tier-medium` / `tier-large` 且 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。后续步骤 4 实测子节不再重复此检查。
 - **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。已达 → **阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威在该文件；override 通过后继续步骤 3）。
 - **`constraints` 的 `references/critical-buffer.md`**：tasks.md 是否已标注关键链 + project buffer（比例按表 1 当前 tier 行；表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - **scenario→test 覆盖账本必填**：若 change 的 `applyRequires` 含 `specs` artifact，检查 proposal 是否附了 scenario→test 覆盖账本（见 `td-propose/references/scenario-test-map-template.md`）。缺账本或有 unmapped scenario 未标 `N/A` → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补账本。tier-small 仅在 `applyRequires` 含 `specs` 且含可执行测试面时检查。
@@ -77,7 +73,7 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 2. 逐 caller 确认兼容（签名匹配 / 返回值未被消费 / 装配点已接 / 语义不变），记录确认结论。
 3. 实测发现 proposal 未标注的 caller，或与已知 caller 的预判结论冲突 → 补做兼容确认，或经步骤 5 的 apply 全局必停通道上报「超出当前 change scope」——不得静默跳过。
 
-**tier 分层**：tier-large = 硬闸门（无条件实测；caller 清单 + 逐 caller 结论未产出，不进入任务实施）；tier-medium = 信号触发（满足任一信号则强制实测：变更点命中四类变更点任一类 / proposal 对某已知 caller 标注"需适配" / 架构 review 对 caller 影响提出疑问；纯内部实现细节且无信号 → 可跳过并在 tasks.md 记录理由）；tier-small = 提醒（默认跳过）。caller 清单与结论记录到 tasks.md（对应任务的验证证据或单独附注）。
+**tier 分层**（本层是实测层，预判标注见 `td-propose` 步骤 6.c 的 caller impact 分析节）：tier-large = 硬闸门（无条件实测；caller 清单 + 逐 caller 结论未产出，不进入任务实施）；tier-medium = 信号触发（满足任一信号则强制实测：变更点命中四类变更点任一类 / proposal 对某已知 caller 标注"需适配" / 架构 review 对 caller 影响提出疑问；纯内部实现细节且无信号 → 可跳过并在 tasks.md 记录理由）；tier-small = 提醒（默认跳过）。caller 清单与结论记录到 tasks.md（对应任务的验证证据或单独附注）。
 
 架构 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。
 
@@ -94,8 +90,8 @@ apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constrain
 
 **复杂场景按需委托 `executing-plans`**：以下任一条件命中时，在基本执行循环的对应位置触发 `executing-plans` 的 checkpoint / 失败处理能力——td-apply 仍是执行主体，`executing-plans` 提供管理层能力（checkpoint 调度 + 失败处理回路），不接管基本执行循环：
 
-- **关键链 checkpoint**：完成一个关键链任务时 → 触发 `executing-plans` 的 checkpoint（含 `requesting-code-review` 做 review，含与既有风格一致性检查）
-- **任务执行失败**：触发 `executing-plans` 的失败处理（内含 `systematic-debugging` 4-phase 流程；失败 2 次以上触发 debug、3 次反思 plan）
+- **关键链 checkpoint**：完成一个关键链任务时 → 触发 `executing-plans` 的 checkpoint
+- **任务执行失败**：触发 `executing-plans` 的失败处理
 - **current-change audit**（tier-medium）：每个关键链任务完成时随 checkpoint 触发，见步骤 6.4
 
 条件不命中时全程走 td-apply 自持的基本执行循环，不加载 `executing-plans`。

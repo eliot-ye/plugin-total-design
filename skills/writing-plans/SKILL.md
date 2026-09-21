@@ -13,7 +13,6 @@ user-invocable: false
 ## 依赖技能
 
 - `constraints` 的 `references/critical-buffer.md`
-- `constraints` 的 `references/delay-decision.md`
 - `field-assessment`
 
 ## 与 td-propose / td-apply 的边界
@@ -23,7 +22,7 @@ tasks.md 分两个阶段完成：
 1. **`/td-propose` 阶段**：创建 tasks.md 骨架——任务序列 + 关键链标注 + project buffer（按 `constraints` 的 `references/critical-buffer.md` 的规则）。这是 proposal 的"实施计划"部分。
 2. **`/td-apply` 阶段**：若 tasks.md 粒度还不够细，本 skill 再次触发细化。
 
-关键链标注在 propose 阶段完成，apply 阶段只做校验和细化。
+关键链标注在 propose 阶段完成，apply 阶段只做粒度细化。
 
 ## 触发时机
 
@@ -34,9 +33,7 @@ tasks.md 分两个阶段完成：
 
 ### 1. 任务切分顺序：先按系统层次，再按时间粒度
 
-钱学森系统工程强调"系统的层次结构"（主基调第 4 条「层次观」）。任务分解应按层次进行，而不是按时间粒度平面切分。
-
-**切分顺序**：
+**切分顺序**（按系统层次切分，不按时间粒度平面切分）：
 
 1. **先按分系统边界切分**：对应 `td-reverse-spec` 的分系统切分。每个分系统一组任务。
 2. **再按分系统内部的层次切分**：顶层架构 → 模块设计 → 实现细节。同一分系统内，顶层架构任务先于模块设计任务，模块设计任务先于实现细节任务。
@@ -52,8 +49,6 @@ tasks.md 分两个阶段完成：
 ### 2. 每个任务必填字段
 
 字段模板与风险等级判定见 `references/task-template.md`（文件 / 风险 / 验证 / 分系统影响 / 依赖 五个字段 + high/medium/low 判定标准）。
-
-每个任务必须带 `风险` 字段（high / medium / low）——`test-driven-development` 据此决定测试强度，`requesting-code-review` 据此决定 review 深度。
 
 ### 3. 标注关键链
 

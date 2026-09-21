@@ -8,7 +8,7 @@ user-invocable: false
 
 ## 服务的主基调原则
 
-**主基调第 1 条：系统工程。** review 是防"局部最优但全局失调"的检测层——每个任务的代码、每次架构的切分，都要对照整体契约检查。
+**主基调第 1 条：系统工程。** review 是防"局部最优但全局失调"的检测层——动作：每个任务的代码、每次架构切分，都对照整体契约检查。
 
 ## 触发时机
 
@@ -76,14 +76,17 @@ review 对象与作者为同一 agent 的产出时，review 不得在 authoring 
 
 **降级必须如实标注**（唯一硬约束）：降级时 review 报告的 Verdict 锚点行后须标注 `reviewed-by: unisolated-self`（形态见第 3 节 Verdict 模板）。不得无标注地降级、不得因无隔离而跳过检查维度、不得编造 Verdict——降级后给出的 Verdict 仍须写出具体检查结论。
 
-**tier 对标注的强调程度**（tier 不决定能否降级，只影响标注强调）：
-
-- tier-large：自评降级时报告须显著标注「本次 critical 判断基于无隔离自评，置信度低于有隔离版本」
-- tier-medium / tier-small：常规标注即可
+**tier 对标注的强调程度**：tier 不决定能否降级，只影响标注强调——tier-large 自评降级时须显著标注「本次 critical 判断基于无隔离自评，置信度低于有隔离版本」；tier-medium / tier-small 常规标注即可。
 
 **review 只读**：review 过程中只允许产出 review 报告，不得修改被审 artifact 与源码（review 判出 critical 后的修复是作者动作，不是 reviewer 动作）。
 
 ### 3. Review 报告
+
+**证据与判级约束**（适用于全部 review 类型）：
+
+- **证据强制指位**：每个非 OK 判定必须给出证据位置（`file:line` 或 artifact 节名）；Issues 的"位置"字段必填。指不出位置的抽象批评不构成有效 issue。
+- **证据充分性判级**：critical 候选若指不出具体证据位置，不得标 critical——降为"待验证疑点"，触发 `constraints` 的 `references/human-in-loop.md` 向用户求证。只有"存在证据"计入 critical；"可能存在"不算。
+- **Issues 条数上限**：最多 5 条（按严重度排序）——防止 nit 淹没重点，超出的 nit 合并为一句汇总。
 
 ```markdown
 ## Code Review：<task name>
@@ -160,7 +163,7 @@ review 对象不是代码，是 proposal 的分系统切分与设计决策。此
 1. 当前 agent 环境自带 code review 工具 → 优先调用，把上方 review 对象与深度档位作为范围输入
 2. 工具 review 失败（不可用 / 报错 / 超时）或环境无 review 工具 → LLM 人工 review：按第 1 节维度、第 2 节分级、第 3 节报告格式执行（报告标题用 change 名）
 
-**深度档位**：tier-medium / tier-large 按 tasks.md 全部任务 `风险` 字段的**最高档**取——收尾 review 的对象是整体，不逐任务各取各档；tier-small 按 `td-apply` 步骤 6.3 的保底抽查执行。
+**深度档位**：以 `td-apply` 步骤 6.3 持有的 tier 分层为准（tier-medium / tier-large 按全部任务 `风险` 最高档；tier-small 保底抽查）。
 
 **critical 阻塞**：沿用第 4 节——修复后重跑 `verification-before-completion`（修复使既有验证证据失效，见其「之前测过」条），重跑通过且无 critical，change 才算 done。
 

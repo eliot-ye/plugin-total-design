@@ -2,10 +2,6 @@
 
 本文件是 `field-assessment` tier 维度三变体之一。判读命中 `tier-small` 后读本文件（判据见 `identification-flow.md`「### 3. 判读 tier（三选一）」节，任一成立取最高）。
 
-## system-audit 频率
-
-见表 3 的 tier-small 行（表 3 见 `audit-frequency.md`）。
-
 ## 特殊规则
 
 ### 1. 不强求重流程

@@ -54,4 +54,4 @@
 
 ## 层次观归位
 
-当系统内部有明显的子系统边界时（`field-assessment` 识别流程允许子系统独立定 tier），本文件的关键链标注应**按子系统层次分别标注**——每个子系统有自己的关键链和 project buffer，子系统之间的依赖链是跨子系统的关键链。子系统独立定 tier 的执行规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
+当系统内部有明显的子系统边界时（`field-assessment` 识别流程允许子系统独立定 tier），本文件的关键链标注应**按子系统层次分别标注**——每个子系统有自己的关键链和 project buffer，子系统之间的依赖链是跨子系统的关键链；跨子系统的依赖链按最高 tier 强度处理，规则见 `field-assessment` 的 `references/subsystem-tiering.md`。
