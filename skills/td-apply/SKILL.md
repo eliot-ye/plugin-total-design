@@ -18,11 +18,7 @@ argument-hint: <change-name>
 
 **系统工程主基调第 1 条：系统工程。** 本 skill 的具体动作是：步骤 6.2 对照 proposal 影响评估跑跨分系统边界验证，在系统全局立场上推进实施，而非按任务清单打勾。
 
-**核心论点归位**：步骤 6.2 系统级验证是"总体性能≠各部分之和"的最直接体现。执行语义见 `verification-before-completion` 第 6 节。
-
 **系统工程主基调第 2 条：总体设计部。** 本 skill 的具体动作是：apply 过程中遇到的关键决策，agent 不自己拍板，触发 `constraints` 的 `references/human-in-loop.md` 让用户（总体设计部）拍。
-
-**反馈控制回路归位**：apply 是控制执行 + 实时误差检测环节。
 
 ## 输入 - change 名。空则推导或问用户"想 apply 哪个 change"
 

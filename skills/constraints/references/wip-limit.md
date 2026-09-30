@@ -47,7 +47,7 @@ WIP 上限是硬约束，违反必须有控制流后果。执行规则：
 
 - 用户想 `/td-propose` 一个新 change，但活跃 change 数已达上限
 - 用户想同时推进多个 change
-- **被 `/td-system-audit` 触发修复时**：audit 发现"同时开太多 change（WIP 超限）"问题时，触发本文件的「硬约束 + override 机制」节（触发方：`td-system-audit` 步骤 6），阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override。
+- **被 `/td-system-audit` 触发修复时**：audit 发现"同时开太多 change（WIP 超限）"问题时，触发本文件的「硬约束 + override 机制」节，阻塞下一个 `/td-propose` 或 `/td-apply`，直到用户 archive 一个或显式 override。
 
 ## 触发时 agent 应做的事
 

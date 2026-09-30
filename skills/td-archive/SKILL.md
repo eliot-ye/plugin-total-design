@@ -24,8 +24,6 @@ archive 前的"实际 vs 预期"复盘（步骤 3）是综合集成循环的闭�
 
 archive 后触发 profile 重新判读（步骤 5.1）是总体设计部的职责。
 
-**反馈控制回路归位**：archive 是事后误差检测 + 校正环节。
-
 ## 输入 - 要 archive 的 change 名。空则推导或问用户。
 
 `$ARGUMENTS`
