@@ -2,6 +2,27 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.12.1] - 2026-09-30
+
+### Fixed
+
+- **td-reverse-spec 「入口契约」锚点断链**：原「入口契约」形态是加粗强调句（非标题节），`td-system-audit` 步骤 6 的映射表按节名「入口契约」检索时无法定位；改为 `## 入口契约` 标题节，明确列出第一入口（首次建立 baseline）与第二入口（漂移定向刷新）两条契约。
+- **profile-maintenance 轻量 proposal 模板漏必填字段**：`field-assessment/references/profile-maintenance.md` 特殊规则 4 的「轻量 proposal」模板列 5 项字段，比 `td-propose` 步骤 6.c 的必填节少「与既有架构/风格的遵循关系」第 6 项；补上第 6 项并同步说明文字（5 项 → 6 项），修复使用态 LLM 按模板填写会漏字段、`requesting-code-review` 第 1 节「Code consistency」维度失去数据源的问题。
+- **开发态调用方清单泄漏进 references**：5 处「触发方：X 步骤 Y」括注按 AGENTS.md「SKILL 与 references 禁止开发态语句」判据清理——`todo-pool` 两处触发方改为「入口契约」执行条件（保留"用户同意→执行 / 拒绝→跳过"的执行前提，删除调用方身份清单）；`audit-frequency.md` 表头段与末尾段删除 `td-archive 步骤 5.2 / executing-plans 步骤 1 / td-apply 步骤 6.4` 调用方清单，改为功能性表述；`constraints/references/wip-limit.md` 与 `human-in-loop.md` 的「（触发方：td-system-audit 步骤 6）」括注删除（触发场景本身保留）。按风险不对称性判据保留 `audit-frequency.md` 表 3 tier-medium 行的 `executing-plans 步骤 1` 触发 skill 列——删除会造成 tier-medium current-change audit 触发归属死链（不可恢复），保留可恢复。
+- **协议格式分叉与流程约定缺口**（`audit-history-template` / `td_state_sync.js` / `td-archive` / `scenario-test-map-template` / `change-point-classes` / `requesting-code-review`）：audit-history 模板要求 timestamp 带时区偏移、report 路径带 `audits/` 前缀、追加前判重；`td_state_sync.js` hook 补记格式对齐模板约定（本地时间补时区后缀 + `audits/` 前缀），fixture 双环境比对验证产出等价；`td-archive` 步骤 3 复盘节落点统一为 `proposal.md`，消除 tasks.md/proposal 分叉；scenario→test 覆盖账本产出加两项机械校验（测试文件路径存在性 + scenario 名称与 spec 逐字一致）；caller 实测锚核对补双类断言约定（`contains` 子串锚 + `toBe` 精确锚，任一缺漏均漏检）；LLM 兜底 review 加逐 finding 复验要求（对照代码实证后进报告，实施者自审场景下记忆性误报率最高）。
+
+### Changed
+
+- **td-propose 三处 spec 填写约束加固**：借鉴 Spec Kit 的 specify / checklist 模板可判定判据，给 `td-propose` SKILL.md 三处内容规范加固——全部为「填法约束」，不新增必填项集合、不改字段定义、不新增 apply-ready 判据、不新增 artifact / 命令 / 依赖：
+  - 步骤 3 human-in-loop 触发项下新增澄清量化约束（≤3 问 + 优先级 scope > security/privacy > UX > 技术细节 + 5 类合理默认不追问 + 4 条跳过条件）；
+  - 步骤 6.c「系统工程影响评估」字段列表后新增「预期行为模型」与「整体性能预期变化」四判据（可测量 / 技术无关 / 用户视角 / 可验证）+ 不适用降级路径（不为了凑判据生成伪量化字段）；
+  - Guardrails 末尾新增整节 N/A vs 行级 N/A 处理规则（"大多数不适用→删节 + 开头一行说明"判据）。
+- **仪式性「归位」段清理**：删除 4 个 td-* SKILL.md 的纯标签「反馈控制回路归位 / 核心论点归位 / 前馈控制准备环节」段——只贴原则标签、不写约束本 skill 的哪个动作，按 AGENTS.md「设计变更评估维度」节仪式性内容判定线判定为仪式性 → 删除；`system-engineering` 的「反馈控制回路」节作为根节点保留（仍是唯一归位锚点）。
+
+### Docs
+
+- `docs/feat/td-plugin-improvements-2026-09-24.md` 新增（958 行）：td 工作流 plugin 改进清单设计讨论稿——非运行时资产，供后续演进参考。
+
 ## [1.12.0] - 2026-09-21
 
 ### Added

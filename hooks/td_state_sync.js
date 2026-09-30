@@ -204,15 +204,20 @@ function syncAuditHistory(stateDir) {
       const m = REPORT_NAME_RE.exec(report);
       if (m) {
         scope = m[2];
-        // 本地时间 naive 字符串：不带时区后缀（Python isoformat() 语义），
-        // toISOString() 会给 UTC 并加 Z，会改变历史文件的既有格式
+        // 本地时间 + 时区偏移：报告文件名是本地 naive 时间，按系统偏移补后缀，
+        // 与 audit-history-template.md 的格式约定一致（禁裸本地时间）
         const parts = m[1].match(/(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})/);
         if (parts) {
           const [, y, mo, d, h, mi, s] = parts;
-          ts = `${y}-${mo}-${d}T${h}:${mi}:${s}`;
+          const off = -new Date().getTimezoneOffset();
+          const sign = off >= 0 ? "+" : "-";
+          const abs = Math.abs(off);
+          const oh = String(Math.floor(abs / 60)).padStart(2, "0");
+          const om = String(abs % 60).padStart(2, "0");
+          ts = `${y}-${mo}-${d}T${h}:${mi}:${s}${sign}${oh}:${om}`;
         }
       }
-      return `  - timestamp: ${ts}\n    scope: ${scope}\n    report: ${report}\n    severe_count: ${countSevere(path.join(auditsDir, report))}\n`;
+      return `  - timestamp: ${ts}\n    scope: ${scope}\n    report: audits/${report}\n    severe_count: ${countSevere(path.join(auditsDir, report))}\n`;
     }).join("");
     fs.appendFileSync(historyPath, header + block, "utf8");
   }
