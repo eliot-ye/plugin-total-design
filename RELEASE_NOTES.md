@@ -1,47 +1,75 @@
-# total-design v1.12.0 发布说明
+# total-design v1.12.1 发布说明
 
 > 面向使用态用户：升级前请先读「⚠️ 行为变更」与「升级步骤」。
 
 ## 本版本是什么
 
-1.12.0 是 **新增 + 收敛版**：一处新 skill（`agents-md-hygiene`，17→18）+ review/audit 判级证据约束 + WIP 连续 override 检测，外加一轮使用态审核的全面收敛（约 30 个文件，强度表述统一改引用式、重复定义归权、依赖节错列修正）。td-* 契约流（propose → apply → archive）结构不变，表 1/2/3 强度数值不动。
+1.12.1 是 **修复 + 收敛版**：4 类修复（td-reverse-spec 锚点断链、profile-maintenance 模板漏必填字段、5 处开发态调用方清单泄漏、协议格式分叉与流程约定缺口）+ 2 处加固（td-propose 三处填法约束、4 个 td-* SKILL.md 仪式性归位段清理）。td-* 契约流（propose → apply → archive）结构不变，表 1/2/3 强度数值不动，skill / command 数量不变（18 skill + 8 command）。
 
-## 本次新增
+## 本次修复
 
-### agents-md-hygiene skill（配置层，17→18）
+### td-reverse-spec 「入口契约」锚点断链
 
-指令文件（AGENTS.md / CLAUDE.md / `.atomcode.md` 等）编写规范：主指令文件体量上限、写入前判重与三选一归属判定、超限拆分指针化按需加载、与 `openspec/specs` 的单一事实源联动（含无 openspec 结构的降级路径），附增改/瘦身子流程。`user-invocable: false`，由 agent 判读触发。
+原「入口契约」形态是加粗强调句（非标题节），`td-system-audit` 步骤 6 的映射表按节名「入口契约」检索时无法定位；改为 `## 入口契约` 标题节，明确列出第一入口（首次建立 baseline）与第二入口（漂移定向刷新）两条契约。
 
-### review / audit 判级须证据指位（requesting-code-review + td-system-audit）
+### profile-maintenance 轻量 proposal 模板漏必填字段
 
-- **review 侧**：非 OK 判定必须给出证据位置（文件:行号或 artifact 指位）；无证据的 critical 自动降级为"待验证疑点"，走 `human-in-loop` 显式路由用户求证，agent 不替用户拍板。报告 Issues 上限 5 条。
-- **audit 侧**：报告模板对照清单改三态判定（符合 / 违反 / 存疑），违反须指证据位置，新增存疑列；`td-system-audit` 步骤 6 新增存疑路由——存疑发现不进修复表，先向用户求证，确认成立才触发修复。
+`field-assessment/references/profile-maintenance.md` 特殊规则 4 的「轻量 proposal」模板列 5 项字段，比 `td-propose` 步骤 6.c 的必填节少「与既有架构/风格的遵循关系」第 6 项；补上第 6 项并同步说明文字（5 项 → 6 项）。此前使用态 LLM 按 profile-maintenance 模板填写 maintenance 项目的轻量 proposal 时，会漏填第 6 项字段——`requesting-code-review` 第 1 节「Code consistency」维度（"偏离既有风格但 proposal 未写明 → warning"）失去数据源。
 
-### WIP 连续 override 检测（constraints/references/wip-limit.md）
+### 开发态调用方清单泄漏进 references
 
-WIP 超限提示时若检测到已有 change 的 `proposal.md` 记录过 override，额外提示"已连续 override，WIP 硬约束正在失效"——防止 override 滥用。
+5 处「触发方：X 步骤 Y」括注按 AGENTS.md「SKILL 与 references 禁止开发态语句」判据清理——这类清单形态是「依赖图文档」，使用态 LLM 是被某个调用方指引来的、知道还有谁引用不改变其执行决策，且清单必然随结构演化腐烂：
+
+- `todo-pool` 两处触发方 → 改为「入口契约」执行条件（保留"用户同意 → 执行 / 拒绝 → 跳过"的执行前提，删除调用方身份清单）
+- `audit-frequency.md` 表头段与末尾段 → 删除 `td-archive 步骤 5.2 / executing-plans 步骤 1 / td-apply 步骤 6.4` 调用方清单，改为功能性表述
+- `constraints/references/wip-limit.md` 与 `human-in-loop.md` → 「（触发方：td-system-audit 步骤 6）」括注删除（触发场景本身保留）
+
+按风险不对称性判据保留 `audit-frequency.md` 表 3 tier-medium 行的 `executing-plans 步骤 1` 触发 skill 列——删除会造成 tier-medium current-change audit 触发归属死链（不可恢复），保留可恢复。
+
+### 协议格式分叉与流程约定缺口
+
+- `audit-history-template.md`：timestamp 必须带时区偏移、report 路径必须带 `audits/` 前缀、追加前判重
+- `hooks/td_state_sync.js`：hook 补记格式对齐模板约定（本地时间补时区后缀 + `audits/` 前缀），fixture 双环境比对验证产出等价
+- `td-archive` 步骤 3：复盘节落点统一为 `proposal.md`，消除 tasks.md/proposal 分叉
+- `td-propose/references/scenario-test-map-template.md`：账本产出加两项机械校验（测试文件路径存在性 + scenario 名称与 spec 逐字一致）
+- `td-apply/references/change-point-classes.md`：caller 实测锚核对补双类断言约定（`contains` 子串锚 + `toBe` 精确锚，任一缺漏均漏检）
+- `requesting-code-review`：LLM 兜底 review 加逐 finding 复验要求（对照代码实证后进报告，实施者自审场景下记忆性误报率最高）
+
+## 本次加固
+
+### td-propose 三处 spec 填写约束
+
+借鉴 Spec Kit 的 specify / checklist 模板可判定判据，给 `td-propose` SKILL.md 三处内容规范加固——全部为「填法约束」，不新增必填项集合、不改字段定义、不新增 apply-ready 判据、不新增 artifact / 命令 / 依赖：
+
+- **步骤 3 human-in-loop 触发项下**：新增澄清量化约束（≤3 问 + 优先级 scope > security/privacy > UX > 技术细节 + 5 类合理默认不追问 + 4 条跳过条件）
+- **步骤 6.c「系统工程影响评估」字段列表后**：新增「预期行为模型」与「整体性能预期变化」四判据（可测量 / 技术无关 / 用户视角 / 可验证）+ 不适用降级路径（不为了凑判据生成伪量化字段）
+- **Guardrails 末尾**：新增整节 N/A vs 行级 N/A 处理规则（"大多数不适用 → 删节 + 开头一行说明"判据）
+
+### 仪式性「归位」段清理
+
+删除 4 个 td-* SKILL.md 的纯标签「反馈控制回路归位 / 核心论点归位 / 前馈控制准备环节」段——只贴原则标签、不写约束本 skill 的哪个动作，按 AGENTS.md「设计变更评估维度」节仪式性内容判定线判定为仪式性 → 删除。`system-engineering` 的「反馈控制回路」节作为根节点保留（仍是唯一归位锚点，下游 skill 触发闭环时按该节叙述归位）。
 
 ## ⚠️ 行为变更
 
-| 变更点 | 1.11.0 表现 | 1.12.0 行为 |
+| 变更点 | 1.12.0 表现 | 1.12.1 行为 |
 |---|---|---|
-| review 非 OK 判定 | 无证据强制要求，critical 可凭语感判出 | 非 OK 判定必给证据指位；无证据 critical 降为待验证疑点走 human-in-loop |
-| review 报告 Issues | 无上限 | 上限 5 条 |
-| audit 对照清单 | 二态（符合/违反） | 三态（符合/违反/存疑），违反须指证据位置；存疑先问用户不进修复表 |
-| WIP 连续 override | 仅单次超限提示，无连续检测 | 检测到已有 change 记录过 override → 提示"WIP 硬约束正在失效" |
-| 约束强度表述 | 部分文件正文写死数值/强度断言 | 统一引用式——按 `field-assessment` 表 1/表 2/表 3 取值（数值本身未变） |
-| 失败次数阈值 | 多文件各写 2 次/3 次 | 收敛至 `systematic-debugging` 单一权威（数值未变） |
-| skill 数量 | 17 skill + 8 command | 18 skill + 8 command |
+| profile-maintenance 轻量 proposal | 模板列 5 项字段 | 模板列 6 项字段（补「与既有架构/风格的遵循关系」） |
+| td-reverse-spec 「入口契约」形态 | 加粗强调句（非节） | `## 入口契约` 标题节 |
+| td-propose 澄清量化 | 无量化约束 | ≤3 问 + 优先级 + 合理默认不追问 + 跳过条件 |
+| td-propose 「系统工程影响评估」两字段 | 无填写判据 | 四判据（可测量 / 技术无关 / 用户视角 / 可验证）+ 不适用降级 |
+| td-propose proposal N/A 处理 | 无整节/行级区分 | 整节 N/A 删节 + 开头一行说明；行级 N/A 附机械校验项 |
+| audit-history 追加前 | 无判重与格式约定 | 判重 + timestamp 带时区 + report 带 `audits/` 前缀 |
+| td-archive 复盘节落点 | tasks.md / proposal 分叉 | 统一为 proposal.md |
+| scenario→test 账本产出 | 无机械校验 | 路径存在性 + scenario 名称逐字一致 两项机械校验 |
+| caller 实测锚核对 | 单类断言 | 双类断言（`contains` 子串 + `toBe` 精确） |
+| LLM 兜底 review | 凭实施记忆写 finding | 逐 finding 复验（对照代码实证） |
+| td-* SKILL.md 「归位」段 | 4 处纯标签归位段 | 删除（`system-engineering` 归位节作为唯一锚点保留） |
 
-**不改变的**：td-* artifact 流（propose → apply → archive）、表 1/2/3 强度数值（只改表述方式为引用式，数值单一事实源未动）、WIP 硬约束 + override 机制本体、hook 脚本与触发时机、`.td-state/` 持久化约定、四处 manifest 的 name / description / author——均不变。
-
-## 本次收敛（使用态审核）
-
-约 30 个文件按使用态 LLM 视角四维度审核收敛：删除 tier 变体文件头部零信息量 audit 频率指针节；tier-large 层次观纯复述段收敛为指向 `subsystem-tiering.md` 的一行指针；`td-explore` 步骤 4 评估维度收敛为指向步骤 5；TDD / writing-plans 依赖技能节移除按需触发项（预加载 vs 按需触发分界对齐）；`constraints`「如何被引用」节收敛为指向子约束映射表；subsystem-tiering 持久化表述与 yaml 模板口径对齐。完整列表见 CHANGELOG 的 [1.12.0] 条目。
+**不改变的**：td-* artifact 流（propose → apply → archive）、表 1/2/3 强度数值、WIP 硬约束 + override 机制本体、hook 触发时机（SessionEnd 事件不变）、`.td-state/` 持久化约定、四处 manifest 的 name / description / author、skill / command 数量（18 skill + 8 command）。
 
 ## 升级步骤
 
-1. **bump 版本**：四处清单的 `version` 已同步改为 `1.12.0`（根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`，description 保持纯 ASCII 且四处完全一致）。
+1. **bump 版本**：四处清单的 `version` 已同步改为 `1.12.1`（根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`，description 保持纯 ASCII 且四处完全一致）。
 2. **运行时前置**：不变——Node.js ≥20.19.0（OpenSpec CLI 与 SessionEnd hook 共用）；OpenSpec CLI：`npm install -g @fission-ai/openspec@latest`。
 3. **重新安装**（按平台）：
    - atomcode：`/plugin marketplace add <this-repo-url>` → `/plugin install total-design`
@@ -49,14 +77,14 @@ WIP 超限提示时若检测到已有 change 的 `proposal.md` 记录过 overrid
    - Pi Agent：`pi install git:<this-repo-url>`
 4. **重新 trust**：本次 hook 命令串未变更（哈希不变），已 trust 的安装无需重新 trust；全新安装按平台执行 `atomcode plugin trust total-design`。
 5. **验证**：
-   - 四处清单版本号同为 1.12.0，description 四处逐字一致。
-   - 新 skill 存在：`ls skills/agents-md-hygiene/SKILL.md` 有输出。
+   - 四处清单版本号同为 1.12.1，description 四处逐字一致。
+   - td-reverse-spec 有 `## 入口契约` 标题节：`grep -n "^## 入口契约" skills/td-reverse-spec/SKILL.md` 有输出。
+   - profile-maintenance 模板含第 6 项：`grep -n "与既有架构/风格的遵循关系" skills/field-assessment/references/profile-maintenance.md` 有输出。
+   - td-propose 三处填法约束存在：`grep -nE "可测量|整节 N/A|澄清量化" skills/td-propose/SKILL.md` 有输出。
+   - 开发态调用方清单零残留：`grep -rnE "触发方：\`?[a-z-]+\`? ?步骤" skills/` 无输出。
    - skill 数量：`ls -d skills/*/ | wc -l` 输出 `18`。
-   - 证据指位约束存在：`grep -n "证据" skills/requesting-code-review/SKILL.md` 有输出。
-   - audit 存疑路由存在：`grep -n "存疑路由" skills/td-system-audit/SKILL.md` 有输出。
-   - 连续 override 检测存在：`grep -n "连续 override" skills/constraints/references/wip-limit.md` 有输出。
    - 逻辑名/命令名/路径/CLI 命令/环境变量不变：`field-assessment` / `/td-propose` / `openspec list` / `$_TD_TIER` 等。
 
 ## 完整变更列表
 
-见 [CHANGELOG.md](./CHANGELOG.md) 的 [1.12.0] 条目。
+见 [CHANGELOG.md](./CHANGELOG.md) 的 [1.12.1] 条目。
