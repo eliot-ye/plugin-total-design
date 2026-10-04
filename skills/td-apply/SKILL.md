@@ -80,7 +80,7 @@ argument-hint: <change-name>
 **基本执行循环**（td-apply 自持，逐任务循环直至全部完成）：
 
 1. 读任务的"验证"字段与"风险"字段
-2. 触发 `test-driven-development`：先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑
+2. 触发 `test-driven-development`：先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑；实施中故意砍角（降级实现 / 留已知上限的简化）→ 按 `constraints` 的 `references/delay-decision.md` 的「`td-cut:` 砍角标注」节在该代码处留一行 `td-cut:` 标注（砍了什么角、已知上限、升级路径），只标有真实 ceiling 的故意砍角
 3. 触发 `verification-before-completion`：跑验证命令，拿到验证证据
 4. 更新 tasks.md：`- [ ]` → `- [x]`，附验证证据
 
