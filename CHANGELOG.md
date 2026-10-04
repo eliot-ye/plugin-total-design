@@ -2,6 +2,16 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.13.0] - 2026-10-04
+
+### Added
+
+- **td-explore frontier 轮次推进与事实/决策分工机制**（`skills/td-explore/SKILL.md` 步骤 4）：需用户拍板的决策点不止一个时，每轮只抛前提已确定的可达决策点全集（附基于现场证据的推荐默认值），依赖未决问题顺延下一轮，回答后重算可达集；事实类问题 agent 仓库自查（收编原「先查仓库再提问」段），自查进行中不阻塞其余问题；每轮问题编号沿用 human-in-loop 条目标号规则。1-2 个决策点时退化为单轮，不套轮次仪式。explore 产物形态不变，`td-propose` greenfield explore 检查与产物合并零影响。
+
+### Docs
+
+- **AGENTS.md 审核标准维度 2 新增「结构性断言与仓库现状一致」判据**：正文/references 中的无条件结构断言（"N 个 skill""X 负责 Y"）逐一对照仓库现状核对，过时断言（实例：`audit-frequency.md` 的"3 个 tier skill"在 1.6.0 收拢后失实）= 冲突；末句说明该判据与 grep 锚点验证不重复的单独存在理由。仅开发态审核流程，运行时资产零改动。
+
 ## [1.12.1] - 2026-09-30
 
 ### Fixed

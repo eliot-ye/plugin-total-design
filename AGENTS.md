@@ -256,6 +256,7 @@ args: none|option|required
 - **无条件 vs 分层限定**：profile / tier 的"特殊规则"带分层限定；正文无条件断言 vs 表 2 的 tier 列限定 = 模糊。
 - **示例与表格不一致**：正文举例（如 `constraints/references/human-in-loop.md` 的 profile 加成举例）与表 2 实际单元格一致（含 tier 限定）。
 - **重复段落**：多文件逐字重复的段落（如 3 profile 的「在各 tier 下的 constraint 强度」节、3 tier 的「判断依据」节）收敛为单一权威 + 引用。
+- **结构性断言与仓库现状一致**：正文/references 中的无条件结构断言（"N 个 skill""X 负责 Y""有 Z 层"）逐一对照仓库现状核对（`ls`/grep 可验证），过时的断言（如 `audit-frequency.md` 的"3 个 tier skill"在结构收拢后失实）= 冲突。grep 验证只覆盖显式引用锚点，抓不住这类断言——它们无锚点可查，是本判据单独存在的理由。
 
 ### 维度 3：可精简
 
