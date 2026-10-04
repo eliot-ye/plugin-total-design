@@ -42,6 +42,7 @@ archive 后触发 profile 重新判读（步骤 5.1）是总体设计部的职�
 
 - 所有 tasks.md 里的任务都 `[x]` 了吗？
 - `verification-before-completion` 跑过了吗？——含 change-level + 系统级（跨分系统边界，proposal 标注了受影响分系统时）两层验证，缺一层不算完成。
+- **`td-cut:` 砍角标注收敛检查**：对本 change 改动过的代码 grep `td-cut:` 标注（约定见 `constraints` 的 `references/delay-decision.md` 的「`td-cut:` 砍角标注」节）——每条标注必须已收敛：已升级实现 / 已进 `openspec/todo.md`（走 `todo-pool`）/ 经用户确认接受为长期现状。未收敛的标注 → 停下问用户归哪类，不接受"留着不管"。
 
 ### 3. 强制"实际 vs 预期"复盘（硬步骤）
 
@@ -101,6 +102,8 @@ openspec archive "<name>" --yes
 **Purpose TBD housekeeping 检查**：`openspec archive` sync 主 spec 时，主 spec `## Purpose` 节会残留模板默认值 TBD（已知 sync 副作用），不能让它留到下一次 audit。**检测（OpenSpec CLI ≥ v1.11）**：`openspec validate --specs` 会报告仍携带 Purpose 占位符的 capability（默认 warning；命中与否以输出中的 warning 为准，不看退出码）——命中 → 基于已归档 change 的 proposal「What Changes」节为该主 spec 补写一句话 Purpose，复检确认无残留。CLI < v1.11 → 按 `references/purpose-tbd-housekeeping.md` 的人工 grep 步骤执行同等检查与补写。
 
 **归档完整性自证**：sync 完成后跑 `openspec validate --archived`（OpenSpec CLI ≥ v1.9）——由 CLI 校验 `archive/` 下每个 change 的 tasks.md 全部 `[x]`。通过 → 归档完整性有命令背书，不再靠人工目测；不通过 → 本次归档（或历史归档）存在未完成任务混入，停下报给用户，不带病继续。CLI 版本低于 v1.9（无此 flag）→ 跳过本自证，完整性由步骤 2 前置检查单独承担，不阻塞。
+
+**全库结构校验（gate 收口）**：`openspec validate --all --json`——归档是契约层的闭合点，全库一致性（含主 spec 与其余 change）在此一次性校验。报出其他 change / 主 spec 的问题 → 提示用户，不阻塞本次归档但必须记录；报出本次归档引入的问题（如 sync 后主 spec 结构损坏）→ **阻塞**，修复后重跑。
 
 ### 5. archive 后接力动作
 

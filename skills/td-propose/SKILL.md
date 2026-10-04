@@ -188,6 +188,8 @@ openspec status --change "<name>" --json
 
 ### 7. 架构 review（proposal 定型后）
 
+**tier 分层**：`tier-small` → 跳过完整架构 review，只做一行自检："本 change 是否引入新的分系统切分或偏离既有架构？"——无 → 记录"跳过架构 review：无实质新架构决策"，直接进步骤 8；有 → 按下方完整流程走。`tier-medium` / `tier-large` → 完整流程：
+
 所有 artifact 创建完成后，**进入实施前先做架构 review**。
 
 调 `requesting-code-review` 的架构 review（见该 skill 第 5 节），review 对象是 proposal 的分系统切分与设计决策，检查清单见该 skill 的 `references/architecture-review-checklist.md`。
@@ -198,19 +200,13 @@ openspec status --change "<name>" --json
 
 ### 8. 显示最终状态
 
-先跑一次官方校验，确认 artifact 集合无结构性问题：
+先跑一次官方校验，确认 artifact 集合无结构性问题——**只校验本 change**：
 
 ```bash
-openspec validate --all --json
+openspec validate "<name>" --type change --json
 ```
 
-解析 JSON 输出：**本 change** 的校验问题 → 回步骤 6 修复对应 artifact 后重跑；其他既有 change 的问题 → 提示用户，不阻塞本流程。通过后显示最终状态：
-
-```bash
-openspec status --change "<name>"
-```
-
-输出：
+解析 JSON 输出：本 change 的校验问题 → 回步骤 6 修复对应 artifact 后重跑。通过后显示最终状态——**直接使用步骤 6.d 末次 `openspec status` 的结果，不再重复跑该命令**，输出：
 
 - Change 名 + 位置
 - 创建的 artifact 列表 + 简述

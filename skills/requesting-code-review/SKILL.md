@@ -12,7 +12,7 @@ user-invocable: false
 
 ## 触发时机
 
-- **`td-propose` 完成后、`td-apply` 动手前（架构 review）**——proposal 刚定型，进入实施前先检查分系统切分与设计决策，此时改架构成本最低
+- **`td-propose` 完成后、`td-apply` 动手前（架构 review）**——proposal 刚定型，进入实施前先检查分系统切分与设计决策，此时改架构成本最低。tier 分层强度由 `td-propose` 步骤 7 持有（tier-small 降为一行自检，命中完整流程才进入本 review）
 - `executing-plans` 的 checkpoint 时机
 - 每完成一个关键链任务
 - **`td-apply` 步骤 6.3 的 change 级收尾**——两层验证（change-level + 系统级）全绿后、change 判 done 前（触发条件与 tier 分层强度见该步骤，执行语义见本 skill 第 6 节）

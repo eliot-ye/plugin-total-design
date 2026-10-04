@@ -1,56 +1,57 @@
-# total-design v1.13.0 发布说明
+# total-design v1.14.0 发布说明
 
 > 面向使用态用户：升级前请先读「⚠️ 行为变更」与「升级步骤」。
 
 ## 本版本是什么
 
-1.13.0 是 **功能 + 文档版**：1 项新能力（td-explore frontier 轮次推进与事实/决策分工机制）+ 1 项开发态文档判据（AGENTS.md 审核标准维度 2 新增「结构性断言与仓库现状一致」）。td-* 契约流（propose → apply → archive）结构不变，表 1/2/3 强度数值不动，skill / command 数量不变（18 skill + 8 command）。
+1.14.0 是 **流程减法 + 新约定版**：1 项新约定（`td-cut:` 砍角标注）+ 2 处流程减法（tier-small 架构 review 降档、propose 校验收窄）+ 1 处 gate 补位（archive 全库校验收口）。td-* 契约流（propose → apply → archive）结构不变，表 1/2/3 强度数值不动，skill / command 数量不变（18 skill + 8 command）。
+
+灵感来源：ponytail 项目（AI agent 极简编码 skill）——借鉴其「砍角显式化」注释约定与「验证前置」思想，转译接入 td 的 delay-decision → archive 闭环；其三级用户调档模式经评估**不采纳**（会破坏 field-assessment 表 1/2/3 的配置层单一事实源）。
 
 ## 本次新增
 
-### td-explore frontier 轮次推进与事实/决策分工
+### `td-cut:` 砍角标注约定
 
-`skills/td-explore/SKILL.md` 步骤 4「头脑风暴」三处修改：
+agent 实施中故意砍角（降级实现、留已知上限的简化：全局锁、O(n²) 扫描、naive 启发式、先不做的输入校验场景）必须在代码处留一行标注：
 
-- **frontier 轮次推进**：需用户拍板的决策点不止一个时，每轮只抛**当前可达**的决策点全集——前提已确定、不需要猜测用户还没给出的答案的问题；答案依赖另一个本轮未决决策点的问题顺延到下一轮，用户回答后重算可达集。消除了逐个追问（轮次爆炸）与一次全抛（悬空问题）两类失败模式。
-- **事实/决策分工**：事实类问题（仓库、spec、配置文件可查的）是 agent 自己的工作，先查仓库再带入对话；只有决策进 frontier 交给用户。自查进行中不阻塞——只有依赖其结论的决策点延后，frontier 其余问题照常抛出。
-- **条目标号对齐**：每轮问题编号沿用 `human-in-loop` 的「需用户回复的条目标号规则」（章节前缀编号），保证用户回复可对应条目。
+```
+# td-cut: <砍了什么角>, <已知上限>, <升级路径>
+例：# td-cut: 全局锁, 单进程吞吐上限, 分账户锁当并发成为瓶颈
+```
 
-**降级出口**：需求基本清楚（仅 1-2 个决策点）时只有一轮，不套轮次仪式；与既有"不凑伪选项"红线一致，决策已闭合时正确输出仍是"没有需要你的决策点，直接继续推进"。
-
-**契约零影响**：explore 产物形态（对话式候选方向评估）不变，`td-propose` 的 greenfield explore 检查（步骤 3）与产物合并（步骤 4 前置）逻辑不受影响。
-
-### AGENTS.md 审核标准维度 2 新增判据（开发态）
-
-「结构性断言与仓库现状一致」：正文/references 中的无条件结构断言（"N 个 skill""X 负责 Y""有 Z 层"）逐一对照仓库现状核对，过时的断言（实例：`audit-frequency.md` 的"3 个 tier skill"在 1.6.0 收拢后失实）= 冲突。grep 锚点验证只覆盖显式引用（"见 X 的「Y」节"），抓不住无锚点的结构断言——它们对使用态 LLM 无报错信号，腐烂只在下游行为出错时暴露，故需单独判据。仅影响开发态审核流程，运行时资产零改动。
+- **只标有真实 ceiling 的故意砍角**——顺手的小事不标，避免注释噪音
+- **不替代记账**——该做的事延后仍走 TODO 池；`td-cut:` 是代码侧锚点，让 "later" 在 diff 里可见，不至于变 "never"
+- **归档时强制收敛**——`td-archive` 前置检查 grep 本 change 的 `td-cut:` 标注，每条归入三类：已升级实现 / 已进 TODO 池 / 用户确认接受为长期现状；未收敛停下问用户
 
 ## ⚠️ 行为变更
 
-| 变更点 | 1.12.1 表现 | 1.13.0 行为 |
+| 变更点 | 1.13.0 表现 | 1.14.0 行为 |
 |---|---|---|
-| td-explore 多决策点追问 | 逐个问或一次全抛（可能含悬空问题） | 每轮只抛前提已确定的可达决策点全集，附推荐默认值；依赖未决问题顺延下一轮 |
-| td-explore 事实类问题 | 问之前先查仓库（顺序约束） | 显式分工：事实 agent 自查，仅决策交用户；自查进行中不阻塞其余问题 |
-| td-explore 轮内编号 | 未显式约定 | 沿用 human-in-loop 章节前缀编号（如 `a1 / b1`） |
+| tier-small 架构 review（td-propose 步骤 7） | 无条件完整 review | 降为一行自检："是否引入新的分系统切分或偏离既有架构？"——无则记录跳过理由；tier-medium / large 不变 |
+| propose 期校验范围（td-propose 步骤 8） | `validate --all` 全库校验，其他 change 的旧问题会阻塞本流程 | 只定点校验本 change；全库校验移至 archive |
+| 归档校验（td-archive 步骤 4） | 无全库校验 | 补 `validate --all --json` gate 收口：旧问题提示不阻塞但必须记录，本次归档引入的问题阻塞 |
+| 故意砍角（td-apply → td-archive） | 无显式留痕约定，砍角决策只在会话上下文里 | 代码处留 `td-cut:` 标注；archive 时核对收敛，不允许"留着不管" |
 
-**不改变的**：td-* artifact 流（propose → apply → archive）、explore 产物形态与 Guardrails、"不凑伪选项"红线、表 1/2/3 强度数值、WIP 硬约束 + override 机制本体、hook 触发时机（SessionEnd 事件不变）、`.td-state/` 持久化约定、四处 manifest 的 name / description / author、skill / command 数量（18 skill + 8 command）。
+**不改变的**：tier-medium / tier-large 的架构 review、tier-small 的 caller impact 与收尾 review 档位、td-* artifact 流（propose → apply → archive）、表 1/2/3 强度数值、WIP 硬约束 + override 机制本体、hook 触发时机（SessionEnd 事件不变）、`.td-state/` 持久化约定、四处 manifest 的 name / description / author、skill / command 数量（18 skill + 8 command）。
 
 ## 升级步骤
 
-1. **bump 版本**：四处清单的 `version` 已同步改为 `1.13.0`（根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`，description 保持纯 ASCII 且四处完全一致）。
-2. **运行时前置**：不变——Node.js ≥20.19.0（OpenSpec CLI 与 SessionEnd hook 共用）；OpenSpec CLI：`npm install -g @fission-ai/openspec@latest`。
+1. **bump 版本**：四处清单的 `version` 已同步改为 `1.14.0`（根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`，description 保持纯 ASCII 且四处完全一致）。
+2. **运行时前置**：不变——Node.js ≥20.19.0（OpenSpec CLI 与 SessionEnd hook 共用）；OpenSpec CLI ≥ 1.12（`validate "<name>" --type change` 定点校验依赖）：`npm install -g @fission-ai/openspec@latest`。
 3. **重新安装**（按平台）：
    - atomcode：`/plugin marketplace add <this-repo-url>` → `/plugin install total-design`
    - Claude Code：`claude plugin marketplace add <this-repo-url>` → `claude plugin install total-design`（或 `claude --plugin-dir <this-repo-path>`）
    - Pi Agent：`pi install git:<this-repo-url>`
 4. **重新 trust**：本次 hook 命令串未变更（哈希不变），已 trust 的安装无需重新 trust；全新安装按平台执行 `atomcode plugin trust total-design`。
 5. **验证**：
-   - 四处清单版本号同为 1.13.0，description 四处逐字一致。
-   - frontier 轮次机制存在：`grep -n "frontier 轮次推进" skills/td-explore/SKILL.md` 有输出。
-   - 事实/决策分工存在：`grep -n "事实类问题（.*是 agent 自己的工作" skills/td-explore/SKILL.md` 有输出。
-   - 条目标号衔接存在：`grep -n "每轮问题编号按" skills/td-explore/SKILL.md` 有输出。
+   - 四处清单版本号同为 1.14.0，description 四处逐字一致。
+   - 砍角标注约定存在：`grep -n "td-cut:" skills/constraints/references/delay-decision.md` 有输出。
+   - tier-small 降档存在：`grep -n "tier-small.*一行自检" skills/td-propose/SKILL.md` 有输出。
+   - 定点校验存在：`grep -n 'validate "<name>" --type change' skills/td-propose/SKILL.md` 有输出。
+   - archive gate 存在：`grep -n "全库结构校验" skills/td-archive/SKILL.md` 有输出。
    - skill 数量：`ls -d skills/*/ | wc -l` 输出 `18`。
    - 逻辑名/命令名/路径/CLI 命令/环境变量不变：`field-assessment` / `/td-propose` / `openspec list` / `$_TD_TIER` 等。
 
 ## 完整变更列表
 
-见 [CHANGELOG.md](./CHANGELOG.md) 的 [1.13.0] 条目。
+见 [CHANGELOG.md](./CHANGELOG.md) 的 [1.14.0] 条目。

@@ -2,6 +2,22 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.14.0] - 2026-10-04
+
+### Added
+
+- **`td-cut:` 砍角标注约定**（`constraints/references/delay-decision.md` 新增「`td-cut:` 砍角标注」节）：实施中故意砍角（降级实现、留已知上限的简化）必须在代码处留一行 `# td-cut: <砍了什么角>, <已知上限>, <升级路径>` 标注——只标有真实 ceiling 的故意砍角，不替代 TODO 池记账。配套三处：`td-apply` 执行循环步骤 2（故意砍角时留标注）、`td-archive` 前置检查（标注收敛核对：已升级 / 已进 TODO 池 / 用户确认接受为长期现状，未收敛停下问用户）。借鉴 ponytail 的 `ponytail:` 注释约定，转译接入 td 的 delay-decision → archive 闭环。
+
+### Changed
+
+- **td-propose 步骤 7 架构 review tier 分层**：`tier-small` 从无条件完整架构 review 降为一行自检（"本 change 是否引入新的分系统切分或偏离既有架构？"——无则记录跳过理由直接进步骤 8，有则走完整流程）；`tier-medium` / `tier-large` 不变。`requesting-code-review` 触发时机节同步标注 tier 分层强度由 `td-propose` 步骤 7 持有。风险论证：tier-small 误跳过的代价有界（apply 的 caller impact 实测 + 后续 change 可恢复），判据与既有 caller impact 分析的 tier-small 可跳过对齐。
+- **td-propose 步骤 8 校验收窄**：`openspec validate --all` 改为本 change 定点校验（`openspec validate "<name>" --type change`，OpenSpec CLI ≥ 1.12 实测支持）——其他既有 change 的旧问题不再阻塞 propose，全库校验职责移至 `td-archive`。
+- **td-archive 步骤 4 补全库结构校验 gate**：`openspec validate --all --json` 作为归档 gate 收口——其他 change / 主 spec 的问题提示不阻塞但必须记录；本次归档引入的问题（如 sync 后主 spec 结构损坏）阻塞修复。与 propose 侧收窄构成"建 change 只管本 change、闭合点管全库"的职责再分配。
+
+### Docs
+
+- release 文档同步（本条目与 RELEASE_NOTES.md）。
+
 ## [1.13.0] - 2026-10-04
 
 ### Added
