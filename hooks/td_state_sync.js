@@ -31,8 +31,8 @@ const REPORT_NAME_RE = /^(\d{8}-\d{6})-([a-z-]+)\.md$/;
 // 模板标题改动时 hook 自动跟随，避免"模板与 hook 两处维护同一字符串"导致
 // 改模板后 hook 静默失效（单一事实源，耦合方向 = 模板 → hook）。
 // 模板读取失败时回退到内置默认值，hook 永不因模板问题崩溃。
-const HEADING_RE = /^#{2,3} /;
-const FALLBACK_MARKERS = ["## System Audit", "### 主基调对照"];
+const HEADING_RE = /^#{1,6} /;
+const FALLBACK_MARKERS = ["System Audit 报告", "主基调对照"];
 
 
 function loadReportMarkers() {
@@ -63,7 +63,11 @@ function loadReportMarkers() {
           inBlock = !inBlock;
           continue;
         }
-        if (inBlock && HEADING_RE.test(s)) markers.push(s);
+        // 2026-10-05 修复（RC2）：只存标题内容、剥掉 # 层级——agent 落盘报告的
+        // 标题层级与模板不一致（H1 vs H2/H3）曾致完整性判定恒 false，全部完整
+        // 报告被误列 .incomplete.log。isCompleteReport 的 includes 按内容匹配，
+        // 层级无关。
+        if (inBlock && HEADING_RE.test(s)) markers.push(s.replace(/^#+\s*/, ""));
       }
       if (markers.length) return markers;
     }
@@ -170,7 +174,10 @@ function syncAuditHistory(stateDir) {
   try {
     for (const line of fs.readFileSync(historyPath, "utf8").split("\n")) {
       const m = line.match(/^\s*report:\s*(.*)/);
-      if (m) known.add(m[1].trim());
+      // 2026-10-05 修复（RC1）：归一化为裸文件名再比对——history 记录带 audits/
+      // 前缀、readdirSync 产出裸名，键形态不一致曾致去重恒失效（每次会话结束
+      // 全量重追加，audit-history 镜像膨胀 2095 条）。basename 对两种形态均归一。
+      if (m) known.add(path.basename(m[1].trim()));
     }
   } catch (err) {
     // 历史文件不存在：known 保持空集
@@ -258,4 +265,16 @@ function main() {
   }
 }
 
-main();
+// 2026-10-05 修复：require 即执行使脚本无法单测（RC1/RC2 两处状态写入缺陷曾
+// 因此漏网）——加入口守卫，函数面导出供测试消费。
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  loadReportMarkers,
+  isCompleteReport,
+  findProjectRoot,
+  syncArchiveCounter,
+  syncAuditHistory,
+};
