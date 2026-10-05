@@ -2,6 +2,16 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.14.1] - 2026-10-05
+
+### Fixed
+
+- **`hooks/td_state_sync.js` 去重键形态不一致致 audit-history 全量重追加**：`syncAuditHistory` 从历史 `report:` 字段直接入 `known` 集合，键形态是 `audits/YYYYMMDD-HHMMSS-<name>.md`（带前缀）；而 `readdirSync` 产出的是裸文件名 `YYYYMMDD-HHMMSS-<name>.md`——两侧键形态不一致，去重恒失效，每次 `SessionEnd` 都把全部历史 report 重新追加一遍。实测真实项目 `.td-state/audit-history.yaml` 膨胀到 2095 条镜像。修复：入集合前统一走 `path.basename` 归一化，两种形态均收敛为裸名。
+- **完整性 marker 剥 `#` 层级存内容——完整报告被误判为 incomplete**：`loadReportMarkers` 从 `references/audit-report-template.md` 抓 H2/H3 标题（`^#{2,3} `），存入的 marker 含 `##`/`###` 前缀；`isCompleteReport` 用 `includes` 匹配。当 agent 落盘报告时用 H1 层级（同一标题，不同层级），`includes` 判 false，完整报告被全量写入 `.td-state/.incomplete.log`。修复：marker 只存标题内容、剥掉 `#` 层级，`includes` 按内容匹配、层级无关；`HEADING_RE` 放宽到 `^#{1,6} ` 覆盖任意标题层级，`FALLBACK_MARKERS` 同步改为内容形态。
+- **`hooks/td_state_sync.js` 加 `require.main` 入口守卫与函数面导出**：原脚本尾部无条件 `main()`，`require` 即执行——无法在测试中引入而跳过执行，上述两处状态写入缺陷因此漏网。修复：包 `if (require.main === module)` 守卫 + `module.exports` 导出 `loadReportMarkers` / `isCompleteReport` / `findProjectRoot` / `syncArchiveCounter` / `syncAuditHistory`。
+
+验证：临时副本连跑两遍幂等（二遍零写入 / `.incomplete.log` 自清 / 99 条镜像不重追加）+ 真实环境零写入。
+
 ## [1.14.0] - 2026-10-04
 
 ### Added
