@@ -2,6 +2,16 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.14.2] - 2026-10-11
+
+### Changed
+
+- **8 个 `td-*` 命令补写 `user-invocable: false` 元数据**：`commands/td-apply.md` / `td-archive.md` / `td-explore.md` / `td-init.md` / `td-list.md` / `td-propose.md` / `td-reverse-spec.md` / `td-system-audit.md` 8 个命令文件的 frontmatter 统一在 `disable-model-invocation: true` 之后补一行 `user-invocable: false`。与 `disable-model-invocation: true` 并列，明确 slash-only 入口语义——这两条字段是 AGENTS.md「命令文件编辑」条中声明的字段集，此前 8 个命令文件只声明了 `disable-model-invocation`，未同步补写 `user-invocable`，属元数据一致性遗漏。命令正文、`args` 字段、`description` 均未变更，agent 加载行为、slash 触发路径、契约流（propose → apply → archive）全部不变。
+
+### Docs
+
+- release 文档同步（本条目与 RELEASE_NOTES.md）。
+
 ## [1.14.1] - 2026-10-05
 
 ### Fixed
