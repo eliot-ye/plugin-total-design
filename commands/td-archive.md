@@ -2,6 +2,7 @@
 name: td-archive
 description: 完成后归档
 disable-model-invocation: true
+user-invocable: false
 args: optional
 ---
 

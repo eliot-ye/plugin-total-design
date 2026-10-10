@@ -2,6 +2,7 @@
 name: td-list
 description: 列出所有未归档的变更
 disable-model-invocation: true
+user-invocable: false
 args: none
 ---
 
