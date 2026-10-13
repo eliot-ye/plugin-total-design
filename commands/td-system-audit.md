@@ -2,7 +2,6 @@
 name: td-system-audit
 description: 周期性对照系统工程主基调自检
 disable-model-invocation: true
-user-invocable: false
 args: optional
 ---
 
