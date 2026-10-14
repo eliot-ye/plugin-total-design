@@ -2,6 +2,18 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.14.3] - 2026-10-14
+
+### Fixed
+
+- **撤销 1.14.2 对 8 个 `td-*` 命令补写 `user-invocable: false` 的元数据变更**：1.14.2 把 `user-invocable: false` 追加进 `commands/td-*.md` 8 个命令文件的 frontmatter，属字段集一致性补齐；但该字段并未改变命令行为（`disable-model-invocation: true` 已充分表达 slash-only 语义，见 AGENTS.md「命令文件编辑」节极薄模板——模板字段集仅 `name` / `description` / `args`），且从未推送至远端。为收紧 AGENTS.md「命令文件编辑」模板的字段集一致口径、避免命令文件与模板产生字段集分叉，1.14.3 以 revert commit `ecc5aba` 撤销该变更，`commands/td-*.md` 回到与 1.14.1 完全一致的状态。
+
+**发布范围提示**：1.14.2 tag 只在本地生成、从未推送到远端，下游无消费记录；1.14.3 是当前唯一应安装的版本。
+
+### Docs
+
+- release 文档同步（本条目与 RELEASE_NOTES.md）。
+
 ## [1.14.2] - 2026-10-11
 
 ### Changed
