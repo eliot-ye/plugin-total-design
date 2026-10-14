@@ -2,6 +2,18 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.14.4] - 2026-10-14
+
+### Added
+
+- **Pi Agent slash 命令桥**：新增 `extensions/pi-agent/index.ts`（Pi extension 入口，71 行），通过 `pi.registerCommand` 注册 8 个短命令 `td-init` / `td-propose` / `td-explore` / `td-apply` / `td-reverse-spec` / `td-archive` / `td-system-audit` / `td-list`，`handler` 内以 `sendUserMessage` 将 `/td-<verb> <args>` 转发为 `/skill:td-<verb> <args>`——Pi 侧原本只能通过 `/skill:td-*` 长前缀调用，本次补齐与 atomcode / Claude Code 一致的短命令入口。`package.json` 的 `pi.extensions` 数组指向该扩展，与既有 `pi.skills` 并存——`pi.skills` 继续加载 18 个 skill，`pi.extensions` 只承载命令注册逻辑，两者职责正交。
+
+- **加载路径与既有平台对齐**：atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载 `commands/` 目录获得 8 个 slash 命令；Pi Agent 无命令系统、只有 skill 加载器与 extension 机制，因此走 extension 桥接而不是复制 `commands/`——`commands/td-*.md` 8 个命令文件保持零改动，Pi 侧的命令描述文本与 `commands/` 目录里的 description 保持同步（人工维护口径，无单一事实源强约束）。
+
+### Docs
+
+- release 文档同步（本条目与 RELEASE_NOTES.md）。
+
 ## [1.14.3] - 2026-10-14
 
 ### Fixed
