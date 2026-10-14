@@ -21,6 +21,9 @@
     "url": "https://atomgit.com/eliot-ye/plugin-total-design"
   },
   "pi": {
-    "skills": ["./skills"]
+    "skills": ["./skills"],
+    "extensions": [
+      "./extensions/pi-agent/index.ts"
+    ]
   }
 }
