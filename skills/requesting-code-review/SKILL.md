@@ -70,7 +70,7 @@ review 对象与作者为同一 agent 的产出时，review 不得在 authoring 
 
 **隔离载体（按优先级）**：
 
-1. **环境自带的 code review 工具**（最强隔离——工具进程外）——现有第 6 节「工具优先」已是此档
+1. **环境自带的 code review 工具**（最强隔离——工具进程外）——现有第 6 节「工具优先」已是此档。**仅当本 skill 定义的 review 维度就是工具 reviewer 内置覆盖的维度时适用**；本 skill 第 5 节架构 review 的检查清单（高内聚 / 低耦合 / 循环依赖 / 隐式依赖）超出该工具 reviewer 覆盖范围，跳过此档从第 2 档 subagent 起
 2. **subagent**（fresh-context，同模型）——平台支持 subagent 派发时，agent 必须尝试走 subagent 隔离，不允许跳过直接自评；subagent 在独立上下文执行 review，作者上下文拿回 review 报告继续决策
 3. **同上下文 LLM review（降级）**——平台不支持 subagent 派发时降级到同上下文自评，不阻塞、不询问用户
 
@@ -141,6 +141,8 @@ warning 不阻塞，但要记录在 tasks.md 的"已知问题"里。
 ### 5. 架构 review（proposal 完成后、apply 前）
 
 review 对象不是代码，是 proposal 的分系统切分与设计决策。此时改架构成本最低。
+
+**隔离载体**：按第 2 节共享前置，本 review 的优先级从 subagent 起——本 skill 定义的架构检查清单（高内聚 / 低耦合 / 循环依赖 / 隐式依赖）超出 code review 工具 reviewer 覆盖范围，工具跑不出本 skill 定义的检查语义（跳过第 2 节第一档）。
 
 检查清单（高内聚 / 低耦合）见 `references/architecture-review-checklist.md`。分级与阻塞语义如下（与 code review 共用；其他位置的分级表述以本节为准）：
 
