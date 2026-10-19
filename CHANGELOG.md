@@ -2,6 +2,16 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.14.5] - 2026-10-19
+
+### Fixed
+
+- **`requesting-code-review` 架构 review 的隔离载体判据修正**：第 2 节「Review 上下文隔离」第一档「环境自带的 code review 工具」原表述未界定适用范围，使用态 LLM 在架构 review 场景会误试第一档工具。初版修正按"是否有真实 diff"分档，判据仍错——`td-propose` 步骤 6 创建的新 artifact（proposal / design.md / tasks.md）在 git 里就是有 diff，"无 diff 对象"不成立。终版判据锚到"本 skill 定义的 review 维度是否落在工具 reviewer 内置覆盖范围内"：code review 工具的 reviewer 内置维度是代码的 correctness / security / reliability，而本 skill 第 5 节架构 review 的检查清单是 `references/architecture-review-checklist.md` 定义的高内聚 / 低耦合 / 循环依赖 / 隐式依赖，超出工具 reviewer 覆盖范围，工具跑不出本 skill 定义的检查语义。第 5 节架构 review 新增「隔离载体」锚定句：优先级从 subagent 起，跳过第 2 节第一档。第 6 节 change 级收尾 review 不受影响（review 对象是 working tree 里的真实代码 diff，维度语义与工具匹配，「工具优先」保留）。
+
+### Docs
+
+- release 文档同步（本条目与 RELEASE_NOTES.md）。
+
 ## [1.14.4] - 2026-10-14
 
 ### Added
