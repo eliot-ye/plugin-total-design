@@ -87,6 +87,15 @@ review 对象与作者为同一 agent 的产出时，review 不得在 authoring 
 - **证据强制指位**：每个非 OK 判定必须给出证据位置（`file:line` 或 artifact 节名）；Issues 的"位置"字段必填。指不出位置的抽象批评不构成有效 issue。
 - **证据充分性判级**：critical 候选若指不出具体证据位置，不得标 critical——降为"待验证疑点"，触发 `constraints` 的 `references/human-in-loop.md` 向用户求证。只有"存在证据"计入 critical；"可能存在"不算。
 - **Issues 条数上限**：最多 5 条（按严重度排序）——防止 nit 淹没重点，超出的 nit 合并为一句汇总。
+- **噪声抑制**：可判定的 actionable suggestion（如"这个 cast 是 no-op，删掉安全"）最多标 **warning**，不得升 critical；纯偏好类命名（`userId` vs `userID`）、格式化、import 顺序、纯风格项一律不列入 Issues——留给 formatter / linter。命名按"是否误导"判级：`getX` 删数据、`isEnabled` 存禁用态、拼写破坏符号一致性 → 按真实严重度处理，不当作 nit。
+- **严重度映射（对接环境自带 code review 工具）**：工具返回的 P0/P1/P2/P3 按下表映射到本 skill 的分级——映射由使用态 LLM 完成，工具输出不是分级最终裁定：
+
+  | 工具 priority | 本 skill 分级 | 说明 |
+  |---|---|---|
+  | P0（构建/服务中断、数据损坏、密钥泄漏、鉴权绕过） | critical | 阻塞 |
+  | P1（高概率运行时错误、安全风险、数据一致性问题） | critical | 阻塞 |
+  | P2（特定条件触发的 bug、边界错误、错误处理缺失、关键测试缺失） | warning | 可延后 |
+  | P3（次要可靠性问题、可选改进） | nit 或 warning | 按具体影响判级 |
 
 ```markdown
 ## Code Review：<task name>
@@ -162,8 +171,8 @@ review 对象不是代码，是 proposal 的分系统切分与设计决策。此
 
 **执行方式（工具优先，LLM 兜底）**：
 
-1. 当前 agent 环境自带 code review 工具 → 优先调用，把上方 review 对象与深度档位作为范围输入
-2. 工具 review 失败（不可用 / 报错 / 超时）或环境无 review 工具 → LLM 人工 review：按第 1 节维度、第 2 节分级、第 3 节报告格式执行（报告标题用 change 名）。**逐 finding 复验**：报告中的每个 finding 在进报告前须对照代码逐条实证（重新打开对应文件与行确认问题真实存在），不得凭实施记忆直接写入——实施者自审场景下记忆性误报率最高，复验是兜底路径的独立性补偿
+1. 当前 agent 环境自带 code review 工具 → 优先调用，把上方 review 对象与深度档位作为范围输入。**Impact plan 预处理**：若工具支持从 diff 生成结构化探索计划（如按 changed files + 高风险符号 + 生命周期/契约节点渲染 review plan），先取该计划作为 reviewer 的探索入口，把无依赖的 `read_file` / `grep` / `ast_grep` 调用并发发出；否则直接从 diff 起。**可选透传参数**：若工具支持按语言/文件模式注入领域规则目录（`rules_dir` 类）与轮次/时长上限（`max_rounds` / `max_duration` 类），把 tier 分层的强度上限作为范围输入传入——这些是工具原生能力，本 skill 不内置规则内容。
+2. 工具 review 失败（不可用 / 报错 / 超时）或环境无 review 工具 → LLM 人工 review：按第 1 节维度、第 2 节分级、第 3 节报告格式执行（报告标题用 change 名）。**逐 finding 复验**：报告中的每个 finding 在进报告前须对照代码逐条实证——重新打开对应文件与行，确认问题**真实存在于被改代码本身**（不是既有旧代码、不是无关兄弟路径），且**触发条件可由 diff 与周边代码推出**（不必已发生，但须能说出「在什么条件下发生什么失败」）；指不出对应行区间或说不出触发条件的候选 → 剔除，不进报告。不得凭实施记忆直接写入——实施者自审场景下记忆性误报率最高，复验是兜底路径的独立性补偿
 
 **深度档位**：以 `td-apply` 步骤 6.3 持有的 tier 分层为准（tier-medium / tier-large 按全部任务 `风险` 最高档；tier-small 保底抽查）。
 
