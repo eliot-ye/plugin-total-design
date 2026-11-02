@@ -69,6 +69,7 @@ archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预�
 
 - 预期之外的副作用（这是后续 `/td-system-audit` 的输入）
 - scenario→test 覆盖账本状态（若 change 产出过账本）：全绿 / 有哪些 `N/A` 条目及理由
+- 需求权衡处置（若 proposal 的"系统工程影响评估"节标注矛盾"留待 archive 对照"或未在 `/td-propose` 设计阶段解决）：实际权衡结果 / 是否仍矛盾；仍矛盾 → 触发 `constraints` 的 `references/human-in-loop.md` 交还用户处置
 
 **模型验证**字段的展开：
 

@@ -2,6 +2,25 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.15.0] - 2026-11-02
+
+### Added
+
+- **code review 工具对接规范与判定判据（`requesting-code-review`）**：第 3 节「Review 报告」新增「严重度映射」——环境自带 code review 工具返回的 P0/P1/P2/P3 按下表映射到本 skill 的分级（P0 构建/服务中断、数据损坏、密钥泄漏、鉴权绕过 → critical 阻塞；P1 高概率运行时错误、安全风险、数据一致性问题 → critical 阻塞；P2 特定条件触发的 bug、边界错误、错误处理缺失、关键测试缺失 → warning 可延后；P3 次要可靠性问题、可选改进 → nit 或 warning 按具体影响判级），映射由使用态 LLM 完成，工具输出不是分级最终裁定。同节新增「噪声抑制」——可判定的 actionable suggestion 最多标 warning 不得升 critical；纯偏好类命名、格式化、import 顺序、纯风格项一律不列入 Issues（留给 formatter / linter）；命名按「是否误导」判级（`getX` 删数据、`isEnabled` 存禁用态、拼写破坏符号一致性 → 按真实严重度处理，不当作 nit）。
+- **tool 对接的执行方式细化（第 6 节 change 级收尾 review）**：工具优先路径补「Impact plan 预处理」——若工具支持从 diff 生成结构化探索计划（按 changed files + 高风险符号 + 生命周期/契约节点渲染 review plan），先取该计划作为 reviewer 的探索入口，把无依赖的 `read_file` / `grep` / `ast_grep` 调用并发发出；否则直接从 diff 起。补「可选透传参数」——若工具支持按语言/文件模式注入领域规则目录（`rules_dir` 类）与轮次/时长上限（`max_rounds` / `max_duration` 类），把 tier 分层的强度上限作为范围输入传入（工具原生能力，本 skill 不内置规则内容）。
+- **`td-system-audit` 价值前提节**：本 skill 是否有东西可审取决于项目是否已接入完整 td 工作流——审计输入来自三个源头（current-change scope 的 proposal/design/tasks、project scope 的 baseline 锚点、实际 vs 预期复盘与频率计数），全部由 propose→apply→archive 循环沉淀；项目零散使用 td（只 propose 不 archive、从未 reverse-spec）时审计产出应理解为合规性检查而非项目健康检查，要审到项目健康度先走通完整循环或建立 baseline。
+
+### Fixed
+
+- **探索产出事实性约束（`td-explore`）**：原「先查仓库再提问」段升级为「先验证为事实（提问与产出都适用）」——事实性陈述无论是要问用户的问题还是探索产出里的陈述（候选方向的优缺点、系统工程影响评估、对现状的判断如「文件是否 tracked」「命令实际行为」「配置字段作用范围」）都是 agent 自己的工作，先验证为事实再陈述。分两层：仓库内能查到的读到的就引用不凭推断补全、可当场验证的当场验证不能靠直觉；仓库内查不到但属外部世界客观事实的（库/框架 API 行为、CLI 参数实际作用、依赖版本兼容性、配置字段语义、生态现状）必须联网搜索官方文档 / 源码 / issue 验证，不能直接当事实陈述。验证过的陈述带证据来源（仓库路径 / 文件:行 或文档、issue 链接）；两层都验证不到的明确标注为假设，不假装已确认。
+- **矛盾处置责任链补齐（`td-explore` / `td-propose` / `td-archive`）**：原矛盾链路只覆盖 explore → archive（archive 时矛盾仍在 → 触发 human-in-loop），propose 承接环节缺失，矛盾可能悬空到 archive 才被一次性暴露。补齐三处——`td-explore` 步骤 3 矛盾迭代终点点名 `td-propose` 步骤 6.a；`td-propose` 步骤 6.a「系统工程影响评估」新增「矛盾承接」条（proposal 须显式描述本 change 承载的需求权衡 + 设计侧如何处置：两全 / 取舍+理由 / 留待 archive 对照，这是描述义务不是拍板门，取舍本身是否需用户确认仍按 human-in-loop 必停场景 5 判定）；`td-archive` 步骤 3 复盘新增「需求权衡处置」字段（实际权衡结果 / 是否仍矛盾，仍矛盾 → 触发 human-in-loop 交还用户处置）。
+- **`requesting-code-review` 兜底路径复验判据收严**：LLM 人工 review 的逐 finding 复验由「重新打开对应文件与行确认问题真实存在」收严为「确认问题真实存在于被改代码本身（不是既有旧代码、不是无关兄弟路径），且触发条件可由 diff 与周边代码推出（不必已发生，但须能说出在什么条件下发生什么失败）；指不出对应行区间或说不出触发条件的候选 → 剔除，不进报告」。
+- **`requesting-code-review` 与 `systematic-debugging` 明确可显式调用**：frontmatter `user-invocable` 由 `false` 改为 `true`——两者此前为流程编排触发（td-apply 内部调用），但用户显式要求 review / debug 时应作为独立入口可调用，消除触发歧义。
+
+### Docs
+
+- release 文档同步（本条目与 RELEASE_NOTES.md）。
+
 ## [1.14.5] - 2026-10-19
 
 ### Fixed

@@ -9,6 +9,16 @@ argument-hint: "<scope: current-change | project>  (optional, default current-ch
 
 钱学森"总体设计部"视角的工程化体现。周期性把 agent 当前的工作对照系统工程四条主基调过一遍，识别"局部优化制造全局失调"的风险。
 
+## 价值前提
+
+本 skill 是否有东西可审，取决于项目是否已接入完整 td 工作流。审计输入来自三个源头，全部由 propose→apply→archive 循环沉淀：
+
+- **current-change scope**：当前活跃 change 的 proposal/design/tasks——来自 propose。
+- **project scope 的 baseline 锚点**：`openspec/specs/` 下的主 spec——由 reverse-spec / archive sync 写入；为空则跳过（见步骤 2）。
+- **project scope 的"实际 vs 预期"复盘与频率计数**：最近 archive 的复盘由 archive 步骤 3 产出；表 3 频率计数由 archive 步骤 5.2 维护——只走 propose 不 archive 则计数不更新。
+
+**因此**：项目零散使用 td（只 propose 不 archive、从未 reverse-spec）时，这些源头基本为空，audit 主要检查"agent 是否按方法论走"，审不到项目健康度。此时跑 audit，产出应理解为合规性检查而非项目健康检查。要审到项目健康度，先走通完整循环或建立 baseline。
+
 ## 依赖技能
 
 - `system-engineering`
