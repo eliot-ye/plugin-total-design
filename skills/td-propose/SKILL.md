@@ -83,6 +83,7 @@ openspec status --change "<name>" --json
 **6.a 合并会话内已有探索产物**：
 
 - 若本次会话已产出 `td-explore` 的候选方向评估（对话形式交付），把其中的候选方向取舍与"系统工程影响"评估合并进 proposal 骨架，作为 6.c 必填项的输入。没有产物 → 跳过本条。
+- **矛盾承接**（若 `td-explore` 产物含未决矛盾——对话中暴露、尚未拍板的权衡）：proposal 的"系统工程影响评估"节须显式描述"本 change 承载的需求权衡 + 设计侧如何处置（两全 / 取舍+理由 / 留待 archive 对照）"。这是**描述义务，不是拍板门**——取舍本身是否需用户确认，仍按 `constraints` 的 `references/human-in-loop.md` 必停场景 5（"agent 置信度低：不确定方案是否对齐用户意图"）判定。
 - 会话上下文中没有本次 change 触及分系统的 baseline spec 内容（如本会话没走过 `/td-explore`，或其读取内容已不在上下文）→ 读 `openspec/specs/` 下相关分系统的 `spec.md`（契约与不变量），作为 6.c"与既有架构/风格的遵循关系"与整体影响判断的输入；相关分系统在 `openspec/specs/` 下没有 baseline（greenfield 首个 change）→ 跳过。
 - 两者皆无 → 直接从 template 构建。
 
