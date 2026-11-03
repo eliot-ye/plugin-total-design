@@ -8,9 +8,9 @@
 
 先读 `AGENTS.md` 了解项目身份和结构。简单说：
 
-- 这是一个 **code agent plugin**（atomcode / Claude Code / Pi Agent 等遵循 Agent Plugins 1.0.0 规范的客户端均可加载），不是应用项目
+- 这是一个 **code agent plugin**（atomcode / Claude Code / Pi Agent / DeepSeek Harness (DSH) 等均可加载），不是应用项目
 - 产出形态：一组 Markdown 文件（`SKILL.md` / 命令文件）+ manifest
-- 没有可执行代码，所有"逻辑"都是 Markdown 指令
+- **除 DSH 薄包装层外没有可执行代码**：`dsh/index.mjs` 是唯一新增 JS（约 152 行，只做 skill 注册，无业务逻辑；`hooks/td_state_sync.js` 是原有状态兜底脚本），其余"逻辑"都是 Markdown 指令
 
 ## 三种贡献方式
 
@@ -107,6 +107,19 @@ for (const d of ['skills', 'commands']) {
 if (bad) process.exit(1);
 console.log('OK: no colons');
 EOF
+
+# DSH：bundle 清单字段存在且指向 patch
+node -e 'const p = require("./package.json"); if (!p.dsh?.bundle?.patch) throw new Error("missing dsh.bundle.patch"); console.log("OK dsh.bundle.patch:", p.dsh.bundle.patch)'
+
+# DSH：provider 能发现全部 18 个 skill（模拟 ctx.skills 注册，不依赖 DSH 运行时）
+node --input-type=module -e '
+import { apply } from "./dsh/index.mjs";
+let provider;
+apply({ logger: { warn: console.error }, skills: { registerProvider(create) { provider = create({ signal: new AbortController().signal, invalidate() {} }); } } });
+const list = await provider.list();
+console.log(`OK dsh provider: ${list.length} skills`);
+if (list.length !== 18) process.exit(1);
+'
 ```
 
 ### 5. Commit
@@ -181,18 +194,13 @@ Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读�
 
 ## 加载器规范（贡献前必读）
 
-以下事实来自 atomcode 源码 `crates/atomcode-core/src/plugin/manifest.rs` 和 `skill.rs`（atomcode 走 CC 兼容路径加载本 plugin，Claude Code 的对应字段规则与其一致）：
+本 plugin 同时服务 atomcode / Claude Code / Pi Agent / DeepSeek Harness (DSH)，各平台的加载清单、合法字段、命名与 frontmatter 规则、以及 DSH 的不支持项统一维护在 docs：
 
-| 项 | 规则 |
-|---|---|
-| manifest 文件名 | `plugin.json`（必须 JSON，不接受 YAML） |
-| manifest 合法字段 | `name` / `version` / `description` / `skills` / `commands` / `hooks` |
-| **无 `constraints` 字段** | 约束层不能用 manifest 声明，必须以 skill 形态存在 |
-| **无 `profiles` / `tiers` 字段** | 二维配置不能靠 manifest 实现，必须以 skill 形态存在 |
-| skill/command 命名规则 | 1–64 字符；合法字符 `a-zA-Z0-9-_/`；**禁 `:`**；禁首尾斜杠、`//` |
-| skill 形态 | 两种布局都支持：① 目录式 `<dir>/SKILL.md` ② 扁平 `<name>.md`（legacy） |
-| skill frontmatter 字段 | `name` / `description` / `disable-model-invocation` / `user-invocable` / `argument-hint` / `allowed-tools`（原子字符，连字符分隔，与 README 与 AGENTS.md 模板一致；下划线变体会被 atomcode 静默忽略） |
-| 命令生态惯例 | 扁平 kebab-case，无冒号 |
+- [docs/maintainer/platforms.md](docs/maintainer/platforms.md) —— 四平台加载机制、分发、命令前缀、hook 差异
+- [docs/maintainer/content-authoring.md](docs/maintainer/content-authoring.md) —— SKILL / 命令编写细节、命名规则、references 约定
+- [docs/maintainer/manifests.md](docs/maintainer/manifests.md) —— 四处 manifest 字段、一致性与发版同步
+
+贡献前至少读 platforms.md 的「总表」与 content-authoring.md 的「命名规则」；不要在本文件或 README 复制平台规则，避免两处维护。
 
 ## PR 审查标准
 

@@ -2,7 +2,9 @@
 
 > 装上它，你的 agent 就有了一个总体设计部。
 
-把 **OpenSpec**（契约层）+ **Superpowers**（行为层）+ **钱学森系统工程**（约束层主基调）封装成一个 code agent skill plugin，让装了它的 agent 从"一个会打字很快的助手"变成"一个有工程纪律的协作者"。支持 atomcode / Claude Code / Pi Agent，符合 [Agent Plugins 1.0.0](https://agent-plugins.org/specification) 规范（其他遵循该标准的客户端可通过根 `plugin.json` 自动识别）。详见 [AGENTS.md](AGENTS.md) 「支持的 code agent」。
+把 **OpenSpec**（契约层）+ **Superpowers**（行为层）+ **钱学森系统工程**（约束层主基调）封装成一个 code agent skill plugin，让装了它的 agent 从"一个会打字很快的助手"变成"一个有工程纪律的协作者"。
+
+支持 **atomcode / Claude Code / Pi Agent / DeepSeek Harness (DSH)**，符合 [Agent Plugins 1.0.0](https://agent-plugins.org/specification) 规范（其他遵循该标准的客户端可通过根 `plugin.json` 自动识别）。
 
 ---
 
@@ -43,72 +45,38 @@ AI coding agent 的失控不是"模型不够强"，是**没有工程纪律**：
 
 ## 安装
 
-**前置：** Node.js ≥20.19.0（OpenSpec CLI 与 SessionEnd hook 共用同一运行时）；OpenSpec CLI：`npm install -g @fission-ai/openspec@latest`
+**前置**：Node.js ≥20.19.0、OpenSpec CLI（`npm install -g @fission-ai/openspec@latest`）。DSH 端由 Harness 自带 Node 运行时。
 
-**选择你使用的 code agent：**
+| 平台 | 安装 |
+|---|---|
+| atomcode | `/plugin marketplace add <repo>` → `/plugin install total-design`（或 clone 到 `~/.atomcode/plugins/`） |
+| Claude Code | `claude plugin marketplace add <repo>` → `claude plugin install total-design`（或 `--plugin-dir`） |
+| Pi Agent | `pi install git:<repo-url>` |
+| DeepSeek Harness (DSH) | 侧边栏「插件 → 添加插件」填仓库绝对路径，或 `dsh plugin --profile <name> add <path>` |
 
-### atomcode
-
-```bash
-/plugin marketplace add <this-repo-url>
-/plugin install total-design
-```
-
-或手动安装：
-
-```bash
-git clone <this-repo-url> ~/.atomcode/plugins/total-design
-# 重启 atomcode session
-```
-
-**信任 SessionEnd hook**（仅 atomcode）：安装后首次运行会提示 hook 待授权，执行
-
-```bash
-atomcode plugin trust total-design
-```
-
-### Claude Code
-
-```bash
-claude plugin marketplace add <this-repo-url>
-claude plugin install total-design
-```
-
-或用 `--plugin-dir` 直接指向本仓库目录（开发调试用）：
-
-```bash
-claude --plugin-dir <this-repo-path>
-```
-
-**hook 说明**：Claude Code 端会识别 `.claude-plugin/plugin.json` 的 `hooks` 字段，`hooks.json` 内的 `${CLAUDE_PLUGIN_ROOT}` 环境变量在 Claude Code 端有效；如需 hook 生效需按 Claude Code 的 trust 机制单独授权。
-
-### Pi Agent
-
-```bash
-pi install git:<this-repo-url>
-```
-
-Pi 通过仓库根目录 `package.json` 的 `pi.skills` 字段加载 skills 目录。skill 在 Pi 里的调用格式是 `/skill:td-propose`（不是 `/td-propose`，见下方「命令格式」）。
-
-**hook 说明**：Pi 无 hook 系统，需 TS extension 自建；本 plugin 未提供 Pi extension——Pi 端状态文件由 td-archive / td-system-audit 的正文步骤直接写入，不依赖 hook。
+各平台的详细步骤、hook 授权（atomcode / Claude Code）、DSH 安装细节见 **[docs/user/install.md](docs/user/install.md)**。
 
 ---
 
-## 命令格式（各平台前缀差异）
+## 文档
 
-| 平台 | 命令前缀 | 例 |
-|---|---|---|
-| atomcode | `/td-propose` | `/td-propose add-x` |
-| Claude Code | `/total-design:td-propose` 或 `/td-propose`（plugin namespace 已自动附加） | `/td-propose add-x` |
-| Pi Agent | `/skill:td-propose` | `/skill:td-propose add-x` |
+| 我是谁 / 我想做什么 | 读 |
+|---|---|
+| 用户：安装 | [docs/user/install.md](docs/user/install.md) |
+| 用户：命令用法、各平台差异、常见问题 | [docs/user/usage.md](docs/user/usage.md) |
+| 维护者：四个平台怎么加载、新增平台要动哪里 | [docs/maintainer/platforms.md](docs/maintainer/platforms.md) |
+| 维护者：manifest 字段、一致性、发版流程 | [docs/maintainer/manifests.md](docs/maintainer/manifests.md) |
+| 维护者：SKILL / 命令编写细节 | [docs/maintainer/content-authoring.md](docs/maintainer/content-authoring.md) |
+| 维护者：架构、依赖图谱、设计评估维度 | [docs/explanation/architecture.md](docs/explanation/architecture.md) |
+| 维护者：使用态 LLM 审核四维清单 | [docs/explanation/review-standard.md](docs/explanation/review-standard.md) |
 
-后续章节的工作流示例统一用 `/td-xxx` 简写——按你使用的平台在开头加对应前缀即可。
+历史设计文档在 [docs/archive](docs/archive) 与 [docs/feat](docs/feat)。开发 agent 的 always-on 规则见 [AGENTS.md](AGENTS.md)。
 
 ---
 
 ## 命令清单
 
-8 个 slash 命令，扁平 kebab-case：
+8 个 slash 命令（各平台前缀差异见 [usage.md](docs/user/usage.md#命令前缀)）：
 
 | 命令 | 用途 |
 |---|---|
@@ -121,7 +89,7 @@ Pi 通过仓库根目录 `package.json` 的 `pi.skills` 字段加载 skills 目�
 | `/td-system-audit` | 周期性对照系统工程主基调自检 |
 | `/td-list` | 列出所有活跃 change 态势（只读） |
 
-`td-init` 是唯一仅用户可触发的命令；其余 6 个 td-* command 也可被 agent 自动触发；`td-list` 只读、无同名 skill。
+各平台调用差异（Pi extension 桥、DSH 的 `/名称` 手势与缺失项）见 [usage.md · 平台差异](docs/user/usage.md#平台差异)。
 
 ---
 
@@ -136,13 +104,11 @@ Pi 通过仓库根目录 `package.json` 的 `pi.skills` 字段加载 skills 目�
 | 配置层 | 3 | `field-assessment`（profile×tier 配置入口）+ `todo-pool`（`openspec/todo.md` 格式约定）+ `agents-md-hygiene`（用户项目 agent 指令文件编写规范） |
 | 契约层 | 7 | 7 个 td-* skill，与 command 一一对应 |
 
-除 7 个 td-* 外全部 `user-invocable: false`，由 agent 按上下文自动触发。详细规则见 [CONTRIBUTING.md](CONTRIBUTING.md) 与 [AGENTS.md](AGENTS.md)。
+除 7 个 td-* 外全部 `user-invocable: false`，由 agent 按上下文自动触发。
 
 ---
 
-## 典型工作流
-
-**零起步项目：**
+## 一次完整的工作流（零起步项目）
 
 ```
 1. /td-explore "我想建一个 X"    ← 先探索
@@ -152,47 +118,17 @@ Pi 通过仓库根目录 `package.json` 的 `pi.skills` 字段加载 skills 目�
 5. /td-archive add-x             ← 归档
 ```
 
-**中途接手项目：**
-
-```
-1. /td-reverse-spec              ← 建立 baseline
-2. /td-explore "我想改 X"        ← 基于 baseline 探索
-3. /td-propose modify-x          ← 创建 change
-4. /td-apply modify-x            ← 实施
-5. /td-archive modify-x          ← 归档
-```
-
-**上线维护（修 bug）：**
-
-```
-1. /td-propose fix-bug-<name>    ← 轻量 proposal
-2. /td-apply fix-bug-<name>      ← 修复 + 回归测试
-3. /td-archive fix-bug-<name>    ← 归档
-```
-
----
-
-## 多人协作
-
-**初始化：** 先跑 `/td-init` 从源头配置 `.gitignore` 忽略 `openspec/.td-state/`——状态文件可从文件系统事实推导，提交进 git 只制造冲突。
-
-**冲突裁决：** 假冲突（`.td-state/` 状态文件）用 gitignore 从源头消除；真冲突（`openspec/specs/` 两 change 改同一分系统契约）是 feature——交给总体设计部（人）裁决，agent 不自动挑版本。
-
-**协作约定：** 一个 change 一个 owner、一个 change 一个分支 + PR；`openspec/specs/` / `openspec/config.yaml` / `openspec/changes/` / `openspec/todo.md` 必须提交，不要 ignore。
+中途接手、修 bug、多人协作约定见 [docs/user/usage.md](docs/user/usage.md)。
 
 ---
 
 ## 贡献
 
-见 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
----
+见 [CONTRIBUTING.md](CONTRIBUTING.md)。平台规范与编写细则见 [docs/maintainer](docs/maintainer)。
 
 ## 行为准则
 
 见 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
-
----
 
 ## License
 

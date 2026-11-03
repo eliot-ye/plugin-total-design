@@ -1,6 +1,6 @@
 {
   "name": "total-design",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "description": "A system-engineering design department for your coding agent. OpenSpec contract layer + Superpowers behavior layer + Qian Xuesen systems-engineering keynote.",
   "keywords": [
     "pi-package",
@@ -25,5 +25,10 @@
     "extensions": [
       "./extensions/pi-agent/index.ts"
     ]
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./dsh/cordis.patch.yml"
+    }
   }
 }
