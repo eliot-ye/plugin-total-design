@@ -25,5 +25,10 @@
     "extensions": [
       "./extensions/pi-agent/index.ts"
     ]
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./dsh/cordis.patch.yml"
+    }
   }
 }
