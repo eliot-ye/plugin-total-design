@@ -6,30 +6,27 @@
 
 这是一个 **code agent skill plugin**，不是一个应用项目，也不是一个代码项目。
 
-- **产出形态**：一组 Markdown 文件（`SKILL.md` / 命令文件）+ 一个 `plugin.json` manifest（`.claude-plugin/plugin.json`）+ 一个跨平台元数据清单（根目录 `plugin.json`，Agent Plugins 1.0.0）+ 一个 Pi `package.json`
-- **运行方式**：用户通过 marketplace 安装本 plugin——atomcode / Claude Code 走 git marketplace；Pi 走 `pi install git:<repo-url>` 走 package.json；其他遵循 Agent Plugins 1.0.0 标准的客户端通过根 `plugin.json` 识别；装上后 agent 自动加载 skills 和 commands
-- **没有可执行代码**：所有"逻辑"都是 Markdown 指令，由 agent 读取并执行
+- **产出形态**：一组 Markdown 文件（`SKILL.md` / 命令文件）+ 四处 manifest + 一个 DSH bundle 包装层（`dsh/`）
+- **运行方式**：atomcode / Claude Code / Pi Agent / DeepSeek Harness (DSH) 各自加载同一份 `skills/`。平台加载机制、安装路径、hook 支持差异见 [docs/maintainer/platforms.md](docs/maintainer/platforms.md)
+- **除 DSH 薄包装层外没有可执行代码**：`dsh/index.mjs` 是唯一新增的 JS——约 152 行，只把 `skills/*/SKILL.md` 注册进 DSH 的 skill 注册表，无业务逻辑（`hooks/td_state_sync.js` 是原有的状态兜底脚本，不属新增）；其余"逻辑"都是 Markdown 指令
 - **内容消费者**：这是 code agent skill plugin，需要考虑 SKILL 是否符合 LLM 的理解
 
-### 支持的 code agent
+**文档地图**（单一事实源，本文不复制细节）：
 
-本 plugin 通过多平台 manifest 并存策略同时覆盖下列 code agent——一份 `skills/` 资产在各平台各自被原生加载器识别，不依赖任何单一平台的扩展能力：
-
-| Code agent | 加载清单位置 | 分发方式 | 加载组件 |
-|---|---|---|---|
-| **atomcode** | `.claude-plugin/plugin.json`（走 CC 兼容路径） | git marketplace（`/plugin marketplace add`） | skills + commands + hooks |
-| **Claude Code** | `.claude-plugin/plugin.json` | git marketplace（`claude plugin marketplace add` 或 `--plugin-dir`） | skills + commands + hooks |
-| **Pi Agent** | `package.json` 的 `pi.skills` 字段（skills）+ `pi.extensions` 字段（`extensions/pi-agent/index.ts`） | `pi install git:<repo-url>` | skills + extension（`/td-xxx` 短命令经 extension：7 个桥接同名 skill、td-list 原生实现 `openspec list`） |
-
-**开放标准支持**：本 plugin 符合 [Agent Plugins 1.0.0 规范](https://agent-plugins.org/specification)——根目录 `plugin.json` 的 `$schema` 字段声明 conformance。任何遵循该标准的客户端都能通过根 `plugin.json` 识别并加载 `skills/` 目录（v1 定义 skills + mcp.json 两种组件，`commands/` 目录不在 v1 规范内）。
-
-**分发路径与 skills 目录**：所有平台共享仓库根目录的 `skills/`（18 个 skill）——各平台各自扫描，不需要副本或 symlink。`commands/`（8 个命令文件）仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载（Agent Plugins 1.0.0 v1 未定义 commands 组件）；Pi 端无 commands 目录概念，其 `/td-*` 短命令由 `extensions/pi-agent/index.ts` 注册生成（7 个桥接同名 skill、td-list 原生实现 `openspec list`）。
+| 想知道 | 读 |
+|---|---|
+| 怎么装、怎么用 | [README.md](README.md) → [docs/user/install.md](docs/user/install.md) / [docs/user/usage.md](docs/user/usage.md) |
+| 四个平台怎么加载 | [docs/maintainer/platforms.md](docs/maintainer/platforms.md) |
+| manifest 字段、一致性、发版 | [docs/maintainer/manifests.md](docs/maintainer/manifests.md) |
+| SKILL / 命令编写细节 | [docs/maintainer/content-authoring.md](docs/maintainer/content-authoring.md) |
+| 为什么这样设计、依赖图谱、评估维度 | [docs/explanation/architecture.md](docs/explanation/architecture.md) |
+| 使用态 LLM 审核四维清单 | [docs/explanation/review-standard.md](docs/explanation/review-standard.md) |
 
 ## 依赖图谱与分析
 
-**任何对本仓库LLM文件的更改——无论改 SKILL.md、命令文件、还是 AGENTS.md 本身——动笔前必须先完成下列分析步骤，全部执行完才能开始用户要求的改动。跳过这一步直接改 = 把局部失调注入系统。**
+**任何对本仓库 LLM 文件的更改——无论改 SKILL.md、命令文件、还是 AGENTS.md 本身——动笔前必须先完成下列分析步骤，全部执行完才能开始改动。跳过这一步直接改 = 把局部失调注入系统。**
 
-理由：本 plugin 的 18 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串 skill 的语义变化——`field-assessment` 被引用最多，它的改动 blast radius 最大。不先摸清依赖就改，等于在总体设计部不知情的情况下动了分系统。
+理由：18 个 skill 之间是真实依赖网络（一个 SKILL.md 引用另一个 skill 的逻辑名，等于声明运行时调用关系）。改一个 skill 可能触发一连串语义变化——`field-assessment` 被引用最多，blast radius 最大。当前图谱快照见 [docs/explanation/architecture.md](docs/explanation/architecture.md#依赖图谱)。
 
 ### 分析步骤（必须按序执行，每步产出可见证据）
 
@@ -43,72 +40,75 @@
 
 3. **扫描反向引用（谁引用了被改 skill）**
    - 对每个被改 skill 的逻辑名，在 `skills/` 全树下 grep 该逻辑名，找出所有引用它的 SKILL.md。
-   - 产出：每个被改 skill 的"入边列表"（谁调用了它）= blast radius。
+   - 产出：每个被改 skill 的"入边列表" = blast radius。
 
 4. **画出完整依赖图谱**
-   - 把步骤 2 + 步骤 3 的边合并成有向图：节点 = skill 逻辑名，边 = `引用者 → 被引用者`。
-   - 图谱必须包含本次改动涉及的所有 skill 及其一度邻居，**用文本邻接表或 ASCII 图呈现，不能用口头描述代替**。
-   - 标注本次改动的"热点节点"（入边最多的被改 skill = blast radius 最大）。
+   - 把步骤 2 + 3 的边合并成有向图：节点 = skill 逻辑名，边 = `引用者 → 被引用者`。
+   - 必须包含本次改动涉及的所有 skill 及其一度邻居，**用文本邻接表或 ASCII 图呈现**，不能口头描述。
+   - 标注"热点节点"（入边最多的被改 skill）。
 
 5. **判断改动是否触及契约边界**
-   - 检查被改 skill 是否被 td-* 契约层 skill 引用——若是，改动可能影响 OpenSpec artifact 流的运行时语义，需在改动前显式声明"这会改变 X skill 的 Y 行为，影响 td-propose/td-apply/... 的 Z 步"。
-   - 检查被改 skill 是否在 `field-assessment` 的表 1/表 2/表 3 里被引用为强度来源——若是，改动可能改变 profile × tier 配置层的单一事实源，需声明影响范围。
+   - 被改 skill 是否被 td-* 契约层 skill 引用？若是，需显式声明"这会改变 X skill 的 Y 行为，影响 td-propose/td-apply/... 的 Z 步"。
+   - 被改 skill 是否在 `field-assessment` 表 1/表 2/表 3 里被引为强度来源？若是，需声明对 profile × tier 单一事实源的影响范围。
 
 6. **写一句话风险评估**
-   - 基于图谱和契约边界判断，写明："本次改动的 blast radius 是 N 个 skill，其中 M 个是契约层，最大风险是 ……"
+   - 格式："本次改动的 blast radius 是 N 个 skill，其中 M 个是契约层，最大风险是 ……"
 
 ### 执行顺序的硬约束
 
-- 步骤 1–6 是**前置门**，不是"改完再补"的文档。必须先产出图谱和风险评估，再开始 edit_file / write_file。
-- 步骤 4 的图谱是**强制产出物**——没有图谱不许动笔。图谱可以用文本邻接表（`A → B, C` 一行一节点）或 ASCII 有向图，但必须有可被另一个 agent 独立验证的结构。
-- 完成步骤 6 后，agent 才能开始用户要求的改动，并在改动完成后回到图谱验证"实际影响范围与预估一致"。
+- 步骤 1–6 是**前置门**，必须先产出图谱和风险评估，再动笔。
+- 步骤 4 的图谱是**强制产出物**——没有图谱不许动笔；图谱必须可被另一个 agent 独立验证。
+- 完成后回到图谱验证"实际影响范围与预估一致"。
 
 ## 三层结构
 
 约束层 / 行为层 / 契约层自上而下：
 
-- **约束层（constraints）** — 钱学森系统工程主基调 + Brooks / Goldratt / 精益局部规律；每个局部动作从整体性能反推，局部优化不能制造全局失调。
-- **行为层（skills）** — Superpowers 转译的 explore→plan→TDD→review→verify 强制流程；触发式，不靠人盯。
-- **契约层（commands）** — OpenSpec 转译的 propose→apply→archive artifact 流；agree before you build。
+- **约束层（constraints）** —— 钱学森系统工程主基调 + Brooks / Goldratt / 精益局部规律；局部优化不能制造全局失调。
+- **行为层（skills）** —— Superpowers 转译的 explore→plan→TDD→review→verify 强制流程；触发式，不靠人盯。
+- **契约层（commands）** —— OpenSpec 转译的 propose→apply→archive artifact 流；agree before you build。
 
-约束层是第零层，是另外两层立起来的前提。`constraints` skill 承载 5 份局部规律 references，每份 references 必须显式声明它服务钱学森系统工程主基调的哪一条。
+约束层是第零层，是另外两层立起来的前提。`constraints` skill 承载 5 份局部规律 references，每份必须显式声明它服务 `system-engineering` 主基调的哪一条。展开见 [docs/explanation/architecture.md](docs/explanation/architecture.md#三层结构)。
 
 ## 目录结构
 
 ```
 total-design/
-├── .claude-plugin/          ← Claude Code / atomcode 共用加载清单（atomcode 加载器搜索顺序：.atomcode-plugin → .claude-plugin，本 plugin 只保留后者）
+├── .claude-plugin/          ← Claude Code / atomcode 加载清单（搜索顺序 .atomcode-plugin → .claude-plugin）
 │   ├── marketplace.json
 │   └── plugin.json
-├── README.md
-├── AGENTS.md                ← 本文件
+├── README.md                ← 用户入口（安装矩阵、命令与 skill 清单）
+├── AGENTS.md                ← 本文件：开发 agent 的 always-on 规则
 ├── CONTRIBUTING.md
 ├── CODE_OF_CONDUCT.md
 ├── LICENSE
 ├── .gitignore
-├── plugin.json             ← 根目录 Agent Plugins 1.0.0 清单（跨平台元数据：$schema/name/version/description/author）
-├── package.json            ← Pi Agent package（pi.skills 指向 ./skills，pi.extensions 指向 ./extensions/pi-agent/index.ts）
+├── plugin.json              ← Agent Plugins 1.0.0 跨平台元数据
+├── package.json             ← Pi Agent + DSH 共用（pi.* 与 dsh.bundle.patch）
 │
-├── skills/                  ← 18 个 skill（profile/tier 变体在 field-assessment/references/ 下；5 个局部规律变体在 constraints/references/ 下）
-├── commands/                ← 8 个 command
-├── extensions/              ← Pi Agent extension（/td-* 短命令注册 + session_shutdown 状态同步兜底）
-│   └── pi-agent/
-│       └── index.ts         ← Pi 端扩展（仅 Pi 加载，atomcode/Claude Code 不读）
+├── skills/                  ← 18 个 skill（变体在 field-assessment/references/ 与 constraints/references/）
+├── commands/                ← 8 个 command（仅 atomcode / Claude Code 加载）
+├── extensions/pi-agent/     ← Pi extension（/td-* 桥 + session_shutdown 兜底）
+├── dsh/                     ← DSH bundle 包装层（patch + skill provider + 安装说明）
+│   ├── index.mjs
+│   ├── cordis.patch.yml
+│   └── README.md
+├── hooks/                   ← SessionEnd 状态兜底（仅 atomcode / Claude Code）
+│   ├── hooks.json
+│   └── td_state_sync.js
 │
-└── hooks/                   ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
-    ├── hooks.json           ← hook 声明（plugin.json 的 "hooks" 字段指向本文件）
-    └── td_state_sync.js     ← 会话结束时从文件系统事实校正 .td-state/ 状态文件（Node ≥20.19.0，与 OpenSpec CLI 一致；导出的纯函数也被 extensions/pi-agent/index.ts 的 session_shutdown 回调复用）
+└── docs/                    ← 深水区文档（user / maintainer / explanation）
 ```
 
 ## 编辑规则
 
-**SKILL 的编写视角应该以使用态的LLM为主。**
+**SKILL 的编写视角应该以使用态的 LLM 为主。**
 
-**首先完成 `## 依赖图谱与分析`，探索给出修改方案给用户确认，用户确认后才能进行编辑**
+**首先完成 `## 依赖图谱与分析`，探索给出修改方案给用户确认，用户确认后才能进行编辑。**
 
 ### SKILL.md 编辑
 
-**skills 目录内只能保留使用态文本；开发态文本说明可以写到 docs 目录内**
+**skills 目录内只能保留使用态文本；开发态文本说明可以写到 docs 目录内。**
 
 每个 `SKILL.md` 必须有以下结构：
 
@@ -118,7 +118,7 @@ name: <skill-name>
 description: <一句话描述，会进 system prompt>
 user-invocable: true | false
 argument-hint: <参数提示>          ← 仅 user-invocable: true 的命令式 skill 需要
-disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 user-invocable: true 兼容（前者禁自动，后者允许显式调用）。本字段合法性待 atomcode 官方文档确认；若 loader 不识别，本字段会被忽略，不影响 user-invocable 语义
+disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 user-invocable 兼容
 ---
 
 # <Skill Title>
@@ -130,25 +130,27 @@ disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 
 <正文>
 ```
 
+字段表、命名规则、目录 vs 扁平布局、各平台字段容忍度差异见 [docs/maintainer/content-authoring.md](docs/maintainer/content-authoring.md)。
+
 **`## 依赖技能` 节的语义定义：**
 
-此节列出的是 skill 在会话级**必须提前加载到上下文**的依赖技能（即使用态 LLM 触发本 skill 时，需要已在上下文中的技能）。运行时按需触发/调用的技能**不列入此节**——它们在正文流程的特定步骤里按条件触发，不属于预加载。
+此节列出的是 skill 在会话级**必须提前加载到上下文**的依赖技能。运行时按需触发/调用的技能**不列入此节**——它们在正文流程的特定步骤里按条件触发。
 
-判定依据（参考 `td-* 标准步骤 1` 的"预加载 vs 按需触发"分界）：
+判定依据（与 `td-* 标准步骤 1` 的"预加载 vs 按需触发"分界一致）：
 
-- **预加载（应列入）**：skill 触发时立即需要其内容在上下文中作为前提（如 `system-engineering` 主基调四条、`field-assessment` 的 profile×tier 识别 + 表 1/2/3 强度值）。
-- **按需触发（不列入）**：在正文流程的特定步骤触发（如 td-apply / td-propose 前置检查流程的 `wip-limit` 硬阻塞检查、td-apply 步骤 5 流程的 `brooks-law` 提醒、`requesting-code-review` 的架构 review、`executing-plans` 的任务执行）。这些的触发时机由正文流程逻辑决定，正文引用处给出路径，依赖节不必列入。
+- **预加载（应列入）**：触发时立即需要其内容作为前提（如 `system-engineering` 主基调四条、`field-assessment` 的 profile×tier 识别 + 表 1/2/3 强度值）。
+- **按需触发（不列入）**：在正文流程的特定步骤触发（如 td-apply 前置检查的 `wip-limit` 硬阻塞、td-apply 步骤 5 的 `brooks-law` 提醒、`requesting-code-review` 的架构 review）。正文引用处给出路径即可。
 
-**constraint references 变体文件的列入判据**：constraint references 变体（如 `constraints` 的 `references/human-in-loop.md`）本身不是 skill、不独立触发，随 `constraints` 入口读取；列入 `## 依赖技能` 节时按此判据——本 skill 的正文执行逻辑在触发时需要以该变体的规则作为判定前提（如 TDD 正文需用 `human-in-loop` 的必停场景判定 spec 契约冲突、`writing-plans` 需用 `critical-buffer` 的标注规范）→ 列入；约束检查只是正文流程固定步骤的检查点（如 td-apply 步骤 2 前置检查的 WIP 硬阻塞）→ 不必列入，正文引用处给出变体路径即可。
+**constraint references 变体的列入判据**：references 变体本身不是 skill、不独立触发，随 `constraints` 入口读取；列入时按同一判据——正文执行逻辑需要以该变体规则作为判定前提 → 列入；只是固定步骤的检查点 → 不必列入，正文给出变体路径。
 
-违反此定义 = 把运行时调用关系误当预加载关系列入依赖节，会造成使用态 LLM 在触发本 skill 时误以为必须预加载这些技能，混淆"预加载 vs 按需触发"的分界。
+违反此定义 = 把运行时调用关系误当预加载关系，会造成使用态 LLM 误以为必须预加载，混淆分界。
 
 **必须有 `## 服务的主基调原则` 一节的 skill：**
 
-- 约束层 1 个 `constraints` skill（承载 5 个局部规律 references：`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop`）—— `constraints` skill 必须显式声明它承载的每个局部规律服务 `system-engineering` 主基调的哪一条；5 份 references 各自也必须有 `## 服务的主基调原则` 一节
+- 约束层 1 个 `constraints` skill（承载 5 份 references：`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop`）——必须显式声明每份局部规律服务 `system-engineering` 的哪一条；5 份 references 各自也必须有此节
 - 契约层 7 个 td-* skill —— 同上
 
-`system-engineering` 自己是主基调本身，不需要这一节。行为层 / 配置层 skill 可选这一节，但写了更清晰。
+`system-engineering` 自己是主基调本身，不需要这一节。行为层 / 配置层 skill 可选。
 
 ### SKILL 不可引用 AGENTS 文件
 
@@ -156,39 +158,29 @@ disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 
 
 理由：
 
-- AGENTS.md 是给**本仓库的开发 agent** 看的元指令，不是 plugin 的运行时资产。装上 plugin 的用户 agent 不会读这个仓库的 AGENTS.md。
-- SKILL.md 一旦出现 `AGENTS.md` 字样，等于把一份只对仓库内部生效的约定泄漏给下游 agent，造成歧义。
-- 多平台扩展时（同步到 `.claude/` / `.codex/` 等），AGENTS.md 路径不保证存在，引用会变成死链。
+- AGENTS.md 是给**本仓库开发 agent** 看的元指令，不是 plugin 的运行时资产；装了 plugin 的用户 agent 不会读它。
+- SKILL.md 一旦出现 `AGENTS.md` 字样，等于把只对仓库内部生效的约定泄漏给下游 agent。
+- 多平台扩展时（`.claude/` / `.codex/` 等），该路径不保证存在，引用会变成死链。
 
-**对象性豁免（操作对象 ≠ 权威引用）**：当 skill 的职责就是操作**用户项目**的 agent 指令文件（读取、判重、写入、整理——如 `agents-md-hygiene`）时，文件名以操作对象身份出现在正文/frontmatter 是合法的，不属本条禁令。判据：该提及是否把文件当作规则来源（"见 AGENTS.md""按 AGENTS.md 的约定执行"→ 禁止），还是当作被处理的数据（"主指令文件 ≤ 200 行""读主指令文件判重"→ 允许）。对象性提及必须同时满足：① 指用户项目中的同名文件，不指向本仓库的 AGENTS.md；② 不从该文件引入任何规则，只描述对它的操作。
+**对象性豁免（操作对象 ≠ 权威引用）**：当 skill 的职责就是操作**用户项目**的 agent 指令文件（如 `agents-md-hygiene`）时，文件名以操作对象身份出现是合法的。判据：该提及是当作规则来源（禁止），还是当作被处理的数据（允许）。对象性提及必须同时满足：① 指用户项目中的同名文件；② 不从该文件引入任何规则，只描述对它的操作。
 
-执行细则：
-
-1. SKILL.md 正文需要说明编辑规则时，改用一句话自包含描述，不写"见 AGENTS.md"。
-2. 约束层 / 契约层 skill 的 `## 服务的主基调原则` 一节，直接陈述它服务钱学森系统工程主基调的哪一条，不指向 AGENTS.md。
-3. 若发现现有 SKILL.md 里有对 AGENTS.md 的引用，视为 bug，转译时删掉。
+执行细则：正文需要说明编辑规则时用一句话自包含描述；约束层 / 契约层 skill 的「服务的主基调原则」直接陈述服务哪一条，不指向 AGENTS.md；发现现有 SKILL.md 有引用视为 bug，转译时删掉。
 
 ### SKILL 与 references 禁止开发态语句
 
-**运行时资产（`SKILL.md` 正文/frontmatter + `references/`）不得包含面向仓库编辑者而非使用态 LLM 的语句。** 判据：这段文本是否服务使用态 LLM 的执行决策——不服务即为开发态泄漏，出现即删。三类典型形态：
+**运行时资产（`SKILL.md` + `references/`）不得包含面向仓库编辑者而非使用态 LLM 的语句。** 判据：这段文本是否服务使用态 LLM 的执行决策——不服务即为开发态泄漏，出现即删。三类典型形态：
 
-- **编辑指令**："只改本文件""不重复定义数值""由三处合并而来""避免重复校验逻辑"——约束的是改仓库的人怎么写文件。
-- **调用方清单**："被三层防护的三处引用""`td-system-audit` / `executing-plans` 引用本文件"——依赖图文档。使用态 LLM 是被某个调用方指引来的，知道还有谁引用不改变其执行决策；且清单必然随结构演化腐烂（实例：`audit-frequency.md` 的"3 个 tier skill"在 1.6.0 收拢后即失实）。
-- **写作规范**："下游引用只指'表 X 的 Y 行'""不必在正文重复这条约定""本节是约定的单一锚点"——写作约定归 AGENTS.md / docs 门记录，不进运行时资产。
+- **编辑指令**："只改本文件""不重复定义数值""由三处合并而来"——约束的是改仓库的人怎么写文件。
+- **调用方清单**："被三层防护的三处引用""`td-system-audit` / `executing-plans` 引用本文件"——依赖图文档；使用态 LLM 知道还有谁引用不改变其执行决策，且清单必然腐烂。
+- **写作规范**："下游引用只指'表 X 的 Y 行'""不必在正文重复这条约定"——写作约定归开发文档，不进运行时资产。
 
-**允许保留的相近形态**（勿误删）：
+**允许保留的相近形态**：冲突仲裁句（"与其它位置的强度表述冲突时以本表为准"）、运行时指针（"完整语义见 X 步骤，此处不重复"）、入口契约（"触发方：`td-explore` 步骤 7（已征得用户同意 → 执行）"）。
 
-- **冲突仲裁句**："与其他位置的强度表述冲突时，以本表为准"——服务运行时判定谁说了算。
-- **运行时指针**："完整语义见 X 步骤，此处不重复"——告诉 LLM 这里没有展开、去哪读。
-- **入口契约**："触发方：`td-explore` 步骤 7（调用方已征得用户同意 → 执行）"——子流程的执行条件输入。
-
-执行细则：改写时保留仲裁语义，只删编辑指令与调用方清单；"谁引用本文件"类信息写进 docs 门记录或本文件的依赖图谱节。
+执行细则：改写时保留仲裁语义，只删编辑指令与调用方清单；"谁引用本文件"类信息写进 [docs/explanation/architecture.md](docs/explanation/architecture.md#依赖图谱)。
 
 ### 命令文件编辑
 
-命令文件位于 `commands/`，文件名 = 命令名（扁平 kebab-case，无冒号，atomcode 规则）。
-
-每个命令文件必须有 frontmatter：
+命令文件位于 `commands/`，文件名 = 命令名（扁平 kebab-case，无冒号）。
 
 ```markdown
 ---
@@ -199,90 +191,36 @@ args: none|option|required
 
 # <command-name>
 
-**立刻调用 `<command-name>` skill，参数 `$ARGUMENTS`。**       ← 如果 args 是 none，可以不需要下半句
+**立刻调用 `<command-name>` skill，参数 `$ARGUMENTS`。**
 ```
 
-7 个命令文件 (`td-propose` / `td-explore` / `td-apply` / `td-reverse-spec` / `td-archive` / `td-system-audit` / `td-init`) 都遵循这个极薄模板——命令只是 slash 入口，真正的逻辑在同名 skill (`skills/<td-*>/SKILL.md`) 里。这样同一份逻辑既能被 slash command 触发，也能被 agent 自动触发。
+7 个命令文件（`td-propose` / `td-explore` / `td-apply` / `td-reverse-spec` / `td-archive` / `td-system-audit` / `td-init`）遵循这个极薄模板——命令只是 slash 入口，逻辑在同名 skill。
 
-**例外：`td-list`**——只读命令（`openspec list` 列活跃 change），无同名 skill，逻辑直接写在命令文件里，不遵循极薄模板。它不需要被 agent 自动触发（只是查询入口），故不为其建 skill。
+**例外：`td-list`**——只读命令（`openspec list`），无同名 skill，逻辑直接写在命令文件里，不遵循极薄模板。
 
-### plugin.json 编辑
+命令文件仅 atomcode / Claude Code 加载；Pi / DSH 的命令入口由 extension 或 `/名称` 手势提供，见 [docs/maintainer/platforms.md](docs/maintainer/platforms.md)。
 
-**多平台 plugin manifest 分布**（本 plugin 走「多 manifest 并存」策略，避免依赖任何单一平台的加载器扩展能力）：
+### Manifest 编辑
 
-| 位置 | 服务对象 | 角色 |
-|---|---|---|
-| `.claude-plugin/plugin.json` | Claude Code + atomcode | 加载清单（skills / commands / hooks 资产字段）——atomcode 加载器搜索顺序 `.atomcode-plugin → .claude-plugin`，本 plugin 只保留后者，走 CC 兼容路径 |
-| `.claude-plugin/marketplace.json` | Claude Code + atomcode | git marketplace 声明 |
-| 根 `plugin.json` | Agent Plugins 1.0.0 生态（含所有遵循该标准的客户端） | Agent Plugins 1.0.0 跨平台元数据（`$schema` / `name` / `version` / `description` / `author`）——遵循该标准的客户端通过此清单识别并加载 `skills/` 目录 |
-| `package.json` | Pi Agent | `pi.skills` 字段指向 `./skills`，`pi.extensions` 字段指向 `./extensions/pi-agent/index.ts`（slash 命令桥） |
+**一致性硬约束**：四处清单中描述本 plugin 的 `name` / `version` / `description` 必须完全一致（`marketplace.json` 取 `plugins[0]` 条目；其顶层 `name`/`description` 是 marketplace 自身身份，不必一致），version bump 时同步；`description` 保持纯 ASCII。
 
-- 只接受 JSON（不接受 YAML）
-- `.claude-plugin/plugin.json` 合法字段（Claude Code + atomcode 兼容并集）：`name` / `version` / `description` / `skills` / `commands` / `hooks`
-- **`skills` / `commands` 字段接受字符串或路径数组**，本 plugin 用字符串 `"./skills"` / `"./commands"`（字符串形态是 atomcode 原生支持，Claude Code 也识别为"追加默认路径"）
-- **没有 `constraints` / `profiles` / `tiers` 字段**——这些必须以 skill 形态存在
-- **根 `plugin.json` schema 是 closed**（Agent Plugins 1.0.0 官方规范）：只允许 `$schema` / `name` / `version` / `description` / `author` / `homepage` / `repository` / `license` / `keywords` / `extensions`；v1 定义只有 `skills/` + `mcp.json` 两种组件——本 plugin 的 `commands/` 目录仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载
+字段清单、合法 schema、Agent Plugins 1.0.0 约束、DSH 不新增清单的原因、自检命令见 [docs/maintainer/manifests.md](docs/maintainer/manifests.md)。
 
-**多平台 manifest 一致性**：四处清单的 `name` / `version` / `description` 必须完全一致，version bump 时同步；`description` 保持纯 ASCII（atomcode TUI plugin manager 按字节下标切截断，多字节字符会导致 panic）。
+### 版本发布流程
 
-### 版本发布流程（version bump 与发布文档同步）
+**版本号是否 bump 是发布决策，不是改动的自动后果**——改 SKILL.md / 命令文件 / 文档不默认要求 bump；只有决定发布新版本时才 bump。
 
-**版本号是否 bump 是发布决策，不是改动的自动后果**——改 SKILL.md / 命令文件 / 文档不默认要求 bump；只有你决定发布新版本时才 bump。**决定 bump 时**，四处清单（根目录 `plugin.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `package.json`）的 `version` 变更必须与 CHANGELOG.md、RELEASE_NOTES.md 的更新在同一个逻辑变更内完成——不允许只 bump 版本不更新发布文档。一致性约束见上方「多平台 manifest 一致性」条。
-
-- **CHANGELOG.md**：按 Keep a Changelog 格式在文件顶部新增当前版本条目（最新在上），按 Fixed / Changed / Docs 等类别记录；历史条目只读，不修改（过时的"发布提示"类临时标注可更新为已结清状态，但不改动已发布的变更记录）。
-- **RELEASE_NOTES.md**：更新为当前版本发布说明——本版本定位（新增/修复/重构版）、行为变更表（升级用户感知的差异）、升级步骤（bump 版本号同步）、完整变更列表指向 CHANGELOG 对应条目。
+决定 bump 时，四处清单的 `version`、`CHANGELOG.md`（顶部新增当前版本条目）、`RELEASE_NOTES.md`（更新为当前版本说明）必须在**同一个逻辑变更**内完成，不允许只 bump 不更新发布文档。详细格式见 [docs/maintainer/manifests.md](docs/maintainer/manifests.md#发布流程version-bump-与发布文档同步)。
 
 ## 使用态 LLM 视角审核标准
 
-**任何对本仓库内容资产（SKILL.md / 命令文件 / references）的审核——周期性自审、发布前审、修复前审——必须以使用态 LLM 的视角按下列四个维度检查，并产出可验证的审核报告。** 审核是改动的前置门：发现问题按类别整理，进入「依赖图谱与分析」门禁后修复。
+**任何对本仓库内容资产（SKILL.md / 命令文件 / references）的审核——周期性自审、发布前审、修复前审——必须以使用态 LLM 的视角按四个维度检查，并产出可验证的审核报告。审核是改动的前置门。**
 
-**"使用态 LLM 视角"是审核的前提，不是四个维度之一**：审核者必须先代入使用态 LLM 的读取体验，再跑四维度清单。使用态 LLM 指装了本 plugin 的 agent——它**只预先看到每个 skill 的 frontmatter description**（进 system prompt，是它判断何时触发的唯一依据），**正文在触发后按需加载**，工作流从 slash 命令进入。因此每个检查都要问"使用态 LLM 读到这段文本会怎么理解、会触发哪个 skill、孤立加载能否执行、会不会断链"，**而不是问"这段文本是否符合仓库内部规范"**。四维度是检查工具，不是审核本身——先有视角，再跑工具；只跑清单不代入视角 = 开发态审核，不是使用态审核。
+- **使用态 LLM 视角**是审核的前提：它只预先看到 description，正文触发后按需加载。先代入读取体验，再跑清单。
+- **四维度**：① 逻辑冲突（强度单一事实源、权威流程单一编排、跨 skill 引用、数字一致性）② 语义重复 / 模糊 ③ 可精简（含仪式性内容）④ 开发态描述泄漏。
+- **验收**：四维度全部跑完；"逻辑冲突"零残留、"开发态泄漏"零残留、"触发歧义"零残留；其余按类别修复后重跑确认。
 
-### 审核前置
-
-1. 审核对象 = 使用态 LLM 实际会读到的文本：frontmatter + 正文 + references/ + 命令文件。
-2. **使用态 LLM 视角的具体检查面**（四维度之前先跑，发现即修）：
-   - **触发语义**：description 触发词是否清晰、无歧义、不与其他 skill 重叠冲突？`user-invocable` / `disable-model-invocation` 语义是否正确（决定自动触发 vs 显式调用）？
-   - **正文自包含性**：正文孤立加载能否执行？"见 X 的「Y」节"类引用的锚点是否真实存在（grep 验证）？依赖技能节与正文实际引用一致（不漏列/多列）？
-   - **入口链**：slash 命令 → 同名 skill 转发是否无缝（命令文件"立刻调用"目标存在）？只读命令例外（td-list）是否清晰？
-
-### 维度 1：逻辑冲突
-
-- **强度单一事实源一致性**：constraint / tier / profile skill 正文的强度表述（"必须强制""上限 N""X% buffer""显式确认才继续"）是否与 `field-assessment` 表 1 / 表 2 / 表 3 一致？正文写死数值或无条件强度断言而表 1 是另一套 = 冲突；修正方向：正文改引用式（"按表 1 的 X 行取值"）或补 tier 分支。
-- **权威流程单一编排**：同一流程（如 WIP override 回路）是否只由一个 references 持有编排（`constraints/references/wip-limit.md`）？其他 skill 描述时必须"指向权威"，复述简化版漏环节 = 冲突。
-- **跨 skill 触发/引用一致性**：skill 的「触发时机」与权威触发方（如 `td-system-audit` 步骤 6 映射表）互相匹配？依赖技能节与正文实际引用一致（不漏列/多列）？
-- **数字一致性**：跨 skill 同一概念的数字（"失败 2 次 vs 3 次""每完成 N 个 change"）口径统一或显式说明关系？
-
-### 维度 2：语义重复 / 模糊
-
-- **同一事实多处定义**：强度、频率、流程、概念（"模型载体""核心论点归位"）多处重复定义时，一处为权威，其余应为引用/强调，不能各自展开到无法判断谁为准。
-- **无条件 vs 分层限定**：profile / tier 的"特殊规则"带分层限定；正文无条件断言 vs 表 2 的 tier 列限定 = 模糊。
-- **示例与表格不一致**：正文举例（如 `constraints/references/human-in-loop.md` 的 profile 加成举例）与表 2 实际单元格一致（含 tier 限定）。
-- **重复段落**：多文件逐字重复的段落（如 3 profile 的「在各 tier 下的 constraint 强度」节、3 tier 的「判断依据」节）收敛为单一权威 + 引用。
-- **结构性断言与仓库现状一致**：正文/references 中的无条件结构断言（"N 个 skill""X 负责 Y""有 Z 层"）逐一对照仓库现状核对（`ls`/grep 可验证），过时的断言（如 `audit-frequency.md` 的"3 个 tier skill"在结构收拢后失实）= 冲突。grep 验证只覆盖显式引用锚点，抓不住这类断言——它们无锚点可查，是本判据单独存在的理由。
-
-### 维度 3：可精简
-
-- 同一概念在两个以上 skill 各写完整解释（《工程控制论》归位段、config.yaml 引导流程）→ 收敛为"权威在 X，此处引用"。
-- 同一文件内重复节（如 `constraints/references/critical-buffer.md` 的「按 tier 调整」与「规则」节）→ 合并。
-- 每段文本应服务使用态 LLM 的执行决策；纯概念/背景重复可删或移往一处。
-- **仪式性内容**：有方法论外观（理论渊源、原则复述）但对使用态 LLM 执行决策零增量的文本。判定线：方法论文本必须绑定执行动作——理论陈述须能回答"因此使用态 LLM 在哪一步、以什么约束改变行为"，答不上即仪式性 → 删，或收敛为一句环节锚定（"本 skill 是整体回路中的 X 环节"）。典型对象：归位段只复述《工程控制论》/Brooks 原文；「服务的主基调原则」节只贴原则标签（"本 skill 服务第 3 条"）不写它约束本 skill 的哪个动作——该节合格形态 = 声明服务的原则 + 约束的动作，是收紧写法而非删节。
-
-### 维度 4：开发态描述内容
-
-出现即视为泄漏：
-
-- **AGENTS 文件引用**：SKILL.md 出现 `AGENTS.md` / `CLAUDE.md` / `.atomcode.md`（见「SKILL 不可引用 AGENTS 文件」）。
-- **开发态语句**：正文/references 出现编辑指令（"只改本文件"类）、调用方清单（"被 X 引用"类）、写作规范（"下游引用只指…"类）——判据、允许形态与执行细则见「SKILL 与 references 禁止开发态语句」节。
-- **Superpowers 残留**：Superpowers 技能名（如 `dispatching-parallel-agents`）、"Superpowers" 字样、其 plugin/marketplace 引用。
-- **Claude Code 工具名**：正文写死 `AskUserQuestion` / `TodoWrite` 等平台工具名 → 改平台无关表述（"询问用户"/"任务跟踪工具"）。
-- **平台命名表 / plugin 前缀**：body 残留平台命名表、`total-design:<name>` 调用名、marketplace 路径。
-
-### 审核产出物与验收标准
-
-- 审核报告必须含：审核对象版本标注、**使用态 LLM 视角检查面结果（触发语义 / 自包含性 / 入口链）**、四维度检查结果（每项通过/违反 + 文件:行号:原文）、按类别整理的问题清单、一句话风险评估。
-- **验收标准（闭环收敛判据）**：使用态 LLM 视角检查面 + 四维度全部跑完；"逻辑冲突"零残留、"开发态描述内容"零残留、"触发歧义"零残留；"语义重复/模糊"与"可精简"按类别修复后重跑确认。不满足则"审核→修复"循环不收敛，问题必然换形式回来。
-- **防复发**：修复按类别做、不按实例做；可脚本化的检查项（禁用词表等）固化进文档供每次审核复用；每次审核先自问"我代入使用态 LLM 的读取体验了吗"，没代入就先别跑清单。
+完整检查清单、审核前置检查面、报告模板与防复发规则见 [docs/explanation/review-standard.md](docs/explanation/review-standard.md)。
 
 ## 设计原则
 
@@ -292,92 +230,45 @@ args: none|option|required
 
 ### 2. profile × tier 二维配置
 
-- **profile**（仓库状态）：greenfield / brownfield / maintenance
-- **tier**（系统复杂度）：small / medium / large
+profile（greenfield / brownfield / maintenance）× tier（small / medium / large），以 `field-assessment` 的 references 变体文件形态存在，agent 现场判读后按需读取命中的 profile 一份 + tier 一份。
 
-两个维度以 `field-assessment` 的 `references/` 变体文件形态存在（3 profile + 3 tier），agent 现场判读后按需读取命中的 profile 一份 + tier 一份（共 2 份）。
-
-**冲突优先级**：profile 与 tier 强度冲突时，**以 tier 为准**——tier 决定约束强度与流程重量（"不强求重流程"这类松绑优先），profile 只决定流程侧重（入口动作、TDD 边界、special rules），不改变强度。profile 的"默认激活的层"强度描述是默认值，最终强度以 `field-assessment` 表 1/表 2/表 3 为单一事实源。
+**冲突优先级**：profile 与 tier 强度冲突时**以 tier 为准**——tier 决定约束强度与流程重量，profile 只决定流程侧重，不改变强度。最终强度以 `field-assessment` 表 1/表 2/表 3 为单一事实源。
 
 ### 3. 触发式而非 hook 强制
 
-Superpowers 的"触发式"哲学保留：skill 靠 agent 根据上下文判读触发，不靠 hook 强制。
+skill 靠 agent 根据上下文判读触发，不靠 hook 强制。
 
-**例外——状态持久化 hook**：`hooks/td_state_sync.js` 是唯一允许的 hook（`SessionEnd` 事件）。它不做任何流程强制，只在会话结束时从文件系统事实校正 `.td-state/` 状态文件（`archive-counter.yaml` 按 `archive/` 目录重算、`audit-history.yaml` 补缺失报告记录）——这是"防 agent 漏写状态"的兜底，不是流程门禁，与触发式哲学不冲突。
-
-实现用 Node（CJS + `node:` 内置模块，零依赖、零构建、无 package.json），与 OpenSpec CLI 的 Node 运行时一致——用户装 OpenSpec 即已满足 hook 的运行时要求，不引入第二个解释器。hook 脚本新增或改写前，必须先在临时 fixture 上对照旧实现逐字节比对产出（状态文件是持久数据，等价性不能靠读代码判断）。
-
-atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.json 的 `hooks` 字段接受路径字符串（本 plugin 用 `"./hooks/hooks.json"`），文件内为 `{ "<Event>": [{ "hooks": [{ "type": "command", "command": "...", "timeout": <s> }] }] }`。事件名大小写不敏感（`SessionEnd` / `session_end` 等价）。hook 经 stdin 收 JSON、stdout 决定处理；命令串可用 `${ATOMCODE_PLUGIN_ROOT}` / `${CLAUDE_PLUGIN_ROOT}` 环境变量指向 plugin 安装目录。**Hook 需信任后才激活**：安装时告知不运行，`atomcode plugin trust <name>` 授权后下次 session 生效；插件更新后 hook 命令哈希变更会失效，需重新 trust。
+**例外——状态持久化 hook**：`hooks/td_state_sync.js` 是唯一允许的 hook（`SessionEnd`），只在会话结束时从文件系统事实校正 `.td-state/` 状态文件，不做流程强制。各平台 hook 支持差异见 [docs/maintainer/platforms.md](docs/maintainer/platforms.md#总表)；哲学与状态机制见 [docs/explanation/architecture.md](docs/explanation/architecture.md#3-触发式而非-hook-强制)。
 
 ### 4. 不原样照搬 Superpowers / 不重新实现 OpenSpec CLI
 
-转译而非搬运：Superpowers 的方法论内核保留但去掉其 plugin / marketplace 引用，每个 skill 加 `## 服务的主基调原则` 一节；OpenSpec 的方法论转译为 slash command，CLI 功能仍调用外部 `openspec` 命令，不在命令文件里重实现。
+转译而非搬运：方法论内核保留但去掉其 plugin / marketplace 引用；OpenSpec 的方法论转译为 slash command，CLI 功能仍调用外部 `openspec` 命令，不在命令文件里重实现。
 
 ### 5. 设计变更评估维度（动笔前的强制评估）
 
-**任何为本 plugin 新增能力 / skill / 命令 / 流程分支的设计讨论，在拍板执行前必须产出「重量 / 价值 / 代价」三维度评估。** 评估结论决定做不做、做多大——不是"写完之后顺便说明一下"。
+**任何为本 plugin 新增能力 / skill / 命令 / 流程分支的设计讨论，在拍板执行前必须产出「重量 / 价值 / 代价」三维度评估。** 这是「依赖图谱与分析」之后的第二道前置门：图谱回答"改动会波及谁"，本节回答"重量与净收益是否匹配"。
 
-评估是「依赖图谱与分析」之后的第二道前置门：图谱回答"改动会波及谁"（结构风险），本节回答"改动的重量与净收益是否匹配"（净收益判断）。两道门都要过，缺一道不许动笔。
+产出格式固定为五节：**重量（量化表，禁止定性）/ 价值（按场景分解，标注工程痛点 vs 生态对齐）/ 代价（分级）/ 风险不对称性（判定）/ 结论（做 / 不做 / 缩窄范围做）**。
 
-#### 重量（必须是量化，不许定性描述）
-
-**禁止用"轻量""很轻""开销不大"这类定性词回答重量**——重量是可实测的量，定性描述掩盖了真实的复杂度来源。必须覆盖下列五个维度：
-
-| 维度 | 测量方式 | 说明 |
-|---|---|---|
-| **token 消耗** | `wc -m` 实测必读文件字符数，乘 tokenizer 系数 | 必读 = 触发路径上每次都要加载的 SKILL.md / references。系数是假设，必须标注 |
-| **LLM 调用次数** | 数"必须独立成轮"的环节（读 → 判 → 写构成一轮） | 判定环节即使无工具调用也算一轮 |
-| **计算密度** | 每轮的输入/输出规模 | 高密度轮（读 checklist + 多维判分）与低密度轮（单条判据比对）不可等价替换 |
-| **生成 token 量** | 数"必须产出文本"的环节 | 现代模型输出远慢于输入，**这是 wall-clock 的主因**，优先于 token 总量看 |
-| **墙钟时间** | 由生成 token 量与输出速度换算，标为估算 | 无实测基准时必须标"估算" |
-
-**关键区分**：token 消耗与调用次数是两件事——省 token 不一定省轮次，省轮次不一定省时间。三者方向常常不一致，必须分开报。
-
-#### 价值（必须按场景分解）
-
-净收益必须**按场景分解后给结论**，不许给聚合值：聚合值会掩盖"某类场景净成本、某类场景净收益"的结构，导致方案在错误场景下自我强化。
-
-**价值来源判据（工程管理 + 编程任务视角）**：场景分解之前，先回答每一项能力改动的**价值来源**——它补的是真实工程痛点，还是外部生态对齐。判据是一条可判定问句：**"不做这项，agent 在真实编程项目里会犯什么可复现的错？"**答得出具体错误（如"agent 用'我觉得改对了'通过验证"）= 工程导向价值；答不出具体错误、只有"社区其他 schema 都有"（如"td 没有 ADR 目录"）= 生态对齐价值，须降档处理——**生态对齐类改动单独不构成"做"的依据**，须由工程判据独立支撑（工程痛点真实存在且该机制恰是对齐项），否则归入"不做"。价值来源混杂（一份方案同时含工程导向项与生态对齐项）时必须在评估里逐项标注，防止方案的"哲学定位"从单一方法论转译漂移为多生态聚合。判断哲学漂移的问句：**"引入这项后，'这是谁的思路'这个答案是否仍然唯一？"**——答案从"OpenSpec spec-driven 转译"变成"OpenSpec + X + Y 聚合"，即漂移信号。
-
-#### 代价
-
-按严重度分级（高 / 中 / 低），须覆盖：
-
-- **维护成本**：新增逻辑落在几个文件 / 几个位置，是否分散了本应集中的判定
-- **失败路径成本**：方案判错时用户付什么代价，是否可恢复
-- **使用态认知成本**：新增多少判定环节、多少失效回路——本 plugin 无测试框架、无 CI，全靠使用态 LLM 现场理解，认知成本直接转化为出错率
-
-#### 风险不对称性（安全论证的真正来源）
-
-评估跳过/省略某环节时，必须回答：**两个方向的判错代价是否对称？**
-
-- 判错方向 A 的代价是否有界且可恢复？
-- 判错方向 B 的代价是否有界且可恢复？
-
-跳过某环节（如跳过架构 review）的安全性**不来自"防线都对"**——防线会错，历史已多次证明——而来自**判错的代价有界**。这是唯一能支撑"敢于省略"的论证形态。若两个方向的代价中有一个不可恢复（如污染唯一数据源、破坏审计链），该省略一律否决。
-
-#### 评估产出格式
-
-五节结构：**重量（量化表）/ 价值（含价值来源判据的分场景表）/ 代价（分级表）/ 风险不对称性（判定）/ 结论（三选一）**，末尾一句话结论必须落到"做 / 不做 / 缩窄范围做"三选一。
-
-**不满足的形态**：只有定性描述、只有聚合值、缺风险不对称性判定、缺价值来源判据（工程痛点 vs 生态对齐未逐项标注）——任一缺项即评估未完成。
+各节的测量口径、价值来源判据、风险不对称性论证要求见 [docs/explanation/architecture.md](docs/explanation/architecture.md#5-设计变更评估维度)。
 
 ## 命名约定
 
-- **skill 名**：kebab-case，无冒号（atomcode `validate_skill_name` 规则）
+- **skill 名**：kebab-case，无冒号
 - **命令名**：`td-<verb>` 或 `td-<noun>`，扁平 kebab-case
-- **文件名**：`SKILL.md`（目录式；本 plugin 18 个 skill 全部采用此形态）或 `<name>.md`（扁平 legacy）
-- **主基调 skill**：`system-engineering`，是所有局部约束的前提，不单独触发（`user-invocable: false`）
-- **skill body 内引用其他 skill 用逻辑名**（如 `constraints`、`field-assessment`），由当前平台的加载器负责拼前缀（atomcode 下为 `total-design:<name>`）——这是预留多平台扩展的关键设计。skill frontmatter 不写 `aliases`，调用名一律由平台加载器按 plugin 名拼接。子约束（如 `wip-limit` / `human-in-loop` / `critical-buffer` / `brooks-law` / `delay-decision`）作为 `constraints` 的 `references/<name>.md` 变体文件存在，body 内引用时写 `constraints` 的 `references/<name>.md`（逻辑名 + 变体路径）
+- **文件名**：`SKILL.md`（目录式；本 plugin 18 个 skill 全部采用）或 `<name>.md`（扁平 legacy）
+- **主基调 skill**：`system-engineering`，不单独触发（`user-invocable: false`）
+- **skill body 内引用其他 skill 用逻辑名**（如 `constraints`、`field-assessment`），由当前平台的加载器拼前缀（atomcode 下为 `total-design:<name>`）——这是多平台扩展的关键设计。frontmatter 不写 `aliases`。子约束以 `constraints` 的 `references/<name>.md` 变体形式存在，引用时写逻辑名 + 变体路径
+
+各平台的命名校验规则（atomcode 的字符集 / 长度限制等）见 [docs/maintainer/content-authoring.md](docs/maintainer/content-authoring.md#命名规则)。
 
 ### td-* skill 标准步骤 1
 
-7 个 td-* skill 的 body 里曾各自重复"步骤 1 激活主基调与配置层"。因为 SKILL.md 禁止引用 AGENTS.md，td-* skill 的 body 必须把此序列自包含书写。此序列也定义"预加载 vs 按需触发"的分界（见上方「SKILL.md 编辑」的 `## 依赖技能` 语义定义）。**只注入强度不做判断**：
+7 个 td-* skill 的 body 必须自包含书写此序列（SKILL.md 禁止引用 AGENTS.md）。此序列也定义"预加载 vs 按需触发"的分界。**只注入强度不做判断**：
 
-
-1. **`system-engineering`** — 主基调四条进入上下文。各 td-* skill 在这一条后补自己的注解（如"reverse-spec 是总体设计部在接手阶段的工作"）。
-2. **profile × tier 识别** — 调用 `field-assessment` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，并把表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）+ 表 3（system-audit 频率，仅 archive/apply 需要）读入上下文。会话内缓存，后续步骤直接引用。
-3. **其余 constraint**（通过 `constraints` skill 承载的 5 个局部规律 references：`wip-limit` / `human-in-loop` / `critical-buffer` / `brooks-law` / `delay-decision`）— 只把 `field-assessment` 的强度值读入上下文，**不在步骤 1 判断是否触发**。"是否触发"是步骤 2 的事。
+1. **`system-engineering`** —— 主基调四条进入上下文。各 td-* skill 在这一条后补自己的注解。
+2. **profile × tier 识别** —— 调用 `field-assessment` 的「识别流程」节，判读 `$_TD_PROFILE` / `$_TD_TIER`，把表 1 + 表 2 + 表 3（仅 archive/apply 需要）读入上下文。会话内缓存。
+3. **其余 constraint**（`constraints` 承载的 5 个局部规律 references）—— 只把 `field-assessment` 的强度值读入上下文，**不在步骤 1 判断是否触发**。"是否触发"是步骤 2 的事。
 
 ## commit 风格
 
@@ -391,8 +282,9 @@ atomcode hooks schema（与 Claude Code 兼容，官方文档核实）：plugin.
 ## 不做的事
 
 - **不做 plugin 内的 spec 系统**：OpenSpec 本身是独立 CLI，本 plugin 转译方法论不重新实现 CLI
-- **不做静态配置文件**：profile × tier 不用 yaml 配置，判读流程与变体规则全部以 `field-assessment` skill（SKILL.md + references/ 机制与变体文件）形态存在
-- **不原样照搬 Superpowers 的 SKILL.md**：转译时去掉 Superpowers 自己的 plugin 引用、marketplace 引用
+- **不做静态配置文件**：profile × tier 不用 yaml 配置，全部以 `field-assessment` skill（SKILL.md + references 变体）形态存在
+- **不原样照搬 Superpowers 的 SKILL.md**：转译时去掉其 plugin 引用、marketplace 引用
+- **不在 DSH 端重实现 commands / hook**：DSH 无 commands 目录加载、无 `hooks.json` 加载器；`/td-*` 由 user-invocable skill 的 `/名称` 手势承载
 
 ## 参考
 
