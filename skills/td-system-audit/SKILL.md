@@ -1,6 +1,6 @@
 ---
 name: td-system-audit
-description: 周期性对照系统工程主基调自检。触发场景：用户说"audit"、"自检"、"复盘"、"最近推进不顺"。
+description: 周期性对照系统工程主基调自检。触发场景：用户说"audit"、"自检"、"最近推进不顺"。
 user-invocable: true
 argument-hint: "<scope: current-change | project>  (optional, default current-change)"
 ---
@@ -38,15 +38,6 @@ argument-hint: "<scope: current-change | project>  (optional, default current-ch
 #### 内容
 
 `$ARGUMENTS`
-
-## 触发时机
-
-system-audit 不是只在用户显式调用时才跑。agent 应在以下时机主动建议 audit：
-
-- **频率触发**：对照表 3（system-audit 频率，按当前 tier 的 project scope / current-change scope 阈值；表 3 见 `field-assessment/references/audit-frequency.md`）——达阈值的判定与计数器维护由 `td-archive` 步骤 5.2 负责。
-- **信号触发**：
-  - 用户表达"感觉最近推进不顺利"时
-  - 关键链缓冲被压缩 2 次以上
 
 ## 步骤
 

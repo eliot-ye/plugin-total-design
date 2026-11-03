@@ -38,13 +38,6 @@
 - override 发生时，本文件应在 override 流程里被触发，评估"并行 N+1 个 change 对每个 change 关键链 buffer 的隐性压缩程度"。
 - 评估输出到 override 确认记录里，作为后续 `/td-system-audit` project scope 的输入。
 
-## 触发时机
-
-- 用户在 `/td-propose` 或 `/td-apply` 时要求"加快进度"或"压缩估时"
-- agent 自己生成 tasks.md 时
-- 多个 change 在排队，用户想插队
-- **被 `/td-system-audit` 触发修复时**：audit 发现"关键链缓冲被压缩"问题时，触发本文件重新规划 tasks。
-
 ## 触发时 agent 应做的事
 
 1. 在 tasks.md 里显式标注关键链路径

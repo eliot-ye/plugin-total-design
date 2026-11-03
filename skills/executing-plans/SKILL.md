@@ -34,6 +34,8 @@ checkpoint 格式：
 
 checkpoint 时做 `requesting-code-review`（含与既有风格一致性检查）。
 
+**current-change audit**：完成一个关键链任务时，按表 3 的 current-change scope 频率触发 `/td-system-audit current-change`
+
 ### 2. 失败处理
 
 1. 触发 `systematic-debugging`：4-phase root cause
