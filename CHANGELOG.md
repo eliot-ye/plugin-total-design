@@ -2,6 +2,32 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.16.0] - 2026-11-03
+
+### Added
+
+- **DeepSeek Harness (DSH) 平台支持**：新增 `dsh/` 包装层——`dsh/index.mjs`（ESM、零运行时依赖，152 行）从 `skills/*/SKILL.md` 读取 18 个 skill 经 `ctx.skills.registerProvider` 注册进会话目录；`dsh/cordis.patch.yml`（bundle 补丁层）insert 一行 `{id: total-design-skill-provider, name: ./index.mjs}`；根 `package.json` 新增 `dsh.bundle.patch` 字段指向该 patch。DSH 是第四个支持的平台（atomcode / Claude Code / Pi Agent / DSH），`skills/`、`commands/`、`hooks/`、根 `plugin.json`、`.claude-plugin/` 均零改动，既有平台加载现状不受影响。已知限制：DSH 不扫描 `commands/*.md`（7 个 `td-*` 命令由同名 user-invocable skill 的手势天然等价，`td-list` 在 DSH 下缺失可用 bash 直跑 `openspec list`）；`hooks/` 无对应加载器（`.td-state/` 校正需改写为 Cordis 事件订阅，属后续工作）。
+- **Pi extension 原生 `td-list` 与会话结束状态同步**：`extensions/pi-agent/index.ts` 由纯桥接扩展为「桥接 + 原生实现」——`td-list` 无同名 skill，不再走 `/skill:` 桥接，直接跑 `openspec list` 把真实结果交给 agent 格式化为态势表（失败不崩溃会话，提示确认 OpenSpec CLI）；`session_shutdown` 时复用 `hooks/td_state_sync.js` 导出的纯函数（不复制逻辑，与 atomcode / Claude Code 的 SessionEnd hook 同一单一事实源）校正 `openspec/.td-state/*`。补充：真实类型标注（`ExtensionCommandContext`，Pi 升级时捕获签名漂移）、`ATOMCODE_PLUGIN_ROOT` env 注入（供 hook 读 audit 报告模板）、`expandPromptTemplates` / `deliverAs` 显式开启（否则 `/skill:` 被当普通用户文本发给 LLM）。
+- **DSH 安装说明**：`dsh/README.md`（66 行）——三种安装方式（Web 插件页 / `dsh plugin` CLI / `plugin_manager` 工具）、已知限制、一致性说明。
+- **DSH 平台文档**：`docs/maintainer/platforms.md` 补 DSH 加载路径与差异表。
+
+### Changed
+
+- **文档按读者分层重组**：README / AGENTS.md 的维护细节拆入 `docs/`——`docs/user/install.md`（用户：四平台安装）、`docs/user/usage.md`（用户：命令用法、平台差异、FAQ）、`docs/maintainer/platforms.md`（四个平台怎么加载）、`docs/maintainer/manifests.md`（manifest 字段、一致性、发版）、`docs/maintainer/content-authoring.md`（SKILL / 命令编写细节）、`docs/explanation/architecture.md`（架构、依赖图谱、设计评估维度）、`docs/explanation/review-standard.md`（使用态 LLM 审核四维清单）。README 精简为入口（安装矩阵表、命令清单、工作流），AGENTS.md 精简为开发 agent 的 always-on 规则（含「文档地图」单一事实源指针）。
+- **audit 触发时机收拢为 `td-system-audit` 单一持有**：`td-system-audit` SKILL.md 删除「触发时机」节（频率触发 + 信号触发原分散于此处），改由 `executing-plans` 步骤 1 的「current-change audit」触发点 + `td-archive` 步骤 5.2（project scope 频率计数）承载——「audit 何时触发」不再由 skill 正文自我声明，而由流程编排单一持有；`constraints/references/critical-buffer.md` 同步删除「触发时机」节（audit 发现关键链缓冲压缩 → 触发本文件重新规划，归口 `td-system-audit` 信号触发）。
+
+### Fixed
+
+- **关键链任务 review 触发关系澄清**：`requesting-code-review` 触发时机节改述——每完成一个关键链任务 → 触发 checkpoint（`executing-plans` 步骤 1）→ checkpoint 时做本 review，不是独立于 checkpoint 的触发点，消除「关键链任务完成即 review」的独立触发歧义。
+- **`td-propose` 设计决策可逆性检查补触发指针**：步骤 6.a 新增「设计决策可逆性检查」条——propose 阶段新出现的设计决策若用户犹豫或写"先选 A 以后再改"，触发 `constraints/references/delay-decision.md` 区分两类决策；探索阶段已检查过的决策不重复查。
+- **`td-archive` description 补「复盘」触发词**：触发场景补 "复盘"（与 `td-system-audit` 的"复盘"触发词去重——`td-system-audit` 移除"复盘"保留"最近推进不顺"，audit 与 archive 的触发边界由 description 词区分）。
+- **`td-system-audit` description 移除「复盘」**：与上一条配套——audit 是周期自检、archive 是完成后复盘，触发词不再重叠。
+- **`td-system-audit` 触发时机收拢后的两处悬空引用**：refactor 删除「触发时机」节后正文仍留两处 `「触发时机」` 指针——步骤 1（频率达阈值判定归 `td-archive` 步骤 5.2）与 Guardrails（信号触发不受频率限制）指向已删节；改为指向新单一持有者（`td-archive` 步骤 5.2 project scope 频率计数 / `executing-plans` 步骤 1 current-change 按关键链任务粒度触发 / 使用态 LLM 判读 description 与 `executing-plans` 步骤 1 的信号触发），消除断链。
+
+### Docs
+
+- release 文档同步（本条目与 RELEASE_NOTES.md）。
+
 ## [1.15.0] - 2026-11-02
 
 ### Added

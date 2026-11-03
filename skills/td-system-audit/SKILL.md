@@ -46,7 +46,7 @@ argument-hint: "<scope: current-change | project>  (optional, default current-ch
 按下述三步序列激活主基调与配置层——只注入强度，不做触发判断：
 
 1. **`system-engineering`** — 主基调四条进入上下文。
-2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存。读表 3 只为报告里引用间隔；频率达阈值的判定与计数器维护归 `td-archive` 步骤 5.2（见「触发时机」）。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1 + 表 2 + 表 3。会话内缓存。读表 3 只为报告里引用间隔；频率达阈值的判定与计数器维护归 `td-archive` 步骤 5.2（project scope 频率计数），current-change 的按关键链任务粒度触发归 `executing-plans` 步骤 1。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断。
 
 ### 2. 收集审计对象
@@ -110,4 +110,4 @@ argument-hint: "<scope: current-change | project>  (optional, default current-ch
 
 - audit 的定位是"总体设计部的周期性自检"，不是找错问责——语气要建设性
 - audit 报告必须包含"建议的下一步动作"，不只是"你这里错了"
-- 频率触发的 audit 不要超出表 3 频率（表 3 见 `field-assessment/references/audit-frequency.md`，tier-medium 的 current-change 按关键链任务粒度触发是合法频率）——"建议动作本身不限频，实际执行 audit 频率不超表 3"；「触发时机」的信号触发与步骤 7 的修复闭环重跑不受此限——过频会变成形式主义
+- 频率触发的 audit 不要超出表 3 频率（表 3 见 `field-assessment/references/audit-frequency.md`，tier-medium 的 current-change 按关键链任务粒度触发是合法频率）——"建议动作本身不限频，实际执行 audit 频率不超表 3"；信号触发（用户表达"感觉最近推进不顺利"、关键链缓冲被压缩 2 次以上，触发来源为使用态 LLM 判读 `td-system-audit` description 与 `executing-plans` 步骤 1）与步骤 7 的修复闭环重跑不受此限——过频会变成形式主义
