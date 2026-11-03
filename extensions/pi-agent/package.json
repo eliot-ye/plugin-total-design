@@ -1,0 +1,12 @@
+{
+  "name": "total-design-pi-agent-ext",
+  "version": "1.15.0",
+  "private": true,
+  "type": "module",
+  "description": "Isolated typecheck environment for the total-design Pi extension. Loaded by Pi directly via pi.extensions -> ./extensions/pi-agent/index.ts; this package only provides a type:module context and dev types so tsc can check the ESM extension without changing the plugin root (which hosts CJS hooks).",
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "1.4.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -19,11 +19,11 @@
 |---|---|---|---|
 | **atomcode** | `.claude-plugin/plugin.json`（走 CC 兼容路径） | git marketplace（`/plugin marketplace add`） | skills + commands + hooks |
 | **Claude Code** | `.claude-plugin/plugin.json` | git marketplace（`claude plugin marketplace add` 或 `--plugin-dir`） | skills + commands + hooks |
-| **Pi Agent** | `package.json` 的 `pi.skills` 字段 | `pi install git:<repo-url>` | skills（Pi 无命令系统，slash 调用格式为 `/skill:td-xxx`） |
+| **Pi Agent** | `package.json` 的 `pi.skills` 字段（skills）+ `pi.extensions` 字段（`extensions/pi-agent/index.ts`） | `pi install git:<repo-url>` | skills + extension（`/td-xxx` 短命令经 extension：7 个桥接同名 skill、td-list 原生实现 `openspec list`） |
 
 **开放标准支持**：本 plugin 符合 [Agent Plugins 1.0.0 规范](https://agent-plugins.org/specification)——根目录 `plugin.json` 的 `$schema` 字段声明 conformance。任何遵循该标准的客户端都能通过根 `plugin.json` 识别并加载 `skills/` 目录（v1 定义 skills + mcp.json 两种组件，`commands/` 目录不在 v1 规范内）。
 
-**分发路径与 skills 目录**：所有平台共享仓库根目录的 `skills/`（18 个 skill）——各平台各自扫描，不需要副本或 symlink。`commands/`（8 个命令文件）仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载（Agent Plugins 1.0.0 v1 未定义 commands 组件）。
+**分发路径与 skills 目录**：所有平台共享仓库根目录的 `skills/`（18 个 skill）——各平台各自扫描，不需要副本或 symlink。`commands/`（8 个命令文件）仅 atomcode / Claude Code 通过 `.claude-plugin/plugin.json` 加载（Agent Plugins 1.0.0 v1 未定义 commands 组件）；Pi 端无 commands 目录概念，其 `/td-*` 短命令由 `extensions/pi-agent/index.ts` 注册生成（7 个桥接同名 skill、td-list 原生实现 `openspec list`）。
 
 ## 依赖图谱与分析
 
@@ -87,14 +87,17 @@ total-design/
 ├── LICENSE
 ├── .gitignore
 ├── plugin.json             ← 根目录 Agent Plugins 1.0.0 清单（跨平台元数据：$schema/name/version/description/author）
-├── package.json            ← Pi Agent package（pi.skills 指向 ./skills）
+├── package.json            ← Pi Agent package（pi.skills 指向 ./skills，pi.extensions 指向 ./extensions/pi-agent/index.ts）
 │
 ├── skills/                  ← 18 个 skill（profile/tier 变体在 field-assessment/references/ 下；5 个局部规律变体在 constraints/references/ 下）
 ├── commands/                ← 8 个 command
+├── extensions/              ← Pi Agent extension（/td-* 短命令注册 + session_shutdown 状态同步兜底）
+│   └── pi-agent/
+│       └── index.ts         ← Pi 端扩展（仅 Pi 加载，atomcode/Claude Code 不读）
 │
 └── hooks/                   ← 1 个 hook：状态持久化兜底（SessionEnd 事件）
     ├── hooks.json           ← hook 声明（plugin.json 的 "hooks" 字段指向本文件）
-    └── td_state_sync.js     ← 会话结束时从文件系统事实校正 .td-state/ 状态文件（Node ≥20.19.0，与 OpenSpec CLI 一致）
+    └── td_state_sync.js     ← 会话结束时从文件系统事实校正 .td-state/ 状态文件（Node ≥20.19.0，与 OpenSpec CLI 一致；导出的纯函数也被 extensions/pi-agent/index.ts 的 session_shutdown 回调复用）
 ```
 
 ## 编辑规则
@@ -212,7 +215,7 @@ args: none|option|required
 | `.claude-plugin/plugin.json` | Claude Code + atomcode | 加载清单（skills / commands / hooks 资产字段）——atomcode 加载器搜索顺序 `.atomcode-plugin → .claude-plugin`，本 plugin 只保留后者，走 CC 兼容路径 |
 | `.claude-plugin/marketplace.json` | Claude Code + atomcode | git marketplace 声明 |
 | 根 `plugin.json` | Agent Plugins 1.0.0 生态（含所有遵循该标准的客户端） | Agent Plugins 1.0.0 跨平台元数据（`$schema` / `name` / `version` / `description` / `author`）——遵循该标准的客户端通过此清单识别并加载 `skills/` 目录 |
-| `package.json` | Pi Agent | `pi.skills` 字段指向 `./skills` |
+| `package.json` | Pi Agent | `pi.skills` 字段指向 `./skills`，`pi.extensions` 字段指向 `./extensions/pi-agent/index.ts`（slash 命令桥） |
 
 - 只接受 JSON（不接受 YAML）
 - `.claude-plugin/plugin.json` 合法字段（Claude Code + atomcode 兼容并集）：`name` / `version` / `description` / `skills` / `commands` / `hooks`

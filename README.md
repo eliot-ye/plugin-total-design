@@ -88,9 +88,11 @@ claude --plugin-dir <this-repo-path>
 pi install git:<this-repo-url>
 ```
 
-Pi 通过仓库根目录 `package.json` 的 `pi.skills` 字段加载 skills 目录。skill 在 Pi 里的调用格式是 `/skill:td-propose`（不是 `/td-propose`，见下方「命令格式」）。
+Pi 通过仓库根目录 `package.json` 的 `pi.skills` 字段加载 skills 目录，通过 `pi.extensions` 字段加载 `extensions/pi-agent/index.ts`（Pi 无 hook 系统，用 TS extension 自建 slash 命令桥）。
 
-**hook 说明**：Pi 无 hook 系统，需 TS extension 自建；本 plugin 未提供 Pi extension——Pi 端状态文件由 td-archive / td-system-audit 的正文步骤直接写入，不依赖 hook。
+**Pi 端调用格式（两种等价）**：skill 本体走 `/skill:td-propose`；extension 注册了 8 个 `/td-*` 短命令——7 个桥接到同名 skill（`/skill:td-xxx`），只读的 `/td-list` 无同名 skill、由 extension 原生实现（跑 `openspec list`）。见下方「命令格式」。
+
+**hook 说明**：Pi 无原生 hook 系统，本 plugin 用 TS extension 承担等价职责——extension 的 `session_shutdown` 回调复用 `hooks/td_state_sync.js` 导出的函数（同单一事实源，不 fork 逻辑），会话结束时从文件系统事实校正 `.td-state/` 状态文件；主路径状态仍由 td-archive / td-system-audit 正文步骤直接写入。
 
 ---
 
@@ -100,7 +102,7 @@ Pi 通过仓库根目录 `package.json` 的 `pi.skills` 字段加载 skills 目�
 |---|---|---|
 | atomcode | `/td-propose` | `/td-propose add-x` |
 | Claude Code | `/total-design:td-propose` 或 `/td-propose`（plugin namespace 已自动附加） | `/td-propose add-x` |
-| Pi Agent | `/skill:td-propose` | `/skill:td-propose add-x` |
+| Pi Agent | `/td-propose`（extension 桥接）或 `/skill:td-propose`（skill 本体） | `/td-propose add-x` |
 
 后续章节的工作流示例统一用 `/td-xxx` 简写——按你使用的平台在开头加对应前缀即可。
 
