@@ -1,8 +1,36 @@
-# total-design v1.16.0 发布说明
+# total-design v1.17.0 发布说明
 
-> 面向使用态用户：本次为**功能版**，新增第四个平台支持（DeepSeek Harness / DSH）与 Pi extension 的原生 `td-list` + 会话结束状态同步，并重组文档为按读者分层的 `docs/` 结构；skill 数量、references、hooks、td-* 契约流不变。
+> 面向使用态用户：本次为**修复版**，基于 td 工作流审核修复 6 处流程缺口——归档门禁收紧（change 级收尾 review 判 critical 时阻塞 archive）、review 报告落盘（跨会话 Verdict 不丢失）、消除 current-change audit 粒度矛盾、补估时字段。skill 数量、命令数量、references、hooks、td-* 契约流、四平台加载均不变。
 
 ## 本版本是什么
+
+1.17.0 是 **td 工作流审核修复版**。上一次版本 1.16.0 新增 DSH 第四平台支持；本版本基于对 td 工作流（explore → propose → apply → archive 主干）的审核，修复 6 处流程缺口：
+
+- **Fixed — `td-apply` 6.4 tier-medium 粒度矛盾**：current-change audit 的 tier-medium 行改述为"由 `executing-plans` 步骤 1 承载，不在本步骤重复触发"——此前"6.1–6.3 都通过后"的完成判定阶段却声明"每个关键链任务完成时"的实施中粒度，构成矛盾。
+- **Fixed — `requesting-code-review` 补 review 报告落盘规定**：第 3 节新增「报告落盘」——change 级收尾 review 落盘到 `openspec/changes/<name>/reviews/`、架构 review → `proposal.md` 末尾、checkpoint review → `tasks.md` 验证证据附注。下游读落盘文件而非会话记忆，跨会话后 Verdict 不丢失。
+- **Changed — `td-archive` 步骤 2 归档门禁收紧**：新增 change 级收尾 review Verdict 检查——`MUST_FIX_CRITICAL` 或无 review 报告 → 阻塞 archive（此前可绕过 6.3 的 critical 判定直接归档）。升级感知：归档前若 6.3 判出 critical 或未做收尾 review，将被拦截，需先修复或补做。
+- **Fixed — `td-propose` 步骤 7 tier-small 架构自检落点明确**："跳过架构 review：无实质新架构决策"记录到 `proposal.md` 影响评估节末尾，供 `td-apply` 步骤 4 复核读取。
+- **Fixed — `executing-plans` 步骤 1 >2x 估时引用估时字段**：消除对未定义字段的依赖。
+- **Added — `writing-plans/references/task-template.md` 新增可选 `估时` 字段**：作为 `executing-plans` >2x 判定的单一事实源；省略时该判定降级为"明显超出同类任务预期"，不构成硬触发。
+
+## 行为变更表（升级用户感知差异）
+
+| 环节 | 变更 | 感知 |
+|---|---|---|
+| `td-archive` 步骤 2 | 新增 change 级收尾 review Verdict 检查 | 归档前若 6.3 判 `MUST_FIX_CRITICAL` 或无 review 报告 → 阻塞，需修复/补做 |
+| `requesting-code-review` 第 3 节 | review 报告落盘 | 报告落到 `openspec/changes/<name>/reviews/`，跨会话可复核 |
+| `td-apply` 6.4 | tier-medium audit 粒度归 `executing-plans` | 无感知（执行粒度不变，仅消除矛盾表述） |
+| `writing-plans` 任务模板 | 新增可选 `估时` 字段 | 任务可填估时，`executing-plans` >2x 判定更准确 |
+
+## 升级步骤
+
+1. 更新 plugin 到 v1.17.0（四平台安装方式不变，见 `docs/user/install.md`）。
+2. 无需迁移数据——`.td-state/` 与 `openspec/` 格式不变；本版本不新增必填字段（`估时` 是可选）。
+3. 既有 change 可继续 apply / archive；archive 前若从未做过 change 级收尾 review，需补做一次（`td-apply` 步骤 6.3）。
+
+## 完整变更列表
+
+见 [CHANGELOG.md](CHANGELOG.md) 的 `[1.17.0]` 条目。
 
 1.16.0 是 **DSH 平台支持 + Pi 状态同步 + 文档重组版**。上一次版本 1.15.0 补齐了 code review 工具对接规范；本版本在此基础上：
 
