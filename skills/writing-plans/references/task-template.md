@@ -25,7 +25,10 @@ task 主体必须是 agent 能**编程性执行**的动作（写代码、跑测�
   - 验证：<how to verify this task is done>
   - 分系统影响：<which subsystems this touches>
   - 依赖：<other tasks that must complete first>
+  - 估时：<estimated effort, optional>
 ```
+
+**`估时` 字段**（可选）：任务的预计耗时。**供 `executing-plans` 步骤 1 的"任务实际耗时 >2x 估时"判定用**——是该触发条件的唯一事实源。任务主体为机械动作（改配置、跑 lint）时可省略；涉及实现逻辑的任务建议填写。省略时 `executing-plans` 的 >2x 判定降级为"任务实际耗时明显超出同类任务预期"，不构成硬触发。
 
 ## 风险等级判定
 

@@ -190,7 +190,7 @@ openspec status --change "<name>" --json
 
 ### 7. 架构 review（proposal 定型后）
 
-**tier 分层**：`tier-small` → 跳过完整架构 review，只做一行自检："本 change 是否引入新的分系统切分或偏离既有架构？"——无 → 记录"跳过架构 review：无实质新架构决策"，直接进步骤 8；有 → 按下方完整流程走。`tier-medium` / `tier-large` → 完整流程：
+**tier 分层**：`tier-small` → 跳过完整架构 review，只做一行自检："本 change 是否引入新的分系统切分或偏离既有架构？"——无 → **把"跳过架构 review：无实质新架构决策"记录到 proposal.md 的"系统工程影响评估"节末尾**（`td-apply` 步骤 4 复核时读该落点，确认此前已做过自检），直接进步骤 8；有 → 按下方完整流程走。`tier-medium` / `tier-large` → 完整流程：
 
 所有 artifact 创建完成后，**进入实施前先做架构 review**。
 

@@ -136,6 +136,13 @@ reviewed-by: subagent | unisolated-self
 
 **Verdict 前置验证**：给出“可以继续”的 Verdict 之前，先触发 `verification-before-completion` 跑验证命令拿到证据——Verdict 是完成声明，没有验证证据的“可以继续”不成立。
 
+**报告落盘**：review 报告按以下路径落盘，供下游跨会话读取 Verdict 锚点行——
+
+- **change 级收尾 review**：`openspec/changes/<change-name>/reviews/<YYYYMMDD-HHMMSS>-<review-kind>.md`
+- **架构 review / checkpoint review**：写入对应 artifact（架构 review → `proposal.md` 末尾；checkpoint review → `tasks.md` 对应任务的验证证据附注）
+
+落盘文件含第 3 节完整报告（含 Verdict 锚点行 + `reviewed-by`）。下游（`td-apply` 步骤 6.3、`td-archive` 步骤 2）读落盘文件而非会话记忆——跨会话后 Verdict 不丢失。若 change 目录尚未创建（独立 review 请求），落盘到 `openspec/.td-state/reviews/` 下同名文件。
+
 ### 4. Critical 阻塞
 
 如果有 critical issue：

@@ -147,7 +147,7 @@ review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 ch
 6.1–6.3 都通过后，对照表 3 的 **current-change scope** 频率决定是否触发 `td-system-audit current-change`（表 3 见 `field-assessment/references/audit-frequency.md`）：
 
 - `tier-small`：不要求
-- `tier-medium`：每个关键链任务完成时触发——该粒度由 `executing-plans` 的 checkpoint 负责（见该 skill 步骤 1）
+- `tier-medium`：current-change audit 由 `executing-plans` 步骤 1 承载（每个关键链任务完成时随 checkpoint 触发），不在本步骤重复触发——本步骤只保留 tier 分层说明，执行粒度归 `executing-plans`
 - `tier-large`：每完成 1 个 change 触发——本步骤即触发点
 
 触发即调用 `/td-system-audit current-change`，把本次 change 的"实际 vs 预期"对照主基调过一遍。
