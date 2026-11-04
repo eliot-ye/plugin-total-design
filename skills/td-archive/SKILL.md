@@ -42,6 +42,7 @@ archive 后触发 profile 重新判读（步骤 5.1）是总体设计部的职�
 
 - 所有 tasks.md 里的任务都 `[x]` 了吗？
 - `verification-before-completion` 跑过了吗？——含 change-level + 系统级（跨分系统边界，proposal 标注了受影响分系统时）两层验证，缺一层不算完成。
+- **change 级收尾 review Verdict 检查**：`td-apply` 步骤 6.3 是完成判定链的硬步骤，本步复核其结论。读 `openspec/changes/<change-name>/reviews/` 下最新一份 change 级收尾 review 报告的 Verdict 锚点行（落盘约定见 `requesting-code-review` 第 3 节「报告落盘」）——`APPROVED` / `APPROVED_WITH_CHANGES` → 放行；`MUST_FIX_CRITICAL` 或无 review 报告（tier-small 的保底抽查也算，不得因 tier-small 跳过本检查）→ **阻塞 archive**，提示用户回 `/td-apply` 步骤 6.3 修复 critical 或补做收尾 review。缺报告且无法回溯（如 apply 跨会话中断未落盘）→ 停下问用户是否重跑 6.3。
 - **`td-cut:` 砍角标注收敛检查**：对本 change 改动过的代码 grep `td-cut:` 标注（约定见 `constraints` 的 `references/delay-decision.md` 的「`td-cut:` 砍角标注」节）——每条标注必须已收敛：已升级实现 / 已进 `openspec/todo.md`（走 `todo-pool`）/ 经用户确认接受为长期现状。未收敛的标注 → 停下问用户归哪类，不接受"留着不管"。
 
 ### 3. 强制"实际 vs 预期"复盘（硬步骤）

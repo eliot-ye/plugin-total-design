@@ -19,7 +19,7 @@ user-invocable: false
 
 ### 1. Human checkpoint
 
-在以下时机停下来问用户：完成一个关键链任务 / 命中 `constraints` 的 `references/human-in-loop.md` 必停场景 / 任务实际耗时 >2x 估时。
+在以下时机停下来问用户：完成一个关键链任务 / 命中 `constraints` 的 `references/human-in-loop.md` 必停场景 / 任务实际耗时 >2x 估时（**估时取任务模板的 `估时` 字段**，定义见 `writing-plans/references/task-template.md`「`估时` 字段」条；省略该字段时降级为"任务实际耗时明显超出同类任务预期"，不构成硬触发）。
 
 checkpoint 格式：
 

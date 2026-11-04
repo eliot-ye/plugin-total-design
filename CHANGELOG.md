@@ -2,6 +2,22 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.17.0] - 2026-11-04
+
+### Fixed
+
+- **td 工作流审核发现的 6 处流程缺口修复**：
+  - **`td-apply` 6.4 tier-medium 粒度矛盾**：current-change audit 的 tier-medium 行由"每个关键链任务完成时触发"改述为"由 `executing-plans` 步骤 1 承载，不在本步骤重复触发"——消除「6.1–6.3 都通过后」的完成判定阶段却声明实施过程中的触发粒度这一矛盾。
+  - **`requesting-code-review` 补 review 报告落盘规定**：第 3 节新增「报告落盘」——change 级收尾 review 落盘到 `openspec/changes/<name>/reviews/`、架构 review → `proposal.md` 末尾、checkpoint review → `tasks.md` 验证证据附注；下游（`td-apply` 6.3 / `td-archive` 步骤 2）读落盘文件而非会话记忆，跨会话后 Verdict 不丢失。
+  - **`td-archive` 步骤 2 加 change 级收尾 review Verdict 检查**：复核 `td-apply` 步骤 6.3 结论——`APPROVED` / `APPROVED_WITH_CHANGES` 放行，`MUST_FIX_CRITICAL` 或无报告 → 阻塞 archive；缺报告且无法回溯 → 问用户是否重跑 6.3。堵住"6.3 判 critical 但直接 archive"的漏归档缺口。
+  - **`td-propose` 步骤 7 tier-small 架构自检落点明确**：一行自检"跳过架构 review：无实质新架构决策"记录到 `proposal.md` 的"系统工程影响评估"节末尾，供 `td-apply` 步骤 4 复核时读取。
+  - **`executing-plans` 步骤 1 >2x 估时触发条件引用任务模板估时字段**：消除对未定义字段的依赖。
+  - **`writing-plans/references/task-template.md` 新增可选 `估时` 字段**：作为 `executing-plans` >2x 判定的单一事实源。
+
+### Docs
+
+- release 文档同步（本条目与 RELEASE_NOTES.md）。
+
 ## [1.16.0] - 2026-11-03
 
 ### Added
