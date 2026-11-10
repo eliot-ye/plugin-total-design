@@ -2,6 +2,24 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.18.0] - 2026-11-10
+
+### Added
+
+- **`requesting-code-review` 新增 `PENDING_RESULT` Verdict 锚点态**：subagent 派发后其报告**尚未回传**到作者上下文时，唯一合法的机器可读锚点为 `PENDING_RESULT`（第四态，前三态 `APPROVED` / `APPROVED_WITH_CHANGES` / `MUST_FIX_CRITICAL` 不变）；下游（`td-apply` 步骤 6.3、`td-archive` 步骤 2）读 `PENDING_RESULT` 视为「review 未完成、不得进入实施」，等同阻塞直至拿到真实结果或明确转 unisolated-self 自评。补齐「委派已发起」与「结论已到手」是两个独立事件——此前锚点只有三态，无法表达"结果在路上"这一真实状态。
+
+### Changed
+
+- **`todo.md` git 策略从「必须提交」改为「本地 backlog 不纳入版本库」**（`todo-pool` / `td-init` / `docs/user/usage.md` 三处同步）：`/td-init` 现在把 `todo.md` 写进 `openspec/.gitignore`，跨机器 / 跨人不通过 git 同步，每个人的待办池独立；多人协作不再有条目粒度的 git 冲突面，无需人工协调。此前 todo.md 是共享事实源、必须提交，两人同时操作同一文件会产生 git 冲突。文件仍留在本地磁盘，本工作流（含 `SessionEnd` hook）照常读写。
+
+### Fixed
+
+- **subagent review 结果未回传时可能凭推测编造结论（`requesting-code-review` 防编造 gate）**：新增硬约束——写 `reviewed-by: subagent` 前必须逐字收到报告原文，没看到就不准写该行、不准写任何归属 subagent 的 Verdict / issues / critical；subagent 完成但报告未回传时，对应段落如实写"委派已发起、结果未回传、结论待补"并停在那里等回传，**不得**用「派发了 review」这个动作冒充「已收到 review 结论」。违反此 gate 等同编造 Verdict，会向下游传递未经真实评审的伪造结论、掩盖真问题（真实 subagent 可能判 critical 而被编造的 `APPROVED` 掩盖）。
+
+### Docs
+
+- release 文档同步（本条目与 RELEASE_NOTES.md）。
+
 ## [1.17.0] - 2026-11-04
 
 ### Fixed
