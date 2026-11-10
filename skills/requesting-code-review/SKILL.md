@@ -70,10 +70,16 @@ review 对象与作者为同一 agent 的产出时，review 不得在 authoring 
 **隔离载体（按优先级）**：
 
 1. **环境自带的 code review 工具**（最强隔离——工具进程外）——现有第 6 节「工具优先」已是此档。**仅当本 skill 定义的 review 维度就是工具 reviewer 内置覆盖的维度时适用**；本 skill 第 5 节架构 review 的检查清单（高内聚 / 低耦合 / 循环依赖 / 隐式依赖）超出该工具 reviewer 覆盖范围，跳过此档从第 2 档 subagent 起
-2. **subagent**（fresh-context，同模型）——平台支持 subagent 派发时，agent 必须尝试走 subagent 隔离，不允许跳过直接自评；subagent 在独立上下文执行 review，作者上下文拿回 review 报告继续决策
-3. **同上下文 LLM review（降级）**——平台不支持 subagent 派发时降级到同上下文自评，不阻塞、不询问用户
+2. **subagent**（fresh-context，同模型）——平台支持 subagent 派发时，agent 必须尝试走 subagent 隔离，不允许跳过直接自评；subagent 在独立上下文执行 review，作者上下文拿回 review 报告继续决策。**"拿回"以结果回传到作者上下文为准**：subagent「已派出」≠「结果已到手」——两者是独立事件。**只有逐字收到 subagent 报告原文，才可将其结论（Verdict / issues / `reviewed-by: subagent` 标注）写入 artifact**；subagent 完成但报告未回传到当前上下文时，等同第 3 档降级触发（见下），不得凭自己的判断推测、代填、复述"subagent 大概会得出什么"
+3. **同上下文 LLM review（降级）**——平台不支持 subagent 派发、**或 subagent 已派出但其报告结果未回传到当前上下文**时，降级到同上下文自评，不阻塞、不询问用户。降级产物**不得**携带任何归属给 subagent 的内容
 
 **降级必须如实标注**（唯一硬约束）：降级时 review 报告的 Verdict 锚点行后须标注 `reviewed-by: unisolated-self`（形态见第 3 节 Verdict 模板）。不得无标注地降级、不得因无隔离而跳过检查维度、不得编造 Verdict——降级后给出的 Verdict 仍须写出具体检查结论。
+
+**防编造 gate**（第 2 档 subagent 结果未回传时的硬约束，与上方降级标注绑定）：
+
+- 写 `reviewed-by: subagent` 前必须通过可机械自检的判据——**"subagent 的报告原文我逐字看到了吗？"没逐字看到就不准写这行、不准写任何归属给 subagent 的 Verdict / issues / critical**。
+- subagent 结果未回传时，对应 review 段落如实写"委派已发起、结果未回传、结论待补"并停在那里等回传；**不得**用「派发了 review」这个动作冒充「已收到 review 结论」。
+- 违反此 gate（凭推测填入归属 subagent 的结论）**等同编造 Verdict**，属严重纪律违规——它会向下游（`td-apply` 步骤 6.3、`td-archive` 步骤 2）传递一个未经真实评审的伪造结论，掩盖真问题（真实 subagent 可能判 critical 而被编造的 APPROVED 掩盖）。
 
 **tier 对标注的强调程度**：tier 不决定能否降级，只影响标注强调——tier-large 自评降级时须显著标注「本次 critical 判断基于无隔离自评，置信度低于有隔离版本」；tier-medium / tier-small 常规标注即可。
 
@@ -127,12 +133,12 @@ review 对象与作者为同一 agent 的产出时，review 不得在 authoring 
    ...
 
 ### Verdict
-APPROVED | APPROVED_WITH_CHANGES | MUST_FIX_CRITICAL
+APPROVED | APPROVED_WITH_CHANGES | MUST_FIX_CRITICAL | PENDING_RESULT
 reviewed-by: subagent | unisolated-self
-<可以继续 / 必须先修 critical>
+<可以继续 / 必须先修 critical / 结果未回传·待补>
 ```
 
-**Verdict 锚点说明**：第一行是机器可读锚点（三态对应第 2 节分级：无 critical = `APPROVED`；有 warning 且用户接受延后 = `APPROVED_WITH_CHANGES`；有 critical = `MUST_FIX_CRITICAL`）。第二行 `reviewed-by` 标注评审的隔离状态（见「Review 上下文隔离」节）。第三行自由文本保留服务人读。下游（`td-apply` 步骤 6.3）优先读锚点行；缺锚点行 → 视为 `MUST_FIX_CRITICAL`（保守），不静默放行。
+**Verdict 锚点说明**：第一行是机器可读锚点（前四态对应第 2 节分级：无 critical = `APPROVED`；有 warning 且用户接受延后 = `APPROVED_WITH_CHANGES`；有 critical = `MUST_FIX_CRITICAL`；**委派已发起但 subagent 报告未回传到当前上下文 = `PENDING_RESULT`**）。第二行 `reviewed-by` 标注评审的隔离状态（见「Review 上下文隔离」节）。第三行自由文本保留服务人读。下游（`td-apply` 步骤 6.3）优先读锚点行；缺锚点行 → 视为 `MUST_FIX_CRITICAL`（保守），不静默放行。**`PENDING_RESULT` 是 subagent 结果未回传时的唯一合法锚点**——此时**禁止**编造前三态的任何一个（见「防编造 gate」），下游读 `PENDING_RESULT` 应视为「review 未完成、不得进入实施」，等同阻塞直至拿到真实结果或明确转 unisolated-self 自评。
 
 **Verdict 前置验证**：给出“可以继续”的 Verdict 之前，先触发 `verification-before-completion` 跑验证命令拿到证据——Verdict 是完成声明，没有验证证据的“可以继续”不成立。
 

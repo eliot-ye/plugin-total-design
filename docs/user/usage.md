@@ -90,7 +90,7 @@ extension 注册了 8 个 `/td-*` 短命令——7 个桥接到同名 skill，�
 
 **冲突裁决**：假冲突（`.td-state/` 状态文件）用 gitignore 从源头消除；真冲突（`openspec/specs/` 两 change 改同一分系统契约）是 feature——交给总体设计部（人）裁决，agent 不自动挑版本。
 
-**协作约定**：一个 change 一个 owner、一个 change 一个分支 + PR；`openspec/specs/` / `openspec/config.yaml` / `openspec/changes/` / `openspec/todo.md` 必须提交，不要 ignore。
+**协作约定**：一个 change 一个 owner、一个 change 一个分支 + PR；`openspec/specs/` / `openspec/config.yaml` / `openspec/changes/` 必须提交，不要 ignore。`openspec/todo.md` 是个人本地 backlog，不纳入版本库（`/td-init` 已把它写进 `openspec/.gitignore`），跨机器/跨人不通过 git 同步。
 
 ## 常见问题
 
