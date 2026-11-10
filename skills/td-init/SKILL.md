@@ -58,14 +58,15 @@ init 是"把系统的工作方式先立起来"——先有 specs 基线、change
 ```gitignore
 # total-design 本地状态：全部可从文件系统事实推导，不进版本库
 .td-state/
+todo.md
 ```
 
   - `openspec/.gitignore` 不存在 → 创建该文件并写入
-  - 已存在 → 追加（不覆盖已有内容）；若已包含 `.td-state/` 条目 → 跳过（幂等）
+  - 已存在 → 追加（不覆盖已有内容）；若已包含 `.td-state/` 与 `todo.md` 条目 → 跳过（幂等）
 
-**为什么**：`.td-state/` 下所有状态文件（`profile-tier.yaml` / `archive-counter.yaml` / `audit-history.yaml` / `audits/`）都能从文件系统事实推导（`archive/` 目录、`audits/*.md` 等），提交进 git 只会制造假冲突——两人同时 archive / audit 时对同一份 YAML 读改写，git 报冲突或静默丢失。忽略后冲突面归零，文件仍留在本地，本工作流（含 `SessionEnd` hook）照常读写。
+**为什么**：`.td-state/` 下所有状态文件（`profile-tier.yaml` / `archive-counter.yaml` / `audit-history.yaml` / `audits/`）都能从文件系统事实推导（`archive/` 目录、`audits/*.md` 等），提交进 git 只会制造假冲突——两人同时 archive / audit 时对同一份 YAML 读改写，git 报冲突或静默丢失。`todo.md` 是个人本地 backlog，同样不跨机器同步——忽略后冲突面归零，文件仍留在本地，本工作流（含 `SessionEnd` hook）照常读写。
 
-**必须提交、不要 ignore**（文件当前可能不存在，但一旦创建就进版本库）：`openspec/config.yaml`（团队共享 context）、`openspec/specs/`（主 spec）、`openspec/changes/`（change 资产）、`openspec/todo.md`。
+**必须提交、不要 ignore**（文件当前可能不存在，但一旦创建就进版本库）：`openspec/config.yaml`（团队共享 context）、`openspec/specs/`（主 spec）、`openspec/changes/`（change 资产）。
 
 ### 4. 老项目迁移检查
 
