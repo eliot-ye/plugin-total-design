@@ -9,7 +9,7 @@ atomcode / Claude Code / Pi 的加载现状不受影响。
 
 ## 这是什么
 
-- `index.mjs` —— DSH skill provider（ESM、零运行时依赖）。从 `../skills/*/SKILL.md`
+- `index.mjs` —— DSH skill provider（ESM、零运行时依赖）。从 `../../skills/*/SKILL.md`
   读取 18 个 skill，经 `ctx.skills.registerProvider` 注册进会话目录。
 - `cordis.patch.yml` —— bundle 补丁层：insert 一行 `{id: total-design-skill-provider, name: ./index.mjs}`。
   `name` 是相对本 patch 文件的路径，因此无需改根 `package.json` 的 `main`/`exports`。

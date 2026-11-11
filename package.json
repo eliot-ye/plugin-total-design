@@ -30,7 +30,7 @@
   },
   "dsh": {
     "bundle": {
-      "patch": "./dsh/cordis.patch.yml"
+      "patch": "./extensions/dsh/cordis.patch.yml"
     }
   }
 }

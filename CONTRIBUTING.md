@@ -10,7 +10,7 @@
 
 - 这是一个 **code agent plugin**（atomcode / Claude Code / Pi Agent / DeepSeek Harness (DSH) 等均可加载），不是应用项目
 - 产出形态：一组 Markdown 文件（`SKILL.md` / 命令文件）+ manifest
-- **除 DSH 薄包装层外没有可执行代码**：`dsh/index.mjs` 是唯一新增 JS（约 152 行，只做 skill 注册，无业务逻辑；`hooks/td_state_sync.js` 是原有状态兜底脚本），其余"逻辑"都是 Markdown 指令
+- **除 DSH 薄包装层外没有可执行代码**：`extensions/dsh/index.mjs` 是唯一新增 JS（约 152 行，只做 skill 注册，无业务逻辑；`hooks/td_state_sync.js` 是原有状态兜底脚本），其余"逻辑"都是 Markdown 指令
 
 ## 三种贡献方式
 
@@ -113,7 +113,7 @@ node -e 'const p = require("./package.json"); if (!p.dsh?.bundle?.patch) throw n
 
 # DSH：provider 能发现全部 18 个 skill（模拟 ctx.skills 注册，不依赖 DSH 运行时）
 node --input-type=module -e '
-import { apply } from "./dsh/index.mjs";
+import { apply } from "./extensions/dsh/index.mjs";
 let provider;
 apply({ logger: { warn: console.error }, skills: { registerProvider(create) { provider = create({ signal: new AbortController().signal, invalidate() {} }); } } });
 const list = await provider.list();

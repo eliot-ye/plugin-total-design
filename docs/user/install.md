@@ -90,7 +90,7 @@ dsh plugin --profile <name> add /absolute/path/to/plugin-total-design
 dsh --profile <name> --dump-config   # 确认 total-design-skill-provider 行已插入
 ```
 
-DSH 通过根 `package.json` 的 `dsh` 字段识别本 plugin。机制与已知限制见 [platforms.md · DSH](../maintainer/platforms.md#deepseek-harness-dsh) 与 [dsh/README.md](../../dsh/README.md)。
+DSH 通过根 `package.json` 的 `dsh` 字段识别本 plugin。机制与已知限制见 [platforms.md · DSH](../maintainer/platforms.md#deepseek-harness-dsh) 与 [dsh/README.md](../../extensions/dsh/README.md)。
 
 **hook 说明**：DSH 没有 `hooks.json` / `SessionEnd` 加载器，`hooks/` 仅对 atomcode / Claude Code 生效；DSH 下 `.td-state/` 校正只由 td-archive / td-system-audit 正文步骤承担。
 
