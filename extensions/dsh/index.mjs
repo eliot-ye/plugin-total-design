@@ -5,7 +5,7 @@
 // shape so the loader contract stays identical; zero runtime dependencies
 // (BUNDLED_SKILL_RANK is inlined as 600, the documented value).
 //
-// Loaded by dsh/cordis.patch.yml as a Cordis plugin entry. This file is ESM
+// Loaded by extensions/dsh/cordis.patch.yml as a Cordis plugin entry. This file is ESM
 // (.mjs), so the root package.json does not need "type": "module" and the
 // CommonJS hooks/td_state_sync.js stays CommonJS.
 
@@ -22,8 +22,8 @@ const inject = ["skills"];
 /** Cordis plugin identity. */
 const name = "total-design-skill-provider";
 
-/** Absolute directory holding the SKILL.md bundles (../skills relative to this file). */
-const SKILLS_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "skills");
+/** Absolute directory holding the SKILL.md bundles (../../skills relative to this file). */
+const SKILLS_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "skills");
 
 /** Public skill-name grammar, mirrors dsh-skill's isSkillName. */
 const SKILL_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

@@ -4,7 +4,7 @@
 # tree. The row name is a path relative to this patch file, so it loads
 # ./index.mjs directly; the profile does not need to add "main"/"exports"
 # to the root package.json. The provider registers the 18 bundled skills
-# under ../skills/*/SKILL.md with the session registry.
+# under ../../skills/*/SKILL.md with the session registry.
 #
 # A new unique id is used instead of overriding the base @deepseek-ai/dsh-skill-filesystem
 # row: in web/desktop profiles the base host row is disabled and presets own

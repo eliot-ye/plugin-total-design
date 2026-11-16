@@ -86,6 +86,7 @@ openspec status --change "<name>" --json
 - **矛盾承接**（若 `td-explore` 产物含未决矛盾——对话中暴露、尚未拍板的权衡）：proposal 的"系统工程影响评估"节须显式描述"本 change 承载的需求权衡 + 设计侧如何处置（两全 / 取舍+理由 / 留待 archive 对照）"。这是**描述义务，不是拍板门**——取舍本身是否需用户确认，仍按 `constraints` 的 `references/human-in-loop.md` 必停场景 5（"agent 置信度低：不确定方案是否对齐用户意图"）判定。
 - 会话上下文中没有本次 change 触及分系统的 baseline spec 内容（如本会话没走过 `/td-explore`，或其读取内容已不在上下文）→ 读 `openspec/specs/` 下相关分系统的 `spec.md`（契约与不变量），作为 6.c"与既有架构/风格的遵循关系"与整体影响判断的输入；相关分系统在 `openspec/specs/` 下没有 baseline（greenfield 首个 change）→ 跳过。
 - **设计决策可逆性检查**（propose 阶段新出现的设计决策）：若用户对某设计点犹豫，或 design.md 写"先选 A 方案，以后再改" → 触发 `constraints` 的 `references/delay-decision.md`，按该文件「区分两类决策」表检查决策的可逆性（propose 是设计决策密集阶段，delay-decision 的可逆性检查在此落地；探索阶段已检查过的决策不重复查，见 `td-explore` 步骤 4 末句）。
+- **全局约束核对**（仅当本 change 触及系统级接缝时触发——跨边界注入、装配接线、包间依赖，非无条件必做）：往注入点之外的全局约束面接新机制前，设计阶段先核对注入形态是否被既有约束放行，不依赖下游 review 兜底。**约束面由现场从当前项目的 baseline spec 与既有守护机制识别**（典型面：安全策略、装配/接线、包边界守护、依赖方向；哪些面真实存在、由什么机制背书，以本项目为准），不是固定清单。核对动作：对每个"注入/接线"决策点，逐条回答"触碰了哪个约束面、为什么不被拦"。**写不出放行理由 = 设计期就该改方案**，而非留到 apply/review 才发现。核对结论写进 design.md（或无 design.md 时写进 proposal「系统工程影响评估」节）。
 - 两者皆无 → 直接从 template 构建。
 
 **6.b 创建 artifact**：

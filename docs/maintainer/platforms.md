@@ -14,7 +14,7 @@
 | atomcode | `.claude-plugin/plugin.json`（走 CC 兼容路径） | git marketplace（`/plugin marketplace add`） | skills + commands + hooks | `/td-propose` | `SessionEnd`，需 trust |
 | Claude Code | `.claude-plugin/plugin.json` | git marketplace 或 `--plugin-dir` | skills + commands + hooks | `/total-design:td-propose` 或 `/td-propose` | `SessionEnd`，需 trust |
 | Pi Agent | `package.json` 的 `pi.skills` + `pi.extensions` | `pi install git:<repo-url>` | skills + extension | `/td-propose` 或 `/skill:td-propose` | 无原生 hook，extension `session_shutdown` 兜底 |
-| DeepSeek Harness (DSH) | `package.json` 的 `dsh.bundle.patch` → `dsh/cordis.patch.yml` | 插件页 / `dsh plugin add` / `plugin_manager install_bundle` | skills（provider 注册） | `/td-propose` | 无 |
+| DeepSeek Harness (DSH) | `package.json` 的 `dsh.bundle.patch` → `extensions/dsh/cordis.patch.yml` | 插件页 / `dsh plugin add` / `plugin_manager install_bundle` | skills（provider 注册） | `/td-propose` | 无 |
 
 ## 共享与差异
 
@@ -54,15 +54,15 @@
 
 ## DeepSeek Harness (DSH)
 
-- bundle 形态：根 `package.json` 声明 `dsh.bundle.patch` → `dsh/cordis.patch.yml`；patch `insert` 一行 `total-design-skill-provider`，`name` 为相对本 patch 的 `./index.mjs`；`dsh/index.mjs` 通过 `ctx.skills.registerProvider` 注册 `skills/*/SKILL.md`。
+- bundle 形态：根 `package.json` 声明 `dsh.bundle.patch` → `extensions/dsh/cordis.patch.yml`；patch `insert` 一行 `total-design-skill-provider`，`name` 为相对本 patch 的 `./index.mjs`；`extensions/dsh/index.mjs` 通过 `ctx.skills.registerProvider` 注册 `skills/*/SKILL.md`。
 - 安装：Web 插件页「添加插件」填绝对路径，或 `dsh plugin --profile <name> add <path>`，或 `plugin_manager install_bundle`（Creator 模式）。DSH 只读根 `package.json` 的 `dsh` 字段，不读其它 manifest。
 - 不支持项：`commands/` 目录、`hooks.json` / `SessionEnd`、frontmatter `argument-hint`（被忽略）。
-- 实现与限制详见 [dsh/README.md](../../dsh/README.md)。
+- 实现与限制详见 [dsh/README.md](../../extensions/dsh/README.md)。
 
 ## 新增一个平台时要动哪里
 
 1. 本文「总表」加一行 + 新增该平台小节（加载清单、分发、组件、命令前缀、hook）。
 2. [manifests.md](manifests.md)：若引入新清单文件，补职责表与一致性约束。
-3. 仓库实现：对应的 manifest 字段 / 包装层（如 Pi 的 `pi.extensions`、DSH 的 `dsh/`）。
+3. 仓库实现：对应的 manifest 字段 / 包装层（如 Pi 的 `pi.extensions`、DSH 的 `extensions/dsh/`）。
 4. `README.md` 安装矩阵加一行；`docs/user/install.md` 加安装步骤。
 5. `AGENTS.md`「项目身份」一句话提及，不复制细节。

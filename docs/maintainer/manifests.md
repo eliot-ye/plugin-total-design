@@ -10,7 +10,7 @@
 | `.claude-plugin/plugin.json` | Claude Code + atomcode | 加载清单（skills / commands / hooks 资产字段） |
 | `.claude-plugin/marketplace.json` | Claude Code + atomcode | git marketplace 声明 |
 | 根 `plugin.json` | Agent Plugins 1.0.0 生态 | 跨平台元数据（`$schema` / `name` / `version` / `description` / `author`），符合标准的客户端据此识别并加载 `skills/` |
-| `package.json` | Pi Agent + DeepSeek Harness (DSH) | `pi.skills` / `pi.extensions`；`dsh.bundle.patch` 指向 `dsh/cordis.patch.yml` |
+| `package.json` | Pi Agent + DeepSeek Harness (DSH) | `pi.skills` / `pi.extensions`；`dsh.bundle.patch` 指向 `extensions/dsh/cordis.patch.yml` |
 
 DSH 不新增清单文件——其 bundle 身份由 `package.json` 承载。
 

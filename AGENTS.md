@@ -6,9 +6,9 @@
 
 这是一个 **code agent skill plugin**，不是一个应用项目，也不是一个代码项目。
 
-- **产出形态**：一组 Markdown 文件（`SKILL.md` / 命令文件）+ 四处 manifest + 一个 DSH bundle 包装层（`dsh/`）
+- **产出形态**：一组 Markdown 文件（`SKILL.md` / 命令文件）+ 四处 manifest + 一个 DSH bundle 包装层（`extensions/dsh/`）
 - **运行方式**：atomcode / Claude Code / Pi Agent / DeepSeek Harness (DSH) 各自加载同一份 `skills/`。平台加载机制、安装路径、hook 支持差异见 [docs/maintainer/platforms.md](docs/maintainer/platforms.md)
-- **除 DSH 薄包装层外没有可执行代码**：`dsh/index.mjs` 是唯一新增的 JS——约 152 行，只把 `skills/*/SKILL.md` 注册进 DSH 的 skill 注册表，无业务逻辑（`hooks/td_state_sync.js` 是原有的状态兜底脚本，不属新增）；其余"逻辑"都是 Markdown 指令
+- **除 DSH 薄包装层外没有可执行代码**：`extensions/dsh/index.mjs` 是唯一新增的 JS——约 152 行，只把 `skills/*/SKILL.md` 注册进 DSH 的 skill 注册表，无业务逻辑（`hooks/td_state_sync.js` 是原有的状态兜底脚本，不属新增）；其余"逻辑"都是 Markdown 指令
 - **内容消费者**：这是 code agent skill plugin，需要考虑 SKILL 是否符合 LLM 的理解
 
 **文档地图**（单一事实源，本文不复制细节）：
@@ -89,7 +89,7 @@ total-design/
 ├── skills/                  ← 18 个 skill（变体在 field-assessment/references/ 与 constraints/references/）
 ├── commands/                ← 8 个 command（仅 atomcode / Claude Code 加载）
 ├── extensions/pi-agent/     ← Pi extension（/td-* 桥 + session_shutdown 兜底）
-├── dsh/                     ← DSH bundle 包装层（patch + skill provider + 安装说明）
+├── extensions/dsh/          ← DSH bundle 包装层（patch + skill provider + 安装说明）
 │   ├── index.mjs
 │   ├── cordis.patch.yml
 │   └── README.md

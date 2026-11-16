@@ -2,6 +2,21 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.19.0] - 2026-11-16
+
+### Fixed
+
+- **`td-propose` 全局约束核对改写为通用触发器判据**：原步骤 6.a「全局约束核对」写死四类 app 私有约束（CSP 内联脚本 / `collectI18nBindings` 装配 / 包 spec 守护 / llm-core 依赖分层）且**无条件必做**。改为现场判读的通用约束面——**约束面由现场从当前项目的 baseline spec 与既有守护机制识别**（典型面：安全策略、装配/接线、包边界守护、依赖方向；哪些面真实存在、由什么机制背书，以本项目为准），不是固定清单。触发条件从无条件必做降级为**仅当本 change 触及系统级接缝时触发**（跨边界注入、装配接线、包间依赖），对齐按需触发风格。同步删除 app 实现锚点（`pnpm check:invariants` / `scripts/check-invariants.mjs` 等）与根 AGENTS.md 引用——消除开发态泄漏与 SKILL 禁引用 AGENTS.md 的硬违规。
+
+### Changed
+
+- **用户呈现纪律（序号标记须带内容）**：`system-engineering` 新增「用户呈现纪律」节——向用户呈现说明文本、问题、change 提案（proposal / design / tasks）时，凡出现序号标记（`表 1/2/3`、`步骤 N`、`第 N 类`、`a1/b1` 等）必须满足「定义已在上下文 / 内联内容 / 文字重述」其一；判据一句话——**用户可见上下文里没有该序号的定义时，不得只给序号而无内容**。`constraints/references/human-in-loop.md` 同步收紧「需用户回复的条目标号规则」，新增「标签必须带内容」；`td-explore` 步骤 6 条目标号规则补运行时指针指向该纪律。
+- **DSH 包装层目录迁移至 `extensions/dsh/`**（内部打包重构，用户无感知）：`dsh/{index.mjs, cordis.patch.yml, README.md}` 移至 `extensions/dsh/`，文件内容零改动；同步更新 `package.json` 的 `dsh.bundle.patch` 指向新位置、修复 `SKILLS_ROOT` 解析路径（`../skills` → `../../skills`，迁移后仍指向 repo 根 `skills/`）、更新 11 处旧路径引用（AGENTS.md / platforms.md / manifests.md / install.md / CONTRIBUTING.md / extensions/dsh/README.md）。四平台安装方式不变，DSH 仍经根 `package.json` 的 `dsh` 字段识别本 plugin。
+
+### Docs
+
+- release 文档同步（本条目与 RELEASE_NOTES.md）。
+
 ## [1.18.0] - 2026-11-10
 
 ### Added
