@@ -1,4 +1,36 @@
-# total-design v1.18.0 发布说明
+# total-design v1.19.0 发布说明
+
+> 面向使用态用户：本次为**修复 + 内部打包重构 + 用户呈现纪律版**——`td-propose` 的全局约束核对从「无条件必做」降级为「仅当触及系统级接缝时触发」并改写为通用触发器判据（消除开发态泄漏与 SKILL 禁引用 AGENTS.md 硬违规），`system-engineering` 新增用户呈现纪律（序号标记不得只给序号而无内容），DSH 包装层目录迁移至 `extensions/dsh/`（用户无感知）。skill 数量、命令数量、references、hooks、td-* 契约流、四平台加载均不变。
+
+## 本版本是什么
+
+1.19.0 是 **td-propose 触发器判据修正 + 用户呈现纪律 + 打包布局整理版**。上一次版本 1.18.0 加固 code review 可信度与 todo.md 协作模型；本版本做三件事：
+
+- **Fixed — `td-propose` 全局约束核对改写为通用触发器判据**：原步骤 6.a「全局约束核对」写死四类 app 私有约束（CSP 内联脚本 / `collectI18nBindings` 装配 / 包 spec 守护 / llm-core 依赖分层）且无条件必做。改为现场判读的通用约束面——**约束面由现场从当前项目的 baseline spec 与既有守护机制识别**（典型面：安全策略、装配/接线、包边界守护、依赖方向；哪些面真实存在、由什么机制背书，以本项目为准），非固定清单。触发条件降级为**仅当本 change 触及系统级接缝时触发**（跨边界注入、装配接线、包间依赖），对齐按需触发风格。同步删除 app 实现锚点与根 AGENTS.md 引用——消除开发态泄漏与 SKILL 禁引用 AGENTS.md 硬违规。
+- **Changed — 用户呈现纪律（序号标记须带内容）**：`system-engineering` 新增「用户呈现纪律」节——向用户呈现说明文本、问题、change 提案时，凡出现序号标记（`表 1/2/3`、`步骤 N`、`第 N 类`、`a1/b1` 等）必须满足「定义已在上下文 / 内联内容 / 文字重述」其一；`constraints/references/human-in-loop.md` 收紧「需用户回复的条目标号规则」（标签必须带内容）；`td-explore` 步骤 6 补运行时指针。
+- **Changed — DSH 包装层目录迁移至 `extensions/dsh/`**（内部打包重构，用户无感知）：`dsh/{index.mjs, cordis.patch.yml, README.md}` 移至 `extensions/dsh/`，内容零改动；同步 `package.json` 的 `dsh.bundle.patch` 路径、修复 `SKILLS_ROOT` 解析路径、更新 11 处文档引用。四平台安装方式不变。
+
+## 行为变更表（升级用户感知差异）
+
+| 环节 | 变更 | 感知 |
+|---|---|---|
+| `td-propose` 全局约束核对 | 从「无条件必做」降级为「仅当触及系统级接缝时触发」，约束面改为现场判读 | propose 时不再强制检查固定四类 app 约束；触及跨边界注入 / 装配接线 / 包间依赖时仍核对接缝放行 |
+| 用户呈现纪律（序号标记） | 新增约束：序号标记必须「定义在上下文 / 内联内容 / 文字重述」其一 | agent 不再只给 `表 1` / `步骤 N` / `a1` 而无内容；用户回复标签时条目内容保证在可见上下文 |
+| DSH 包装层目录 | `dsh/` → `extensions/dsh/` | 无用户感知（四平台安装方式不变） |
+
+## 升级步骤
+
+1. 更新 plugin 到 v1.19.0（四平台安装方式不变，见 `docs/user/install.md`）。
+2. 无需迁移数据——`.td-state/` 与 `openspec/` 格式不变。
+3. 无破坏性变更，可直接升级。
+
+## 完整变更列表
+
+见 [CHANGELOG.md](CHANGELOG.md) 的 `[1.19.0]` 条目。
+
+---
+
+# total-design v1.18.0 发布说明（历史）
 
 > 面向使用态用户：本次为**修复 + 行为变更版**——code review 新增 `PENDING_RESULT` 锚点态与防编造 gate（杜绝 subagent 结论未回传时的编造），`todo.md` 改为本地 backlog 不纳入版本库。skill 数量、命令数量、references、hooks、td-* 契约流、四平台加载均不变。
 
