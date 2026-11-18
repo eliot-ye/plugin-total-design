@@ -80,7 +80,7 @@ argument-hint: <change-name>
 **基本执行循环**（td-apply 自持，逐任务循环直至全部完成）：
 
 1. 读任务的"验证"字段与"风险"字段
-2. 触发 `test-driven-development`：先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑；**写新代码前先过 `constraints` 的 `references/yagni-ladder.md` 的「六级决策阶梯」节**——从第 1 级往下找第一个"完全能用"的（复用既有 / 标准库 / 已装依赖 / 一行 / 最小实现），命中即停；触碰其 never-cut 清单的能力按 full 强度做不走降级，走了阶梯之外的重路留 `shortcut:` 标注（该文件有定义）；实施中故意砍角（降级实现 / 留已知上限的简化）→ 按 `constraints` 的 `references/delay-decision.md` 的「`td-cut:` 砍角标注」节在该代码处留一行 `td-cut:` 标注（砍了什么角、已知上限、升级路径），只标有真实 ceiling 的故意砍角
+2. 触发 `test-driven-development`：先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑。**`yagni-ladder` 信号触发（不是每次写代码都过）**：仅当命中「准备装新依赖 / 新建 helper·组件·抽象 / 写出超出任务验证字段所需能力的代码 / 用户说别过度设计」任一信号时，才过 `constraints` 的 `references/yagni-ladder.md` 的「六级决策阶梯」节——从第 1 级往下找第一个"完全能用"的，命中即停；触碰其 never-cut 清单的能力按 full 强度做不走降级，走了阶梯之外的重路留 `shortcut:` 标注（该文件有定义）。无信号的小改动不查阶梯，默认对齐既有模式即可。实施中故意砍角（降级实现 / 留已知上限的简化）→ 按 `constraints` 的 `references/delay-decision.md` 的「`td-cut:` 砍角标注」节在该代码处留一行 `td-cut:` 标注（砍了什么角、已知上限、升级路径），只标有真实 ceiling 的故意砍角
 3. 触发 `verification-before-completion`：跑验证命令，拿到验证证据
 4. 更新 tasks.md：`- [ ]` → `- [x]`，附验证证据
 
@@ -91,6 +91,16 @@ argument-hint: <change-name>
 - **current-change audit**（tier-medium）：每个关键链任务完成时随 checkpoint 触发，见步骤 6.4
 
 条件不命中时全程走 td-apply 自持的基本执行循环，不加载 `executing-plans`。
+
+#### 验证边界登记（长任务，防静默削减验证范围）
+
+跨多任务 / 上下文压力大（接近 compaction）的实施中，**不得用上下文压力或工作量当理由静默缩小验证计划**。若实施中发现原定的验证范围（全量测试矩阵 / 某类边界验证 / scenario 覆盖）跑不完，这是**范围变更**，必须显式登记并上报，不允许直接降级成"最小可行子集"了事：
+
+1. **登记**：在 tasks.md 对应任务下留一行 `Ruling: 削减验证 <砍了什么> — <为什么（上下文/工作量/阻塞）> — <漏检风险 + 补跑条件>`（复用 `constraints` 的 `references/human-in-loop.md` 的 `Ruling:` 记账形态）。
+2. **上报裁决**：削减的是原 proposal / tasks 承诺的验证范围 → 走步骤 5 的 apply 全局必停通道问用户（补跑到后续 / 接受风险 / 缩 change scope），**不得自行拍板砍掉就不提**。
+3. **登记已验证 / 未验证边界**：checkpoint 与收尾时，明确区分"哪些验证跑过且绿 / 哪些还没跑 / 哪些被削减"——这条边界是 `verification-before-completion` 判"能否宣布完成"的依据，不得含糊。
+
+短任务（tier-small、单任务、无上下文压力）不要求此登记。执行语义与 `executing-plans` 的 checkpoint 调度衔接（checkpoint 时核对验证边界）。
 
 ### 5. 触发 apply 全局粒度的工程管理约束
 

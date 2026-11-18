@@ -1,6 +1,6 @@
 # WIP 限制
 
-> 本文件与同目录的 `brooks-law.md` / `critical-buffer.md` / `delay-decision.md` / `human-in-loop.md` / `yagni-ladder.md` 是平级兄弟文件，正文中出现的裸逻辑名均指同目录对应变体文件。
+> 本文件与同目录的 `brooks-law.md` / `critical-buffer.md` / `delay-decision.md` / `human-in-loop.md` 是平级兄弟文件，正文中出现的裸逻辑名均指同目录对应变体文件。
 
 ## 服务的主基调原则
 

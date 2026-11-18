@@ -198,6 +198,8 @@ review 对象不是代码，是 proposal 的分系统切分与设计决策。此
 | "subagent 派出去了，先按 APPROVED 往下走" | 「已派出」≠「已回传」——没逐字看到报告就不准写 `reviewed-by: subagent`，写 `PENDING_RESULT` 等回传（防编造 gate） |
 | "这个 critical 太吹毛求疵了，降成 warning" | 判级由证据位置和触发条件决定，不由"我觉得严不严重"决定——指得出 `file:line` 且说得出触发条件就是 critical |
 | "warning 不阻塞，先记着继续" | warning 确实不阻塞，但 critical 不行——先分清这条到底是 warning 还是 critical，别拿 warning 规则豁免 critical |
+| "记进 tasks.md「已知问题」节了，不阻塞" | "记录下来"≠"已处置"——记已知问题只对真 warning 有效；拿它豁免 critical / Important 等于 park 掉阻塞问题继续走。Important 修完或经裁决 park 才能往下（见第 4 节分级阻塞） |
+| "这是 spec §X 明确指示的行为，改它违背 spec + YAGNI 排除——不改" | 拿 spec / YAGNI 当权威把 review finding 合法化掉，是 park 的隐蔽形态。spec 确实这么写 → 走「设计回写」改 artifact 再评；spec 没写 → 这条就是该修的 finding。两条路都通，唯独"引用权威然后不改"不通 |
 | "review 太慢了，跳过直接 apply" | review 是完成判定链的一环，跳过=未完成——apply 前/收尾前的 review 不可省 |
 | "工具 review 报了一堆，都是 nit" | 按严重度映射逐条判，别一锅端——P0/P1 是 critical，混在 nit 里也要捞出来 |
 | "架构看起来合理，不用查清单" | 架构 review 查的是高内聚/低耦合/循环依赖/隐式依赖，"看起来"不是判据——过 `references/architecture-review-checklist.md` |
