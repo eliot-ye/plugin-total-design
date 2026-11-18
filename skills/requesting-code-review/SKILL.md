@@ -190,6 +190,18 @@ review 对象不是代码，是 proposal 的分系统切分与设计决策。此
 
 **critical 阻塞**：沿用第 4 节——修复后重跑 `verification-before-completion`（修复使既有验证证据失效，见其「之前测过」条），重跑通过且无 critical，change 才算 done。
 
+## 常见合理化
+
+| 合理化（agent 对自己说的话） | 现实 |
+|---|---|
+| "我自己写的我清楚，不用派 subagent" | 作者上下文自评=既当运动员又当裁判，隔离就是为了打破这个（见「Review 上下文隔离」节）——必须尝试 subagent |
+| "subagent 派出去了，先按 APPROVED 往下走" | 「已派出」≠「已回传」——没逐字看到报告就不准写 `reviewed-by: subagent`，写 `PENDING_RESULT` 等回传（防编造 gate） |
+| "这个 critical 太吹毛求疵了，降成 warning" | 判级由证据位置和触发条件决定，不由"我觉得严不严重"决定——指得出 `file:line` 且说得出触发条件就是 critical |
+| "warning 不阻塞，先记着继续" | warning 确实不阻塞，但 critical 不行——先分清这条到底是 warning 还是 critical，别拿 warning 规则豁免 critical |
+| "review 太慢了，跳过直接 apply" | review 是完成判定链的一环，跳过=未完成——apply 前/收尾前的 review 不可省 |
+| "工具 review 报了一堆，都是 nit" | 按严重度映射逐条判，别一锅端——P0/P1 是 critical，混在 nit 里也要捞出来 |
+| "架构看起来合理，不用查清单" | 架构 review 查的是高内聚/低耦合/循环依赖/隐式依赖，"看起来"不是判据——过 `references/architecture-review-checklist.md` |
+
 ## 与其他 skill 的关系
 
 - 与 `constraints` 的 `references/human-in-loop.md` 配合：critical issue 是 agent 自己能修就修，修不了触发 human-in-loop

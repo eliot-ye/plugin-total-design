@@ -11,7 +11,7 @@
 - **行为层（skills）** —— Superpowers 转译的 explore → plan → TDD → review → verify 强制流程；触发式，不靠人盯。
 - **契约层（commands）** —— OpenSpec 转译的 propose → apply → archive artifact 流；agree before you build。
 
-约束层是第零层，是另外两层立起来的前提。`constraints` skill 承载 5 份局部规律 references（`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop`），每份必须显式声明它服务 `system-engineering` 主基调的哪一条。
+约束层是第零层，是另外两层立起来的前提。`constraints` skill 承载 6 份局部规律 references（`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop` / `yagni-ladder`），每份必须显式声明它服务 `system-engineering` 主基调的哪一条。
 
 ## 依赖图谱
 

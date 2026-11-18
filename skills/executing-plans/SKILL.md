@@ -41,3 +41,14 @@ checkpoint 时做 `requesting-code-review`（含与既有风格一致性检查�
 1. 触发 `systematic-debugging`：4-phase root cause
 2. root cause 在 plan 之外 → 停下来问用户
 3. 不"硬刚"——失败次数阈值分两个层面、各自持有：**同一任务失败 2 次 → 触发 `systematic-debugging`（阈值归该 skill 的「触发时机」节）；3 次 → 反思 plan（回到 checkpoint 询问用户，阈值归本节）**
+
+## 常见合理化
+
+| 合理化（agent 对自己说的话） | 现实 |
+|---|---|
+| "关键链任务做完了，但用户正忙，跳过 checkpoint" | checkpoint 是硬门不是礼貌询问——做完关键链任务就停，用户忙是用户的事，门不因忙而消失 |
+| "这个 checkpoint 内容不多，合并到下一个一起问" | 每个关键链任务完成是一个独立门，合并=让用户失去中途纠偏的机会 |
+| "任务失败 2 次了，再试一次说不定就过" | 2 次失败=触发 `systematic-debugging` 找根因，不是再蛮干一次（阈值归该 skill）——3 次才回来反思 plan |
+| "失败原因我大概知道，不用走 4-phase" | "大概知道"是猜——4-phase 是防猜的，走 `systematic-debugging` |
+| "checkpoint 时 review 太重了，这任务风险低" | checkpoint review 深度由任务风险字段决定（见 `requesting-code-review` 第 1 节），低风险本就轻——不是跳过的理由 |
+| "估时超了但我觉得能追回来，不停" | 实际 >2x 估时是硬触发（见步骤 1），"能追回来"是赌——停下让总体设计部看到偏差 |

@@ -4,9 +4,9 @@ description: 局部约束层入口——防局部优化制造全局失调。
 user-invocable: false
 ---
 
-# 局部约束层（5 个局部规律的单一入口）
+# 局部约束层（6 个局部规律的单一入口）
 
-复杂巨系统（主基调第 4 条）不能并行硬解、不能局部优化、不能让分系统工程师各自拍板——这些硬约束由本 skill 的 5 个局部规律承载，各自由钱学森系统工程框架下的局部规律（Brooks / Goldratt / 精益 / 综合集成）支撑。
+复杂巨系统（主基调第 4 条）不能并行硬解、不能局部优化、不能让分系统工程师各自拍板、不能过度工程——这些硬约束由本 skill 的 6 个局部规律承载，各自由钱学森系统工程框架下的局部规律（Brooks / Goldratt / 精益 / 综合集成 / YAGNI）支撑。
 
 ## 依赖技能
 
@@ -15,7 +15,7 @@ user-invocable: false
 
 ## 服务的主基调原则
 
-本 skill 是**所有局部 constraint 的入口**——5 个子约束各服务主基调的不同条款（第 1、2、3、4 条），通过 references 下的 5 份变体文件承载执行规则。触发路径统一：**agent 命中任一子约束的触发场景 → 读本 skill 判读子约束 → 读对应 references/<name>.md 执行规则**。
+本 skill 是**所有局部 constraint 的入口**——6 个子约束各服务主基调的不同条款（第 1、2、3、4 条），通过 references 下的 6 份变体文件承载执行规则。触发路径统一：**agent 命中任一子约束的触发场景 → 读本 skill 判读子约束 → 读对应 references/<name>.md 执行规则**。
 
 ## 子约束映射
 
@@ -28,6 +28,7 @@ user-invocable: false
 | 可逆决策延迟 / 分层决策 / 层次观 | `delay-decision` | `references/delay-decision.md` | 第 3 条 |
 | 何时停下等用户 / 必停场景 / 强度叠加 | `human-in-loop` | `references/human-in-loop.md` | 第 2、3 条 |
 | 活跃 change 上限 / WIP 硬约束 + override | `wip-limit` | `references/wip-limit.md` | 第 4 条 |
+| 过度工程 / 装多余依赖 / 造已有轮子 / YAGNI | `yagni-ladder` | `references/yagni-ladder.md` | 第 1、4 条 |
 
 ## 如何被引用
 
