@@ -82,6 +82,7 @@ argument-hint: <change-name>
 1. 读任务的"验证"字段与"风险"字段
 2. 触发 `test-driven-development`：先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑。**`yagni-ladder` 信号触发（不是每次写代码都过）**：仅当命中「准备装新依赖 / 新建 helper·组件·抽象 / 写出超出任务验证字段所需能力的代码 / 用户说别过度设计」任一信号时，才过 `constraints` 的 `references/yagni-ladder.md` 的「六级决策阶梯」节——从第 1 级往下找第一个"完全能用"的，命中即停；触碰其 never-cut 清单的能力按 full 强度做不走降级，走了阶梯之外的重路留 `shortcut:` 标注（该文件有定义）。无信号的小改动不查阶梯，默认对齐既有模式即可。实施中故意砍角（降级实现 / 留已知上限的简化）→ 按 `constraints` 的 `references/delay-decision.md` 的「`td-cut:` 砍角标注」节在该代码处留一行 `td-cut:` 标注（砍了什么角、已知上限、升级路径），只标有真实 ceiling 的故意砍角
 3. 触发 `verification-before-completion`：跑验证命令，拿到验证证据
+   - **测试失败/挂起且原因不明** → 不直接修、不上报，先触发 `systematic-debugging`（复现→隔离→定位根因）。隔离定位完成前不得修、不得报；根因定位后按 Guardrails 的「任务内缺陷直修」判据决定直修或上报。
 4. 更新 tasks.md：`- [ ]` → `- [x]`，附验证证据
 
 **复杂场景按需委托 `executing-plans`**：以下任一条件命中时，在基本执行循环的对应位置触发 `executing-plans` 的 checkpoint / 失败处理能力——td-apply 仍是执行主体，`executing-plans` 提供管理层能力（checkpoint 调度 + 失败处理回路），不接管基本执行循环：
@@ -167,3 +168,4 @@ review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 ch
 - 不跳过任务，按 tasks.md 顺序；tasks.md 显式标注并行的任务除外
 - 每个任务必须有验证证据，"我觉得改对了"不算
 - 遇到 proposal 与实际代码冲突时，停下来问用户：是改 proposal 还是改代码？（执行序列见步骤 5 的「设计回写」）
+- **任务内缺陷直修**：根因在任务内（含测试基建缺陷、agent 自写的测试代码、任务验证字段定义的动作）→ **直接修，不问用户**；只有根因在 plan 之外（proposal/design 预期模型之外）才走 `constraints` 的 `references/human-in-loop.md` 必停通道。
