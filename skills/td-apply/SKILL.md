@@ -40,7 +40,7 @@ argument-hint: <change-name>
 
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 6.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"
 - **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。
-- **caller impact 分析节必填**：若 `$_TD_TIER` 为 `tier-medium` / `tier-large` 且 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。后续步骤 4 实测子节不再重复此检查。
+- **caller impact 分析节必填**（按 change-scope，不按 tier）：若 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`，命中即 change-scope 为 medium/large），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。**不加 tier 前置**——tier-small 项目里的大 change 照样要填，否则 propose 阶段的方案 review 查「caller impact 完备性」时对的是一个本可不填的节。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。后续步骤 4 实测子节不再重复此检查。
 - **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。已达 → **阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威在该文件；override 通过后继续步骤 3）。
 - **`constraints` 的 `references/critical-buffer.md`**：tasks.md 是否已标注关键链 + project buffer（比例按表 1 当前 tier 行；表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - **scenario→test 覆盖账本必填**：若 change 的 `applyRequires` 含 `specs` artifact，检查 proposal 是否附了 scenario→test 覆盖账本（见 `td-propose/references/scenario-test-map-template.md`）。缺账本或有 unmapped scenario 未标 `N/A` → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补账本。tier-small 仅在 `applyRequires` 含 `specs` 且含可执行测试面时检查。
@@ -146,10 +146,10 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 
 #### 6.3 change 级收尾 code review（硬步骤）
 
-两层验证（6.1 + 6.2）全部通过后，对本 change 的全部新增 / 修改代码做一次 change 级收尾 review——review 是完成判定链的最后阶段：先全绿拿验证证据，再对整体做 review。**执行语义由 `requesting-review` 的「change 级收尾 review」节承载**（review 对象、工具优先 / LLM 兜底的执行方式、与 checkpoint review 的分工在那里），本步骤只定义触发条件与 tier 分层强度：
+两层验证（6.1 + 6.2）全部通过后，对本 change 的全部新增 / 修改代码做一次 change 级收尾 review——review 是完成判定链的最后阶段：先全绿拿验证证据，再对整体做 review。**执行语义由 `requesting-review` 的「change 级收尾 review」节承载**（review 对象、工具优先 / LLM 兜底的执行方式、与 checkpoint review 的分工在那里），本步骤只定义触发条件与 change-scope 分层强度（与 proposal review 的 change-scope 口径对齐，不按 tier——tier-small 项目里的大 change 收尾不能只保底抽查）：
 
-- `tier-small`：保底抽查——只查 Spec compliance + 安全红线。小 change 可能全程轮不到 checkpoint review，收尾是它唯一的 review 机会，不整体跳过
-- `tier-medium` / `tier-large`：review 深度按 tasks.md 全部任务 `风险` 字段的最高档取
+- `scope-small`：保底抽查——只查 Spec compliance + 安全红线。小 change 可能全程轮不到 checkpoint review，收尾是它唯一的 review 机会，不整体跳过
+- `scope-medium` / `scope-large`：review 深度按 tasks.md 全部任务 `风险` 字段的最高档取
 
 review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 change-level 验证（修复使既有验证证据失效，见 `verification-before-completion` 的「之前测过」条）；无 critical → 进入 6.4。
 

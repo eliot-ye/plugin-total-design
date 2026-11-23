@@ -14,7 +14,7 @@ user-invocable: true
 
 - **`td-propose` 完成后、`td-apply` 动手前（方案 review）**——proposal 刚定型，进入实施前先检查方案整体（分系统切分、设计决策、需求对齐、预期行为模型、取舍可逆性、caller impact 完备性），此时改架构成本最低。change-scope 分层强度由第 5 节持有，判读落点在 `td-propose` 步骤 7（scope-small 降为一行自检，不入本 review）
 - `executing-plans` 的 checkpoint 时机（含每完成一个关键链任务——关键链任务完成 → 触发 checkpoint（`executing-plans` 步骤 1）→ checkpoint 时做本 review；不是独立于 checkpoint 的触发点）
-- **`td-apply` 步骤 6.3 的 change 级收尾**——两层验证（change-level + 系统级）全绿后、change 判 done 前（触发条件与 tier 分层强度见该步骤，执行语义见本 skill 第 6 节）
+- **`td-apply` 步骤 6.3 的 change 级收尾**——两层验证（change-level + 系统级）全绿后、change 判 done 前（触发条件与 change-scope 分层强度见该步骤，执行语义见本 skill 第 6 节）
 - 用户显式要求 review
 
 ## 工作方式
@@ -185,7 +185,7 @@ review 对象不是代码，是 proposal 的**方案整体**——分系统切�
 
 ### 6. change 级收尾 review
 
-`td-apply` 完成判定链的最后阶段：先全绿拿验证证据（6.1 + 6.2），再对整体做 review。触发条件与 tier 分层强度由 `td-apply` 步骤 6.3 持有，本节只定义执行语义。
+`td-apply` 完成判定链的最后阶段：先全绿拿验证证据（6.1 + 6.2），再对整体做 review。触发条件与 change-scope 分层强度由 `td-apply` 步骤 6.3 持有，本节只定义执行语义。
 
 **与 checkpoint review 的分工**：checkpoint review（第 1–4 节）是任务粒度的增量检查；本节是 change 级的整体检查——跨任务接口衔接、模块拼装后的整体 Spec compliance。每个任务各自绿，拼起来仍可能失调（接口对不上、风格两套、边界互相踩）。
 
@@ -196,7 +196,7 @@ review 对象不是代码，是 proposal 的**方案整体**——分系统切�
 1. 当前 agent 环境自带 code review 工具 → 优先调用，把上方 review 对象与深度档位作为范围输入。**Impact plan 预处理**：若工具支持从 diff 生成结构化探索计划（如按 changed files + 高风险符号 + 生命周期/契约节点渲染 review plan），先取该计划作为 reviewer 的探索入口，把无依赖的 `read_file` / `grep` / `ast_grep` 调用并发发出；否则直接从 diff 起。**可选透传参数**：若工具支持按语言/文件模式注入领域规则目录（`rules_dir` 类）与轮次/时长上限（`max_rounds` / `max_duration` 类），把 tier 分层的强度上限作为范围输入传入——这些是工具原生能力，本 skill 不内置规则内容。
 2. 工具 review 失败（不可用 / 报错 / 超时）或环境无 review 工具 → LLM 人工 review：按第 1 节维度、第 2 节分级、第 3 节报告格式执行（报告标题用 change 名）。**逐 finding 复验**：报告中的每个 finding 在进报告前须对照代码逐条实证——重新打开对应文件与行，确认问题**真实存在于被改代码本身**（不是既有旧代码、不是无关兄弟路径），且**触发条件可由 diff 与周边代码推出**（不必已发生，但须能说出「在什么条件下发生什么失败」）；指不出对应行区间或说不出触发条件的候选 → 剔除，不进报告。不得凭实施记忆直接写入——实施者自审场景下记忆性误报率最高，复验是兜底路径的独立性补偿
 
-**深度档位**：以 `td-apply` 步骤 6.3 持有的 tier 分层为准（tier-medium / tier-large 按全部任务 `风险` 最高档；tier-small 保底抽查）。
+**深度档位**：以 `td-apply` 步骤 6.3 持有的 change-scope 为准（change-scope 判据与 proposal review 同源，见第 5 节；scope-medium / scope-large 按全部任务 `风险` 最高档；scope-small 保底抽查）。
 
 **critical 阻塞**：沿用第 4 节——修复后重跑 `verification-before-completion`（修复使既有验证证据失效，见其「之前测过」条），重跑通过且无 critical，change 才算 done。
 

@@ -161,7 +161,7 @@ openspec instructions <artifact-id> --change "<name>" --json
 
 本节是前馈定位（类别标注 + 高危 go/no-go），完整 caller 清单不由本节承担——由 `td-apply` 步骤 4 实测产出并兜底；实测兜底与上报规则见 `td-apply` 步骤 4 对应子节。
 
-tier 分层：tier-small 可跳过（提醒性质，跳过时在 proposal 注明）；tier-medium / tier-large 必填（必填的是变更点类别标注 + 高危标记）——缺项的 proposal 不算 apply-ready。
+change-scope 分层：命中 caller impact 触发条件即必填（必填的是变更点类别标注 + 高危标记），**不按 tier**——触发条件本身已隐含 change-scope 为 medium/large，tier-small 项目里的大 change 照样要填（与 `td-apply` 步骤 2 的必填检查口径一致）。未命中触发条件 → 可跳过（跳过时在 proposal 注明）。
 
 - **tasks.md 必填：关键链标注、project buffer、任务主体约束**
 
