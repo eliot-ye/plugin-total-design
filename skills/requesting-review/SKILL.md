@@ -4,7 +4,7 @@ description: 方案 review 与任务间代码 review。critical issue 阻塞进�
 user-invocable: true
 ---
 
-# Requesting Code Review
+# Requesting Review
 
 ## 服务的主基调原则
 
