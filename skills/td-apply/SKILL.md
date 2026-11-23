@@ -57,7 +57,7 @@ argument-hint: <change-name>
 
 ### 4. 架构 review 复核 + caller impact 实测 + 触发行为层
 
-**进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 7 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 实测」子节**；**有改动 → 重新触发 `requesting-code-review` 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合，检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
+**进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 7 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 实测」子节**；**有改动 → 重判 change-scope（判据见 `requesting-code-review` 第 5 节）并重新触发该 skill 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，按 change-scope 查 `references/architecture-review-checklist.md` 对应节——分系统切分 / 设计决策 / 需求对齐 / 预期行为模型质量 / 设计取舍可逆性 / caller impact 完备性）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
 
 #### Caller Impact 实测（任务实施前的闸门）
 

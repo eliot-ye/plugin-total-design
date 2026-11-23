@@ -12,7 +12,7 @@ user-invocable: true
 
 ## 触发时机
 
-- **`td-propose` 完成后、`td-apply` 动手前（架构 review）**——proposal 刚定型，进入实施前先检查分系统切分与设计决策，此时改架构成本最低。tier 分层强度由 `td-propose` 步骤 7 持有（tier-small 降为一行自检，命中完整流程才进入本 review）
+- **`td-propose` 完成后、`td-apply` 动手前（架构 review）**——proposal 刚定型，进入实施前先检查方案整体（分系统切分、设计决策、需求对齐、预期行为模型、取舍可逆性、caller impact 完备性），此时改架构成本最低。change-scope 分层强度由第 5 节持有，判读落点在 `td-propose` 步骤 7（scope-small 降为一行自检，不入本 review）
 - `executing-plans` 的 checkpoint 时机（含每完成一个关键链任务——关键链任务完成 → 触发 checkpoint（`executing-plans` 步骤 1）→ checkpoint 时做本 review；不是独立于 checkpoint 的触发点）
 - **`td-apply` 步骤 6.3 的 change 级收尾**——两层验证（change-level + 系统级）全绿后、change 判 done 前（触发条件与 tier 分层强度见该步骤，执行语义见本 skill 第 6 节）
 - 用户显式要求 review
@@ -161,14 +161,24 @@ warning 不阻塞，但要记录在 tasks.md 的"已知问题"里。
 
 ### 5. 架构 review（proposal 完成后、apply 前）
 
-review 对象不是代码，是 proposal 的分系统切分与设计决策。此时改架构成本最低。
+review 对象不是代码，是 proposal 的**方案整体**——分系统切分与设计决策之外，还包括需求对齐、预期行为模型质量、设计取舍可逆性、caller impact 完备性。此时改架构成本最低。
 
-**隔离载体**：按第 2 节共享前置，本 review 的优先级从 subagent 起——本 skill 定义的架构检查清单（高内聚 / 低耦合 / 循环依赖 / 隐式依赖）超出 code review 工具 reviewer 覆盖范围，工具跑不出本 skill 定义的检查语义（跳过第 2 节第一档）。
+**change-scope 分层**（本 review 的强度收口，per-change 判读，与 tier 正交——tier 管项目级 constraint 强度，change-scope 管 change 级 review 深度，由 `td-propose` 步骤 7 在判读后传入）：
 
-检查清单（高内聚 / 低耦合）见 `references/architecture-review-checklist.md`。分级与阻塞语义如下（与 code review 共用；其他位置的分级表述以本节为准）：
+| change-scope | 判据（任一成立即取该 scope，取最高） | 查的清单节 |
+|---|---|---|
+| `scope-large` | 跨 3+ 分系统 **或** 命中 2+ 类变更点 **或** 触碰 ①③ 类高危变更点（公共符号 / 装配点） **或** proposal 含"偏离既有架构" | 高内聚 + 低耦合 + A + B + C + D（全量） |
+| `scope-medium` | 跨 2 分系统 **或** 命中 1 类变更点 **或** 净修改面 >10 文件 | 高内聚 + 低耦合 + A + B |
+| `scope-small` | 单分系统 + 无四类变更点 + 净修改面 ≤10 文件 | 一行自检（见 `td-propose` 步骤 7） |
 
-- **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖 / 触发了 caller impact 分析但 proposal 缺「caller impact 分析」节或缺变更点类别标注与高危标记（仅 tier-small 降为 warning）——**阻塞 apply**，先回 propose 改 proposal 再继续
-- **warning**：接口偏大、职责偏散——记录到 proposal，可延后
+**判据复用**：change-scope 判据里"跨 N 分系统""命中 N 类变更点"直接引用 `td-apply/references/change-point-classes.md`（四类变更点与触发条件的单一事实源），不在此重复定义。change-scope 判读不缓存——每个 change 独立判。
+
+**隔离载体**：按第 2 节共享前置，本 review 的优先级从 subagent 起——本 skill 定义的检查清单（高内聚 / 低耦合 / 循环依赖 / 隐式依赖 / 预期行为模型质量等）超出 code review 工具 reviewer 覆盖范围，工具跑不出本 skill 定义的检查语义（跳过第 2 节第一档）。
+
+检查清单见 `references/architecture-review-checklist.md`（按上表 change-scope 决定查哪几节）。分级与阻塞语义如下（与 code review 共用；其他位置的分级表述以本节为准）：
+
+- **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖 / 触发了 caller impact 分析但 proposal 缺「caller impact 分析」节或缺变更点类别标注与高危标记（仅 scope-small 降为 warning，但 scope-small 本就不入完整 review）/ "预期行为模型"缺失或全不满足四判据致 archive 无法对照 / 不可逆设计决策未触发 human-in-loop / proposal 缺 scenario→test 账本（含 specs 且含可执行测试面时）——**阻塞 apply**，先回 propose 改 proposal 再继续
+- **warning**：接口偏大 / 职责偏散 / scope creep（需求没要但无假设背书的行为）/ 偏离既有架构未写明理由——记录到 proposal，可延后
 - **nit**：命名等——可忽略
 
 架构 review 的 critical 与 code review 的 critical 同样适用"不继续"规则——只是这里"不继续"意味着不进入任务实施。
