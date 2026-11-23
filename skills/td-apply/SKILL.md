@@ -55,9 +55,9 @@ argument-hint: <change-name>
 3. `specs/` 下的 spec 文件
 4. `tasks.md`（实施步骤）
 
-### 4. 架构 review 复核 + caller impact 实测 + 触发行为层
+### 4. 方案 review 复核 + caller impact 实测 + 触发行为层
 
-**进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 7 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 实测」子节**；**有改动 → 重判 change-scope（判据见 `requesting-code-review` 第 5 节）并重新触发该 skill 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，按 change-scope 查 `references/architecture-review-checklist.md` 对应节——分系统切分 / 设计决策 / 需求对齐 / 预期行为模型质量 / 设计取舍可逆性 / caller impact 完备性）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
+**进入任务实施前，复核方案 review 结论**：`td-propose` 步骤 7 已完成方案 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 实测」子节**；**有改动 → 重判 change-scope（判据见 `requesting-code-review` 第 5 节）并重新触发该 skill 的方案 review**（对照 proposal 的"系统工程影响评估"节与 design.md，按 change-scope 查 `references/proposal-review-checklist.md` 对应节——分系统切分 / 设计决策 / 需求对齐 / 预期行为模型质量 / 设计取舍可逆性 / caller impact 完备性）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
 
 #### Caller Impact 实测（任务实施前的闸门）
 
@@ -69,9 +69,9 @@ argument-hint: <change-name>
 2. 逐 caller 确认兼容（签名匹配 / 返回值未被消费 / 装配点已接 / 语义不变），记录确认结论。
 3. 实测发现 proposal 未标注的 caller，或与已知 caller 的预判结论冲突 → 补做兼容确认，或经步骤 5 的 apply 全局必停通道上报「超出当前 change scope」——不得静默跳过。
 
-**tier 分层**（本层是实测层，预判标注见 `td-propose` 步骤 6.c 的 caller impact 分析节）：tier-large = 硬闸门（无条件实测；caller 清单 + 逐 caller 结论未产出，不进入任务实施）；tier-medium = 信号触发（满足任一信号则强制实测：变更点命中四类变更点任一类 / proposal 对某已知 caller 标注"需适配" / 架构 review 对 caller 影响提出疑问；纯内部实现细节且无信号 → 可跳过并在 tasks.md 记录理由）；tier-small = 提醒（默认跳过）。caller 清单与结论记录到 tasks.md（对应任务的验证证据或单独附注）。
+**tier 分层**（本层是实测层，预判标注见 `td-propose` 步骤 6.c 的 caller impact 分析节）：tier-large = 硬闸门（无条件实测；caller 清单 + 逐 caller 结论未产出，不进入任务实施）；tier-medium = 信号触发（满足任一信号则强制实测：变更点命中四类变更点任一类 / proposal 对某已知 caller 标注"需适配" / 方案 review 对 caller 影响提出疑问；纯内部实现细节且无信号 → 可跳过并在 tasks.md 记录理由）；tier-small = 提醒（默认跳过）。caller 清单与结论记录到 tasks.md（对应任务的验证证据或单独附注）。
 
-架构 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。
+方案 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。
 
 #### 任务执行
 

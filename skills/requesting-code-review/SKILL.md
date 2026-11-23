@@ -1,6 +1,6 @@
 ---
 name: requesting-code-review
-description: 架构 review 与任务间代码 review。critical issue 阻塞进度。触发场景：propose 完成后/apply 前；关键链任务 / checkpoint 时；用户要求 review 时。
+description: 方案 review 与任务间代码 review。critical issue 阻塞进度。触发场景：propose 完成后/apply 前；关键链任务 / checkpoint 时；用户要求 review 时。
 user-invocable: true
 ---
 
@@ -12,7 +12,7 @@ user-invocable: true
 
 ## 触发时机
 
-- **`td-propose` 完成后、`td-apply` 动手前（架构 review）**——proposal 刚定型，进入实施前先检查方案整体（分系统切分、设计决策、需求对齐、预期行为模型、取舍可逆性、caller impact 完备性），此时改架构成本最低。change-scope 分层强度由第 5 节持有，判读落点在 `td-propose` 步骤 7（scope-small 降为一行自检，不入本 review）
+- **`td-propose` 完成后、`td-apply` 动手前（方案 review）**——proposal 刚定型，进入实施前先检查方案整体（分系统切分、设计决策、需求对齐、预期行为模型、取舍可逆性、caller impact 完备性），此时改架构成本最低。change-scope 分层强度由第 5 节持有，判读落点在 `td-propose` 步骤 7（scope-small 降为一行自检，不入本 review）
 - `executing-plans` 的 checkpoint 时机（含每完成一个关键链任务——关键链任务完成 → 触发 checkpoint（`executing-plans` 步骤 1）→ checkpoint 时做本 review；不是独立于 checkpoint 的触发点）
 - **`td-apply` 步骤 6.3 的 change 级收尾**——两层验证（change-level + 系统级）全绿后、change 判 done 前（触发条件与 tier 分层强度见该步骤，执行语义见本 skill 第 6 节）
 - 用户显式要求 review
@@ -65,11 +65,11 @@ review 深度由 tasks.md 对应任务的 `风险` 字段决定（风险判据�
 
 ### Review 上下文隔离
 
-review 对象与作者为同一 agent 的产出时，review 不得在 authoring context 内内联执行。本节是第 5 节架构 review 与第 6 节 change 级收尾 review 的共享前置约束（第 1–4 节的 checkpoint review 同样适用）。
+review 对象与作者为同一 agent 的产出时，review 不得在 authoring context 内内联执行。本节是第 5 节方案 review 与第 6 节 change 级收尾 review 的共享前置约束（第 1–4 节的 checkpoint review 同样适用）。
 
 **隔离载体（按优先级）**：
 
-1. **环境自带的 code review 工具**（最强隔离——工具进程外）——现有第 6 节「工具优先」已是此档。**仅当本 skill 定义的 review 维度就是工具 reviewer 内置覆盖的维度时适用**；本 skill 第 5 节架构 review 的检查清单（高内聚 / 低耦合 / 循环依赖 / 隐式依赖）超出该工具 reviewer 覆盖范围，跳过此档从第 2 档 subagent 起
+1. **环境自带的 code review 工具**（最强隔离——工具进程外）——现有第 6 节「工具优先」已是此档。**仅当本 skill 定义的 review 维度就是工具 reviewer 内置覆盖的维度时适用**；本 skill 第 5 节方案 review 的检查清单（高内聚 / 低耦合 / 循环依赖 / 隐式依赖）超出该工具 reviewer 覆盖范围，跳过此档从第 2 档 subagent 起
 2. **subagent**（fresh-context，同模型）——平台支持 subagent 派发时，agent 必须尝试走 subagent 隔离，不允许跳过直接自评；subagent 在独立上下文执行 review，作者上下文拿回 review 报告继续决策。**"拿回"以结果回传到作者上下文为准**：subagent「已派出」≠「结果已到手」——两者是独立事件。**只有逐字收到 subagent 报告原文，才可将其结论（Verdict / issues / `reviewed-by: subagent` 标注）写入 artifact**；subagent 完成但报告未回传到当前上下文时，等同第 3 档降级触发（见下），不得凭自己的判断推测、代填、复述"subagent 大概会得出什么"
 3. **同上下文 LLM review（降级）**——平台不支持 subagent 派发、**或 subagent 已派出但其报告结果未回传到当前上下文**时，降级到同上下文自评，不阻塞、不询问用户。降级产物**不得**携带任何归属给 subagent 的内容
 
@@ -145,7 +145,7 @@ reviewed-by: subagent | unisolated-self
 **报告落盘**：review 报告按以下路径落盘，供下游跨会话读取 Verdict 锚点行——
 
 - **change 级收尾 review**：`openspec/changes/<change-name>/reviews/<YYYYMMDD-HHMMSS>-<review-kind>.md`
-- **架构 review / checkpoint review**：写入对应 artifact（架构 review → `proposal.md` 末尾；checkpoint review → `tasks.md` 对应任务的验证证据附注）
+- **方案 review / checkpoint review**：写入对应 artifact（方案 review → `proposal.md` 末尾；checkpoint review → `tasks.md` 对应任务的验证证据附注）
 
 落盘文件含第 3 节完整报告（含 Verdict 锚点行 + `reviewed-by`）。下游（`td-apply` 步骤 6.3、`td-archive` 步骤 2）读落盘文件而非会话记忆——跨会话后 Verdict 不丢失。若 change 目录尚未创建（独立 review 请求），落盘到 `openspec/.td-state/reviews/` 下同名文件。
 
@@ -159,7 +159,7 @@ reviewed-by: subagent | unisolated-self
 
 warning 不阻塞，但要记录在 tasks.md 的"已知问题"里。
 
-### 5. 架构 review（proposal 完成后、apply 前）
+### 5. 方案 review（proposal 完成后、apply 前）
 
 review 对象不是代码，是 proposal 的**方案整体**——分系统切分与设计决策之外，还包括需求对齐、预期行为模型质量、设计取舍可逆性、caller impact 完备性。此时改架构成本最低。
 
@@ -175,13 +175,13 @@ review 对象不是代码，是 proposal 的**方案整体**——分系统切�
 
 **隔离载体**：按第 2 节共享前置，本 review 的优先级从 subagent 起——本 skill 定义的检查清单（高内聚 / 低耦合 / 循环依赖 / 隐式依赖 / 预期行为模型质量等）超出 code review 工具 reviewer 覆盖范围，工具跑不出本 skill 定义的检查语义（跳过第 2 节第一档）。
 
-检查清单见 `references/architecture-review-checklist.md`（按上表 change-scope 决定查哪几节）。分级与阻塞语义如下（与 code review 共用；其他位置的分级表述以本节为准）：
+检查清单见 `references/proposal-review-checklist.md`（按上表 change-scope 决定查哪几节）。分级与阻塞语义如下（与 code review 共用；其他位置的分级表述以本节为准）：
 
 - **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖 / 触发了 caller impact 分析但 proposal 缺「caller impact 分析」节或缺变更点类别标注与高危标记（仅 scope-small 降为 warning，但 scope-small 本就不入完整 review）/ "预期行为模型"缺失或全不满足四判据致 archive 无法对照 / 不可逆设计决策未触发 human-in-loop / proposal 缺 scenario→test 账本（含 specs 且含可执行测试面时）——**阻塞 apply**，先回 propose 改 proposal 再继续
 - **warning**：接口偏大 / 职责偏散 / scope creep（需求没要但无假设背书的行为）/ 偏离既有架构未写明理由——记录到 proposal，可延后
 - **nit**：命名等——可忽略
 
-架构 review 的 critical 与 code review 的 critical 同样适用"不继续"规则——只是这里"不继续"意味着不进入任务实施。
+方案 review 的 critical 与 code review 的 critical 同样适用"不继续"规则——只是这里"不继续"意味着不进入任务实施。
 
 ### 6. change 级收尾 review
 
@@ -212,7 +212,7 @@ review 对象不是代码，是 proposal 的**方案整体**——分系统切�
 | "这是 spec §X 明确指示的行为，改它违背 spec + YAGNI 排除——不改" | 拿 spec / YAGNI 当权威把 review finding 合法化掉，是 park 的隐蔽形态。spec 确实这么写 → 走「设计回写」改 artifact 再评；spec 没写 → 这条就是该修的 finding。两条路都通，唯独"引用权威然后不改"不通 |
 | "review 太慢了，跳过直接 apply" | review 是完成判定链的一环，跳过=未完成——apply 前/收尾前的 review 不可省 |
 | "工具 review 报了一堆，都是 nit" | 按严重度映射逐条判，别一锅端——P0/P1 是 critical，混在 nit 里也要捞出来 |
-| "架构看起来合理，不用查清单" | 架构 review 查的是高内聚/低耦合/循环依赖/隐式依赖，"看起来"不是判据——过 `references/architecture-review-checklist.md` |
+| "架构看起来合理，不用查清单" | 方案 review 查的是高内聚/低耦合/循环依赖/隐式依赖，"看起来"不是判据——过 `references/proposal-review-checklist.md` |
 
 ## 与其他 skill 的关系
 

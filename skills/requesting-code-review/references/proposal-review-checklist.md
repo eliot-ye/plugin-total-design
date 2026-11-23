@@ -1,4 +1,4 @@
-# 架构 Review 检查清单（proposal 完成后、apply 前）
+# 方案 Review 检查清单（proposal 完成后、apply 前）
 
 本清单审的是**方案整体**，不只分系统切分。查哪些节由 **change-scope** 收口（判据与收口表见 `requesting-code-review` skill 第 5 节，单一事实源）——本文件每节标题标注其适用 scope。
 
@@ -60,4 +60,4 @@
 
 ## 分级与阻塞
 
-分级与阻塞语义由 `requesting-code-review` skill 第 5 节持有：架构 review 按该节的 critical / warning / nit 判定，critical **阻塞 apply**，先回 propose 改 proposal 再继续——"不继续"即不进入任务实施。
+分级与阻塞语义由 `requesting-code-review` skill 第 5 节持有：方案 review 按该节的 critical / warning / nit 判定，critical **阻塞 apply**，先回 propose 改 proposal 再继续——"不继续"即不进入任务实施。
