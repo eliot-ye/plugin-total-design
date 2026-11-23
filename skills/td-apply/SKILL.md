@@ -57,7 +57,7 @@ argument-hint: <change-name>
 
 ### 4. 方案 review 复核 + caller impact 实测 + 触发行为层
 
-**进入任务实施前，复核方案 review 结论**：`td-propose` 步骤 7 已完成方案 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 实测」子节**；**有改动 → 重判 change-scope（判据见 `requesting-code-review` 第 5 节）并重新触发该 skill 的方案 review**（对照 proposal 的"系统工程影响评估"节与 design.md，按 change-scope 查 `references/proposal-review-checklist.md` 对应节——分系统切分 / 设计决策 / 需求对齐 / 预期行为模型质量 / 设计取舍可逆性 / caller impact 完备性）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
+**进入任务实施前，复核方案 review 结论**：`td-propose` 步骤 7 已完成方案 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 实测」子节**；**有改动 → 重判 change-scope（判据见 `requesting-review` 第 5 节）并重新触发该 skill 的方案 review**（对照 proposal 的"系统工程影响评估"节与 design.md，按 change-scope 查 `references/proposal-review-checklist.md` 对应节——分系统切分 / 设计决策 / 需求对齐 / 预期行为模型质量 / 设计取舍可逆性 / caller impact 完备性）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
 
 #### Caller Impact 实测（任务实施前的闸门）
 
@@ -146,7 +146,7 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 
 #### 6.3 change 级收尾 code review（硬步骤）
 
-两层验证（6.1 + 6.2）全部通过后，对本 change 的全部新增 / 修改代码做一次 change 级收尾 review——review 是完成判定链的最后阶段：先全绿拿验证证据，再对整体做 review。**执行语义由 `requesting-code-review` 的「change 级收尾 review」节承载**（review 对象、工具优先 / LLM 兜底的执行方式、与 checkpoint review 的分工在那里），本步骤只定义触发条件与 tier 分层强度：
+两层验证（6.1 + 6.2）全部通过后，对本 change 的全部新增 / 修改代码做一次 change 级收尾 review——review 是完成判定链的最后阶段：先全绿拿验证证据，再对整体做 review。**执行语义由 `requesting-review` 的「change 级收尾 review」节承载**（review 对象、工具优先 / LLM 兜底的执行方式、与 checkpoint review 的分工在那里），本步骤只定义触发条件与 tier 分层强度：
 
 - `tier-small`：保底抽查——只查 Spec compliance + 安全红线。小 change 可能全程轮不到 checkpoint review，收尾是它唯一的 review 机会，不整体跳过
 - `tier-medium` / `tier-large`：review 深度按 tasks.md 全部任务 `风险` 字段的最高档取

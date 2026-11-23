@@ -1,5 +1,5 @@
 ---
-name: requesting-code-review
+name: requesting-review
 description: 方案 review 与任务间代码 review。critical issue 阻塞进度。触发场景：propose 完成后/apply 前；关键链任务 / checkpoint 时；用户要求 review 时。
 user-invocable: true
 ---

@@ -85,7 +85,7 @@ reverse-spec 是总体设计部在"接手"阶段的工作——先建立系统�
 - 循环依赖
 - 隐式依赖（共享数据库、共享配置）
 
-**与 `requesting-code-review` 方案 review 的连接**：本步骤识别的"循环依赖、隐式依赖"正是 `requesting-code-review` 的 `references/proposal-review-checklist.md` 里"低耦合"维度的检查项。reverse-spec 阶段识别的接口稳定性，是后续 `/td-propose` 步骤 7 方案 review 的输入——方案 review 时要对照 reverse-spec 报告里的接口稳定性，判断新 change 是否破坏了既有分系统的公共契约。
+**与 `requesting-review` 方案 review 的连接**：本步骤识别的"循环依赖、隐式依赖"正是 `requesting-review` 的 `references/proposal-review-checklist.md` 里"低耦合"维度的检查项。reverse-spec 阶段识别的接口稳定性，是后续 `/td-propose` 步骤 7 方案 review 的输入——方案 review 时要对照 reverse-spec 报告里的接口稳定性，判断新 change 是否破坏了既有分系统的公共契约。
 
 ### 6. 输出 reverse-spec 报告
 

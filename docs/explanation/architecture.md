@@ -22,24 +22,24 @@ system-engineering → constraints, field-assessment, executing-plans, td-explor
                      td-system-audit, verification-before-completion, systematic-debugging
 td-explore → td-propose, td-archive, todo-pool, constraints, field-assessment, system-engineering
 td-propose → td-apply, td-archive, td-reverse-spec, todo-pool, writing-plans,
-             requesting-code-review, constraints, field-assessment, system-engineering, td-explore
-td-apply   → 11 个下游（constraints, executing-plans, field-assessment, requesting-code-review,
+             requesting-review, constraints, field-assessment, system-engineering, td-explore
+td-apply   → 11 个下游（constraints, executing-plans, field-assessment, requesting-review,
              system-engineering, systematic-debugging, td-propose, td-system-audit,
              test-driven-development, verification-before-completion, writing-plans）
 td-archive → constraints, field-assessment, system-engineering, td-propose, td-system-audit,
              todo-pool, verification-before-completion
-td-reverse-spec → field-assessment, requesting-code-review, system-engineering,
+td-reverse-spec → field-assessment, requesting-review, system-engineering,
                   td-propose, td-system-audit
 td-system-audit → constraints, field-assessment, system-engineering, td-apply, td-archive,
                   td-propose, td-reverse-spec, todo-pool
-requesting-code-review → constraints, executing-plans, td-apply, td-propose,
+requesting-review → constraints, executing-plans, td-apply, td-propose,
                          verification-before-completion, writing-plans
 test-driven-development → constraints, field-assessment, system-engineering,
                           systematic-debugging, td-apply, writing-plans
-executing-plans → constraints, field-assessment, requesting-code-review,
+executing-plans → constraints, field-assessment, requesting-review,
                   systematic-debugging, td-apply, td-system-audit
 systematic-debugging → constraints, executing-plans, td-apply
-verification-before-completion → constraints, requesting-code-review,
+verification-before-completion → constraints, requesting-review,
                                  systematic-debugging, td-apply
 writing-plans → constraints, field-assessment, td-apply, td-propose, td-reverse-spec
 todo-pool → constraints, td-archive, td-propose

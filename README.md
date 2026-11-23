@@ -100,7 +100,7 @@ AI coding agent 的失控不是"模型不够强"，是**没有工程纪律**：
 | 层 | 数量 | 代表 |
 |---|---|---|
 | 约束层 | 2 | `system-engineering` 主基调 + `constraints` 承载 5 份局部规律 |
-| 行为层 | 6 | writing-plans / executing-plans / test-driven-development / requesting-code-review / systematic-debugging / verification-before-completion |
+| 行为层 | 6 | writing-plans / executing-plans / test-driven-development / requesting-review / systematic-debugging / verification-before-completion |
 | 配置层 | 3 | `field-assessment`（profile×tier 配置入口）+ `todo-pool`（`openspec/todo.md` 格式约定）+ `agents-md-hygiene`（用户项目 agent 指令文件编写规范） |
 | 契约层 | 7 | 7 个 td-* skill，与 command 一一对应 |
 

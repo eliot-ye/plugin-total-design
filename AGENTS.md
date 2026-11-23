@@ -139,7 +139,7 @@ disable-model-invocation: true     ← 可选；禁止 agent 自动触发，与 
 判定依据（与 `td-* 标准步骤 1` 的"预加载 vs 按需触发"分界一致）：
 
 - **预加载（应列入）**：触发时立即需要其内容作为前提（如 `system-engineering` 主基调四条、`field-assessment` 的 profile×tier 识别 + 表 1/2/3 强度值）。
-- **按需触发（不列入）**：在正文流程的特定步骤触发（如 td-apply 前置检查的 `wip-limit` 硬阻塞、td-apply 步骤 5 的 `brooks-law` 提醒、`requesting-code-review` 的方案 review）。正文引用处给出路径即可。
+- **按需触发（不列入）**：在正文流程的特定步骤触发（如 td-apply 前置检查的 `wip-limit` 硬阻塞、td-apply 步骤 5 的 `brooks-law` 提醒、`requesting-review` 的方案 review）。正文引用处给出路径即可。
 
 **constraint references 变体的列入判据**：references 变体本身不是 skill、不独立触发，随 `constraints` 入口读取；列入时按同一判据——正文执行逻辑需要以该变体规则作为判定前提 → 列入；只是固定步骤的检查点 → 不必列入，正文给出变体路径。
 
