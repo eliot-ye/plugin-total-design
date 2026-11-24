@@ -2,6 +2,15 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.20.1] - 2026-11-24
+
+### Fixed
+
+- **`requesting-review` 降级标注强调从 tier 改绑 change-scope**：review 深度已收口到 change-scope 后，第 2 节「tier 对标注的强调程度」是残留的双轴失调——一个 scope-large change 在 tier-small 项目里自评降级只给常规标注（漏掉强提示），一个 scope-small 在 tier-large 项目里那行自检反被要求显著标注（强调配错风险）。现改为 `scope-large` 自评降级须显著标注「置信度低于有隔离版本」、`scope-medium` / `scope-small` 常规标注；并补落点说明——checkpoint review 是任务粒度、不持 change-scope 轴，降级一律常规标注。review 深度与降级标注回到同一收口轴（change-scope）。
+- **收敛 change-scope 判据单一事实源并对齐 tier-large 字段与表 1 口径**：`requesting-review` 第 5 节持 change-scope 查节映射、`td-propose` 步骤 7 持判据，两处口径统一，消除重复定义导致的潜在漂移；tier-large 相关字段表述与 `field-assessment` 表 1 强度矩阵对齐。
+- **清除运行时资产中的开发态语句**：`SKILL.md` / `references/` 里面向仓库编辑者而非使用态 LLM 的语句（编辑指令、调用方清单、写作规范三类）逐条判读并删除，保留冲突仲裁句与运行时指针。使用态 LLM 不再被仓库维护约定干扰。
+- **删除 constraint references 顶部的结构自述 blockquote**：`constraints` 的 5 份局部规律 references 顶部那段「本文件是 X 的 references 变体」自述属开发态描述，已删——使用态 LLM 从 `constraints` 入口读取时该自述只占上下文、不服务执行决策。
+
 ## [1.20.0] - 2026-11-24
 
 ### Added

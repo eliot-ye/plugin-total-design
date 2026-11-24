@@ -1,4 +1,37 @@
-# total-design v1.20.0 发布说明
+# total-design v1.20.1 发布说明
+
+> 面向使用态用户：本次为**一致性修复版**——`requesting-review` 的降级标注强调从 tier 改绑 change-scope，消除 review 深度换轴后残留的双轴失调；另含三项开发态泄漏清理与判据单一事实源收敛。skill 数量、命令数量、references、hooks、td-* 契约流、四平台加载均不变，**无行为破坏性变更**。
+
+## 本版本是什么
+
+1.20.1 是 **1.20.0 的一致性收尾版**（patch）。1.20.0 把 review 深度收口到 change-scope 轴，但 `requesting-review` 第 2 节还留了一句按 tier 调降级标注强调——造出"深度按 change-scope、标注按 tier"的双轴失调。本版本把它拉回同一轴，并清理 1.20.0 大改后遗留的开发态语句。做四件事：
+
+- **Fixed — `requesting-review` 降级标注强调改绑 change-scope**：原第 2 节按 tier 分档——scope-large change 在 tier-small 项目里自评降级只给常规标注（漏掉强提示），scope-small 在 tier-large 项目里那行自检反被要求显著标注（强调配错风险）。现改为 `scope-large` 自评降级须显著标注「置信度低于有隔离版本」、`scope-medium` / `scope-small` 常规标注；checkpoint review 是任务粒度、不持 change-scope 轴，降级一律常规标注。review 深度与降级标注回到同一收口轴。
+- **Fixed — change-scope 判据单一事实源收敛**：`requesting-review` 第 5 节持查节映射、`td-propose` 步骤 7 持判据，两处口径统一，消除重复定义的潜在漂移；tier-large 相关字段表述与 `field-assessment` 表 1 强度矩阵对齐。
+- **Fixed — 清除运行时资产中的开发态语句**：`SKILL.md` / `references/` 里面向仓库编辑者而非使用态 LLM 的语句（编辑指令、调用方清单、写作规范）逐条删除，保留冲突仲裁句与运行时指针。
+- **Fixed — 删除 constraint references 顶部结构自述**：`constraints` 的 5 份局部规律 references 顶部「本文件是 X 的 references 变体」自述属开发态描述，已删——使用态 LLM 读取时只占上下文、不服务执行决策。
+
+## 行为变更表（升级用户感知差异）
+
+| 环节 | 变更 | 感知 |
+|---|---|---|
+| review 自评降级标注 | 强调分档由 change-scope 决定（`scope-large` 显著标注 / `scope-medium`·`scope-small` 常规），不再按 tier | scope-large change 在小项目里自评降级也会拿到「置信度低」强提示（此前被 tier-small 漏掉）；scope-small 在大项目里不再被误要求显著标注 |
+| `constraints` references | 删除顶部结构自述 blockquote | 使用态 LLM 读取 5 份局部规律时少一段占上下文的仓库维护描述；规则内容不变 |
+| 运行时资产开发态语句 | `SKILL.md` / `references/` 清除编辑指令、调用方清单、写作规范 | 使用态 LLM 不再被仓库维护约定干扰；冲突仲裁句与运行时指针保留 |
+
+## 升级步骤
+
+1. 更新 plugin 到 v1.20.1（四平台安装方式不变，见 `docs/user/install.md`）。
+2. 无需迁移数据——`.td-state/` 与 `openspec/` 格式不变。
+3. 无破坏性变更，可直接升级。
+
+## 完整变更列表
+
+见 [CHANGELOG.md](CHANGELOG.md) 的 `[1.20.1]` 条目。
+
+---
+
+# total-design v1.20.0 发布说明（历史）
 
 > 面向使用态用户：本次为**纪律 gate 加固 + 方案 review 换轴 + 一处 skill 更名版**——新增 YAGNI 阶梯局部规律（`constraints` 第 6 份）、review 深度改由 change-scope 轴决定（与 tier 正交，堵住"大 change 进小系统只获轻量 review"的缺口）、行为层 `requesting-code-review` 更名 `requesting-review`（slash 手势 `/requesting-review`，**旧手势失效**）。命令数量、hook、td-* 契约流、四平台加载均不变。
 
