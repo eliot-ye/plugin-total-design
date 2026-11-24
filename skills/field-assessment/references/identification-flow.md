@@ -61,7 +61,7 @@ agent 按以下顺序判读，把结果写入工作上下文（变量名建议 `
 
 ### 5. 注入强度
 
-判读完成后（现判，或快车道取缓存值），agent 把表 1（5 个 constraint 在当前 tier 下的强度）+ 表 2（当前 profile 的 human-in-loop 加成）（+ 表 3 system-audit 频率，仅 archive / apply / system-audit）读入上下文，同时按命中的 profile 与 tier 各读一份本目录下的变体文件（共 2 份，见下方「### 变体文件」节）。后续步骤引用这些强度值与变体规则，不再回查本 skill。
+判读完成后（现判，或快车道取缓存值），agent 把表 1（5 个有 tier 梯度强度的 constraint；`yagni-ladder` 信号驱动、无分档，不入表）+ 表 2（当前 profile 的 human-in-loop 加成）（+ 表 3 system-audit 频率，仅 archive / apply / system-audit）读入上下文，同时按命中的 profile 与 tier 各读一份本目录下的变体文件（共 2 份，见下方「### 变体文件」节）。后续步骤引用这些强度值与变体规则，不再回查本 skill。
 
 **子系统独立定 tier 时的强度注入**：当 `profile-tier.yaml` 含 `subsystems` 条目时，注入强度应**按子系统分别注入**——每个子系统有自己的表 1 / 表 2 强度。跨子系统的依赖链按"最高 tier 子系统"的强度处理（保守原则）。后续步骤引用强度时，需区分"当前操作作用于哪个子系统"。
 

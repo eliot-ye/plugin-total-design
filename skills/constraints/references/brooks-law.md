@@ -1,7 +1,5 @@
 # Brooks 定律提醒
 
-> 本文件与同目录的 `critical-buffer.md` / `delay-decision.md` / `human-in-loop.md` / `wip-limit.md` 是平级兄弟文件，正文中出现的裸逻辑名均指同目录对应变体文件。
-
 ## 服务的主基调原则
 
 **系统工程主基调第 1 条：系统工程。** 总体性能 ≠ 各部分之和；协调成本随人数呈 O(n²) 增长。

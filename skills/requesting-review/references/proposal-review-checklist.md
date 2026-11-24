@@ -1,6 +1,6 @@
 # 方案 Review 检查清单（proposal 完成后、apply 前）
 
-本清单审的是**方案整体**，不只分系统切分。查哪些节由 **change-scope** 收口（判据与收口表见 `requesting-review` skill 第 5 节，单一事实源）——本文件每节标题标注其适用 scope。
+本清单审的是**方案整体**，不只分系统切分。查哪些节由 **change-scope** 收口（本文件每节标题标注其适用 scope；change-scope 判据见 `td-propose` 步骤 7，查节映射见 `requesting-review` 第 5 节）。
 
 **本清单不查 tasks 层**：关键链标注 / project buffer / 任务主体约束属 `writing-plans` 域，由 `td-apply` 步骤 2 前置检查兜底，不在本 review 重复。
 
@@ -44,7 +44,7 @@
 - **"以后再改"审视**：design 写"先选 A 以后再改" → 真可逆吗？判据：改的成本（是否要迁移数据 / 改所有 caller / 破兼容）——成本高 = 实际不可逆 = 信号
 - **偏离既有架构的合理性**："系统工程影响评估"里"与既有架构/风格的遵循关系"若写了偏离点 → 偏离理由是否成立？是否已让用户确认？——无理由或未确认 = 信号
 - **矛盾承接描述**：若 explore 阶段有未决矛盾 → proposal 是否显式写了"需求权衡 + 设计侧处置（两全 / 取舍+理由 / 留待 archive）"？——缺 = 信号
-- **tier-large 总体设计文档 3 字段**（`$_TD_TIER == tier-large` 时）：系统层次位置 / 与最近 archive change 的关系 / 是否触发跨分系统协调——是否都填了实质内容？——缺 = 不 apply-ready
+- **tier-large 总体设计文档必填字段**（权威见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）：系统层次位置 / 影响的所有分系统 / 与最近 archive 的 change 的关系 / 是否触发跨分系统协调——是否都填了实质内容？——缺 = 不 apply-ready
 
 ## D. caller impact / 变更点完备性（scope-large）
 

@@ -37,7 +37,7 @@ OpenSpec 契约层入口。在写代码之前，让人和 AI 对"建什么、为
 按下述三步序列激活主基调与配置层——只注入强度，不做触发判断：
 
 1. **`system-engineering`** — 主基调四条进入上下文。propose 的每个判断都在主基调四条框架下做。
-2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1（5 个 constraint 强度）+ 表 2（human-in-loop 加成）。会话内缓存。
+2. **profile × tier 识别** — 调 `field-assessment`，判读 `$_TD_PROFILE` / `$_TD_TIER`，读入表 1（5 个有 tier 梯度强度的 constraint；`yagni-ladder` 信号驱动、无分档，不入表）+ 表 2（human-in-loop 加成）。会话内缓存。
 3. **其余 constraint** — 只把强度值读入上下文，不在本步判断触发——wip-limit / human-in-loop 是否触发由后续步骤据此判断。
 
 ### 2. 读现场背景（config.yaml context）
@@ -191,7 +191,7 @@ openspec status --change "<name>" --json
 
 ### 7. 方案 review（proposal 定型后）
 
-**判读 change-scope**（本 review 的强度收口，与 tier 正交；判据权威见 `requesting-review` 第 5 节）：单分系统 + 无四类变更点（定义见 `td-apply/references/change-point-classes.md`）+ 净修改面 ≤10 文件 → `scope-small`；跨 2 分系统 / 命中 1 类变更点 / 净修改面 >10 文件 → `scope-medium`；跨 3+ 分系统 / 命中 2+ 类变更点 / 触碰 ①③ 类高危变更点 / 含"偏离既有架构" → `scope-large`。取最高。
+**判读 change-scope**（本 review 的强度收口，与 tier 正交。**change-scope 判据以本表为准**——与其它位置的 change-scope 表述冲突时，以本表为准）：单分系统 + 无四类变更点（定义见 `td-apply/references/change-point-classes.md`）+ 净修改面 ≤10 文件 → `scope-small`；跨 2 分系统 / 命中 1 类变更点 / 净修改面 >10 文件 → `scope-medium`；跨 3+ 分系统 / 命中 2+ 类变更点 / 触碰 ①③ 类高危变更点 / 含"偏离既有架构" → `scope-large`。取最高。
 
 **按 change-scope 分流**：`scope-small` → 跳过完整方案 review，只做一行自检："本 change 是否引入新的分系统切分或偏离既有架构？"——无 → **把"跳过方案 review：无实质新架构决策（scope-small）"记录到 proposal.md 的"系统工程影响评估"节末尾**（`td-apply` 步骤 4 复核时读该落点，确认此前已做过自检），直接进步骤 8；有 → 按下方完整流程走。`scope-medium` / `scope-large` → 完整流程：
 

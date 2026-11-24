@@ -81,7 +81,7 @@ review 对象与作者为同一 agent 的产出时，review 不得在 authoring 
 - subagent 结果未回传时，对应 review 段落如实写"委派已发起、结果未回传、结论待补"并停在那里等回传；**不得**用「派发了 review」这个动作冒充「已收到 review 结论」。
 - 违反此 gate（凭推测填入归属 subagent 的结论）**等同编造 Verdict**，属严重纪律违规——它会向下游（`td-apply` 步骤 6.3、`td-archive` 步骤 2）传递一个未经真实评审的伪造结论，掩盖真问题（真实 subagent 可能判 critical 而被编造的 APPROVED 掩盖）。
 
-**tier 对标注的强调程度**：tier 不决定能否降级，只影响标注强调——tier-large 自评降级时须显著标注「本次 critical 判断基于无隔离自评，置信度低于有隔离版本」；tier-medium / tier-small 常规标注即可。
+**change-scope 对标注的强调程度**：change-scope 不决定能否降级，只影响标注强调——`scope-large` 自评降级时须显著标注「本次 critical 判断基于无隔离自评，置信度低于有隔离版本」；`scope-medium` / `scope-small` 常规标注即可。第 5 节方案 review、第 6 节 change 级收尾 review 的 change-scope 判读落点分别见 `td-propose` 步骤 7 与 `td-apply` 步骤 6.3（与 review 深度同一收口轴）；第 1–4 节 checkpoint review 是任务粒度、不持 change-scope 轴，降级一律常规标注。
 
 **review 只读**：review 过程中只允许产出 review 报告，不得修改被审 artifact 与源码（review 判出 critical 后的修复是作者动作，不是 reviewer 动作）。
 
@@ -163,15 +163,15 @@ warning 不阻塞，但要记录在 tasks.md 的"已知问题"里。
 
 review 对象不是代码，是 proposal 的**方案整体**——分系统切分与设计决策之外，还包括需求对齐、预期行为模型质量、设计取舍可逆性、caller impact 完备性。此时改架构成本最低。
 
-**change-scope 分层**（本 review 的强度收口，per-change 判读，与 tier 正交——tier 管项目级 constraint 强度，change-scope 管 change 级 review 深度，由 `td-propose` 步骤 7 在判读后传入）：
+**change-scope 分层**（本 review 的强度收口，per-change 判读，与 tier 正交——tier 管项目级 constraint 强度，change-scope 管 change 级 review 深度。**查节映射以本表为准**——与其它位置的 change-scope 查节表述冲突时，以本表为准；判据本身见 `td-propose` 步骤 7）：
 
-| change-scope | 判据（任一成立即取该 scope，取最高） | 查的清单节 |
-|---|---|---|
-| `scope-large` | 跨 3+ 分系统 **或** 命中 2+ 类变更点 **或** 触碰 ①③ 类高危变更点（公共符号 / 装配点） **或** proposal 含"偏离既有架构" | 高内聚 + 低耦合 + A + B + C + D（全量） |
-| `scope-medium` | 跨 2 分系统 **或** 命中 1 类变更点 **或** 净修改面 >10 文件 | 高内聚 + 低耦合 + A + B |
-| `scope-small` | 单分系统 + 无四类变更点 + 净修改面 ≤10 文件 | 一行自检（见 `td-propose` 步骤 7） |
+| change-scope | 查的清单节 |
+|---|---|
+| `scope-large` | 高内聚 + 低耦合 + A + B + C + D（全量） |
+| `scope-medium` | 高内聚 + 低耦合 + A + B |
+| `scope-small` | 一行自检（见 `td-propose` 步骤 7） |
 
-**判据复用**：change-scope 判据里"跨 N 分系统""命中 N 类变更点"直接引用 `td-apply/references/change-point-classes.md`（四类变更点与触发条件的单一事实源），不在此重复定义。change-scope 判读不缓存——每个 change 独立判。
+**判据复用**：change-scope 判据里"跨 N 分系统""命中 N 类变更点"直接引用 `td-apply/references/change-point-classes.md`（四类变更点与触发条件的单一事实源）。change-scope 判读不缓存——每个 change 独立判。
 
 **隔离载体**：按第 2 节共享前置，本 review 的优先级从 subagent 起——本 skill 定义的检查清单（高内聚 / 低耦合 / 循环依赖 / 隐式依赖 / 预期行为模型质量等）超出 code review 工具 reviewer 覆盖范围，工具跑不出本 skill 定义的检查语义（跳过第 2 节第一档）。
 
