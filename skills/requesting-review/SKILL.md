@@ -163,15 +163,15 @@ warning 不阻塞，但要记录在 tasks.md 的"已知问题"里。
 
 review 对象不是代码，是 proposal 的**方案整体**——分系统切分与设计决策之外，还包括需求对齐、预期行为模型质量、设计取舍可逆性、caller impact 完备性。此时改架构成本最低。
 
-**change-scope 分层**（本 review 的强度收口，per-change 判读，与 tier 正交——tier 管项目级 constraint 强度，change-scope 管 change 级 review 深度，由 `td-propose` 步骤 7 在判读后传入）：
+**change-scope 分层**（本 review 的强度收口，per-change 判读，与 tier 正交——tier 管项目级 constraint 强度，change-scope 管 change 级 review 深度。**查节映射以本表为准**——与其它位置的 change-scope 查节表述冲突时，以本表为准；判据本身见 `td-propose` 步骤 7）：
 
-| change-scope | 判据（任一成立即取该 scope，取最高） | 查的清单节 |
-|---|---|---|
-| `scope-large` | 跨 3+ 分系统 **或** 命中 2+ 类变更点 **或** 触碰 ①③ 类高危变更点（公共符号 / 装配点） **或** proposal 含"偏离既有架构" | 高内聚 + 低耦合 + A + B + C + D（全量） |
-| `scope-medium` | 跨 2 分系统 **或** 命中 1 类变更点 **或** 净修改面 >10 文件 | 高内聚 + 低耦合 + A + B |
-| `scope-small` | 单分系统 + 无四类变更点 + 净修改面 ≤10 文件 | 一行自检（见 `td-propose` 步骤 7） |
+| change-scope | 查的清单节 |
+|---|---|
+| `scope-large` | 高内聚 + 低耦合 + A + B + C + D（全量） |
+| `scope-medium` | 高内聚 + 低耦合 + A + B |
+| `scope-small` | 一行自检（见 `td-propose` 步骤 7） |
 
-**判据复用**：change-scope 判据里"跨 N 分系统""命中 N 类变更点"直接引用 `td-apply/references/change-point-classes.md`（四类变更点与触发条件的单一事实源），不在此重复定义。change-scope 判读不缓存——每个 change 独立判。
+**判据复用**：change-scope 判据里"跨 N 分系统""命中 N 类变更点"直接引用 `td-apply/references/change-point-classes.md`（四类变更点与触发条件的单一事实源）。change-scope 判读不缓存——每个 change 独立判。
 
 **隔离载体**：按第 2 节共享前置，本 review 的优先级从 subagent 起——本 skill 定义的检查清单（高内聚 / 低耦合 / 循环依赖 / 隐式依赖 / 预期行为模型质量等）超出 code review 工具 reviewer 覆盖范围，工具跑不出本 skill 定义的检查语义（跳过第 2 节第一档）。
 

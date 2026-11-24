@@ -4,6 +4,8 @@
 
 ## 表 1：5 个 constraint 在 3 个 tier 下的强度
 
+表 1 只收录**有 tier 梯度强度**的 constraint（下表 5 个）。`yagni-ladder` 为**信号驱动、无 tier 分档**（见该文件「触发时机（信号驱动，不是每次写代码都过）」节），故不进表 1——它与表 1 五个 constraint 合起来是 `constraints` 承载的全部 6 个子约束。
+
 constraint 列为子约束逻辑名，路径为 `constraints` 的 `references/<name>.md`：
 
 | constraint | tier-small | tier-medium | tier-large |
@@ -19,7 +21,7 @@ constraint 列为子约束逻辑名，路径为 `constraints` 的 `references/<n
 **表 1 第 5 行是叠加在 `constraints` 的 `references/human-in-loop.md` 的第 1–5 类通用基线之上的 tier 额外触发条件，不是绝对强度值。** 第 1–5 类通用基线在所有 profile × tier 下都生效——这是"必须停"的下限。
 
 - tier-small"—"：无额外 tier 触发条件，仅用第 1–5 类通用基线。
-- tier-medium"—"：无额外 tier 触发条件，仅用第 1–5 类通用基线（"公共契约变更"属基线第 1 类，所有 tier 生效，不在此重复列为 tier 加成）。
+- tier-medium"—"：无额外 tier 触发条件，仅用第 1–5 类通用基线（"公共契约变更"属基线第 1 类，所有 tier 生效）。
 - tier-large"+ 总体设计文档审阅"：基线之外，总体设计文档需要审阅时额外触发 human-in-loop。
 
 ### 表 1 critical-buffer 行计算基准
