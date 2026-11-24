@@ -1,6 +1,6 @@
 # config.yaml context 引导流程
 
-本文件是 `openspec/config.yaml` 的 `context` 字段引导填写的**单一权威**。`td-explore` / `td-propose` / `td-init` 首次运行读取现场背景时都执行本节，不各自重复展开。
+本文件是 `openspec/config.yaml` 的 `context` 字段引导填写的**单一权威**。`td-explore` / `td-propose` / `td-init` 首次运行读取现场背景时都执行本节。
 
 ## 引导流程
 

@@ -32,4 +32,4 @@ user-invocable: false
 
 ## 如何被引用
 
-引用路径统一见上方「子约束映射」节：命中触发场景 → 读本 skill → 按映射读对应 `references/<name>.md`；约束强度（表 1/表 2/表 3）与 override 回路编排由各 references 文件与 `field-assessment` 的「如何被引用」节持有，此处不重复。
+引用路径统一见上方「子约束映射」节：命中触发场景 → 读本 skill → 按映射读对应 `references/<name>.md`；约束强度（表 1/表 2/表 3）与 override 回路编排由各 references 文件与 `field-assessment` 的「如何被引用」节持有。
