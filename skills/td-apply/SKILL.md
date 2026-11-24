@@ -163,9 +163,27 @@ review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 ch
 
 触发即调用 `/td-system-audit current-change`，把本次 change 的"实际 vs 预期"对照主基调过一遍。
 
+#### 6.5 完成 checklist（终局闸门）
+
+声明 change done / 调 goal complete 前，必须逐条打勾并贴出证据；缺一项即 apply 未完成，不得进入最终报告：
+
+- [ ] 6.1 change-level 验证证据（命令 + 结果行）
+- [ ] 6.2 跨分系统边界验证证据（对照影响评估逐分系统结论）
+- [ ] 6.3 收尾 review 报告路径 `openspec/changes/<change-name>/reviews/<YYYYMMDD-HHMMSS>-closing.md` + critical / warning 结论（**报告文件不存在 = 6.3 未做，机械可检**）
+- [ ] 6.4 current-change audit 结论（tier-large 必触发；tier-medium 引 `executing-plans` checkpoint 证据；tier-small 记不要求）
+- [ ] scenario→test 账本全 🟢（change 含账本时）
+
+**禁止替代**：6.1–6.4 是**独立动作**，不可用"任务内修过 bug / 跑过全量门 / 点状自纠"冒充；不得用"已在过程中覆盖 / 逐步执行"的措辞声明完成。
+
+**如实报告**：6.1–6.4 任一步**未作为独立动作执行**，最终报告必须写明"未做 X（原因）"，不得含糊成"已做"。
+
+**终点收敛**：6.5 全打勾 → 才算 change done，方可给最终报告；未跑完 6.3/6.4 就声明完成 = 流程违规，等同 `verification-before-completion` 的"未验证就声称完成"。
+
 ## Guardrails
 
 - 不跳过任务，按 tasks.md 顺序；tasks.md 显式标注并行的任务除外
 - 每个任务必须有验证证据，"我觉得改对了"不算
 - 遇到 proposal 与实际代码冲突时，停下来问用户：是改 proposal 还是改代码？（执行序列见步骤 5 的「设计回写」）
 - **任务内缺陷直修**：根因在任务内（含测试基建缺陷、agent 自写的测试代码、任务验证字段定义的动作）→ **直接修，不问用户**；只有根因在 plan 之外（proposal/design 预期模型之外）才走 `constraints` 的 `references/human-in-loop.md` 必停通道。
+- **6.1–6.4 完成亦须证据**：guardrail"每个任务必须有验证证据"只约束任务粒度——6.3 收尾 review / 6.4 audit 的完成同样要证据（review 报告文件 / audit 结论），**不能说"已做"就完事**。
+- **报告与执行一致**：声明完成 = 报告与实际执行一致；未做 X 就写"未做 X"，不得用"已在过程中覆盖 / 逐步执行"之类措辞偷换。
