@@ -40,7 +40,7 @@ argument-hint: <change-name>
 
 - **change 完整性**：artifact 是否齐全？proposal 是否有"系统工程影响评估"节？没有 → 不算 apply-ready，停下来问用户。"预期行为模型"字段缺失时**不阻塞**，降级提示："proposal 缺'预期行为模型'字段（旧 change 兼容），apply 时以步骤 6.2 实际行为验证为准；新 change 应回 `/td-propose` 步骤 6.c 补填。"
 - **tier-large 总体设计文档必填**：若 `$_TD_TIER == tier-large`，检查 proposal 是否附了"总体设计文档"（见 `field-assessment` 的 `references/tier-large.md`「总体设计文档必填」节）。没这份文档 → **阻塞 apply**，提示用户回 `/td-propose` 补文档。
-- **caller impact 分析节必填**：若 `$_TD_TIER` 为 `tier-medium` / `tier-large` 且 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。后续步骤 4 实测子节不再重复此检查。
+- **caller impact 分析节必填**（按 change-scope，不按 tier）：若 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`，命中即 change-scope 为 medium/large），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。**不加 tier 前置**——tier-small 项目里的大 change 照样要填，否则 propose 阶段的方案 review 查「caller impact 完备性」时对的是一个本可不填的节。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。后续步骤 4 实测子节不再重复此检查。
 - **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。已达 → **阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威在该文件；override 通过后继续步骤 3）。
 - **`constraints` 的 `references/critical-buffer.md`**：tasks.md 是否已标注关键链 + project buffer（比例按表 1 当前 tier 行；表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
 - **scenario→test 覆盖账本必填**：若 change 的 `applyRequires` 含 `specs` artifact，检查 proposal 是否附了 scenario→test 覆盖账本（见 `td-propose/references/scenario-test-map-template.md`）。缺账本或有 unmapped scenario 未标 `N/A` → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补账本。tier-small 仅在 `applyRequires` 含 `specs` 且含可执行测试面时检查。
@@ -55,9 +55,9 @@ argument-hint: <change-name>
 3. `specs/` 下的 spec 文件
 4. `tasks.md`（实施步骤）
 
-### 4. 架构 review 复核 + caller impact 实测 + 触发行为层
+### 4. 方案 review 复核 + caller impact 实测 + 触发行为层
 
-**进入任务实施前，复核架构 review 结论**：`td-propose` 步骤 7 已完成架构 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 实测」子节**；**有改动 → 重新触发 `requesting-code-review` 的架构 review**（对照 proposal 的"系统工程影响评估"节与 design.md，检查分系统切分与设计决策是否符合高内聚低耦合，检查清单见该 skill 的 `references/architecture-review-checklist.md`）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
+**进入任务实施前，复核方案 review 结论**：`td-propose` 步骤 7 已完成方案 review 且无 critical 才放行 apply——本步骤只复核：proposal / design 在 propose 之后是否被改过？**未改动 → 沿用步骤 7 结论，继续执行下方「Caller Impact 实测」子节**；**有改动 → 重判 change-scope（判据见 `requesting-review` 第 5 节）并重新触发该 skill 的方案 review**（对照 proposal 的"系统工程影响评估"节与 design.md，按 change-scope 查 `references/proposal-review-checklist.md` 对应节——分系统切分 / 设计决策 / 需求对齐 / 预期行为模型质量 / 设计取舍可逆性 / caller impact 完备性）。**架构级 critical 未修复 → 阻塞 apply**，提示用户回 `/td-propose` 步骤 6 改 proposal 再重新 review。
 
 #### Caller Impact 实测（任务实施前的闸门）
 
@@ -69,9 +69,9 @@ argument-hint: <change-name>
 2. 逐 caller 确认兼容（签名匹配 / 返回值未被消费 / 装配点已接 / 语义不变），记录确认结论。
 3. 实测发现 proposal 未标注的 caller，或与已知 caller 的预判结论冲突 → 补做兼容确认，或经步骤 5 的 apply 全局必停通道上报「超出当前 change scope」——不得静默跳过。
 
-**tier 分层**（本层是实测层，预判标注见 `td-propose` 步骤 6.c 的 caller impact 分析节）：tier-large = 硬闸门（无条件实测；caller 清单 + 逐 caller 结论未产出，不进入任务实施）；tier-medium = 信号触发（满足任一信号则强制实测：变更点命中四类变更点任一类 / proposal 对某已知 caller 标注"需适配" / 架构 review 对 caller 影响提出疑问；纯内部实现细节且无信号 → 可跳过并在 tasks.md 记录理由）；tier-small = 提醒（默认跳过）。caller 清单与结论记录到 tasks.md（对应任务的验证证据或单独附注）。
+**tier 分层**（本层是实测层，预判标注见 `td-propose` 步骤 6.c 的 caller impact 分析节）：tier-large = 硬闸门（无条件实测；caller 清单 + 逐 caller 结论未产出，不进入任务实施）；tier-medium = 信号触发（满足任一信号则强制实测：变更点命中四类变更点任一类 / proposal 对某已知 caller 标注"需适配" / 方案 review 对 caller 影响提出疑问；纯内部实现细节且无信号 → 可跳过并在 tasks.md 记录理由）；tier-small = 提醒（默认跳过）。caller 清单与结论记录到 tasks.md（对应任务的验证证据或单独附注）。
 
-架构 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。
+方案 review 与 caller impact 实测均通过后，按 `tasks.md` 的任务序列实施。
 
 #### 任务执行
 
@@ -80,8 +80,9 @@ argument-hint: <change-name>
 **基本执行循环**（td-apply 自持，逐任务循环直至全部完成）：
 
 1. 读任务的"验证"字段与"风险"字段
-2. 触发 `test-driven-development`：先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑；实施中故意砍角（降级实现 / 留已知上限的简化）→ 按 `constraints` 的 `references/delay-decision.md` 的「`td-cut:` 砍角标注」节在该代码处留一行 `td-cut:` 标注（砍了什么角、已知上限、升级路径），只标有真实 ceiling 的故意砍角
+2. 触发 `test-driven-development`：先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑。**`yagni-ladder` 信号触发（不是每次写代码都过）**：仅当命中「准备装新依赖 / 新建 helper·组件·抽象 / 写出超出任务验证字段所需能力的代码 / 用户说别过度设计」任一信号时，才过 `constraints` 的 `references/yagni-ladder.md` 的「六级决策阶梯」节——从第 1 级往下找第一个"完全能用"的，命中即停；触碰其 never-cut 清单的能力按 full 强度做不走降级，走了阶梯之外的重路留 `shortcut:` 标注（该文件有定义）。无信号的小改动不查阶梯，默认对齐既有模式即可。实施中故意砍角（降级实现 / 留已知上限的简化）→ 按 `constraints` 的 `references/delay-decision.md` 的「`td-cut:` 砍角标注」节在该代码处留一行 `td-cut:` 标注（砍了什么角、已知上限、升级路径），只标有真实 ceiling 的故意砍角
 3. 触发 `verification-before-completion`：跑验证命令，拿到验证证据
+   - **测试失败/挂起且原因不明** → 不直接修、不上报，先触发 `systematic-debugging`（复现→隔离→定位根因）。隔离定位完成前不得修、不得报；根因定位后按 Guardrails 的「任务内缺陷直修」判据决定直修或上报。
 4. 更新 tasks.md：`- [ ]` → `- [x]`，附验证证据
 
 **复杂场景按需委托 `executing-plans`**：以下任一条件命中时，在基本执行循环的对应位置触发 `executing-plans` 的 checkpoint / 失败处理能力——td-apply 仍是执行主体，`executing-plans` 提供管理层能力（checkpoint 调度 + 失败处理回路），不接管基本执行循环：
@@ -91,6 +92,16 @@ argument-hint: <change-name>
 - **current-change audit**（tier-medium）：每个关键链任务完成时随 checkpoint 触发，见步骤 6.4
 
 条件不命中时全程走 td-apply 自持的基本执行循环，不加载 `executing-plans`。
+
+#### 验证边界登记（长任务，防静默削减验证范围）
+
+跨多任务 / 上下文压力大（接近 compaction）的实施中，**不得用上下文压力或工作量当理由静默缩小验证计划**。若实施中发现原定的验证范围（全量测试矩阵 / 某类边界验证 / scenario 覆盖）跑不完，这是**范围变更**，必须显式登记并上报，不允许直接降级成"最小可行子集"了事：
+
+1. **登记**：在 tasks.md 对应任务下留一行 `Ruling: 削减验证 <砍了什么> — <为什么（上下文/工作量/阻塞）> — <漏检风险 + 补跑条件>`（复用 `constraints` 的 `references/human-in-loop.md` 的 `Ruling:` 记账形态）。
+2. **上报裁决**：削减的是原 proposal / tasks 承诺的验证范围 → 走步骤 5 的 apply 全局必停通道问用户（补跑到后续 / 接受风险 / 缩 change scope），**不得自行拍板砍掉就不提**。
+3. **登记已验证 / 未验证边界**：checkpoint 与收尾时，明确区分"哪些验证跑过且绿 / 哪些还没跑 / 哪些被削减"——这条边界是 `verification-before-completion` 判"能否宣布完成"的依据，不得含糊。
+
+短任务（tier-small、单任务、无上下文压力）不要求此登记。执行语义与 `executing-plans` 的 checkpoint 调度衔接（checkpoint 时核对验证边界）。
 
 ### 5. 触发 apply 全局粒度的工程管理约束
 
@@ -135,10 +146,10 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 
 #### 6.3 change 级收尾 code review（硬步骤）
 
-两层验证（6.1 + 6.2）全部通过后，对本 change 的全部新增 / 修改代码做一次 change 级收尾 review——review 是完成判定链的最后阶段：先全绿拿验证证据，再对整体做 review。**执行语义由 `requesting-code-review` 的「change 级收尾 review」节承载**（review 对象、工具优先 / LLM 兜底的执行方式、与 checkpoint review 的分工在那里），本步骤只定义触发条件与 tier 分层强度：
+两层验证（6.1 + 6.2）全部通过后，对本 change 的全部新增 / 修改代码做一次 change 级收尾 review——review 是完成判定链的最后阶段：先全绿拿验证证据，再对整体做 review。**执行语义由 `requesting-review` 的「change 级收尾 review」节承载**（review 对象、工具优先 / LLM 兜底的执行方式、与 checkpoint review 的分工在那里），本步骤只定义触发条件与 change-scope 分层强度（与 proposal review 的 change-scope 口径对齐，不按 tier——tier-small 项目里的大 change 收尾不能只保底抽查）：
 
-- `tier-small`：保底抽查——只查 Spec compliance + 安全红线。小 change 可能全程轮不到 checkpoint review，收尾是它唯一的 review 机会，不整体跳过
-- `tier-medium` / `tier-large`：review 深度按 tasks.md 全部任务 `风险` 字段的最高档取
+- `scope-small`：保底抽查——只查 Spec compliance + 安全红线。小 change 可能全程轮不到 checkpoint review，收尾是它唯一的 review 机会，不整体跳过
+- `scope-medium` / `scope-large`：review 深度按 tasks.md 全部任务 `风险` 字段的最高档取
 
 review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 change-level 验证（修复使既有验证证据失效，见 `verification-before-completion` 的「之前测过」条）；无 critical → 进入 6.4。
 
@@ -157,3 +168,4 @@ review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 ch
 - 不跳过任务，按 tasks.md 顺序；tasks.md 显式标注并行的任务除外
 - 每个任务必须有验证证据，"我觉得改对了"不算
 - 遇到 proposal 与实际代码冲突时，停下来问用户：是改 proposal 还是改代码？（执行序列见步骤 5 的「设计回写」）
+- **任务内缺陷直修**：根因在任务内（含测试基建缺陷、agent 自写的测试代码、任务验证字段定义的动作）→ **直接修，不问用户**；只有根因在 plan 之外（proposal/design 预期模型之外）才走 `constraints` 的 `references/human-in-loop.md` 必停通道。

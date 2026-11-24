@@ -37,7 +37,7 @@ plugin_manager install_bundle target: /absolute/path/to/plugin-total-design
 ```
 
 安装后 18 个 skill 会出现在会话目录；`user-invocable: true` 的 skill
-（7 个 `td-*` + `requesting-code-review` + `systematic-debugging`）可用
+（7 个 `td-*` + `requesting-review` + `systematic-debugging`）可用
 `/td-propose`、`/td-apply` 这类 `/名称` 手势直接调用。
 
 ## 已知限制（DSH 下）

@@ -161,7 +161,7 @@ openspec instructions <artifact-id> --change "<name>" --json
 
 本节是前馈定位（类别标注 + 高危 go/no-go），完整 caller 清单不由本节承担——由 `td-apply` 步骤 4 实测产出并兜底；实测兜底与上报规则见 `td-apply` 步骤 4 对应子节。
 
-tier 分层：tier-small 可跳过（提醒性质，跳过时在 proposal 注明）；tier-medium / tier-large 必填（必填的是变更点类别标注 + 高危标记）——缺项的 proposal 不算 apply-ready。
+change-scope 分层：命中 caller impact 触发条件即必填（必填的是变更点类别标注 + 高危标记），**不按 tier**——触发条件本身已隐含 change-scope 为 medium/large，tier-small 项目里的大 change 照样要填（与 `td-apply` 步骤 2 的必填检查口径一致）。未命中触发条件 → 可跳过（跳过时在 proposal 注明）。
 
 - **tasks.md 必填：关键链标注、project buffer、任务主体约束**
 
@@ -189,17 +189,19 @@ openspec status --change "<name>" --json
 
 检查每个 `applyRequires` 里的 artifact ID 是否 `status: "done"`。未完成 → 回 6.b 处理下一个；全完成且必填项全过 → 进步骤 7。
 
-### 7. 架构 review（proposal 定型后）
+### 7. 方案 review（proposal 定型后）
 
-**tier 分层**：`tier-small` → 跳过完整架构 review，只做一行自检："本 change 是否引入新的分系统切分或偏离既有架构？"——无 → **把"跳过架构 review：无实质新架构决策"记录到 proposal.md 的"系统工程影响评估"节末尾**（`td-apply` 步骤 4 复核时读该落点，确认此前已做过自检），直接进步骤 8；有 → 按下方完整流程走。`tier-medium` / `tier-large` → 完整流程：
+**判读 change-scope**（本 review 的强度收口，与 tier 正交；判据权威见 `requesting-review` 第 5 节）：单分系统 + 无四类变更点（定义见 `td-apply/references/change-point-classes.md`）+ 净修改面 ≤10 文件 → `scope-small`；跨 2 分系统 / 命中 1 类变更点 / 净修改面 >10 文件 → `scope-medium`；跨 3+ 分系统 / 命中 2+ 类变更点 / 触碰 ①③ 类高危变更点 / 含"偏离既有架构" → `scope-large`。取最高。
 
-所有 artifact 创建完成后，**进入实施前先做架构 review**。
+**按 change-scope 分流**：`scope-small` → 跳过完整方案 review，只做一行自检："本 change 是否引入新的分系统切分或偏离既有架构？"——无 → **把"跳过方案 review：无实质新架构决策（scope-small）"记录到 proposal.md 的"系统工程影响评估"节末尾**（`td-apply` 步骤 4 复核时读该落点，确认此前已做过自检），直接进步骤 8；有 → 按下方完整流程走。`scope-medium` / `scope-large` → 完整流程：
 
-调 `requesting-code-review` 的架构 review（见该 skill 第 5 节），review 对象是 proposal 的分系统切分与设计决策，检查清单见该 skill 的 `references/architecture-review-checklist.md`。
+所有 artifact 创建完成后，**进入实施前先做方案 review**。
 
-分级定义见 `requesting-code-review` 的「Issue 分级」节（critical / warning / nit）。本步骤只持有阻塞后回路：架构 review 判为 critical → 阻塞，回步骤 6 改 proposal 再重新 review；warning → 记录到 proposal，可延后；nit → 可忽略。
+调 `requesting-review` 的方案 review（见该 skill 第 5 节），review 对象是 proposal 的**方案整体**——分系统切分与设计决策（高内聚/低耦合）+ 需求对齐 + 预期行为模型质量 + 设计取舍可逆性 + caller impact 完备性，检查清单见该 skill 的 `references/proposal-review-checklist.md`（按 change-scope 查对应节）。
 
-架构 review 通过（无 critical）才进入步骤 8。
+分级定义见 `requesting-review` 的「Issue 分级」节（critical / warning / nit）。本步骤只持有阻塞后回路：方案 review 判为 critical → 阻塞，回步骤 6 改 proposal 再重新 review；warning → 记录到 proposal，可延后；nit → 可忽略。
+
+方案 review 通过（无 critical）才进入步骤 8。
 
 ### 8. 显示最终状态
 
@@ -213,7 +215,7 @@ openspec validate "<name>" --type change --json
 
 - Change 名 + 位置
 - 创建的 artifact 列表 + 简述
-- 架构 review 结果：通过 / 有 warning（已记录）
+- 方案 review 结果（含 change-scope）：scope-small 自检通过 / scope-medium·scope-large 通过 / 有 warning（已记录）
 - "All artifacts created! Ready for implementation."
 - "Run `/td-apply` to start implementing."
 

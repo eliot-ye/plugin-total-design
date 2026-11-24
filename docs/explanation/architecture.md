@@ -11,7 +11,7 @@
 - **行为层（skills）** —— Superpowers 转译的 explore → plan → TDD → review → verify 强制流程；触发式，不靠人盯。
 - **契约层（commands）** —— OpenSpec 转译的 propose → apply → archive artifact 流；agree before you build。
 
-约束层是第零层，是另外两层立起来的前提。`constraints` skill 承载 5 份局部规律 references（`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop`），每份必须显式声明它服务 `system-engineering` 主基调的哪一条。
+约束层是第零层，是另外两层立起来的前提。`constraints` skill 承载 6 份局部规律 references（`wip-limit` / `critical-buffer` / `brooks-law` / `delay-decision` / `human-in-loop` / `yagni-ladder`），每份必须显式声明它服务 `system-engineering` 主基调的哪一条。
 
 ## 依赖图谱
 
@@ -22,24 +22,24 @@ system-engineering → constraints, field-assessment, executing-plans, td-explor
                      td-system-audit, verification-before-completion, systematic-debugging
 td-explore → td-propose, td-archive, todo-pool, constraints, field-assessment, system-engineering
 td-propose → td-apply, td-archive, td-reverse-spec, todo-pool, writing-plans,
-             requesting-code-review, constraints, field-assessment, system-engineering, td-explore
-td-apply   → 11 个下游（constraints, executing-plans, field-assessment, requesting-code-review,
+             requesting-review, constraints, field-assessment, system-engineering, td-explore
+td-apply   → 11 个下游（constraints, executing-plans, field-assessment, requesting-review,
              system-engineering, systematic-debugging, td-propose, td-system-audit,
              test-driven-development, verification-before-completion, writing-plans）
 td-archive → constraints, field-assessment, system-engineering, td-propose, td-system-audit,
              todo-pool, verification-before-completion
-td-reverse-spec → field-assessment, requesting-code-review, system-engineering,
+td-reverse-spec → field-assessment, requesting-review, system-engineering,
                   td-propose, td-system-audit
 td-system-audit → constraints, field-assessment, system-engineering, td-apply, td-archive,
                   td-propose, td-reverse-spec, todo-pool
-requesting-code-review → constraints, executing-plans, td-apply, td-propose,
+requesting-review → constraints, executing-plans, td-apply, td-propose,
                          verification-before-completion, writing-plans
 test-driven-development → constraints, field-assessment, system-engineering,
                           systematic-debugging, td-apply, writing-plans
-executing-plans → constraints, field-assessment, requesting-code-review,
+executing-plans → constraints, field-assessment, requesting-review,
                   systematic-debugging, td-apply, td-system-audit
 systematic-debugging → constraints, executing-plans, td-apply
-verification-before-completion → constraints, requesting-code-review,
+verification-before-completion → constraints, requesting-review,
                                  systematic-debugging, td-apply
 writing-plans → constraints, field-assessment, td-apply, td-propose, td-reverse-spec
 todo-pool → constraints, td-archive, td-propose

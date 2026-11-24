@@ -32,7 +32,7 @@ task 主体必须是 agent 能**编程性执行**的动作（写代码、跑测�
 
 ## 风险等级判定
 
-供 `test-driven-development` 决定测试强度、`requesting-code-review` 决定 review 深度：
+供 `test-driven-development` 决定测试强度、`requesting-review` 决定 review 深度：
 
 - **high**：核心路径 / 跨多个分系统 / 数据一致性 / 安全 / 不可逆决策 → 完整边界用例 + review 必查
 - **medium**：常规功能 → 标准 TDD 强度（正常路径 + 关键边界）

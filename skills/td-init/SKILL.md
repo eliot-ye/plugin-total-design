@@ -97,6 +97,7 @@ git rm -r --cached openspec/.td-state/
 - `.gitignore`：根目录已有 / openspec/.gitignore 已创建或追加 / 无需
 - 老项目迁移：已完成 / 无需 / 待用户确认
 - config context：已填写 / 跳过
+- **轻量通道提示**（按步骤 1 判读的 profile × tier）：若判为 `tier-small` 或 `profile-maintenance`，附一行——"当前项目偏小 / 维护态，一次性脚本、原型、探索性实验、改配置这类轻活**不必走完整 propose→apply→archive 三步**，按 `field-assessment` 的 `references/profile-maintenance.md` / `references/strength-matrix.md` 的轻量强度走即可；完整三步留给真正需要 artifact 沉淀的改动。" 避免"修个 bug 也要三步走"的流程重量观感（机制已存在，这里做入口暴露）。
 
 ## Guardrails
 

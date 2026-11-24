@@ -100,7 +100,7 @@ AI coding agent 的失控不是"模型不够强"，是**没有工程纪律**：
 | 层 | 数量 | 代表 |
 |---|---|---|
 | 约束层 | 2 | `system-engineering` 主基调 + `constraints` 承载 5 份局部规律 |
-| 行为层 | 6 | writing-plans / executing-plans / test-driven-development / requesting-code-review / systematic-debugging / verification-before-completion |
+| 行为层 | 6 | writing-plans / executing-plans / test-driven-development / requesting-review / systematic-debugging / verification-before-completion |
 | 配置层 | 3 | `field-assessment`（profile×tier 配置入口）+ `todo-pool`（`openspec/todo.md` 格式约定）+ `agents-md-hygiene`（用户项目 agent 指令文件编写规范） |
 | 契约层 | 7 | 7 个 td-* skill，与 command 一一对应 |
 
@@ -119,6 +119,16 @@ AI coding agent 的失控不是"模型不够强"，是**没有工程纪律**：
 ```
 
 中途接手、修 bug、多人协作约定见 [docs/user/usage.md](docs/user/usage.md)。
+
+### 轻量通道（小改动不必走三步）
+
+上面是完整流程，适合需要 artifact 沉淀的改动。但**一次性脚本、原型、探索性实验、改个配置、修个小 bug** 这类轻活，走完整 propose→apply→archive 是过度流程。total-design 的强度是按 profile × tier 分层的（见 `field-assessment`）——判为 `tier-small` / `profile-maintenance` 时：
+
+- **不必强上三步**：直接说"改 X"让 agent 干，按轻量强度执行即可，不强制生成 proposal / design / tasks artifact
+- **仍守纪律底线**：验证后再宣称完成（`verification-before-completion`）、反过度工程（`yagni-ladder`）这些 gate 照常生效——轻量砍的是**流程 artifact 重量**，不是验证与纪律
+- 何时该回到完整三步：改动跨分系统边界、涉及公共契约、或需要留设计决策记录时
+
+强度分层判据见 [skills/field-assessment](skills/field-assessment/SKILL.md)。
 
 ---
 
