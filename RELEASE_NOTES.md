@@ -1,4 +1,44 @@
-# total-design v1.19.0 发布说明
+# total-design v1.20.0 发布说明
+
+> 面向使用态用户：本次为**纪律 gate 加固 + 方案 review 换轴 + 一处 skill 更名版**——新增 YAGNI 阶梯局部规律（`constraints` 第 6 份）、review 深度改由 change-scope 轴决定（与 tier 正交，堵住"大 change 进小系统只获轻量 review"的缺口）、行为层 `requesting-code-review` 更名 `requesting-review`（slash 手势 `/requesting-review`，**旧手势失效**）。命令数量、hook、td-* 契约流、四平台加载均不变。
+
+## 本版本是什么
+
+1.20.0 是 **方案 review 换轴 + 纪律 gate 加固 + skill 更名版**。上一次版本 1.19.0 改了 td-propose 触发器判据与用户呈现纪律；本版本做四件事：
+
+- **Added — `constraints` 新增第 6 份局部规律 `yagni-ladder`（YAGNI 阶梯）**：六级决策阶梯（从"需要存在吗"到"最小实现"，命中即停）+ never-cut 负向清单（信任边界校验 / 防数据丢失 / 安全 / 可访问性 / 用户显式要求——永不裁剪）+ `shortcut:` 捷径标注。信号驱动触发——只在准备装新依赖、新建 helper·组件·抽象、写出超出验证字段所需能力、用户说别过度设计时查，普通实施不逐次过。
+- **Added + Changed — 方案 review 深度改由 change-scope 轴决定，与 tier 正交**：tier 管项目级 constraint 强度，change-scope 管 change 级 review 深度。checklist 从架构单视角扩展为完整 proposal 审查（新增 A 需求对齐 / B 预期行为模型 / C 取舍可逆性 / D caller impact 四块）。堵住一个真实缺口：跨 3 分系统、触碰公共符号签名的大 change，落在一个 tier-small 项目里，此前只获得轻量 review，完备性与 caller impact 检查全被跳过。
+- **Changed — 行为层 skill `requesting-code-review` 更名 `requesting-review`**：旧名"code"只覆盖第 6 节 change 级收尾 review，与第 5 节方案 review（审 proposal 文档而非代码）名实不符。slash 手势变为 `/requesting-review`；逻辑名引用、依赖图谱、DSH README 同步，`index.mjs` 无需改动（DSH 按目录扫描注册）。
+- **Fixed — 四处纪律 gate 补「常见合理化」表 + 复现隔离绑定**：`td-apply` 绑定 `systematic-debugging`（测试失败先复现→隔离→定位根因，不隔离不上报）、Guardrails 加"任务内缺陷直修"；`executing-plans` / `requesting-review` / `verification-before-completion` 各补合理化反驳表；验证削减必须 `Ruling:` 记账并上报，不得静默砍成最小子集。
+
+## 行为变更表（升级用户感知差异）
+
+| 环节 | 变更 | 感知 |
+|---|---|---|
+| review skill 手势 | `requesting-code-review` → `requesting-review` | **直接敲旧手势的用户需改用 `/requesting-review`**（`/requesting-code-review` 不再注册）；agent 触发自动适配 |
+| 方案 review 深度轴 | 深度由 change-scope（scope-small/medium/large）决定，与 tier 正交 | 跨分系统 / 命中变更点的大 change 在小项目里也会走全量 review（此前被 tier-small 跳过）；scope-small 降为 `td-propose` 步骤 7 一行自检 |
+| caller impact 完备性 | 命中触发条件即必填分析节，不再前置 tier 判断 | tier-small 项目里的大 change 也会要求 caller impact 分析节，否则不算 apply-ready |
+| change 级收尾 review | 深度按 scope 档位（scope-small 保底抽查，medium/large 按 `风险` 最高档） | 收尾 review 深度与 proposal review 同轴，大 change 收尾不再只保底抽查 |
+| 实施中测试失败 | 失败原因不明先触发 `systematic-debugging` 复现→隔离→定位 | 失败不再"顺手一修"——隔离定位前不得修不得报；任务内缺陷直修不问用户 |
+| 验证范围削减 | 必须留 `Ruling:` 记账并走必停通道上报 | 上下文压力大时不得静默把验证砍成子集——削减属范围变更，需用户裁决 |
+| 完成声明 | 新增「红灯自行豁免」「park 掉自我怀疑」两条硬约束 | 见红灯不得用"我没碰那文件 / pre-existing"自行洗白；对"是否与我有关"的疑虑本身即红灯 |
+| 过度工程 | 新增 `yagni-ladder` 信号触发 + `shortcut:` 标注 | 装新依赖 / 新建抽象前过六级阶梯，走了重路留 `shortcut:` 标注；never-cut 清单能力不走降级 |
+| 小项目轻量改动 | README + `td-apply`/`td-init` 暴露轻量通道 | `tier-small` / `profile-maintenance` 时一次性脚本、原型、改配置不必走三步（机制已存在，补入口暴露） |
+
+## 升级步骤
+
+1. 更新 plugin 到 v1.20.0（四平台安装方式不变，见 `docs/user/install.md`）。
+2. 无需迁移数据——`.td-state/` 与 `openspec/` 格式不变。
+3. **手势更名**：若你或你的团队曾直接用 `/requesting-code-review` 手势调用 review，改用 `/requesting-review`；agent 自动触发不受影响。
+4. 其余无破坏性变更，可直接升级。
+
+## 完整变更列表
+
+见 [CHANGELOG.md](CHANGELOG.md) 的 `[1.20.0]` 条目。
+
+---
+
+# total-design v1.19.0 发布说明（历史）
 
 > 面向使用态用户：本次为**修复 + 内部打包重构 + 用户呈现纪律版**——`td-propose` 的全局约束核对从「无条件必做」降级为「仅当触及系统级接缝时触发」并改写为通用触发器判据（消除开发态泄漏与 SKILL 禁引用 AGENTS.md 硬违规），`system-engineering` 新增用户呈现纪律（序号标记不得只给序号而无内容），DSH 包装层目录迁移至 `extensions/dsh/`（用户无感知）。skill 数量、命令数量、references、hooks、td-* 契约流、四平台加载均不变。
 

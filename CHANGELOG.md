@@ -2,6 +2,38 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.20.0] - 2026-11-24
+
+### Added
+
+- **`constraints` 新增第 6 份局部规律 `yagni-ladder`（YAGNI 阶梯）**：约束解法重量——六级决策阶梯（1 需要存在吗 → 2 代码库已有 → 3 标准库/平台原生 → 4 已装依赖 → 5 一行 → 6 最小实现，命中即停）+ never-cut 负向清单（信任边界输入校验 / 防数据丢失的错误处理 / 安全 / 可访问性 / 用户显式要求——永不裁剪）+ `shortcut:` 捷径标注（技术债物化，与 `delay-decision` 的 `td-cut:` 分工：`td-cut:` 标砍角、`shortcut:` 标走重路）。触发为**信号驱动**（准备装新依赖 / 新建 helper·组件·抽象 / 写出超出任务验证字段所需能力的代码 / 用户说别过度设计——命中才查，普通实施不逐次过）。`system-engineering` 注记、`architecture.md` 依赖图谱、`td-apply` 步骤 4 兄弟清单同步 5→6。
+- **方案 review 新增 change-scope 轴（scope-small / medium / large），与 tier 正交**：tier 管项目级 constraint 强度，change-scope 管 change 级 review 深度。判据复用 `td-apply/references/change-point-classes.md`（四类变更点单一事实源）：单分系统 + 无四类变更点 + 净修改面 ≤10 文件 → scope-small（降为 `td-propose` 步骤 7 一行自检，不入完整 review）；跨 2 分系统 / 命中 1 类变更点 / 净修改面 >10 文件 → scope-medium（内聚 + 耦合 + A + B）；跨 3+ 分系统 / 命中 2+ 类变更点 / 触碰 ①③ 类高危变更点（公共符号签名 / 装配点）/ proposal 含"偏离既有架构" → scope-large（内聚 + 耦合 + A + B + C + D 全量）。修复「大 change 进小 tier 系统只获得轻量 review」的缺口。
+- **方案 review 检查清单从架构单视角扩展为完整 proposal 审查**：`requesting-review` 的 `architecture-review-checklist.md`（19 行）重写为 `proposal-review-checklist.md`（63 行）——在分系统切分与高内聚/低耦合之外新增 A 需求/范围对齐、B 预期行为模型质量（四判据）、C 设计取舍可逆性、D caller impact / 变更点完备性四块，按 change-scope 分节查。
+- **`executing-plans` 新增「验证边界」核对**：checkpoint 必须显式区分「已验证且绿 / 未验证待跑 / 被削减」三类，作为 `verification-before-completion` 判「能否宣布完成」的依据；长任务（多任务 / 接近 compaction）必做，短任务可略。依赖技能节新增 `verification-before-completion` 预加载。
+- **`verification-before-completion` 新增两条硬约束**：「红灯自行豁免」——跑出红灯不得用因果论证（"我没碰那文件"）或存量论证（"pre-existing"）自行豁免，判无关必须拿出改动前新鲜基线证据（git stash 前后对照跑通），否则默认算本 change 的红灯；「park 掉自我怀疑」——实施中对"是否与我的改动有关"的疑虑本身即视为红灯，必须当场验证或上报，不得记一句"以后再看"就继续标完成。
+- **`human-in-loop` 新增「默认自主裁决」白名单与 `Ruling:` 记账**：区分真决策点与事实缺口——事实缺口类默认自主裁决并留 `Ruling: <决定> — <为什么> — <错了的代价>`，命中必停基线或四类停止条件时 `Ruling:` 无效必须停。机器自主判断对总体设计部透明，减少"缺一个事实也要停下问"的误停轮次。
+- **轻量通道入口暴露**：README 新增「轻量通道」节——一次性脚本 / 原型 / 探索性实验 / 改配置 / 修小 bug 这类轻活，判为 `tier-small` / `profile-maintenance` 时不必走完整 propose→apply→archive 三步，但仍守验证与反过度工程底线；`td-apply` 步骤 1 对 `tier-small` / `profile-maintenance` 附一行轻量通道提示，`td-init` 输出末尾同步。
+
+### Changed
+
+- **行为层 skill `requesting-code-review` 更名为 `requesting-review`**（slash 手势随之变为 `/requesting-review`）：旧名的"code"只覆盖第 6 节 change 级收尾 review，与第 5 节方案 review（审 proposal 文档而非代码）名实不符。无 `td-` 前缀，保持"td- 标契约层入口、行为层不加"的命名分层约定。7 个契约层 / 行为层 skill 的逻辑名引用、README / AGENTS.md / architecture.md 依赖图谱 / DSH README 同步更新；DSH bundle 按 `skills/*/SKILL.md` 扫描注册，`index.mjs` 无需改动。
+- **「架构 review」统一改称「方案 review」**：review 对象实为完整 proposal（清单里只有两块属架构视角），旧名系统性低估其余视角。checklist 文件、frontmatter description、`td-propose` 步骤 7/8、`td-apply` 步骤 4/5/6、`td-reverse-spec`、`change-point-classes.md` 术语同步。
+- **caller impact 完备性与收尾 review 深度改由 change-scope 决定，不再按 tier**：`td-apply` 步骤 2 去掉冗余 tier-medium/large 前置（caller impact 触发条件已蕴含 scope-medium/large）；`td-propose` 步骤 6.c 改为"命中触发条件即必填 caller impact 分析节"、`td-apply` 步骤 6.3 收尾深度改用 scope 档位、`td-archive` 步骤 2 Verdict 检查、`requesting-review` 触发清单与第 6 节深度同步换轴。tier 保留项（总体设计文档 tier-large 要求、6.2 集成验证深度、audit 节奏表 3、`td-archive` 复盘深度）测的是系统固有复杂度或节奏，非 per-change 风险，明确不动，`field-assessment` tier 表与缓存不变。
+- **验证削减必须记账 + 上报**（`td-apply` 步骤 5 + `executing-plans`）：因上下文压力或工作量把原定验证范围（全量测试矩阵 / 边界验证 / scenario 覆盖）砍成子集属**范围变更**——就地留 `Ruling: 削减验证 <砍了什么> — <为什么> — <漏检风险 + 补跑条件>` 并走 apply 全局必停通道上报用户裁决，不得静默降级成"最小可行子集"。
+
+### Fixed
+
+- **`td-apply` 绑定 `systematic-debugging` 复现隔离**：测试失败/挂起且原因不明 → 不直接修、不上报，先复现→隔离→定位根因，隔离定位完成前不得修不得报；Guardrails 新增「任务内缺陷直修」——根因在任务内（含测试基建缺陷、agent 自写测试代码、任务验证字段定义的动作）直接修不问用户，只有根因在 plan 外才走 human-in-loop 必停通道。
+- **收窄「超 scope」第 4 类必停判据**（`human-in-loop`）：明确"涉及既有代码路径 ≠ 超 scope"——加法式扩展既有件是任务定义的一部分，减少误停。
+- **`td-apply` / `executing-plans` / `requesting-review` / `verification-before-completion` 各补「常见合理化」表**：把 agent 压力下会用的绕过借口（"用户正忙跳过 checkpoint" / "改动小不用跑全量" / "失败是存量与我无关" / "失败原因我大概知道不用走 4-phase" / "3 次失败再试一次说不定就过"）逐条列出并当场反驳——压力下违反规则类失败靠软引导压不住。
+- **`requesting-review` 补 `park` 模板措辞**：已知问题不阻塞 / `spec§X + YAGNI` 豁免的记账形态，补齐 park 动作的落点。
+
+### Docs
+
+- `docs/maintainer/content-authoring.md` 新增「按失败类型选规则句式」：四类基线失败（压力下违反规则 / 照做但产出形状不对 / 漏该有元素 / 行为该依赖某条件）与对应句式错配表 + 两条硬规则——塑造产出形状的问题用否定句式会适得其反（"don't X" 会被拿来讨价还价），要改正面配方；禁 nuance 从句与无作用域豁免。
+- `docs/explanation/review-standard.md` 新增「精简护栏：压缩不损义」pre-send check：首句宣告意图删 / 末句 recap 删 / 否定词·代码·数字逐字保留 / 歧义句改回完整句；payload verbatim（报错、命令输出、API 签名、spec 条款、用户原话逐字不动）。
+- release 文档同步（本条目与 RELEASE_NOTES.md）。
+
 ## [1.19.0] - 2026-11-16
 
 ### Fixed
