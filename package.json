@@ -16,6 +16,9 @@
   },
   "license": "MIT",
   "homepage": "https://atomgit.com/eliot-ye/plugin-total-design",
+  "scripts": {
+    "test": "node tests/run-all.mjs"
+  },
   "repository": {
     "type": "git",
     "url": "https://atomgit.com/eliot-ye/plugin-total-design"
