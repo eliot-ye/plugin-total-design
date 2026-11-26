@@ -43,7 +43,7 @@ user-invocable: false
 
 1. 写让测试通过的**最小**代码
 2. 不要"顺手"加额外功能——YAGNI
-3. 跑测试，确认绿
+3. 跑**项目的测试命令**（`npm test` / `pnpm test` / `make test` 等），确认**全绿**——**项目套件定义 green，不只是本次写的测试文件**。任务的 scope 界定的是交付物，验证范围由项目套件界定——GREEN 要跑的是后者。分层豁免：risk-low 任务允许只跑本次测试文件（冒烟级，见 RED 节步骤 2 的 low 档）
 4. 如果绿不了，回到 RED 调整测试，不要在 GREEN 里硬刚
 
 ### REFACTOR：重构
