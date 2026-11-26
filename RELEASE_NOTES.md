@@ -1,4 +1,44 @@
-# total-design v1.20.1 发布说明
+# total-design v1.21.0 发布说明
+
+> 面向使用态用户：本次为**机械闭合 + 逃生阀 + 终局闸门版**——把 spec↔task↔test 升级为三向机械闭合（🟢 不再只是"测试存在且通过"）、纯重构新增 `skip_specs` 逃生阀、`td-apply` 补 change 级完成终局闸门。skill 数量、命令数量、references、hooks、td-* 契约流、四平台加载均不变，**无行为破坏性变更**（新增的均是对"假绿 / 形式主义 / 假完成"的机械防线，不改变既有判据口径）。
+
+## 本版本是什么
+
+1.21.0 是 **1.20.1 之后的 minor 版**。上一次 1.20.1 做的是 review 深度换轴后的一致性收尾；本版本做三件主线 + 若干加固：
+
+- **Added — spec ↔ task ↔ test 三向机械闭合**：`scenario-test-map-template` 覆盖账本此前只证"每个 scenario 有个测试"（覆盖存在性），不证"测试断言真的承接了 scenario 承诺"。本版本把 🟢 的判据从"存在且通过"提到三判据——断言承接场景承诺 / 可证伪 / 落点为行为非文本；并加「实现 task」列 + 双向无孤儿规则（scenario 无 task 承载、task 实现了未登记的 scenario 均为 blocking defect）。`td-propose` 步骤 6.c、`td-apply` 步骤 2/4/6.1/6.3、`td-archive` 步骤 3、`writing-plans` 的 `task-template.md`、`requesting-review` 的 Spec compliance 全链同步。**tier-small 把 task 侧核对降级为提醒（不阻塞），scenario 侧闭合与断言强度仍强制**——重量收窄到该收的 change 上。
+- **Added — 纯重构逃生阀 `skip_specs`**：纯重构 change（行为不变的代码 / 重命名 / 纯 tooling / 纯 docs）此前被迫产 spec delta，属形式主义。现借 OpenSpec 原生 `.openspec.yaml` 顶层 `skip_specs: true`（v1.7.0+）免产 spec delta；下游 4 处账本判据统一为"applyRequires 含 specs 且未被跳过"。含同名陷阱警告：`openspec archive --skip-specs` 是另一套 CLI 机制，勿混用。
+- **Added — `td-apply` 步骤 6.5 change 级完成终局闸门**：声明 change done 前逐条打勾贴证据，收尾 review 报告文件缺失即机械可检为"未做"；补「禁止替代」（不得用任务内修 bug 冒充收尾 review）与「如实报告」（未做的步骤须写明原因）两条纪律。堵住"假完成"这个隐蔽缺陷。
+- **Added — `test-driven-development` GREEN 前装配链触发校验**：新增「理想路径陷阱」——手工调内部函数造绿只证函数理想路径，未证生产代码会在正确时机调用它；GREEN 前须 grep 生产调用方，零调用方 = 装配断链。GREEN 步骤绑定项目测试命令判据（项目套件定义 green，而非只跑你的测试文件）。
+- **Added — `td-propose` 步骤 6.a 既有能力面清点**：避免造出与既有 capability 撞名 / 撞职责的重复项（含 tier/profile 分层豁免）。
+- **Added — `td-explore` 候选方向追加具体草图**：每个方向给示例输入 → 输出 / 行为片段 / 伪代码，让用户点选而非二次推导。
+- **Added（开发态）— 可执行 skill 质量断言 `tests/`**：把"skill 内不得引用 agent 指令文件作规则来源 / 开发态编辑指令泄漏"和"单 SKILL.md ≤16000 字符"两条最易腐烂的纸面规则变成 `pnpm test` 可跑防线，带负向测试。**开发态工具，不进 `skills/`、不随 plugin 分发、使用态不可见。**
+
+## 行为变更表（升级用户感知差异）
+
+| 环节 | 变更 | 感知 |
+|---|---|---|
+| scenario→test 覆盖账本 | 升级为三向闭合（+「实现 task」列 + 断言强度三判据 + 双向无孤儿） | 🟢 不再只是"测试存在且通过"，须断言承接场景承诺；scope-medium/large change 的 propose 阶段账本负担上升，但堵住"覆盖存在而断言弱"的假绿 |
+| `tasks.md` 必填字段 | 新增「覆盖 scenario」（task 侧锚点，与账本反向引用） | 每 task 须标明它实现/验证哪些 scenario（不承载时标 N/A + 理由）；tier-medium/large 强制，tier-small 提醒不阻塞 |
+| 纯重构 change | 新增 `skip_specs: true` 逃生阀，免产 spec delta | 行为不变的纯重构 / 纯 tooling / 纯 docs 不再被迫产 spec delta；下游账本判据统一加"且未被跳过"条件 |
+| change 完成声明 | `td-apply` 步骤 6.5 终局闸门 + 如实报告纪律 | 声明 done 前须逐条贴证据，收尾 review 报告缺失即机械可检为"未做"；不得用任务内修 bug 冒充收尾 review |
+| TDD GREEN 判据 | 新增「理想路径陷阱」+ 绑定项目套件 | 手工调内部函数造绿不算绿——须 grep 生产调用方确认装配链已接；green 由项目套件界定，不只跑你的测试文件 |
+| 探索候选方向 | 每个方向给具体草图 | 用户可点选具体示例而非推导抽象标签，降低探索轮次 |
+| 仓库自身（开发态） | `tests/` 可执行断言挂 `pnpm test` | 仅维护者可见；使用态无感知，`skills/` 分发内容不含 `tests/` |
+
+## 升级步骤
+
+1. 更新 plugin 到 v1.21.0（四平台安装方式不变，见 `docs/user/install.md`）。
+2. 无需迁移数据——`.td-state/` 与 `openspec/` 格式不变。
+3. 无破坏性变更，可直接升级。已在用的 change 不受影响；新 change 从本版本起适用三向闭合与 `skip_specs` 判据。
+
+## 完整变更列表
+
+见 [CHANGELOG.md](CHANGELOG.md) 的 `[1.21.0]` 条目。
+
+---
+
+# total-design v1.20.1 发布说明（历史）
 
 > 面向使用态用户：本次为**一致性修复版**——`requesting-review` 的降级标注强调从 tier 改绑 change-scope，消除 review 深度换轴后残留的双轴失调；另含三项开发态泄漏清理与判据单一事实源收敛。skill 数量、命令数量、references、hooks、td-* 契约流、四平台加载均不变，**无行为破坏性变更**。
 
