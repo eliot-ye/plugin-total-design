@@ -177,7 +177,7 @@ review 对象不是代码，是 proposal 的**方案整体**——分系统切�
 
 检查清单见 `references/proposal-review-checklist.md`（按上表 change-scope 决定查哪几节）。分级与阻塞语义如下（与 code review 共用；其他位置的分级表述以本节为准）：
 
-- **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖 / 触发了 caller impact 分析但 proposal 缺「caller impact 分析」节或缺变更点类别标注与高危标记（仅 scope-small 降为 warning，但 scope-small 本就不入完整 review）/ "预期行为模型"缺失或全不满足四判据致 archive 无法对照 / 不可逆设计决策未触发 human-in-loop / proposal 缺 scenario→test 账本（含 specs 且含可执行测试面时）——**阻塞 apply**，先回 propose 改 proposal 再继续
+- **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖 / 触发了 caller impact 分析但 proposal 缺「caller impact 分析」节或缺变更点类别标注与高危标记（仅 scope-small 降为 warning，但 scope-small 本就不入完整 review）/ "预期行为模型"缺失或全不满足四判据致 archive 无法对照 / 不可逆设计决策未触发 human-in-loop / proposal 缺 scenario→test 账本（含 specs、specs 未被 `skip_specs` 跳过、且含可执行测试面时；specs 被跳过则无账本是正常的，不因缺账本判 critical）——**阻塞 apply**，先回 propose 改 proposal 再继续
 - **warning**：接口偏大 / 职责偏散 / scope creep（需求没要但无假设背书的行为）/ 偏离既有架构未写明理由——记录到 proposal，可延后
 - **nit**：命名等——可忽略
 

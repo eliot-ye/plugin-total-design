@@ -2,7 +2,7 @@
 
 ## 用途
 
-本账本是 scenario 粒度的覆盖声明——把 specs/ 里每个 `#### Scenario:` 映射到一个具名测试。由 `td-propose` 步骤 6.c 在 proposal 定型后产出（当 change 的 `applyRequires` 含 `specs` artifact 时），由 `td-apply` 步骤 2 前置检查验证存在性、步骤 6.1 审计全绿。
+本账本是 scenario 粒度的覆盖声明——把 specs/ 里每个 `#### Scenario:` 映射到一个具名测试。由 `td-propose` 步骤 6.c 在 proposal 定型后产出（当 change 的 `applyRequires` 含 `specs` artifact **且 specs 未被 `skip_specs` 跳过**时——`td-propose` 步骤 6.a 纯重构逃生阀命中时无 spec delta 即无 scenario 可映射，不产出本账本），由 `td-apply` 步骤 2 前置检查验证存在性（specs 被跳过时跳过本检查）、步骤 6.1 审计全绿。
 
 ## 账本格式
 

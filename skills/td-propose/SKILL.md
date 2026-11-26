@@ -103,6 +103,26 @@ openspec list --specs
 - **全局约束核对**（仅当本 change 触及系统级接缝时触发——跨边界注入、装配接线、包间依赖，非无条件必做）：往注入点之外的全局约束面接新机制前，设计阶段先核对注入形态是否被既有约束放行，不依赖下游 review 兜底。**约束面由现场从当前项目的 baseline spec 与既有守护机制识别**（典型面：安全策略、装配/接线、包边界守护、依赖方向；哪些面真实存在、由什么机制背书，以本项目为准），不是固定清单。核对动作：对每个"注入/接线"决策点，逐条回答"触碰了哪个约束面、为什么不被拦"。**写不出放行理由 = 设计期就该改方案**，而非留到 apply/review 才发现。核对结论写进 design.md（或无 design.md 时写进 proposal「系统工程影响评估」节）。
 - 两者皆无 → 直接从 template 构建。
 
+**纯重构逃生阀（`skip_specs`）**：
+
+本 change 若属"重构行为不变的代码 / 重命名 / 移文件 / 提函数 / 删死代码 / 纯 tooling / 纯 docs"——**不改变系统可观察行为**——则无需为它编造 spec delta。判据：**说不出来这次改动让用户看到的系统行为发生了什么变化 → 就是纯重构**（specs 描述行为，行为没变 spec 就不该变）。命中后：
+
+```bash
+# 在 change 目录的 .openspec.yaml 顶层（无缩进）加一行
+skip_specs: true
+```
+
+命中本条的效果与约束：
+
+- OpenSpec（≥ v1.7.0）会跳过 spec delta 的生成与校验，`openspec status` 把 specs 阶段显示为 `skipped`（视为满足，不算 incomplete），validate 接受零 delta，archive 无需额外 flag 即可归档。
+- **只豁免 `specs/` 下的 artifact**——proposal / design / tasks 的结构与校验照跑，tasks.md checkbox 照跑，不因此免检。
+- **与 scenario→test 账本的关系**：specs 被跳过 = 没有 scenario 可映射 → **不产出账本**。下游（`td-apply` / `requesting-review` / `td-archive`）对账本的检查都以"specs artifact 存在且未被跳过"为前提，跳过时按无账本处理，不阻塞。
+- **版本门槛**：设此字段前确认 `openspec --version` ≥ 1.7.0；更低版本对该键的处理官方未文档化，命中低版本 → 走常规 propose 流程（照常产出 spec delta），不阻塞。
+- ⚠️ **不要与 CLI flag 混淆**：`openspec archive --skip-specs` 是**另一套机制**（显式跳过归档时的 spec 合并步骤），与 `.openspec.yaml` 的 `skip_specs` 字段无关。纯重构 change 设了字段就够，**不要**再传 `--skip-specs` flag——那会跳过本该发生的合并，可能漏同步 delta。
+- **若 `specs/` 下已存在 delta 文件**：此时设 `skip_specs: true` 是 validation error（字段与 spec 文件冲突）——先删掉已有 delta 或撤销标记，二选一。
+
+未命中（确有行为变更）→ 照常产出 spec delta，不套用本条。
+
 **6.b 创建 artifact**：
 
 ```bash
@@ -187,11 +207,13 @@ tasks.md 必须：
 
 粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `constraints` 的 `references/critical-buffer.md` 的「识别关键链」节；主体不合规 → 把非编程性动作降级到对应 task 的 `验证` 字段，回 6.b 补写。
 
-- **proposal.md 必填：scenario→test 覆盖账本**（当 `applyRequires` 含 `specs` artifact 时）
+- **proposal.md 必填：scenario→test 覆盖账本**（当 `applyRequires` 含 `specs` artifact **且 specs 未被 `skip_specs` 跳过**时）
 
-change 的 `applyRequires` 含 `specs` artifact 时，proposal 定型后须产出 scenario→test 覆盖账本——把 specs/ 里每个 `#### Scenario:` 映射到一个具名测试。格式与规则见 `references/scenario-test-map-template.md`。
+change 的 `applyRequires` 含 `specs` artifact 且 specs 未被跳过（6.a 纯重构逃生阀未命中）时，proposal 定型后须产出 scenario→test 覆盖账本——把 specs/ 里每个 `#### Scenario:` 映射到一个具名测试。格式与规则见 `references/scenario-test-map-template.md`。
 
-unmapped scenario → 回 6.b 补 scenario 的测试意图，或在账本里显式标 `N/A` 并给机械校验项。缺账本 → 不算 apply-ready。
+specs 被 `skip_specs: true` 跳过（6.a 纯重构逃生阀命中）时**不产出账本**——没有 spec delta 就没有 scenario 可映射；这不是漏账本，按无账本处理，不阻塞 apply-ready。
+
+unmapped scenario → 回 6.b 补 scenario 的测试意图，或在账本里显式标 `N/A` 并给机械校验项。缺账本（且 specs 未被跳过）→ 不算 apply-ready。
 
 tier 分层：tier-small 仅当 `applyRequires` 含 `specs` **且**含可执行测试面时强制，否则跳过并在账本头注明理由；tier-medium / tier-large 强制。
 

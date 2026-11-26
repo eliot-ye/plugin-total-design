@@ -22,7 +22,7 @@
 
 - **核心需求覆盖**：proposal 的"预期行为模型"是否回应了本 change 的原始需求？列出需求点 → 逐条在 proposal 找对应——缺对应 = 漏需求信号
 - **scope creep**：是否有"预期行为模型"里描述的行为**原始需求没提**（agent 自作主张加的）？→ 每条多出来的行为须有"假设"字段背书；无背书 = scope creep 信号
-- **scenario→test 账本完备性**（`applyRequires` 含 `specs` 时）：每个 `#### Scenario:` 都映射到具名测试？unmapped 项是否给了 `N/A` + 机械校验项或理由？——缺 = 不 apply-ready
+- **scenario→test 账本完备性**（`applyRequires` 含 `specs` **且 specs 未被 `skip_specs` 跳过**时）：每个 `#### Scenario:` 都映射到具名测试？unmapped 项是否给了 `N/A` + 机械校验项或理由？——缺 = 不 apply-ready。specs 被 `td-propose` 步骤 6.a 纯重构逃生阀跳过时**不查本项**（无 delta 即无 scenario 可映射，无账本是正常的）
 - **假设字段滥用**："假设"字段是否把**该问用户的**（scope / security / privacy 级）当合理默认推定了？判据：合理默认只适用于数据保留 / 性能目标 / 错误处理 / 认证 / 集成模式等可按行业惯例推定的项；scope 级模糊点必须走澄清——写成假设 = 逃逸澄清信号
 
 ## B. 预期行为模型质量（scope-medium / scope-large）
