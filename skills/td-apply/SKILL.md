@@ -43,7 +43,7 @@ argument-hint: <change-name>
 - **caller impact 分析节必填**（按 change-scope，不按 tier）：若 change 命中 caller impact 触发条件（条件与四类变更点定义见 `references/change-point-classes.md`，命中即 change-scope 为 medium/large），检查 proposal 是否附了「caller impact 分析」节（变更点类别标注 + 高危标记，见 `td-propose` 步骤 6.c）。**不加 tier 前置**——tier-small 项目里的大 change 照样要填，否则 propose 阶段的方案 review 查「caller impact 完备性」时对的是一个本可不填的节。缺项 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补节。后续步骤 4 实测子节不再重复此检查。
 - **`constraints` 的 `references/wip-limit.md`（硬阻塞 + override，补拦）**：当前活跃 change 数已达上限？（apply 一个已达上限意味着 propose 阶段的 WIP 硬阻塞被 override 穿透，或 propose 阶段漏拦）。已达 → **阻塞本步骤，不执行步骤 3**，执行 `constraints` 的 `references/wip-limit.md` 的「硬约束 + override 机制」节（权威在该文件；override 通过后继续步骤 3）。
 - **`constraints` 的 `references/critical-buffer.md`**：tasks.md 是否已标注关键链 + project buffer（比例按表 1 当前 tier 行；表 1 见 `field-assessment/references/strength-matrix.md`）？没有 → 触发 `writing-plans` 补上（关键链标注应在 propose 阶段完成，这里只补漏）。
-- **scenario→test 覆盖账本必填**：若 change 的 `applyRequires` 含 `specs` artifact **且 specs 未被 `skip_specs` 跳过**（`td-propose` 步骤 6.a 纯重构逃生阀；跳过时 `.openspec.yaml` 顶层有 `skip_specs: true`，无 spec delta 也无账本可查），检查 proposal 是否附了 scenario→test 覆盖账本（见 `td-propose/references/scenario-test-map-template.md`）。缺账本或有 unmapped scenario 未标 `N/A` → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补账本。specs 被跳过 → 本项整体跳过，不索要账本。tier-small 仅在 `applyRequires` 含 `specs`、未被跳过、且含可执行测试面时检查。
+- **scenario→test 覆盖账本必填 + 三向闭合完整性**：若 change 的 `applyRequires` 含 `specs` artifact **且 specs 未被 `skip_specs` 跳过**（`td-propose` 步骤 6.a 纯重构逃生阀；跳过时 `.openspec.yaml` 顶层有 `skip_specs: true`，无 spec delta 也无账本可查），检查 proposal 是否附了 scenario→test 覆盖账本（见 `td-propose/references/scenario-test-map-template.md`），且账本 **scenario ↔ task ↔ test 三向闭合**——逐项核对：① 无 unmapped scenario（每个 spec scenario 至少一行）；② 账本 `实现 task` 列引用的 task 编号在 tasks.md 里存在，且 tasks.md 里声明 `覆盖 scenario` 的 task 反向能在账本找到（双向无孤儿，判据见账本模板「三向闭合」节）。缺账本、有 unmapped scenario 未标 `N/A`、或任一侧孤儿 → **不算 apply-ready**，提示用户回 `/td-propose` 步骤 6.c 补账本。specs 被跳过 → 本项整体跳过，不索要账本。tier-small 仅在 `applyRequires` 含 `specs`、未被跳过、且含可执行测试面时检查（task 侧孤儿在 tier-small 降级为提醒，不阻塞）。
 - 其余 constraint（`constraints` 的 `references/brooks-law.md` / `references/delay-decision.md` / `references/human-in-loop.md`）在实施过程中按需触发，不在本步预判。
 
 ### 3. 读 change 的 artifact
@@ -79,7 +79,7 @@ argument-hint: <change-name>
 
 **基本执行循环**（td-apply 自持，逐任务循环直至全部完成）：
 
-1. 读任务的"验证"字段与"风险"字段
+1. 读任务的"验证"字段与"风险"字段，并回读任务的"覆盖 scenario"字段（字段定义见 `writing-plans/references/task-template.md`「必填字段模板」节）——本任务承接的 spec scenario 是实现时的契约锚，实现须让这些 scenario 的预期行为成立，而不只是让任务自己的验证命令转绿
 2. 触发 `test-driven-development`：先写失败测试，再写实现；**实现默认对齐既有代码风格与既有实现模式**（命名 / 模块组织 / 错误处理）——主基调第 1 条"局部动作从整体性能反推"，偏离需有 proposal 的遵循声明支撑。**`yagni-ladder` 信号触发（不是每次写代码都过）**：仅当命中「准备装新依赖 / 新建 helper·组件·抽象 / 写出超出任务验证字段所需能力的代码 / 用户说别过度设计」任一信号时，才过 `constraints` 的 `references/yagni-ladder.md` 的「六级决策阶梯」节——从第 1 级往下找第一个"完全能用"的，命中即停；触碰其 never-cut 清单的能力按 full 强度做不走降级，走了阶梯之外的重路留 `shortcut:` 标注（该文件有定义）。无信号的小改动不查阶梯，默认对齐既有模式即可。实施中故意砍角（降级实现 / 留已知上限的简化）→ 按 `constraints` 的 `references/delay-decision.md` 的「`td-cut:` 砍角标注」节在该代码处留一行 `td-cut:` 标注（砍了什么角、已知上限、升级路径），只标有真实 ceiling 的故意砍角
 3. 触发 `verification-before-completion`：跑验证命令，拿到验证证据
    - **测试失败/挂起且原因不明** → 不直接修、不上报，先触发 `systematic-debugging`（复现→隔离→定位根因）。隔离定位完成前不得修、不得报；根因定位后按 Guardrails 的「任务内缺陷直修」判据决定直修或上报。
@@ -128,7 +128,13 @@ argument-hint: <change-name>
 
 触发 `verification-before-completion` 做 change-level 最终验证（全量测试 / lint / build / type check）。
 
-若 change 含 scenario→test 覆盖账本，审计账本全绿——所有非 `N/A` 行状态为 🟢，`N/A` 行须有等价机械校验项且校验通过。有未映射 scenario 或未标 `N/A` 的 unmapped scenario → **blocking defect**，不通过本步骤。
+若 change 含 scenario→test 覆盖账本，审计账本全绿——**三层判据，全部通过才算账本绿**：
+
+1. **存在性**：所有非 `N/A` 行状态为 🟢，`N/A` 行须有等价机械校验项且校验通过。有未映射 scenario 或未标 `N/A` 的 unmapped scenario → **blocking defect**。
+2. **断言强度三判据**：逐个非 `N/A` 行复验其映射测试的断言是否承接该 scenario 承诺的预期行为（判据见 `td-propose/references/scenario-test-map-template.md`「断言强度三判据」节——断言覆盖场景承诺 / 可证伪 / 落点为行为非文本）。测试通过但断言只承接了弱保证（scenario 承诺"输出去重后的 1 条"，断言只测"调用成功"）→ 该行不得算 🟢，判为 **blocking defect**——这是 spec 与代码对不上的最隐蔽入口，账本全 🟢 不等于 spec 被满足。
+3. **三向闭合**：账本 `实现 task` 列引用的 task 在 tasks.md 里存在且已 `[x]`；tasks.md 里声明 `覆盖 scenario` 的 task 反向能在账本找到（双向无孤儿，判据见账本模板「三向闭合」节）。任一侧孤儿 → **blocking defect**。
+
+三层任一不过 → 本步骤不通过，修复后重跑 change-level 验证。tier-small 的 task 侧孤儿降级为提醒（记录到 tasks.md，不阻塞），scenario 侧与断言强度三判据仍强制。
 
 #### 6.2 系统级验证（跨分系统边界，硬步骤）
 
@@ -150,6 +156,8 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 
 - `scope-small`：保底抽查——只查 Spec compliance + 安全红线。小 change 可能全程轮不到 checkpoint review，收尾是它唯一的 review 机会，不整体跳过
 - `scope-medium` / `scope-large`：review 深度按 tasks.md 全部任务 `风险` 字段的最高档取
+
+**Spec compliance 的 review 对象包含 spec delta 本身**：本 change 的 `specs/` 下每个 scenario 是独立 review 对象——不只对照 tasks.md / design.md / proposal 影响评估（三条见 `requesting-review` 第 1 节「Spec compliance」节），还要逐个核对 spec scenario 的预期行为是否被实现代码承接。change 含 scenario→test 覆盖账本时，以账本为核对入口（账本已把 scenario ↔ task ↔ test 三向闭合，见 6.1）；账本未覆盖的 spec scenario 在 review 里同样要捞——review 是账本机械校验之外的冗余兜底，两者口径一致、不互相替代。
 
 review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 change-level 验证（修复使既有验证证据失效，见 `verification-before-completion` 的「之前测过」条）；无 critical → 进入 6.4。
 

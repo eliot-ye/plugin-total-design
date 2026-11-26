@@ -69,7 +69,7 @@ archive 之前**必须**在 change 里补一节"实际系统工程影响 vs 预�
 补充字段（表格未覆盖的复盘项）：
 
 - 预期之外的副作用（这是后续 `/td-system-audit` 的输入）
-- scenario→test 覆盖账本状态（若 change 产出过账本）：全绿 / 有哪些 `N/A` 条目及理由
+- scenario→test 覆盖账本状态（若 change 产出过账本）：三向闭合状态——全闭合 / 有孤儿（哪侧、哪些条目）/ 有哪些 `N/A` 条目及理由 / 断言强度三判据复核结论（账本 🟢 的测试是否真承接了 scenario 承诺的预期行为，判据见 `td-propose/references/scenario-test-map-template.md`「断言强度三判据」节）。本字段是"实际 vs 预期"复盘里"spec 是否真被满足"的机械证据——账本全 🟢 不等于 spec 被满足，须连断言强度一起回答
 - 需求权衡处置（若 proposal 的"系统工程影响评估"节标注矛盾"留待 archive 对照"或未在 `/td-propose` 设计阶段解决）：实际权衡结果 / 是否仍矛盾；仍矛盾 → 触发 `constraints` 的 `references/human-in-loop.md` 交还用户处置
 
 **模型验证**字段的展开：

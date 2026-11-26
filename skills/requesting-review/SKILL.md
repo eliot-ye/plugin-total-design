@@ -33,6 +33,7 @@ review 深度由 tasks.md 对应任务的 `风险` 字段决定（风险判据�
 - 代码实现了 tasks.md 里的任务吗？
 - 代码符合 design.md 里的设计决策吗？
 - 代码违反了 proposal 的"系统工程影响评估"里说的边界吗？
+- **代码承接了 spec delta 的每个 scenario 吗？**（change 级收尾 review 必查——任务粒度 review 若无 spec 上下文可跳过本条）逐个核对 `openspec/changes/<change>/specs/` 下的 `#### Scenario:`，确认实现代码承接了每个 scenario 承诺的预期行为。change 含 scenario→test 覆盖账本时以账本为核对入口（账本已把 scenario ↔ task ↔ test 三向闭合，审计见 `td-apply` 步骤 6.1）；账本未覆盖的 scenario 在 review 里同样要捞——review 是账本机械校验之外的冗余兜底。每个任务各自绿、拼起来对不上 spec scenario（接口对不上、断言只承接弱保证、scenario 被漏实现）在这条检出。
 
 #### Security（安全）
 

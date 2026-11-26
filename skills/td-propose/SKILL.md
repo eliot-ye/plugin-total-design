@@ -204,18 +204,24 @@ tasks.md 必须：
 - 标注关键链（critical chain）：哪条任务序列是项目的关键路径
 - 留 project buffer：按当前 tier 比例（查表 1 的 critical-buffer 行，会话内已缓存；表 1 见 `field-assessment/references/strength-matrix.md`）
 - 每条 task 主体是 agent 能**编程性执行**的动作（写代码 / 跑测试 / 执行 CLI / 改配置等）；非编程性动作（人工目测 / 用户验收 / 第三方审批 / 人工回归测试等）不得作为独立 task，必须降级为该 task 的 `验证` 字段——权威定义见 `writing-plans/references/task-template.md`「任务主体约束」节
+- 每条 task 标注 `覆盖 scenario` 字段（该 task 实现/验证的 scenario 名，多值；字段定义见 `writing-plans/references/task-template.md`「必填字段模板」节）——本字段与 scenario→test 账本的 `实现 task` 列构成双向闭合（校验见本步骤 6.c 账本必填节的「双向孤儿核对」条），是 spec↔task↔test 三向闭合的 task 侧锚点
 
 粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `constraints` 的 `references/critical-buffer.md` 的「识别关键链」节；主体不合规 → 把非编程性动作降级到对应 task 的 `验证` 字段，回 6.b 补写。
 
 - **proposal.md 必填：scenario→test 覆盖账本**（当 `applyRequires` 含 `specs` artifact **且 specs 未被 `skip_specs` 跳过**时）
 
-change 的 `applyRequires` 含 `specs` artifact 且 specs 未被跳过（6.a 纯重构逃生阀未命中）时，proposal 定型后须产出 scenario→test 覆盖账本——把 specs/ 里每个 `#### Scenario:` 映射到一个具名测试。格式与规则见 `references/scenario-test-map-template.md`。
+change 的 `applyRequires` 含 `specs` artifact 且 specs 未被跳过（6.a 纯重构逃生阀未命中）时，proposal 定型后须产出 scenario→test 覆盖账本——把 specs/ 里每个 `#### Scenario:` 映射到一个具名测试与实现它的 task，构成 **scenario ↔ task ↔ test 三向闭合**。格式与规则见 `references/scenario-test-map-template.md`。
 
 specs 被 `skip_specs: true` 跳过（6.a 纯重构逃生阀命中）时**不产出账本**——没有 spec delta 就没有 scenario 可映射；这不是漏账本，按无账本处理，不阻塞 apply-ready。
 
+产出账本时同步做三向闭合校验（任一不过即回 6.b 补，不进 6.d）：
+
+1. **断言强度三判据**：逐行核对每个待标 🟢 的 scenario，其映射测试的断言是否承接该 scenario 承诺的预期行为（判据见 `references/scenario-test-map-template.md`「断言强度三判据」节）。propose 期测试多半尚未实现（状态 🔴），本步校验的是"测试意图是否承接场景承诺"——写进账本的测试意图若只能推出弱断言（只测"不报错"没测"输出 Y"），回 6.b 改测试意图。apply 期（`td-apply` 步骤 6.1）对实现后的测试复验同一组判据。
+2. **双向孤儿核对**：账本每行 `实现 task` 列引用的 task 编号在 tasks.md 里存在；tasks.md 里每条声明 `覆盖 scenario` 的 task（字段见 `writing-plans/references/task-template.md`「必填字段模板」节），其列出的 scenario 名能在账本 Scenario 列逐字找到。任一侧孤儿（scenario 无 task 承载 / task 实现了未登记的 scenario）→ 回 6.b 补对应侧。
+
 unmapped scenario → 回 6.b 补 scenario 的测试意图，或在账本里显式标 `N/A` 并给机械校验项。缺账本（且 specs 未被跳过）→ 不算 apply-ready。
 
-tier 分层：tier-small 仅当 `applyRequires` 含 `specs` **且**含可执行测试面时强制，否则跳过并在账本头注明理由；tier-medium / tier-large 强制。
+tier 分层：tier-small 仅当 `applyRequires` 含 `specs` **且**含可执行测试面时强制，否则跳过并在账本头注明理由；tier-medium / tier-large 强制。三向闭合的 task 侧核对在 tier-small 降级为提醒（不阻塞），scenario 侧与断言强度三判据仍强制（分层口径见 `references/scenario-test-map-template.md`「tier 分层」节）。
 
 **6.d 循环判定**：
 
