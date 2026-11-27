@@ -157,6 +157,8 @@ change-level 验证通过后，对照 `proposal.md` 的"系统工程影响评估
 - `scope-small`：保底抽查——只查 Spec compliance + 安全红线。小 change 可能全程轮不到 checkpoint review，收尾是它唯一的 review 机会，不整体跳过
 - `scope-medium` / `scope-large`：review 深度按 tasks.md 全部任务 `风险` 字段的最高档取
 
+**change-scope 只降「查的维度数」，不降「隔离要求」——两者正交**：无论 scope，本收尾 review 的**执行方式（含隔离载体）一律由 `requesting-review` 的「Review 上下文隔离」节承载，任何 change-scope 都不豁免隔离**——`scope-small` 保底抽查降的是"查哪几个维度"，不是"由谁来查"。这意味着：**作者自评只可能是「降级」这一种形态**（`requesting-review` 第 2 节第 3 档），必须标注 `reviewed-by: unisolated-self`；走 subagent 隔离则必须**逐字收到报告原文**后才可写 `reviewed-by: subagent`（该节「防编造 gate」——「已派出」≠「已回传」）。不得以「`scope-small` 保底抽查」为由把自评当默认路径、也不得因 scope 小而省掉隔离标注。
+
 **Spec compliance 的 review 对象包含 spec delta 本身**：本 change 的 `specs/` 下每个 scenario 是独立 review 对象——不只对照 tasks.md / design.md / proposal 影响评估（三条见 `requesting-review` 第 1 节「Spec compliance」节），还要逐个核对 spec scenario 的预期行为是否被实现代码承接。change 含 scenario→test 覆盖账本时，以账本为核对入口（账本已把 scenario ↔ task ↔ test 三向闭合，见 6.1）；账本未覆盖的 spec scenario 在 review 里同样要捞——review 是账本机械校验之外的冗余兜底，两者口径一致、不互相替代。
 
 review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 change-level 验证（修复使既有验证证据失效，见 `verification-before-completion` 的「之前测过」条）；无 critical → 进入 6.4。
@@ -178,6 +180,7 @@ review 判出 critical issue → **change 不算 done**，修复后重跑 6.1 ch
 - [ ] 6.1 change-level 验证证据（命令 + 结果行）
 - [ ] 6.2 跨分系统边界验证证据（对照影响评估逐分系统结论）
 - [ ] 6.3 收尾 review 报告路径 `openspec/changes/<change-name>/reviews/<YYYYMMDD-HHMMSS>-closing.md` + critical / warning 结论（**报告文件不存在 = 6.3 未做，机械可检**）
+- [ ] 6.3 报告含 Verdict 锚点行 **且** `reviewed-by:` 隔离标注行（两者缺一 = 6.3 未做，机械可检）——`reviewed-by: subagent` 须有**逐字回传的报告原文**支撑（否则按 `requesting-review`「防编造 gate」等同编造 Verdict）；`reviewed-by: unisolated-self` 须是**如实标注的降级自评**（任何 change-scope 都不得无标注自评）。审查者读落盘报告的这两行判定隔离状态，不靠会话记忆
 - [ ] 6.4 current-change audit 结论（tier-large 必触发；tier-medium 引 `executing-plans` checkpoint 证据；tier-small 记不要求）
 - [ ] scenario→test 账本全 🟢（change 含账本时）
 

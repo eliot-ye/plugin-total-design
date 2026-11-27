@@ -206,6 +206,7 @@ review 对象不是代码，是 proposal 的**方案整体**——分系统切�
 | 合理化（agent 对自己说的话） | 现实 |
 |---|---|
 | "我自己写的我清楚，不用派 subagent" | 作者上下文自评=既当运动员又当裁判，隔离就是为了打破这个（见「Review 上下文隔离」节）——必须尝试 subagent |
+| "change-scope 是 scope-small，保底抽查，我自评一遍就行" | scope 降的是**查的维度数**，不降**隔离要求**——两者正交。`scope-small` 保底指的是"只查 Spec compliance + 安全红线"，不是"由谁来查"；自评仍只可能是降级形态，须标 `reviewed-by: unisolated-self`，或走 subagent 隔离。拿 scope 小当自评默认路径 = 把隔离要求静默豁免（`td-apply` 步骤 6.3 明写此正交关系） |
 | "subagent 派出去了，先按 APPROVED 往下走" | 「已派出」≠「已回传」——没逐字看到报告就不准写 `reviewed-by: subagent`，写 `PENDING_RESULT` 等回传（防编造 gate） |
 | "这个 critical 太吹毛求疵了，降成 warning" | 判级由证据位置和触发条件决定，不由"我觉得严不严重"决定——指得出 `file:line` 且说得出触发条件就是 critical |
 | "warning 不阻塞，先记着继续" | warning 确实不阻塞，但 critical 不行——先分清这条到底是 warning 还是 critical，别拿 warning 规则豁免 critical |
