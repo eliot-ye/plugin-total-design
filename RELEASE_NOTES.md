@@ -4,8 +4,9 @@
 
 ## 本版本是什么
 
-1.21.0 是 **1.20.1 之后的 minor 版**。上一次 1.20.1 做的是 review 深度换轴后的一致性收尾；本版本做三件主线 + 若干加固：
+1.21.0 是 **1.20.1 之后的 minor 版**。上一次 1.20.1 做的是 review 深度换轴后的一致性收尾；本版本做三件主线 + 若干加固 + 一处收尾 review 隔离加固：
 
+- **Fixed — `td-apply` 步骤 6.3 收尾 review 不得以 scope-small 豁免隔离**：change-scope 只降查的维度数、不降隔离要求（两者正交），自评即降级须标 `reviewed-by: unisolated-self`；步骤 6.5 终局闸门补机械可检项（Verdict 行 + reviewed-by 行齐全，subagent 须有逐字回传原文支撑）；`requesting-review` 合理化表补「scope-small 保底可自评」一行；`td-archive` 步骤 2 复核 reviewed-by 行，无原文支撑视同编造 Verdict、阻塞 archive。堵住"顶着 subagent 名头、实为作者自评"的三处结构性缺口。
 - **Added — spec ↔ task ↔ test 三向机械闭合**：`scenario-test-map-template` 覆盖账本此前只证"每个 scenario 有个测试"（覆盖存在性），不证"测试断言真的承接了 scenario 承诺"。本版本把 🟢 的判据从"存在且通过"提到三判据——断言承接场景承诺 / 可证伪 / 落点为行为非文本；并加「实现 task」列 + 双向无孤儿规则（scenario 无 task 承载、task 实现了未登记的 scenario 均为 blocking defect）。`td-propose` 步骤 6.c、`td-apply` 步骤 2/4/6.1/6.3、`td-archive` 步骤 3、`writing-plans` 的 `task-template.md`、`requesting-review` 的 Spec compliance 全链同步。**tier-small 把 task 侧核对降级为提醒（不阻塞），scenario 侧闭合与断言强度仍强制**——重量收窄到该收的 change 上。
 - **Added — 纯重构逃生阀 `skip_specs`**：纯重构 change（行为不变的代码 / 重命名 / 纯 tooling / 纯 docs）此前被迫产 spec delta，属形式主义。现借 OpenSpec 原生 `.openspec.yaml` 顶层 `skip_specs: true`（v1.7.0+）免产 spec delta；下游 4 处账本判据统一为"applyRequires 含 specs 且未被跳过"。含同名陷阱警告：`openspec archive --skip-specs` 是另一套 CLI 机制，勿混用。
 - **Added — `td-apply` 步骤 6.5 change 级完成终局闸门**：声明 change done 前逐条打勾贴证据，收尾 review 报告文件缺失即机械可检为"未做"；补「禁止替代」（不得用任务内修 bug 冒充收尾 review）与「如实报告」（未做的步骤须写明原因）两条纪律。堵住"假完成"这个隐蔽缺陷。
@@ -22,6 +23,7 @@
 | `tasks.md` 必填字段 | 新增「覆盖 scenario」（task 侧锚点，与账本反向引用） | 每 task 须标明它实现/验证哪些 scenario（不承载时标 N/A + 理由）；tier-medium/large 强制，tier-small 提醒不阻塞 |
 | 纯重构 change | 新增 `skip_specs: true` 逃生阀，免产 spec delta | 行为不变的纯重构 / 纯 tooling / 纯 docs 不再被迫产 spec delta；下游账本判据统一加"且未被跳过"条件 |
 | change 完成声明 | `td-apply` 步骤 6.5 终局闸门 + 如实报告纪律 | 声明 done 前须逐条贴证据，收尾 review 报告缺失即机械可检为"未做"；不得用任务内修 bug 冒充收尾 review |
+| 收尾 review 隔离 | change-scope 只降维度数、不降隔离要求；reviewed-by 行成机械可检项 | scope-small 不再成为"自评冒充 subagent review"的缝隙；自评降级须标 `reviewed-by: unisolated-self` |
 | TDD GREEN 判据 | 新增「理想路径陷阱」+ 绑定项目套件 | 手工调内部函数造绿不算绿——须 grep 生产调用方确认装配链已接；green 由项目套件界定，不只跑你的测试文件 |
 | 探索候选方向 | 每个方向给具体草图 | 用户可点选具体示例而非推导抽象标签，降低探索轮次 |
 | 仓库自身（开发态） | `tests/` 可执行断言挂 `pnpm test` | 仅维护者可见；使用态无感知，`skills/` 分发内容不含 `tests/` |

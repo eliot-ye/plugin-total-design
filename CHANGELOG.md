@@ -14,6 +14,10 @@
 - **`td-explore` 候选方向追加具体草图**：每个方向给示例输入 → 输出 / 行为片段 / 伪代码，让用户能点选而非推导，不用抽象标签逼二次推断。
 - **可执行 skill 质量断言（`tests/`，开发态）**：把最易腐烂的两条纸面规则变成可跑防线——`no-dev-files-in-skills`（检测 agent 指令文件作规则来源引用 + 开发态编辑指令泄漏，含 `agents-md-hygiene` 对象性豁免，负向测试验证可抓违规）、`skill-size`（单 SKILL.md ≤16000 字符）。开发态工具，不进 `skills/`、不随 plugin 分发、使用态不可见，挂 `pnpm test`。
 
+### Fixed
+
+- **`td-apply` 步骤 6.3 收尾 review 不得以 scope-small 豁免隔离**：change-scope 只降查的维度数、不降隔离要求（两者正交），自评即降级须标 `reviewed-by: unisolated-self`；步骤 6.5 终局闸门新增机械可检项（Verdict 行 + reviewed-by 行齐全，subagent 须有逐字回传原文支撑）；`requesting-review` 常见合理化表补「scope-small 保底可自评」一行指明 scope 与隔离正交；`td-archive` 步骤 2 复核 reviewed-by 行，subagent 无报告原文支撑视同编造 Verdict、阻塞 archive。
+
 ### Docs
 
 - 归档 OpenSpec v2.2.0 / Superpowers v7.0.2 调研结论与借鉴评估（`docs/research/`），供后续设计变更决策作证据基础。
