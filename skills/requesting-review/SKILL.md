@@ -33,6 +33,7 @@ review 深度由 tasks.md 对应任务的 `风险` 字段决定（风险判据�
 - 代码实现了 tasks.md 里的任务吗？
 - 代码符合 design.md 里的设计决策吗？
 - 代码违反了 proposal 的"系统工程影响评估"里说的边界吗？
+- **代码承接了 spec delta 的每个 scenario 吗？**（change 级收尾 review 必查——任务粒度 review 若无 spec 上下文可跳过本条）逐个核对 `openspec/changes/<change>/specs/` 下的 `#### Scenario:`，确认实现代码承接了每个 scenario 承诺的预期行为。change 含 scenario→test 覆盖账本时以账本为核对入口（账本已把 scenario ↔ task ↔ test 三向闭合，审计见 `td-apply` 步骤 6.1）；账本未覆盖的 scenario 在 review 里同样要捞——review 是账本机械校验之外的冗余兜底。每个任务各自绿、拼起来对不上 spec scenario（接口对不上、断言只承接弱保证、scenario 被漏实现）在这条检出。
 
 #### Security（安全）
 
@@ -177,7 +178,7 @@ review 对象不是代码，是 proposal 的**方案整体**——分系统切�
 
 检查清单见 `references/proposal-review-checklist.md`（按上表 change-scope 决定查哪几节）。分级与阻塞语义如下（与 code review 共用；其他位置的分级表述以本节为准）：
 
-- **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖 / 触发了 caller impact 分析但 proposal 缺「caller impact 分析」节或缺变更点类别标注与高危标记（仅 scope-small 降为 warning，但 scope-small 本就不入完整 review）/ "预期行为模型"缺失或全不满足四判据致 archive 无法对照 / 不可逆设计决策未触发 human-in-loop / proposal 缺 scenario→test 账本（含 specs 且含可执行测试面时）——**阻塞 apply**，先回 propose 改 proposal 再继续
+- **critical**：坏的分系统切分 / 循环依赖 / 隐式依赖 / 触发了 caller impact 分析但 proposal 缺「caller impact 分析」节或缺变更点类别标注与高危标记（仅 scope-small 降为 warning，但 scope-small 本就不入完整 review）/ "预期行为模型"缺失或全不满足四判据致 archive 无法对照 / 不可逆设计决策未触发 human-in-loop / proposal 缺 scenario→test 账本（含 specs、specs 未被 `skip_specs` 跳过、且含可执行测试面时；specs 被跳过则无账本是正常的，不因缺账本判 critical）——**阻塞 apply**，先回 propose 改 proposal 再继续
 - **warning**：接口偏大 / 职责偏散 / scope creep（需求没要但无假设背书的行为）/ 偏离既有架构未写明理由——记录到 proposal，可延后
 - **nit**：命名等——可忽略
 
@@ -205,6 +206,7 @@ review 对象不是代码，是 proposal 的**方案整体**——分系统切�
 | 合理化（agent 对自己说的话） | 现实 |
 |---|---|
 | "我自己写的我清楚，不用派 subagent" | 作者上下文自评=既当运动员又当裁判，隔离就是为了打破这个（见「Review 上下文隔离」节）——必须尝试 subagent |
+| "change-scope 是 scope-small，保底抽查，我自评一遍就行" | scope 降的是**查的维度数**，不降**隔离要求**——两者正交。`scope-small` 保底指的是"只查 Spec compliance + 安全红线"，不是"由谁来查"；自评仍只可能是降级形态，须标 `reviewed-by: unisolated-self`，或走 subagent 隔离。拿 scope 小当自评默认路径 = 把隔离要求静默豁免（`td-apply` 步骤 6.3 明写此正交关系） |
 | "subagent 派出去了，先按 APPROVED 往下走" | 「已派出」≠「已回传」——没逐字看到报告就不准写 `reviewed-by: subagent`，写 `PENDING_RESULT` 等回传（防编造 gate） |
 | "这个 critical 太吹毛求疵了，降成 warning" | 判级由证据位置和触发条件决定，不由"我觉得严不严重"决定——指得出 `file:line` 且说得出触发条件就是 critical |
 | "warning 不阻塞，先记着继续" | warning 确实不阻塞，但 critical 不行——先分清这条到底是 warning 还是 critical，别拿 warning 规则豁免 critical |

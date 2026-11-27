@@ -84,10 +84,44 @@ openspec status --change "<name>" --json
 
 - 若本次会话已产出 `td-explore` 的候选方向评估（对话形式交付），把其中的候选方向取舍与"系统工程影响"评估合并进 proposal 骨架，作为 6.c 必填项的输入。没有产物 → 跳过本条。
 - **矛盾承接**（若 `td-explore` 产物含未决矛盾——对话中暴露、尚未拍板的权衡）：proposal 的"系统工程影响评估"节须显式描述"本 change 承载的需求权衡 + 设计侧如何处置（两全 / 取舍+理由 / 留待 archive 对照）"。这是**描述义务，不是拍板门**——取舍本身是否需用户确认，仍按 `constraints` 的 `references/human-in-loop.md` 必停场景 5（"agent 置信度低：不确定方案是否对齐用户意图"）判定。
+- **能力清点**（`openspec/specs/` 下已有 baseline 时必做；greenfield 首个 change 的 specs 为空 → 跳过本条，无既有能力面可对照）：动笔 proposal 前先清点既有能力面，避免造出与既有 capability 撞名/撞职责的重复项（这类冲突若不在 propose 期暴露，会拖到 archive sync 主 spec 时才报错）。清点动作：
+
+```bash
+openspec list --specs
+```
+
+对照本次 change 要建/改的行为，逐项回答三问，结论写进 proposal 的「系统工程影响评估」节"影响哪些分系统"字段下：
+
+1. 本次 change 落在哪个**既有** capability，还是确属**新** capability？
+2. 若新增：capability 名是否用 durable behavior 名（如 `user-auth`），而非实现视角名（如 `add-login-endpoint`）？是否与既有 capability 撞名或撞职责？
+3. 若修改既有：本次 delta 落在该 capability 的哪些需求/场景？
+
+判出与既有 capability 撞职责 → 先澄清能力边界再往下写，不带着含糊的 capability 归属进入 6.b（撞边界属设计期该改的方案，不是留到 apply/review 才发现的问题，见 6.a「全局约束核对」条同一逻辑）。tier 分层：tier-small 单分系统项目若 specs 下仅一个 capability 且本次明显落在其内，可只在 proposal 一行注明"落在既有 capability `<名>`"，不必展开三问。
+
 - 会话上下文中没有本次 change 触及分系统的 baseline spec 内容（如本会话没走过 `/td-explore`，或其读取内容已不在上下文）→ 读 `openspec/specs/` 下相关分系统的 `spec.md`（契约与不变量），作为 6.c"与既有架构/风格的遵循关系"与整体影响判断的输入；相关分系统在 `openspec/specs/` 下没有 baseline（greenfield 首个 change）→ 跳过。
 - **设计决策可逆性检查**（propose 阶段新出现的设计决策）：若用户对某设计点犹豫，或 design.md 写"先选 A 方案，以后再改" → 触发 `constraints` 的 `references/delay-decision.md`，按该文件「区分两类决策」表检查决策的可逆性（propose 是设计决策密集阶段，delay-decision 的可逆性检查在此落地；探索阶段已检查过的决策不重复查，见 `td-explore` 步骤 4 末句）。
 - **全局约束核对**（仅当本 change 触及系统级接缝时触发——跨边界注入、装配接线、包间依赖，非无条件必做）：往注入点之外的全局约束面接新机制前，设计阶段先核对注入形态是否被既有约束放行，不依赖下游 review 兜底。**约束面由现场从当前项目的 baseline spec 与既有守护机制识别**（典型面：安全策略、装配/接线、包边界守护、依赖方向；哪些面真实存在、由什么机制背书，以本项目为准），不是固定清单。核对动作：对每个"注入/接线"决策点，逐条回答"触碰了哪个约束面、为什么不被拦"。**写不出放行理由 = 设计期就该改方案**，而非留到 apply/review 才发现。核对结论写进 design.md（或无 design.md 时写进 proposal「系统工程影响评估」节）。
 - 两者皆无 → 直接从 template 构建。
+
+**纯重构逃生阀（`skip_specs`）**：
+
+本 change 若属"重构行为不变的代码 / 重命名 / 移文件 / 提函数 / 删死代码 / 纯 tooling / 纯 docs"——**不改变系统可观察行为**——则无需为它编造 spec delta。判据：**说不出来这次改动让用户看到的系统行为发生了什么变化 → 就是纯重构**（specs 描述行为，行为没变 spec 就不该变）。命中后：
+
+```bash
+# 在 change 目录的 .openspec.yaml 顶层（无缩进）加一行
+skip_specs: true
+```
+
+命中本条的效果与约束：
+
+- OpenSpec（≥ v1.7.0）会跳过 spec delta 的生成与校验，`openspec status` 把 specs 阶段显示为 `skipped`（视为满足，不算 incomplete），validate 接受零 delta，archive 无需额外 flag 即可归档。
+- **只豁免 `specs/` 下的 artifact**——proposal / design / tasks 的结构与校验照跑，tasks.md checkbox 照跑，不因此免检。
+- **与 scenario→test 账本的关系**：specs 被跳过 = 没有 scenario 可映射 → **不产出账本**。下游（`td-apply` / `requesting-review` / `td-archive`）对账本的检查都以"specs artifact 存在且未被跳过"为前提，跳过时按无账本处理，不阻塞。
+- **版本门槛**：设此字段前确认 `openspec --version` ≥ 1.7.0；更低版本对该键的处理官方未文档化，命中低版本 → 走常规 propose 流程（照常产出 spec delta），不阻塞。
+- ⚠️ **不要与 CLI flag 混淆**：`openspec archive --skip-specs` 是**另一套机制**（显式跳过归档时的 spec 合并步骤），与 `.openspec.yaml` 的 `skip_specs` 字段无关。纯重构 change 设了字段就够，**不要**再传 `--skip-specs` flag——那会跳过本该发生的合并，可能漏同步 delta。
+- **若 `specs/` 下已存在 delta 文件**：此时设 `skip_specs: true` 是 validation error（字段与 spec 文件冲突）——先删掉已有 delta 或撤销标记，二选一。
+
+未命中（确有行为变更）→ 照常产出 spec delta，不套用本条。
 
 **6.b 创建 artifact**：
 
@@ -170,16 +204,24 @@ tasks.md 必须：
 - 标注关键链（critical chain）：哪条任务序列是项目的关键路径
 - 留 project buffer：按当前 tier 比例（查表 1 的 critical-buffer 行，会话内已缓存；表 1 见 `field-assessment/references/strength-matrix.md`）
 - 每条 task 主体是 agent 能**编程性执行**的动作（写代码 / 跑测试 / 执行 CLI / 改配置等）；非编程性动作（人工目测 / 用户验收 / 第三方审批 / 人工回归测试等）不得作为独立 task，必须降级为该 task 的 `验证` 字段——权威定义见 `writing-plans/references/task-template.md`「任务主体约束」节
+- 每条 task 标注 `覆盖 scenario` 字段（该 task 实现/验证的 scenario 名，多值；字段定义见 `writing-plans/references/task-template.md`「必填字段模板」节）——本字段与 scenario→test 账本的 `实现 task` 列构成双向闭合（校验见本步骤 6.c 账本必填节的「双向孤儿核对」条），是 spec↔task↔test 三向闭合的 task 侧锚点
 
 粒度不够 → 触发 `writing-plans` 细化；标注不明 → 参考 `constraints` 的 `references/critical-buffer.md` 的「识别关键链」节；主体不合规 → 把非编程性动作降级到对应 task 的 `验证` 字段，回 6.b 补写。
 
-- **proposal.md 必填：scenario→test 覆盖账本**（当 `applyRequires` 含 `specs` artifact 时）
+- **proposal.md 必填：scenario→test 覆盖账本**（当 `applyRequires` 含 `specs` artifact **且 specs 未被 `skip_specs` 跳过**时）
 
-change 的 `applyRequires` 含 `specs` artifact 时，proposal 定型后须产出 scenario→test 覆盖账本——把 specs/ 里每个 `#### Scenario:` 映射到一个具名测试。格式与规则见 `references/scenario-test-map-template.md`。
+change 的 `applyRequires` 含 `specs` artifact 且 specs 未被跳过（6.a 纯重构逃生阀未命中）时，proposal 定型后须产出 scenario→test 覆盖账本——把 specs/ 里每个 `#### Scenario:` 映射到一个具名测试与实现它的 task，构成 **scenario ↔ task ↔ test 三向闭合**。格式与规则见 `references/scenario-test-map-template.md`。
 
-unmapped scenario → 回 6.b 补 scenario 的测试意图，或在账本里显式标 `N/A` 并给机械校验项。缺账本 → 不算 apply-ready。
+specs 被 `skip_specs: true` 跳过（6.a 纯重构逃生阀命中）时**不产出账本**——没有 spec delta 就没有 scenario 可映射；这不是漏账本，按无账本处理，不阻塞 apply-ready。
 
-tier 分层：tier-small 仅当 `applyRequires` 含 `specs` **且**含可执行测试面时强制，否则跳过并在账本头注明理由；tier-medium / tier-large 强制。
+产出账本时同步做三向闭合校验（任一不过即回 6.b 补，不进 6.d）：
+
+1. **断言强度三判据**：逐行核对每个待标 🟢 的 scenario，其映射测试的断言是否承接该 scenario 承诺的预期行为（判据见 `references/scenario-test-map-template.md`「断言强度三判据」节）。propose 期测试多半尚未实现（状态 🔴），本步校验的是"测试意图是否承接场景承诺"——写进账本的测试意图若只能推出弱断言（只测"不报错"没测"输出 Y"），回 6.b 改测试意图。apply 期（`td-apply` 步骤 6.1）对实现后的测试复验同一组判据。
+2. **双向孤儿核对**：账本每行 `实现 task` 列引用的 task 编号在 tasks.md 里存在；tasks.md 里每条声明 `覆盖 scenario` 的 task（字段见 `writing-plans/references/task-template.md`「必填字段模板」节），其列出的 scenario 名能在账本 Scenario 列逐字找到。任一侧孤儿（scenario 无 task 承载 / task 实现了未登记的 scenario）→ 回 6.b 补对应侧。
+
+unmapped scenario → 回 6.b 补 scenario 的测试意图，或在账本里显式标 `N/A` 并给机械校验项。缺账本（且 specs 未被跳过）→ 不算 apply-ready。
+
+tier 分层：tier-small 仅当 `applyRequires` 含 `specs` **且**含可执行测试面时强制，否则跳过并在账本头注明理由；tier-medium / tier-large 强制。三向闭合的 task 侧核对在 tier-small 降级为提醒（不阻塞），scenario 侧与断言强度三判据仍强制（分层口径见 `references/scenario-test-map-template.md`「tier 分层」节）。
 
 **6.d 循环判定**：
 

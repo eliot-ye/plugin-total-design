@@ -100,6 +100,14 @@ total-design/
 └── docs/                    ← 深水区文档（user / maintainer / explanation）
 ```
 
+## 本仓库自身的开发流程
+
+对 total-design **本仓库**的 skill / command / docs / manifest 改动，收尾走普通 `git commit`（conventional commits）。
+
+**不触发本 plugin 自身的 td-propose / td-apply / td-archive**——这些流程的作用对象是**用户项目**里的 `openspec/` 目录（`openspec/changes/`、`openspec/specs/`）。本仓库不是 openspec 项目、没有这些目录，td-* 的前置检查在此无对象。判据一句话：**改动落在 `plugin-total-design` 仓库内 = 开发态，走 git；改动落在用户项目的 `openspec/` = 使用态，走 td-\***。
+
+（这与「SKILL 不可引用 AGENTS 文件」同一分层：AGENTS.md 承载"怎么开发本仓库"的开发态规则，SKILL 承载"怎么用本 plugin 管理用户项目"的使用态流程，两层各司其职。）
+
 ## 编辑规则
 
 **SKILL 的编写视角应该以使用态的 LLM 为主。**

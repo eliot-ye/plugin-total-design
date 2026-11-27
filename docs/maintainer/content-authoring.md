@@ -5,6 +5,8 @@
 
 **规则本身**（必备结构、依赖技能节语义、禁止项）以 [AGENTS.md](../../AGENTS.md)「编辑规则」为准；本文只补充字段、命名、路径等细节。
 
+写完 SKILL.md / references 后可跑 `pnpm test` 自动校验两类最易腐烂的规则（开发态泄漏、skill 体积上限），口径与阈值见 [skill-tests.md](skill-tests.md)。
+
 ## Skill 目录布局
 
 两种布局都支持：

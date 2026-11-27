@@ -2,6 +2,27 @@
 
 本文件记录 total-design plugin 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [SemVer](https://semver.org/lang/zh-CN/)。
 
+## [1.21.0] - 2026-11-26
+
+### Added
+
+- **spec ↔ task ↔ test 三向机械闭合**：`scenario-test-map-template` 覆盖账本新增「实现 task」列、「断言强度三判据」（🟢 不再只是"测试存在且通过"，须断言承接场景承诺 / 可证伪 / 落点为行为非文本）与「三向闭合」双向无孤儿规则（scenario 侧无 task 承载、task 侧实现了未登记的 scenario 均为 blocking defect）。`td-propose` 步骤 6.c 产出账本时校验断言强度与双向孤儿；`td-apply` 步骤 2 前置检查升级为三向闭合完整性、步骤 4 执行循环回读「覆盖 scenario」作契约锚、步骤 6.1 账本审计升级为三层判据、步骤 6.3 把 spec delta 场景列为独立 review 对象；`td-archive` 步骤 3 复盘把账本状态升级为三向闭合状态 + 断言强度复核结论；`writing-plans` 的 `task-template.md` 必填字段模板加「覆盖 scenario」（task 侧锚点，与账本「实现 task」列反向引用）；`requesting-review` 的 Spec compliance 加「代码承接了 spec delta 的每个 scenario 吗」检查条。tier-small 把 task 侧核对降级为提醒（不阻塞），scenario 侧闭合与断言强度仍强制。
+- **纯重构逃生阀 `skip_specs`**：纯重构 change（行为不变的代码 / 重命名 / 纯 tooling / 纯 docs）免产 spec delta，借 OpenSpec `.openspec.yaml` 顶层 `skip_specs: true` 字段（v1.7.0+）。下游账本判据（`td-propose` 步骤 6.c / `td-apply` 步骤 2 / `requesting-review` critical + checklist / `scenario-test-map-template`）同步补 specs-skip 豁免——统一措辞为账本只要求于「applyRequires 含 specs 且未被跳过」。含同名陷阱警告：`openspec archive --skip-specs` 是另一套 CLI 机制，勿混用。
+- **`td-propose` 步骤 6.a 新增既有能力面清点**（含 tier/profile 分层豁免），避免造出与既有 capability 撞名 / 撞职责的重复项。
+- **`td-apply` 步骤 6.5 change 级完成终局闸门**：声明 change done 前逐条打勾贴证据，6.3 收尾 review 报告文件缺失即机械可检为"未做"。补「禁止替代」条款（6.1–6.4 是独立动作，不得用任务内修 bug / 跑全量门 / 点状自纠冒充收尾 review）与「如实报告」条款（未作为独立动作执行的步骤须写明"未做 X（原因）"）。`verification-before-completion` 第 6 节补「验证不替代 change 级收尾 review」边界句 + 对应合理化表条目。
+- **`test-driven-development` GREEN 前装配链触发校验**：可证伪性自检三条扩为四条（新增「经真实入口驱动」），伪测试陷阱两个扩为三个（新增「理想路径陷阱」——手工调内部函数造绿只证函数理想路径，未证生产代码会在正确时机调用它；GREEN 前须 grep 生产调用方，零调用方 = 装配断链）；GREEN 步骤 3 绑定项目测试命令判据（项目套件定义 green，验证范围由套件界定而非任务 scope，risk-low 允许冒烟级豁免）。
+- **`td-explore` 候选方向追加具体草图**：每个方向给示例输入 → 输出 / 行为片段 / 伪代码，让用户能点选而非推导，不用抽象标签逼二次推断。
+- **可执行 skill 质量断言（`tests/`，开发态）**：把最易腐烂的两条纸面规则变成可跑防线——`no-dev-files-in-skills`（检测 agent 指令文件作规则来源引用 + 开发态编辑指令泄漏，含 `agents-md-hygiene` 对象性豁免，负向测试验证可抓违规）、`skill-size`（单 SKILL.md ≤16000 字符）。开发态工具，不进 `skills/`、不随 plugin 分发、使用态不可见，挂 `pnpm test`。
+
+### Fixed
+
+- **`td-apply` 步骤 6.3 收尾 review 不得以 scope-small 豁免隔离**：change-scope 只降查的维度数、不降隔离要求（两者正交），自评即降级须标 `reviewed-by: unisolated-self`；步骤 6.5 终局闸门新增机械可检项（Verdict 行 + reviewed-by 行齐全，subagent 须有逐字回传原文支撑）；`requesting-review` 常见合理化表补「scope-small 保底可自评」一行指明 scope 与隔离正交；`td-archive` 步骤 2 复核 reviewed-by 行，subagent 无报告原文支撑视同编造 Verdict、阻塞 archive。
+
+### Docs
+
+- 归档 OpenSpec v2.2.0 / Superpowers v7.0.2 调研结论与借鉴评估（`docs/research/`），供后续设计变更决策作证据基础。
+- `AGENTS.md` 新增「本仓库自身的开发流程」节：本仓库改动走 git 而非触发自身 td-*，厘清开发态（本仓库）与使用态（用户项目 `openspec/`）的分界。
+
 ## [1.20.1] - 2026-11-24
 
 ### Fixed
